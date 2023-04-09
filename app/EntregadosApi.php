@@ -4,9 +4,10 @@ namespace App;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 
-class PendientesApi extends Model
+class EntregadosApi extends Model
 {
-    protected $table = 'pendientesapi';
+    //
+    protected $table = 'entregadosapi';
 
 
     protected $fillable = [
@@ -40,5 +41,4 @@ class PendientesApi extends Model
     {
         return $date->format('Y-m-d H:i:s');
     }
-
 }

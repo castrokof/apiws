@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePendientesapiTable extends Migration
+class CreateEntregadosApisTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreatePendientesapiTable extends Migration
      */
     public function up()
     {
-        Schema::create('pendientesapi', function (Blueprint $table) {
+        Schema::create('entregadosapi', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('Tipodocum')->nullable();;
             $table->string('cantdpx');
@@ -43,7 +43,6 @@ class CreatePendientesapiTable extends Migration
         });
     }
 
-
     /**
      * Reverse the migrations.
      *
@@ -51,6 +50,6 @@ class CreatePendientesapiTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('pendientesapi');
+        Schema::dropIfExists('entregadosapi');
     }
 }
