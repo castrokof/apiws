@@ -82,5 +82,5 @@ Route::get('/guardar_usuario', 'UsuarioApiContoller@createuserapi')->name('guard
 
 Route::get('/pendientes', 'PendienteApiController@index')->name('pendientes')->middleware('verified');
 Route::get('/porentregar', 'PendienteApiController@porentregar')->name('porentregar')->middleware('verified');
-Route::get('/entregados', 'PendienteApiController@entregados')->name('entregados')->middleware('verified');
+Route::get('/entregados', 'EntregadosApiController@index')->name('entregados')->middleware('verified');
 Route::get('/guardar_observacion', 'PendienteApiController@saveObs')->name('guardar_observacion')->middleware('verified');

@@ -16,6 +16,7 @@
                         <tr>
                             <th>Acciones</th>
                             <th>Id</th>
+                            <th>Tipodocum</th>
                             <th>Cantidad Entregada</th>
                             <th>Cantidad de Ordenada</th>
                             <th>Fecha de Factura</th>

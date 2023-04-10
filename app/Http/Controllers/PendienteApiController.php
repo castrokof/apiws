@@ -20,7 +20,7 @@ class PendienteApiController extends Controller
 
         if ($request->ajax()) {
             $pendientesapi = PendientesApi::orderBy('id')->get();
-            dd($pendientesapi);
+
             return DataTables()->of($pendientesapi)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="resumen" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar pendiente"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
@@ -104,7 +104,7 @@ class PendienteApiController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function porentregar(Request $request)
     {
         //
     }

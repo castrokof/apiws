@@ -1,18 +1,20 @@
 <div class="row">
     <div class="col-lg-12">
-        <div class="card card-warning">
+
+        <div class="card card-primary">
             <div class="card-header with-border">
-                <h3 class="card-title">Lista de entregados</h3>
+                <h3 class="card-title">Lista de pendientes en transito</h3>
 
             </div>
             <div class="card-body table-responsive p-2">
 
-                <table id="entregados" class="table table-hover  text-nowrap">
-
+                <table id="porentregar" class="table table-hover  text-nowrap">
+                    {{-- class="table table-hover table-bordered text-nowrap" --}}
                     <thead>
                         <tr>
                             <th>Acciones</th>
                             <th>Id</th>
+                            <th>Tipodocum</th>
                             <th>Cantidad Entregada</th>
                             <th>Cantidad de Ordenada</th>
                             <th>Fecha de Factura</th>
@@ -36,6 +38,7 @@
                             <th>Estado</th>
                             <th>Fecha de Impresión</th>
                             <th>Fecha de Entrega</th>
+
 
                         </tr>
                     </thead>

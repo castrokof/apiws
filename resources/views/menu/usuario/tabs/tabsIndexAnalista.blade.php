@@ -19,7 +19,7 @@
         href="#custom-tabs-one-datos-agendados"
         role="tab"
         aria-controls="custom-tabs-one-datos-agendados"
-        aria-selected="false">Por entregar</a>
+        aria-selected="false">En Transito</a>
       </li>
       <li class="nav-item">
         <a class="nav-link"
@@ -42,14 +42,14 @@
 
       <div class="tab-pane fade " id="custom-tabs-one-datos-agendados" role="tabpanel" aria-labelledby="custom-tabs-one-datos-agendados-tab">
         <div class="card-body">
-       @include('menu.usuario.tablas.tablaIndexPsicologicaAgendado')
+       @include('menu.usuario.tablas.tablaIndexTransito')
       </div>
 
     </div>
 
     <div class="tab-pane fade " id="custom-tabs-one-datos-seguimiento" role="tabpanel" aria-labelledby="custom-tabs-one-datos-seguimiento-tab">
       <div class="card-body">
-       @include('menu.usuario.tablas.tablaIndexPsicologicaSeguimiento')
+       @include('menu.usuario.tablas.tablaIndexEntragados')
       </div>
 
     </div>

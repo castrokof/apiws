@@ -234,17 +234,13 @@ Pendientes Medcol San Fernando
                 processing: true,
                 serverSide: true,
                 aaSorting: [
-                    [21, "desc"]
+                    [1, "desc"]
                 ],
                 ajax: {
                     url: "{{route('porentregar')}}",
                 },
                 columns: [{
                         data: 'action',
-                        orderable: false
-                    },
-                    {
-                        data: 'actions',
                         orderable: false
                     },
                     {
@@ -377,7 +373,7 @@ Pendientes Medcol San Fernando
                 processing: true,
                 serverSide: true,
                 aaSorting: [
-                    [20, "desc"]
+                    [1, "desc"]
                 ],
                 ajax: {
                     url: "{{route('entregados')}}",
