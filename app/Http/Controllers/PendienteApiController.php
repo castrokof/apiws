@@ -23,7 +23,7 @@ class PendienteApiController extends Controller
 
             return DataTables()->of($pendientesapi)
                 ->addColumn('action', function ($pendiente) {
-                    $button = '<button type="button" name="resumen" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar pendiente"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
+                    $button = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
 
                     return $button;
                 })
@@ -107,6 +107,22 @@ class PendienteApiController extends Controller
     public function porentregar(Request $request)
     {
         //
+        if ($request->ajax()) {
+            $pendientesapi = PendientesApi::where('estado', 'EN TRANSITO')
+                ->orderBy('id')
+                ->get();
+
+            return DataTables()->of($pendientesapi)
+                ->addColumn('action', function ($pendiente) {
+                    $button = '<button type="button" name="resumen" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar pendiente"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
+
+                    return $button;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+
+        return view('menu.usuario.indexAnalista');
     }
 
     /**
@@ -128,7 +144,13 @@ class PendienteApiController extends Controller
      */
     public function edit($id)
     {
-        //
+        if (request()->ajax()) {
+            $pendiente = PendientesApi::where('id', '=', $id)
+                ->first();
+
+            return response()->json(['pendiente' => $pendiente]);
+        }
+        return view('menu.usuario.indexAnalista');
     }
 
     /**

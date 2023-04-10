@@ -84,3 +84,5 @@ Route::get('/pendientes', 'PendienteApiController@index')->name('pendientes')->m
 Route::get('/porentregar', 'PendienteApiController@porentregar')->name('porentregar')->middleware('verified');
 Route::get('/entregados', 'EntregadosApiController@index')->name('entregados')->middleware('verified');
 Route::get('/guardar_observacion', 'PendienteApiController@saveObs')->name('guardar_observacion')->middleware('verified');
+
+Route::get('editpendientes/{id}', 'PendienteApiController@edit')->name('pendientes-edit')->middleware('verified');

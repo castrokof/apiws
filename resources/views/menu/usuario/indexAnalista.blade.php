@@ -504,93 +504,70 @@ Pendientes Medcol San Fernando
 
 
 
+
+
         //Función para abrir modal del detalle de la evolución y muestra las observaciones agregadas
-        $(document).on('click', '.resumen', function() {
-            var idevo = $(this).attr('id');
-            $('#names').empty();
-            $('#documents').empty();
-            $('#evolution').empty();
-            $('#names1').empty();
-            $('#address').empty();
-            $('#date_birth').empty();
-            $('#celular').empty();
-            $('#sex').empty();
-            $('#consultation').empty();
-            $('#created_at').empty();
-            $('#observaciones_chat').empty();
+        $(document).on('click', '.edit_pendiente', function() {
+
+            $('#form-general')[0].reset();
+            var id = $(this).attr('id');
 
 
             $.ajax({
-                url: "evolucion/" + idevo + "",
+                url: "editpendientes/" + id,
                 dataType: "json",
                 success: function(data) {
 
+                    // Primer form de información pendientes por pagar
+                    $('#Tipodocum').val(data.pendiente.Tipodocum);
+                    $('#cantdpx').val(data.pendiente.cantdpx);
+                    $('#cantord').val(data.pendiente.cantord);
+                    $('#fecha_factura').val(moment(data.pendiente.fecha_factura).format('YYYY-MM-DD'));
+                    $('#fecha').val(moment(data.pendiente.fecha).format('YYYY-MM-DD'));
+                    $('#historia').val(data.pendiente.historia);
+                    $('#apellido1').val(data.pendiente.apellido1);
+                    $('#apellido2').val(data.pendiente.apellido2);
+                    $('#nombre1').val(data.pendiente.nombre1);
+                    $('#nombre2').val(data.pendiente.nombre2);
+                    $('#cantedad').val(data.pendiente.cantedad);
+                    $('#direcres').val(data.pendiente.direcres);
+                    $('#telefres').val(data.pendiente.telefres);
+                    $('#documento').val(data.pendiente.documento);
+                    $('#factura').val(data.pendiente.factura);
+                    $('#codigo').val(data.pendiente.codigo);
+                    $('#nombre').val(data.pendiente.nombre);
 
-                    var usuarios = data[1];
-                    console.log(usuarios);
-                    console.log(data[0]);
-                    $.each(data[0], function(i, items) {
-                        $('#names').append(items.surname + " " + items.fname);
-                        $('#documents').append(items.type_document + "-" + items.document);
-                        $('#evolution').append(items.reason_consultation);
-                        $('#names1').append(items.surname + " " + items.fname);
-                        $('#address').append("Ciudad: " + items.municipality + " | Dirección: " + items.address + " | Eapb: " + items.eapb);
-                        $('#date_birth').append(items.date_birth);
-                        $('#celular').append(items.celular);
-                        if (items.sex == "M") {
-                            $('#sex').append("MASCULINO");
-                        } else {
-                            $('#sex').append("FEMENINO");
-                        }
-                        $('#created_at').append("Fecha de evolución: " + " " + items.created_at);
-                        if (items.consultation == 1) {
-                            $('#consultation').append("Evolución " + items.consultation + "-" + "Orientación Psicológica");
-                        }
-                    });
-
-
-                    $.each(usuarios, function(i, items1) {
-                        $.each(data[0], function(i, items) {
-                            $.each(items.observacionadd, function(i, itemobs) {
-                                var filtered = items1.filter(el => el.id == itemobs.user_id);
-                                $.each(filtered, function(i, itemsusu) {
-                                    $('#observaciones_chat').append(
-                                        '<div class="direct-chat-msg">' +
-                                        '<div class="direct-chat-infos clearfix">' +
-                                        '<span class="direct-chat-name float-left">' + 'Usuario: ' + itemsusu.usuario + '</span>' +
-                                        '<span class="direct-chat-timestamp float-right">' + 'Fecha creación: ' + itemobs.created_at + '</span>' +
-                                        '</div>' +
-                                        '<div class="direct-chat-text">' + 'Observación: ' +
-                                        itemobs.addobservacion +
-                                        '</div>' +
-                                        '</div>');
-                                });
-                            });
-
-                        });
-                    });
+                    $('#cums').val(data.pendiente.cums);
+                    $('#cantidad').val(data.pendiente.cantidad);
+                    $('#cajero').val(data.pendiente.cajero);
+                    $('#usuario').val(data.pendiente.usuario);
+                    $('#estado').val(data.pendiente.estado);
+                    $('#fecha_impresion').val(data.pendiente.fecha_impresion);
+                    $('#fecha_entrega').val(data.pendiente.fecha_entrega);
 
 
+                    $('#hidden_id').val(id)
+                    $('.card-title').text("Editando entrega pendiente: " + data.pendiente.factura +
+                        "-" + data.pendiente.nombre);
+                    $('#action_button').val('Editar').removeClass('btn-sucess')
+                    $('#action_button').addClass('btn-danger')
+                    $('#action_button').val('Edit');
+                    $('#action').val('Edit');
+                    $('#modal-add-pendientes').modal('show');
 
+                },
 
-                    $('.modal-title-resumen').text('Evolución');
-                    $('#modal-resumen').modal({
-                        backdrop: 'static',
-                        keyboard: false
-                    });
-                    $('#modal-resumen').modal('show');
-                }
 
 
             }).fail(function(jqXHR, textStatus, errorThrown) {
 
                 if (jqXHR.status === 403) {
 
-                    Manteliviano.notificaciones('No tienes permisos para realizar esta accion', 'Sistema Ventas', 'warning');
+                    Manteliviano.notificaciones('No tienes permisos para realizar esta accion',
+                        'Sistema pendientes por pagar', 'warning');
 
                 }
             });
-
 
         });
 
