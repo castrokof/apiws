@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\PendientesApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class PendienteApiController extends Controller
 {
@@ -15,18 +16,24 @@ class PendienteApiController extends Controller
      */
     public function index(Request $request)
     {
-        $this->createapendientespi($request);
+        /* $this->createapendientespi($request); */
 
         if ($request->ajax()) {
-                 $pendientesapi = PendientesApi::all();
-                 return  DataTables()->of($pendientesapi)
-                 ->make(true);
-             }
+            $pendientesapi = PendientesApi::orderBy('id')->get();
+            dd($pendientesapi);
+            return DataTables()->of($pendientesapi)
+                ->addColumn('action', function ($pendiente) {
+                    $button = '<button type="button" name="resumen" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar pendiente"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
 
+                    return $button;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
 
-                 return view('menu.usuario.indexAnalista');
-
+        return view('menu.usuario.indexAnalista');
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -38,43 +45,58 @@ class PendienteApiController extends Controller
         $email = 'sistemas.saludtempus@gmail.com'; // Auth::user()->email
         $password = '12345678';
 
-        $response = Http::post("http://190.145.32.226:8000/api/acceso",
-        [ 'email' =>  $email,
-          'password' => $password,
-        ]);
+        $response = Http::post(
+            "http://190.145.32.226:8000/api/acceso",
+            [
+                'email' =>  $email,
+                'password' => $password,
+            ]
+        );
 
 
 
-      $prueba = $response->json();
-      $token=$prueba["token"];
+        $prueba = $response->json();
+        $token = $prueba["token"];
 
-      $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/factura");
+        $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/factura");
 
-     $facturassapi = $responsefacturas->json();
+        $facturassapi = $responsefacturas->json();
 
-     //dd($facturassapi);
-        foreach($facturassapi['data'] as $factura){
-
-
-         $existe =  PendientesApi::where('email',$factura['email'])->count();
-
-           if ($existe == 0 || $existe == '') {
-            PendientesApi::create(
-                   [   'idapi' => $factura['id'],
-                       'name' => $factura['name'],
-                       'email' => $factura['email'],
-                       'created_api' => $factura['created_at'],
-                       'updated_api' => $factura['updated_at'],
-                   ]);
-
-           }
+        //dd($facturassapi);
+        foreach ($facturassapi['data'] as $factura) {
 
 
+            $existe =  PendientesApi::where('factura', $factura['factura'])->count();
 
+            if ($existe == 0 || $existe == '') {
+                PendientesApi::create([
+                    'Tipodocum' => $factura['Tipodocum'],
+                    'cantdpx' => $factura['cantdpx'],
+                    'cantord' => $factura['cantord'],
+                    'fecha_factura' => $factura['fecha_factura'],
+                    'fecha' => $factura['fecha'],
+                    'historia' => $factura['historia'],
+                    'apellido1' => $factura['apellido1'],
+                    'apellido2' => $factura['apellido2'],
+                    'nombre1' => $factura['nombre1'],
+                    'nombre2' => $factura['nombre2'],
+                    'cantedad' => $factura['cantedad'],
+                    'direcres' => $factura['direcres'],
+                    'telefres' => $factura['telefres'],
+                    'documento' => $factura['documento'],
+                    'factura' => $factura['factura'],
+                    'codigo' => $factura['codigo'],
+                    'nombre' => $factura['nombre'],
+                    'cums' => $factura['cums'],
+                    'cantidad' => $factura['cantidad'],
+                    'cajero' => $factura['cajero']
+                ]);
+            }
         }
 
         Http::withToken($token)->get("http://190.145.32.226:8000/api/closeallacceso");
     }
+
 
     /**
      * Store a newly created resource in storage.

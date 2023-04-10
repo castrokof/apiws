@@ -46,7 +46,7 @@
                         <div class="card-body">
                         <form  id="form-general" class="form-horizontal" method="POST">
                             @csrf
-                            @include('lineaPsicologica.form.form')
+                            @include('menu.usuario.form.form')
                             @include('includes.boton-form-crear-empresa-empleado-usuario')
                         </form>
                         </div>

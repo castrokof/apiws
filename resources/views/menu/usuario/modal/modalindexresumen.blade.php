@@ -17,7 +17,7 @@
                 @csrf
 
 
-                @include('lineaPsicologica.form.formAnalista')
+                @include('menu.usuario.form.formAnalista')
 
 
         </form>

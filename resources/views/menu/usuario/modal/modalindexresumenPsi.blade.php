@@ -18,7 +18,7 @@
 
 
 
-                @include('lineaPsicologica.form.formAnalistaPsi')
+                @include('menu.usuario.form.formAnalistaPsi')
 
         </form>
         </div>

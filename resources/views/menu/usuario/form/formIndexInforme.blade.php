@@ -73,7 +73,7 @@
 
 
                                   @csrf
-                                  @include('lineaPsicologica.tablas.tablaIndexInforme')
+                                  @include('menu.usuario.tablas.tablaIndexInforme')
 
                             </div>
                            </div>

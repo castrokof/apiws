@@ -36,7 +36,7 @@
    <div class="tab-content" id="custom-tabs-one-tabContent">
       <div class="tab-pane fade active show" id="custom-tabs-one-datos-del-paciente" role="tabpanel" aria-labelledby="custom-tabs-one-datos-del-paciente-tab">
         <div class="card-body">
-       @include('menu.usuario.tablas.tablaIndexPsicologica')
+       @include('menu.usuario.tablas.tablaIndexPendientes')
       </div>
       </div>
 

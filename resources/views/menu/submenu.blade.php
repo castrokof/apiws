@@ -81,7 +81,7 @@
 
                     @else
 
-                    @if(Auth::user()->email == 'castrokof@gmail.com' || Auth::user()->email == 'sistemasmedcol@gmail.com')
+                    @if(Auth::user()->email == 'castrokof@gmail.com' || Auth::user()->email == 'sistemasmedcol@gmail.com' || Auth::user()->email == 'sistemas3.tempus@gmail.com')
                    <div class="collapse navbar-collapse" id="navbarNavDropdown">
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url('/usuariosapi') }}">Usuarios API</a>

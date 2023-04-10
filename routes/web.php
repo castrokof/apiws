@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,9 +14,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
+/* Route::get('/', function () {
     return view('welcome');
-});
+}); */
 
 Auth::routes(['verify' => true]);
 
@@ -82,3 +83,4 @@ Route::get('/guardar_usuario', 'UsuarioApiContoller@createuserapi')->name('guard
 Route::get('/pendientes', 'PendienteApiController@index')->name('pendientes')->middleware('verified');
 Route::get('/porentregar', 'PendienteApiController@porentregar')->name('porentregar')->middleware('verified');
 Route::get('/entregados', 'PendienteApiController@entregados')->name('entregados')->middleware('verified');
+Route::get('/guardar_observacion', 'PendienteApiController@saveObs')->name('guardar_observacion')->middleware('verified');

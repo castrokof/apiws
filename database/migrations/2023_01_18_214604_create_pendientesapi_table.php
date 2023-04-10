@@ -15,7 +15,7 @@ class CreatePendientesapiTable extends Migration
     {
         Schema::create('pendientesapi', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('Tipodocum')->nullable();;
+            $table->string('Tipodocum')->nullable();;
             $table->string('cantdpx');
             $table->string('cantord');
             $table->dateTime('fecha_factura');

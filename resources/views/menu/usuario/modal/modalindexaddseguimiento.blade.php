@@ -15,7 +15,7 @@
 
         <form id="form-generaladd" name="form-general" class="form-horizontal">
                 @csrf
-                @include('lineaPsicologica.form.formAnalistaAddSeguimiento')
+                @include('menu.usuario.form.formAnalistaAddSeguimiento')
         </form>
         </div>
 
