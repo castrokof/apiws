@@ -1,4 +1,4 @@
-var Manteliviano = function(){
+var Apiws = function(){
     return{
         validacionGeneral: function (id, reglas, mensajes) {
             const formulario = $('#' + id);
@@ -40,11 +40,11 @@ var Manteliviano = function(){
             })
         },
         notificaciones: function(mensaje, titulo, tipo){
-            
-            
+
+
             const Toast = Swal.mixin({
             toast: true,
-            position: 'top-end',
+            position: 'bottom-left',
             showConfirmButton: false,
             timer: 3000,
             timerProgressBar: true,
@@ -53,40 +53,40 @@ var Manteliviano = function(){
               toast.addEventListener('mouseleave', Swal.resumeTimer)
             }
           });
-       
+
         /*toastr.options = {
             closeButton: true,
             newestOnTop: true,
             positioClass: 'toast-top-right',
             preventDuplicates: true,
             timeOut: '5000'
-            
+
         };*/
         if (tipo == 'success'){
             Toast.fire({
-                icon: tipo, 
+                type: tipo,
                 title: mensaje
-                });    
+                });
         }else if(tipo == 'error'){
             Toast.fire({
-                icon: tipo, 
+                type: tipo,
                 title: mensaje});
         }else if(tipo == 'info'){
             Toast.fire({
-                icon: tipo, 
+                type: tipo,
                 title: mensaje});
         }else if(tipo == 'warning'){
             Toast.fire({
-                icon: tipo, 
+                type: tipo,
                 title: mensaje
                 });
         }else if(tipo == 'danger'){
             Toast.fire({
-                icon: tipo, 
+                type: tipo,
                 title: mensaje
                 });
-        }        
-       
+        }
+
     },
 
     }

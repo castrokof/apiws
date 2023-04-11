@@ -5,9 +5,12 @@ Pendientes Medcol San Fernando
 @endsection
 @section("styles")
 
+<link href="{{asset("assets/lte/plugins/sweetalert2/sweetalert2.min.css")}}" rel="stylesheet" type="text/css" />
+{{-- <link href="{{asset("assets/lte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css")}}" rel="stylesheet" type="text/css" /> --}}
 <link href="{{asset("assets/lte/plugins/datatables-bs4/css/dataTables.bootstrap4.css")}}" rel="stylesheet" type="text/css" />
 <link href="{{asset("assets/lte/plugins/icheck-bootstrap/icheck-bootstrap.min.css")}}" rel="stylesheet" type="text/css" />
 <link href="{{asset("assets/lte/plugins/fontawesome-free/css/all.min.css")}}" rel="stylesheet" type="text/css" />
+
 
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
@@ -16,6 +19,73 @@ Pendientes Medcol San Fernando
 <link href="{{asset("assets/js/gijgo-combined-1.9.13/css/gijgo.min.css")}}" rel="stylesheet" type="text/css" />
 <link href="{{asset("assets/css/select2-bootstrap.min.css")}}" rel="stylesheet" type="text/css" />
 <link href="{{asset("assets/css/select2.min.css")}}" rel="stylesheet" type="text/css" />
+
+
+<style>
+
+/*btn flotante*/
+.btn-flotante {
+    font-size: 14px;
+    /* Cambiar el tamaño de la tipografia */
+    text-transform: uppercase;
+    /* Texto en mayusculas */
+    font-weight: bold;
+    /* Fuente en negrita o bold */
+    color: #ffffff;
+    /* Color del texto */
+    border-radius: 40px 40px 40px 40px;
+    border-color: #ffffff;
+    /* Borde del boton */
+    letter-spacing: 2px;
+    /* Espacio entre letras */
+    background: linear-gradient(to right, #0880a8, #56e6ff) !important;
+    /* Color de fondo */
+    /*background-color: #e9321e; /* Color de fondo */
+    padding: 8px 15px;
+    /* Relleno del boton */
+    position: fixed;
+    top:146px;
+
+    right: 40px;
+    transition: all 300ms ease 0ms;
+    box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.5);
+    z-index: 99;
+    /* border: none;
+    outline: none; */
+}
+
+.btn-flotante:hover {
+    background-color: #2c2fa5;
+    /* Color de fondo al pasar el cursor */
+    box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.3);
+    transform: translateY(-5px);
+}
+
+@media only screen and (max-width: 300px) {
+    .btn-flotante {
+        font-size: 14px;
+        padding: 12px 20px 0 0;
+        bottom: 20px;
+        right: 20px;
+    }
+}
+
+.loaders {
+
+visibility: hidden;
+background-color: rgba(255, 253, 253, 0.952);
+position: absolute;
+z-index: +100 !important;
+width: 100%;
+height:100%;
+}
+  .loaders img { position: relative; top:50%; left:40%;
+    width: 180px; height: 180px; }
+
+
+
+
+</style>
 
 @endsection
 
@@ -27,7 +97,7 @@ Pendientes Medcol San Fernando
 @endsection
 
 @section('content')
-
+<div class="loaders"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>
 @include('menu.usuario.tabs.tabsIndexAnalista')
 @include('menu.usuario.modal.modalindexresumen')
 @include('menu.usuario.modal.modalindexaddseguimiento')
@@ -42,6 +112,7 @@ Pendientes Medcol San Fernando
 <script src="{{asset("assets/lte/plugins/datatables-bs4/js/dataTables.bootstrap4.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/lte/plugins/datatables-responsive/js/dataTables.responsive.min.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/js/jquery-select2/select2.min.js")}}" type="text/javascript"></script>
+<script src="{{asset("assets/lte/plugins/sweetalert2/sweetalert2.all.min.js")}}" type="text/javascript"></script>
 
 
 
@@ -741,6 +812,43 @@ Pendientes Medcol San Fernando
 
 
 
+   // Función que envia el id al controlador y cambia el estado del registro
+   $(document).on('click', '#syncapi', function() {
+
+    const text = 'De Medcol 2';
+
+    Swal.fire({
+                    title: "¿Estás por sincronizar pendientes?",
+                    text: text,
+                    type: "info",
+                    showCancelButton: true,
+                    showCloseButton: true,
+                    confirmButtonText: 'Aceptar',
+                }).then((result) => {
+                    if (result.value) {
+
+            ajaxRequestSync('syncapi');
+
+                    }
+                });
+        });
+
+        function ajaxRequestSync(url) {
+            $.ajax({
+         beforeSend: function(){
+        $('.loaders').css("visibility", "visible"); },
+                url: url,
+                type: 'GET',
+                success: function(data) {
+                    $('#pendientes').DataTable().ajax.reload();
+                    $('#porentregar').DataTable().ajax.reload();
+                    $('#entregados').DataTable().ajax.reload();
+                    Apiws.notificaciones(data.respuesta, data.titulo, data.icon);
+                },complete: function(){
+            $('.loaders').css("visibility", "hidden");
+            }
+            });
+        }
 
 
 

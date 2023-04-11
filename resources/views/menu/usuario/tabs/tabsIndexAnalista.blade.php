@@ -30,7 +30,16 @@
         aria-controls="custom-tabs-one-datos-seguimiento"
         aria-selected="false">Entregados</a>
       </li>
-      </ul>
+
+
+
+
+      <div class="card-tools pull-right">
+
+      </div>
+    </ul>
+
+
   </div>
   <div class="card-body">
    <div class="tab-content" id="custom-tabs-one-tabContent">
@@ -57,4 +66,11 @@
   </div>
 </div>
 </div>
+<button
+type="button" id="syncapi" class="btn-flotante tooltipsC" title="Sync Pendientes">
+<i class="fas fa-capsules fa-1x"></i>
+<span class="badge badge-pill badge-primary pull-right">Sync</span>
+</button>
+
+
 </div>
