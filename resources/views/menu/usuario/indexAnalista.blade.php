@@ -23,69 +23,70 @@ Pendientes Medcol San Fernando
 
 
 <style>
-
-/*btn flotante*/
-.btn-flotante {
-    font-size: 14px;
-    /* Cambiar el tamaño de la tipografia */
-    text-transform: uppercase;
-    /* Texto en mayusculas */
-    font-weight: bold;
-    /* Fuente en negrita o bold */
-    color: #ffffff;
-    /* Color del texto */
-    border-radius: 40px 40px 40px 40px;
-    border-color: #ffffff;
-    /* Borde del boton */
-    letter-spacing: 2px;
-    /* Espacio entre letras */
-    background: linear-gradient(to right, #0880a8, #56e6ff) !important;
-    /* Color de fondo */
-    /*background-color: #e9321e; /* Color de fondo */
-    padding: 8px 15px;
-    /* Relleno del boton */
-    position: fixed;
-    top:146px;
-
-    right: 40px;
-    transition: all 300ms ease 0ms;
-    box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.5);
-    z-index: 99;
-    /* border: none;
-    outline: none; */
-}
-
-.btn-flotante:hover {
-    background-color: #2c2fa5;
-    /* Color de fondo al pasar el cursor */
-    box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.3);
-    transform: translateY(-5px);
-}
-
-@media only screen and (max-width: 300px) {
+    /*btn flotante*/
     .btn-flotante {
         font-size: 14px;
-        padding: 12px 20px 0 0;
-        bottom: 20px;
-        right: 20px;
+        /* Cambiar el tamaño de la tipografia */
+        text-transform: uppercase;
+        /* Texto en mayusculas */
+        font-weight: bold;
+        /* Fuente en negrita o bold */
+        color: #ffffff;
+        /* Color del texto */
+        border-radius: 40px 40px 40px 40px;
+        border-color: #ffffff;
+        /* Borde del boton */
+        letter-spacing: 2px;
+        /* Espacio entre letras */
+        background: linear-gradient(to right, #0880a8, #56e6ff) !important;
+        /* Color de fondo */
+        /*background-color: #e9321e; /* Color de fondo */
+        padding: 8px 15px;
+        /* Relleno del boton */
+        position: fixed;
+        top: 146px;
+
+        right: 40px;
+        transition: all 300ms ease 0ms;
+        box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.5);
+        z-index: 99;
+        /* border: none;
+    outline: none; */
     }
-}
 
-.loaders {
+    .btn-flotante:hover {
+        background-color: #2c2fa5;
+        /* Color de fondo al pasar el cursor */
+        box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.3);
+        transform: translateY(-5px);
+    }
 
-visibility: hidden;
-background-color: rgba(255, 253, 253, 0.952);
-position: absolute;
-z-index: +100 !important;
-width: 100%;
-height:100%;
-}
-  .loaders img { position: relative; top:50%; left:40%;
-    width: 180px; height: 180px; }
+    @media only screen and (max-width: 300px) {
+        .btn-flotante {
+            font-size: 14px;
+            padding: 12px 20px 0 0;
+            bottom: 20px;
+            right: 20px;
+        }
+    }
 
+    .loaders {
 
+        visibility: hidden;
+        background-color: rgba(255, 253, 253, 0.952);
+        position: absolute;
+        z-index: +100 !important;
+        width: 100%;
+        height: 100%;
+    }
 
-
+    .loaders img {
+        position: relative;
+        top: 50%;
+        left: 40%;
+        width: 180px;
+        height: 180px;
+    }
 </style>
 
 @endsection
@@ -112,7 +113,7 @@ height:100%;
 <script src="{{asset("assets/lte/plugins/datatables-bs4/js/dataTables.bootstrap4.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/lte/plugins/datatables-responsive/js/dataTables.responsive.min.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/js/jquery-select2/select2.min.js")}}" type="text/javascript"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
 <script src="https://cdn.datatables.net/plug-ins/1.10.20/api/sum().js"></script>
 <script src="https://cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js"></script>
@@ -133,31 +134,46 @@ height:100%;
             var futuro3 = $('#futuro3');
             var enviar_fecha_entrega = $('#enviar_fecha_entrega');
             var enviar_fecha_impresion = $('#enviar_fecha_impresion');
+            var input1 = $('#fecha_entrega');
+            var input2 = $('#fecha_impresion');
+            var input3 = $('#cantord');
+            var input4 = $('#cantdpx');
 
-            if (estado_texto == "EN TRANSITO") {
+            if (estado_texto == "TRAMITADO") {
                 futuro2.show();
+                enviar_fecha_impresion.val('true');
                 futuro1.hide();
                 futuro3.hide();
-                enviar_fecha_impresion.val('true');
                 enviar_fecha_entrega.val('false');
+                input1.val('');
+
             } else if (estado_texto == "ENTREGADO") {
                 futuro1.show();
+                enviar_fecha_entrega.val('true');
                 futuro2.hide();
                 futuro3.hide();
-                enviar_fecha_entrega.val('true');
                 enviar_fecha_impresion.val('false');
+                input2.val('');
+
+                var cant_entregada = parseInt(input3.val());
+                input4.val(cant_entregada);
+
             } else if (estado_texto == "PENDIENTE") {
                 futuro1.hide();
                 futuro2.hide();
                 futuro3.show();
                 enviar_fecha_entrega.val('false');
                 enviar_fecha_impresion.val('false');
+                input1.val('');
+                input2.val('');
             } else {
                 futuro1.hide();
                 futuro2.hide();
                 futuro3.hide();
                 enviar_fecha_entrega.val('false');
                 enviar_fecha_impresion.val('false');
+                input1.val('');
+                input2.val('');
             }
         }
 
@@ -182,6 +198,8 @@ height:100%;
                     $('#pendientes').DataTable().ajax.reload();
                     $('#porentregar').DataTable().ajax.reload();
                     $('#entregados').DataTable().ajax.reload();
+                    $('#tanulados').DataTable().ajax.reload();
+                    $('#tdesabastecidos').DataTable().ajax.reload();
                     Manteliviano.notificaciones(data.respuesta, data.titulo, data.icon);
                 }
             });
@@ -189,7 +207,7 @@ height:100%;
 
 
 
-        // Funcion para pintar con data table la pestaña de linea psicologica
+        // Funcion para pintar con data table la pestaña Lista de pendientes
         var datatable =
             $('#pendientes').DataTable({
                 language: idioma_espanol,
@@ -605,7 +623,283 @@ height:100%;
                     }
                 ],
 
+            });
 
+        // Funcion para pintar con data table la pestaña Lista de pendientes desabastecidos
+        var datatable =
+            $('#tdesabastecidos').DataTable({
+                language: idioma_espanol,
+                processing: true,
+                lengthMenu: [
+                    [25, 50, 100, 500, -1],
+                    [25, 50, 100, 500, "Mostrar Todo"]
+                ],
+                processing: true,
+                serverSide: true,
+                aaSorting: [
+                    [1, "desc"]
+                ],
+                ajax: {
+                    url: "{{route('desabastecidos')}}",
+                },
+                columns: [{
+                        data: 'action',
+                        orderable: false
+                    },
+                    {
+                        data: 'id'
+                    },
+                    {
+                        data: 'Tipodocum'
+                    },
+                    {
+                        data: 'cantdpx'
+                    },
+                    {
+                        data: 'cantord'
+                    },
+                    {
+                        data: 'fecha_factura'
+                    },
+                    {
+                        data: 'fecha'
+                    },
+                    {
+                        data: 'historia'
+                    },
+                    {
+                        data: 'apellido1'
+                    },
+                    {
+                        data: 'apellido2'
+                    },
+                    {
+                        data: 'nombre1'
+                    },
+                    {
+                        data: 'nombre2'
+                    },
+                    {
+                        data: 'cantedad'
+                    },
+                    {
+                        data: 'direcres'
+                    },
+                    {
+                        data: 'telefres'
+                    },
+                    {
+                        data: 'documento'
+                    },
+                    {
+                        data: 'factura'
+                    },
+                    {
+                        data: 'codigo'
+                    },
+                    {
+                        data: 'nombre'
+                    },
+                    {
+                        data: 'cums'
+                    },
+                    {
+                        data: 'cantidad'
+                    },
+                    {
+                        data: 'cajero'
+                    },
+                    {
+                        data: 'usuario'
+                    },
+                    {
+                        data: 'estado'
+                    },
+                    {
+                        data: 'fecha_impresion'
+                    },
+                    {
+                        data: 'fecha_entrega'
+                    }
+                ],
+
+                //Botones----------------------------------------------------------------------
+
+                "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+
+                buttons: [{
+
+                        extend: 'copyHtml5',
+                        titleAttr: 'Copiar Registros',
+                        title: "Control de horas",
+                        className: "btn  btn-outline-primary btn-sm"
+
+
+                    },
+                    {
+
+                        extend: 'excelHtml5',
+                        titleAttr: 'Exportar Excel',
+                        title: "Control de horas",
+                        className: "btn  btn-outline-success btn-sm"
+
+
+                    },
+                    {
+
+                        extend: 'csvHtml5',
+                        titleAttr: 'Exportar csv',
+                        className: "btn  btn-outline-warning btn-sm"
+
+                    },
+                    {
+
+                        extend: 'pdfHtml5',
+                        titleAttr: 'Exportar pdf',
+                        className: "btn  btn-outline-secondary btn-sm"
+
+
+                    }
+                ],
+
+            });
+
+        // Funcion para pintar con data table la pestaña Lista de pendientes desabastecidos
+        var datatable =
+            $('#tanulados').DataTable({
+                language: idioma_espanol,
+                processing: true,
+                lengthMenu: [
+                    [25, 50, 100, 500, -1],
+                    [25, 50, 100, 500, "Mostrar Todo"]
+                ],
+                processing: true,
+                serverSide: true,
+                aaSorting: [
+                    [1, "desc"]
+                ],
+                ajax: {
+                    url: "{{route('anulados')}}",
+                },
+                columns: [{
+                        data: 'action',
+                        orderable: false
+                    },
+                    {
+                        data: 'id'
+                    },
+                    {
+                        data: 'Tipodocum'
+                    },
+                    {
+                        data: 'cantdpx'
+                    },
+                    {
+                        data: 'cantord'
+                    },
+                    {
+                        data: 'fecha_factura'
+                    },
+                    {
+                        data: 'fecha'
+                    },
+                    {
+                        data: 'historia'
+                    },
+                    {
+                        data: 'apellido1'
+                    },
+                    {
+                        data: 'apellido2'
+                    },
+                    {
+                        data: 'nombre1'
+                    },
+                    {
+                        data: 'nombre2'
+                    },
+                    {
+                        data: 'cantedad'
+                    },
+                    {
+                        data: 'direcres'
+                    },
+                    {
+                        data: 'telefres'
+                    },
+                    {
+                        data: 'documento'
+                    },
+                    {
+                        data: 'factura'
+                    },
+                    {
+                        data: 'codigo'
+                    },
+                    {
+                        data: 'nombre'
+                    },
+                    {
+                        data: 'cums'
+                    },
+                    {
+                        data: 'cantidad'
+                    },
+                    {
+                        data: 'cajero'
+                    },
+                    {
+                        data: 'usuario'
+                    },
+                    {
+                        data: 'estado'
+                    },
+                    {
+                        data: 'fecha_impresion'
+                    },
+                    {
+                        data: 'fecha_entrega'
+                    }
+                ],
+
+                //Botones----------------------------------------------------------------------
+
+                "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+
+                buttons: [{
+
+                        extend: 'copyHtml5',
+                        titleAttr: 'Copiar Registros',
+                        title: "Control de horas",
+                        className: "btn  btn-outline-primary btn-sm"
+
+
+                    },
+                    {
+
+                        extend: 'excelHtml5',
+                        titleAttr: 'Exportar Excel',
+                        title: "Control de horas",
+                        className: "btn  btn-outline-success btn-sm"
+
+
+                    },
+                    {
+
+                        extend: 'csvHtml5',
+                        titleAttr: 'Exportar csv',
+                        className: "btn  btn-outline-warning btn-sm"
+
+                    },
+                    {
+
+                        extend: 'pdfHtml5',
+                        titleAttr: 'Exportar pdf',
+                        className: "btn  btn-outline-secondary btn-sm"
+
+
+                    }
+                ],
 
             });
 
@@ -746,6 +1040,10 @@ height:100%;
                                 $('#form-general')[0].reset();
                                 $('#modal-edit-pendientes').modal('hide');
                                 $('#pendientes').DataTable().ajax.reload();
+                                $('#porentregar').DataTable().ajax.reload();
+                                $('#entregados').DataTable().ajax.reload();
+                                $('#tanulados').DataTable().ajax.reload();
+                                $('#tdesabastecidos').DataTable().ajax.reload();
                                 Swal.fire({
                                     icon: 'warning',
                                     title: 'Documento pendiente actualizado correctamente',
@@ -768,200 +1066,32 @@ height:100%;
         });
 
 
-        //Función para abrir modal y prevenir el cierre de agregar observaciones
+        // Función que envia el id al controlador y cambia el estado del registro
+        $(document).on('click', '#syncapi', function() {
 
-        $(document).on('click', '.seguimientoadd', function() {
-            var idas = $(this).attr('value');
+            const text = 'De Medcol 2';
 
-            $('#namesadd').empty();
-            $('#documentsadd').empty();
-            $('#evo_id').val(idas);
-            /* $('#user_id').val({
-                {
-                    Session() -> get('usuario_id') ?? ''
-                }
-            }); */
+            Swal.fire({
+                title: "¿Estás por sincronizar pendientes?",
+                text: text,
+                type: "info",
+                showCancelButton: true,
+                showCloseButton: true,
+                confirmButtonText: 'Aceptar',
+            }).then((result) => {
+                if (result.value) {
 
-            $.ajax({
-                url: "addseguimiento/" + idas + "",
-                dataType: "json",
-                success: function(data) {
-                    $.each(data.add, function(i, items) {
-                        $('#namesadd').append(items.surname + " " + items.fname);
-                        $('#documentsadd').append(items.type_document + "-" + items.document);
-                        $('.modal-title-addseguimiento').text('Add Seguimiento');
-                        $('#modal-addseguimiento').modal({
-                            backdrop: 'static',
-                            keyboard: false
-                        });
-                        $('#modal-addseguimiento').modal('show');
-
-                    });
-                }
-
-
-            }).fail(function(jqXHR, textStatus, errorThrown) {
-
-                if (jqXHR.status === 403) {
-
-                    Manteliviano.notificaciones('No tienes permisos para realizar esta accion', 'Sistema Ventas', 'warning');
+                    ajaxRequestSync('syncapi');
 
                 }
             });
-
-
-        });
-
-        //Función para abrir modal y prevenir el cierre
-        $(document).on('click', '.observacion', function() {
-            var idas = $(this).attr('value');
-
-            $('#namesadd').empty();
-            $('#documentsadd').empty();
-            $('#evo_id').val(idas);
-            /* $('#user_id').val({
-                {
-                    Session() - > get('usuario_id') ?? ''
-                }
-            }); */
-
-            $.ajax({
-                url: "addseguimiento/" + idas + "",
-                dataType: "json",
-                success: function(data) {
-                    $.each(data.add, function(i, items) {
-                        $('#namesadd').append(items.surname + " " + items.fname);
-                        $('#documentsadd').append(items.type_document + "-" + items.document);
-                        $('.modal-title-addseguimiento').text('Add Seguimiento');
-                        $('#modal-addseguimiento').modal({
-                            backdrop: 'static',
-                            keyboard: false
-                        });
-                        $('#modal-addseguimiento').modal('show');
-
-                    });
-                }
-
-
-            }).fail(function(jqXHR, textStatus, errorThrown) {
-
-                if (jqXHR.status === 403) {
-
-                    Manteliviano.notificaciones('No tienes permisos para realizar esta accion', 'Sistema Ventas', 'warning');
-
-                }
-            });
-
-
-        });
-
-        // Función que envían los datos de la obervación al controlador
-        $('#form-generaladd').on('submit', function(event) {
-            event.preventDefault();
-            var url = '';
-            var method = '';
-            var text = '';
-
-
-            if ($('#action').val() == 'Add') {
-                text = "Estás por crear una observación"
-                url = "{{route('guardar_observacion')}}";
-                method = 'post';
-            }
-
-            if ($('#addobservacion').val() == '') {
-                Swal.fire({
-                    title: "Debes de rellenar todos los campos del formulario",
-                    text: "Respuesta Linea Psicologica",
-                    icon: "warning",
-                    showCloseButton: true,
-                    confirmButtonText: 'Aceptar',
-                });
-            } else {
-
-                Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: text,
-                    icon: "success",
-                    showCancelButton: true,
-                    showCloseButton: true,
-                    confirmButtonText: 'Aceptar',
-                }).then((result) => {
-                    if (result.value) {
-                        $.ajax({
-                            url: url,
-                            method: method,
-                            data: $('#form-generaladd').serialize(),
-                            dataType: "json",
-                            success: function(data) {
-                                if (data.success == 'ok') {
-                                    $('#form-generaladd')[0].reset();
-                                    $('#modal-addseguimiento').modal('hide');
-                                    $('#psicologica').DataTable().ajax.reload();
-                                    $('#psicologicaSeguimiento').DataTable().ajax.reload();
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Observación agregada correctamente y estado en seguimiento',
-                                        showConfirmButton: false,
-                                        timer: 2000
-                                    })
-                                } else
-                                if (data.success == 'ok1') {
-                                    $('#form-generaladd')[0].reset();
-                                    $('#modal-addseguimiento').modal('hide');
-                                    $('#psicologicaSeguimiento').DataTable().ajax.reload();
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Observación agregada correctamente',
-                                        showConfirmButton: false,
-                                        timer: 2000
-                                    })
-                                } else if (data.errors != null) {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: data.errors,
-                                        showConfirmButton: false,
-                                        timer: 3000
-                                    })
-                                }
-                            }
-
-                        });
-                    }
-                });
-
-            }
-
-        });
-
-
-
-
-   // Función que envia el id al controlador y cambia el estado del registro
-   $(document).on('click', '#syncapi', function() {
-
-    const text = 'De Medcol 2';
-
-    Swal.fire({
-                    title: "¿Estás por sincronizar pendientes?",
-                    text: text,
-                    type: "info",
-                    showCancelButton: true,
-                    showCloseButton: true,
-                    confirmButtonText: 'Aceptar',
-                }).then((result) => {
-                    if (result.value) {
-
-            ajaxRequestSync('syncapi');
-
-                    }
-                });
         });
 
         function ajaxRequestSync(url) {
             $.ajax({
-         beforeSend: function(){
-        $('.loaders').css("visibility", "visible"); },
+                beforeSend: function() {
+                    $('.loaders').css("visibility", "visible");
+                },
                 url: url,
                 type: 'GET',
                 success: function(data) {
@@ -969,9 +1099,10 @@ height:100%;
                     $('#porentregar').DataTable().ajax.reload();
                     $('#entregados').DataTable().ajax.reload();
                     Apiws.notificaciones(data.respuesta, data.titulo, data.icon);
-                },complete: function(){
-            $('.loaders').css("visibility", "hidden");
-            }
+                },
+                complete: function() {
+                    $('.loaders').css("visibility", "hidden");
+                }
             });
         }
 

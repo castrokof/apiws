@@ -94,13 +94,13 @@
         </div>
         <div id="futuro1" class="col-lg-3" style="display:none;">
             <label for="fecha_entrega" class="col-xs-4 control-label ">Fecha Entrega</label>
-            <input type="date" name="fecha_entrega" id="fecha_entrega" class="form-control">
-            <input type="hidden" name="enviar_fecha_entrega" value="false">
+            <input type="date" name="fecha_entrega" id="fecha_entrega" class="form-control" >
+            <input type="hidden" name="enviar_fecha_entrega" id="enviar_fecha_entrega" value="false">
         </div>
         <div id="futuro2" class="col-lg-3" style="display:none;">
-            <label for="fecha_impresion" class="col-xs-4 control-label ">Fecha Despachado</label>
+            <label for="fecha_impresion" class="col-xs-4 control-label ">Fecha Tramitado</label>
             <input type="date" name="fecha_impresion" id="fecha_impresion" class="form-control">
-            <input type="hidden" name="enviar_fecha_impresion" value="false">
+            <input type="hidden" name="enviar_fecha_impresion" id="enviar_fecha_impresion" value="false">
         </div>
         <div id="futuro3" class="col-lg-3" style="display:none;">
             <label for="fecha" class="col-xs-4 control-label ">Fecha Pendiente</label>
@@ -111,8 +111,10 @@
             <select name="estado" id="estado" class="form-control select2bs4" style="width: 100%;" required>
                 <option value="">---seleccione---</option>
                 <option value="PENDIENTE">PENDIENTE</option>
-                <option value="EN TRANSITO">EN TRANSITO</option>
                 <option value="ENTREGADO">ENTREGADO</option>
+                <option value="TRAMITADO">TRAMITADO</option>
+                <option value="DESABASTECIDO">DESABASTECIDO</option>
+                <option value="ANULADO">ANULADO</option>
             </select>
         </div>
     </div>
@@ -120,7 +122,7 @@
 <div class="form-group row">
     <div class="col-lg-12 col-md-12 col-xs-12">
         <label for="observacion" class="col-xs-8 control-label requerido">Observaciones</label>
-        <textarea name="observacion" id="observacion" class="form-control UpperCase" rows="3" placeholder="Ingrese las observaciones ..."  required></textarea>
+        <textarea name="observacion" id="observacion" class="form-control UpperCase" rows="3" placeholder="Ingrese las observaciones ..." required></textarea>
     </div>
 </div>
 

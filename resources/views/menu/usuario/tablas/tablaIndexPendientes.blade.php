@@ -16,29 +16,29 @@
                         <tr>
                             <th>Acciones</th>
                             <th>Id</th>
-                            <th>Tipodocum</th>
+                            <th>Tipo Documento</th>
                             <th>Cantidad Entregada</th>
-                            <th>Cantidad de Ordenada</th>
-                            <th>Fecha de Factura</th>
+                            <th>Cantidad Ordenada</th>
+                            <th>Fecha Factura</th>
                             <th>Fecha</th>
                             <th>Historia</th>
                             <th>Primer Apellido</th>
                             <th>Segundo Apellido</th>
                             <th>Primer Nombre</th>
                             <th>Segundo Nombre</th>
-                            <th>Cantidad de Edad</th>
+                            <th>Edad</th>
                             <th>Direccion de Residencia</th>
                             <th>Telefono de Residencia</th>
                             <th>Documento</th>
                             <th>Factura</th>
                             <th>Código</th>
-                            <th>Nombre</th>
+                            <th>Medicamento</th>
                             <th>CUMS</th>
                             <th>Cantidad</th>
                             <th>Cajero</th>
                             <th>Usuario</th>
                             <th>Estado</th>
-                            <th>Fecha de Impresión</th>
+                            <th>Fecha de Tramite</th>
                             <th>Fecha de Entrega</th>
                         </tr>
                     </thead>
