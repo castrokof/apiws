@@ -19,7 +19,7 @@ class PendienteApiController extends Controller
      */
     public function index(Request $request)
     {
-        /* $this->createapendientespi($request); */
+
 
         if ($request->ajax()) {
             $pendientesapi = PendientesApi::where('estado', 'PENDIENTE')
@@ -61,15 +61,19 @@ class PendienteApiController extends Controller
         );
 
 
+       // $this->createapendientespi($request);
 
         $prueba = $response->json();
         $token = $prueba["token"];
 
-        $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/factura");
+        $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/pendientesapi");
 
         $facturassapi = $responsefacturas->json();
 
         //dd($facturassapi);
+
+        $contador = 0;
+
         foreach ($facturassapi['data'] as $factura) {
 
 
@@ -98,10 +102,20 @@ class PendienteApiController extends Controller
                     'cantidad' => $factura['cantidad'],
                     'cajero' => $factura['cajero']
                 ]);
+
+                $contador++;
             }
         }
 
         Http::withToken($token)->get("http://190.145.32.226:8000/api/closeallacceso");
+
+
+        if ($contador>0) {
+            return response()->json(['respuesta' => $contador.' Lineas creadas','titulo' => 'Creando lineas', 'icon' => 'success']);
+        }else{return response()->json(['respuesta' => $contador.' Lineas creadas','titulo' => 'No se crearon lineas', 'icon' => 'warning']);}
+
+
+
     }
 
 

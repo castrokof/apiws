@@ -14,9 +14,9 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 
-/* Route::get('/', function () {
+Route::get('/', function () {
     return view('welcome');
-}); */
+});
 
 Auth::routes(['verify' => true]);
 
@@ -88,3 +88,6 @@ Route::get('/guardar_observacion', 'PendienteApiController@guardar')->name('guar
 Route::get('editpendientes/{id}', 'PendienteApiController@edit')->name('pendientes-edit')->middleware('verified');
 Route::put('pendientes/{id}', 'PendienteApiController@update')->name('actualizar_pendientes')->middleware('verified');
 Route::post('pendientes', 'PendienteApiController@saveObs')->name('crear_observacion')->middleware('verified');
+
+Route::get('/syncapi', 'PendienteApiController@createapendientespi')->name('syncapi')->middleware('verified');
+
