@@ -10,6 +10,7 @@ Pendientes Medcol San Fernando
 <link href="{{asset("assets/lte/plugins/fontawesome-free/css/all.min.css")}}" rel="stylesheet" type="text/css" />
 
 
+
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.css" rel="stylesheet" type="text/css" />
 
@@ -32,8 +33,7 @@ Pendientes Medcol San Fernando
 @include('menu.usuario.modal.modalindexresumen')
 @include('menu.usuario.modal.modalindexaddseguimiento')
 
-
-
+@include('menu.usuario.modal.modalPendientes')
 
 @endsection
 
@@ -42,8 +42,8 @@ Pendientes Medcol San Fernando
 <script src="{{asset("assets/lte/plugins/datatables-bs4/js/dataTables.bootstrap4.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/lte/plugins/datatables-responsive/js/dataTables.responsive.min.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/js/jquery-select2/select2.min.js")}}" type="text/javascript"></script>
-
-
+<script src="{{asset("assets/js/gijgo-combined-1.9.13/js/gijgo.min.js")}}" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
 
 <script src="https://cdn.datatables.net/plug-ins/1.10.20/api/sum().js"></script>
@@ -52,9 +52,48 @@ Pendientes Medcol San Fernando
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
+
+
 <script>
     $(document).ready(function() {
 
+        function mostrarOcultarCampos() {
+            var estado_id = $('#estado option:selected');
+            var estado_texto = estado_id.text();
+            var futuro1 = $('#futuro1');
+            var futuro2 = $('#futuro2');
+            var futuro3 = $('#futuro3');
+            var enviar_fecha_entrega = $('#enviar_fecha_entrega');
+            var enviar_fecha_impresion = $('#enviar_fecha_impresion');
+
+            if (estado_texto == "EN TRANSITO") {
+                futuro2.show();
+                futuro1.hide();
+                futuro3.hide();
+                enviar_fecha_impresion.val('true');
+                enviar_fecha_entrega.val('false');
+            } else if (estado_texto == "ENTREGADO") {
+                futuro1.show();
+                futuro2.hide();
+                futuro3.hide();
+                enviar_fecha_entrega.val('true');
+                enviar_fecha_impresion.val('false');
+            } else if (estado_texto == "PENDIENTE") {
+                futuro1.hide();
+                futuro2.hide();
+                futuro3.show();
+                enviar_fecha_entrega.val('false');
+                enviar_fecha_impresion.val('false');
+            } else {
+                futuro1.hide();
+                futuro2.hide();
+                futuro3.hide();
+                enviar_fecha_entrega.val('false');
+                enviar_fecha_impresion.val('false');
+            }
+        }
+
+        $('#estado').change(mostrarOcultarCampos);
 
         // Función que envia el id al controlador y cambia el estado del registro
         $(document).on('click', '.agenda', function() {
@@ -536,28 +575,28 @@ Pendientes Medcol San Fernando
                     $('#factura').val(data.pendiente.factura);
                     $('#codigo').val(data.pendiente.codigo);
                     $('#nombre').val(data.pendiente.nombre);
+                    $('#cant_pndt').val(data.saldo_pendiente);
 
                     $('#cums').val(data.pendiente.cums);
                     $('#cantidad').val(data.pendiente.cantidad);
                     $('#cajero').val(data.pendiente.cajero);
                     $('#usuario').val(data.pendiente.usuario);
                     $('#estado').val(data.pendiente.estado);
-                    $('#fecha_impresion').val(data.pendiente.fecha_impresion);
+                    /* $('#fecha_impresion').val(data.pendiente.fecha_impresion); */
                     $('#fecha_entrega').val(data.pendiente.fecha_entrega);
 
 
                     $('#hidden_id').val(id)
-                    $('.card-title').text("Editando entrega pendiente: " + data.pendiente.factura +
-                        "-" + data.pendiente.nombre);
-                    $('#action_button').val('Editar').removeClass('btn-sucess')
-                    $('#action_button').addClass('btn-danger')
+                    $('#edit_pendiente').text("Editando entrega pendiente: " + data.pendiente.documento +
+                        "-" + data.pendiente.factura);
+                    /* $('#action_button').val('Editar').removeClass('btn-sucess') */
+                    /* $('#action_button').addClass('btn-danger') */
                     $('#action_button').val('Edit');
                     $('#action').val('Edit');
-                    $('#modal-add-pendientes').modal('show');
+
+                    $('#modal-edit-pendientes').modal('show');
 
                 },
-
-
 
             }).fail(function(jqXHR, textStatus, errorThrown) {
 
@@ -568,6 +607,95 @@ Pendientes Medcol San Fernando
 
                 }
             });
+
+        });
+
+        // Función que envían los datos de la factura al controlador
+        $('#form-general1').on('submit', function(event) {
+            event.preventDefault();
+            /* guardar($(this).serialize()); */
+            var url = '';
+            var method = '';
+            var text = '';
+
+            /* if ($('#action').val() == 'Add') {
+                text = "Estás por crear una factura o cuenta por pagar"
+                url = "{{route('crear_observacion')}}";
+                method = 'post';
+            } */
+
+            if ($('#action').val() == 'Edit') {
+                text = "Estás por entregar o despachar medicamentos pendientes"
+                var updateid = $('#hidden_id').val();
+                url = "pendientes/" + updateid;
+                method = 'put';
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: text,
+                icon: "success",
+                showCancelButton: true,
+                showCloseButton: true,
+                confirmButtonText: 'Aceptar',
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        url: url,
+                        method: method,
+                        data: $(this).serialize(),
+                        dataType: "json",
+                        success: function(data) {
+                            var html = '';
+                            if (data.errors) {
+
+                                html =
+                                    '<div class="alert alert-danger alert-dismissible">' +
+                                    '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' +
+                                    '<h5><i class="icon fas fa-ban"></i> Alerta! Verifica los siguientes datos: </h5>';
+
+                                for (var count = 0; count < data.errors.length; count++) {
+                                    html += '<p>' + data.errors[count] + '<p>';
+                                }
+                                html += '</div>';
+                            }
+
+                            if (data.success == 'ok') {
+                                $('#form-general')[0].reset();
+                                $('#modal-edit-pendientes').modal('hide');
+                                /* limpiarModal(); */
+                                $('#pendientes').DataTable().ajax.reload();
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Cuenta por pagar creada correctamente',
+                                    showConfirmButton: false,
+                                    timer: 1500
+
+                                })
+
+
+                            } else if (data.success == 'ok1') {
+                                $('#form-general')[0].reset();
+                                $('#modal-edit-pendientes').modal('hide');
+                                $('#pendientes').DataTable().ajax.reload();
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Documento pendiente actualizado correctamente',
+                                    showConfirmButton: false,
+                                    timer: 1500
+
+                                })
+
+
+                            }
+                            $('#form_result').html(html)
+                        }
+
+
+                    });
+                }
+            });
+
 
         });
 

@@ -26,6 +26,7 @@ class EntregadosApi extends Model
         'telefres',
         'documento',
         'factura',
+        'orden_externa',
         'codigo',
         'nombre',
         'cums',

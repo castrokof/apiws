@@ -221,6 +221,7 @@
 <!-- AdminLTE for demo purposes -->
 <script src="{{asset("assets/lte/dist/js/demo.js")}}"></script>
 <!-- Jq Sweet alert cdn -->
+<script src="{{asset("assets/lte/plugins/sweetalert2/sweetalert2.all.min.js")}}"></script>
 
 <!-- Jq Validate -->
 

@@ -1,146 +1,128 @@
 <div class="form-group row">
     <div class="col-lg-3">
-        <label for="surname" class="col-xs-4 control-label requerido">Primer nombre</label>
-        <input type="text" name="surname" id="surname" class="form-control UpperCase" value="{{old('surname')}}" required >
+        <label for="nombre1" class="col-xs-4 control-label requerido">Primer nombre</label>
+        <input type="text" name="nombre1" id="nombre1" class="form-control" readonly>
     </div>
     <div class="col-lg-3">
-        <label for="ssurname" class="col-xs-4 control-label ">Segundo nombre</label>
-        <input type="text" name="ssurname" id="ssurname" class="form-control UpperCase" value="{{old('ssurname')}}"  >
+        <label for="nombre2" class="col-xs-4 control-label ">Segundo nombre</label>
+        <input type="text" name="nombre2" id="nombre2" class="form-control " readonly>
     </div>
     <div class="col-lg-3">
-        <label for="fname" class="col-xs-4 control-label requerido">Primer apellido</label>
-        <input type="text" name="fname" id="fname" class="form-control UpperCase" value="{{old('fname')}}" required >
+        <label for="apellido1" class="col-xs-4 control-label requerido">Primer apellido</label>
+        <input type="text" name="apellido1" id="apellido1" class="form-control " readonly>
     </div>
     <div class="col-lg-3">
-        <label for="sname" class="col-xs-4 control-label ">Segundo apellido</label>
-        <input type="text" name="sname" id="sname" class="form-control UpperCase" value="{{old('sname')}}"  >
+        <label for="apellido2" class="col-xs-4 control-label ">Segundo apellido</label>
+        <input type="text" name="apellido2" id="apellido2" class="form-control " readonly>
     </div>
-    </div>
-    <div class="form-group row">
+</div>
+<div class="form-group row">
     <div class="col-lg-2">
-        <label for="type_document" class="col-xs-4 control-label requerido">Tipo de documento</label>
-        <select name="type_document" id="type_document" class="form-control select2bs4" style="width: 100%;" required>
-            <option value="">---seleccione---</option>
-            <option value="AS">AS</option>
-            <option value="CC">CC</option>
-            <option value="CE">CE</option>
-            <option value="MS">MS</option>
-            <option value="NI">NI</option>
-            <option value="NU">NU</option>
-            <option value="PE">PE</option>
-            <option value="RC">RC</option>
-            <option value="TI">TI</option>
-        </select>
+        <label for="Tipodocum" class="col-xs-4 control-label ">Tipo de documento</label>
+        <input type="text" name="Tipodocum" id="Tipodocum" class="form-control " readonly>
     </div>
     <div class="col-lg-3">
-        <label for="document" class="col-xs-4 control-label requerido">Documento</label>
-        <input type="number" name="document" id="document" class="form-control" value="{{old('document')}}" minlength="5"  required >
+        <label for="historia" class="col-xs-4 control-label requerido">Documento</label>
+        <input type="text" name="historia" id="historia" class="form-control" minlength="5" readonly>
     </div>
 
-    <div class="col-lg-2">
-        <label for="date_birth" class="col-xs-4 control-label requerido">Fecha nacimiento</label>
-        <input type="date" name="date_birth" id="date_birth" class="form-control" value="{{old('date_birth')}}" required >
-        </div>
-        <div class="col-lg-1">
-        <label for="edad" class="col-xs-4 control-label ">Edad</label>
-        <input type="number" name="edad" id="edad" class="form-control" value="{{old('edad')}}" placeholder = "00" readonly >
+    <div class="col-lg-1">
+        <label for="cantedad" class="col-xs-4 control-label ">Edad</label>
+        <input type="text" name="cantedad" id="cantedad" class="form-control" readonly>
     </div>
-
-    <div class="col-lg-2">
-        <label for="municipality" class="col-xs-4 control-label requerido">Municipio</label>
-        <select name="municipality" id="municipality" class="form-control select2bs4" style="width: 100%;" required>
-        <option value="">---seleccione---</option>
-        <option value="Cali">Cali</option>
-        <option value="Palmira">Palmira</option>
-        <option value="Buenaventura">Buenaventura</option>
-        <option value="Jamundi">Jamundi</option>
-        <option value="Yumbo">Yumbo</option>
-        <option value="Otro">Otro</option>
-    </select>
+    <div class="col-lg-3">
+        <label for="direcres" class="col-xs-4 control-label requerido">Direccion</label>
+        <input type="text" name="direcres" id="direcres" class="form-control " minlength="6" readonly>
     </div>
-
-    <div class="col-lg-2" id="municipio_otras" style="display: none;">
-        <label for="other" class="col-xs-4 control-label requerido">Otro</label>
-        <input type="text" name="other" id="other" class="form-control UpperCase" value="{{old('other')}}" >
+    <div class="col-lg-3">
+        <label for="telefres" class="col-xs-4 control-label requerido">Telefono</label>
+        <input type="text" name="telefres" id="telefres" class="form-control" readonly>
     </div>
 
 </div>
-    <div class="form-group row">
-    <div class="col-lg-3">
-    <label for="address" class="col-xs-4 control-label requerido">Direccion</label>
-    <input type="text" name="address" id="address" class="form-control UpperCase" value="{{old('address')}}" minlength="6" required >
+<div class="form-group row">
+    <div class="col-lg-2">
+        <label for="fecha_factura" class="col-xs-4 control-label requerido">Fecha Factura</label>
+        <input type="date" name="fecha_factura" id="fecha_factura" class="form-control" readonly>
     </div>
     <div class="col-lg-3">
-        <label for="celular" class="col-xs-4 control-label requerido">Celular</label>
-        <input type="number" name="celular" id="celular" class="form-control" value="{{old('celular')}}" required>
+        <label for="documento" class="col-xs-4 control-label requerido">Comprobante</label>
+        <input type="text" name="documento" id="documento" class="form-control " minlength="6" readonly>
     </div>
     <div class="col-lg-3">
-        <label for="telefono" class="col-xs-4 control-label requerido">Telefono</label>
-        <input type="number" name="phone" id="phone" class="form-control" value="{{old('phone')}}" required>
+        <label for="factura" class="col-xs-4 control-label requerido">Factura No.</label>
+        <input type="text" name="factura" id="factura" class="form-control" readonly>
+    </div>
+    <div class="col-lg-3">
+        <label for="cajero" class="col-xs-4 control-label requerido">Auxiliar</label>
+        <input type="text" name="cajero" id="cajero" class="form-control" readonly>
     </div>
 
-    <div class="col-lg-3">
-        <label for="correo" class="col-xs-4 control-label ">E-mail</label>
-        <input type="email" name="email" id="email" class="form-control" value="{{old('email')}}">
+</div>
+<div class="form-group row">
+    <div class="col-lg-2">
+        <label for="codigo" class="col-xs-4 control-label requerido">Código</label>
+        <input type="text" name="codigo" id="codigo" class="form-control" readonly>
     </div>
-
+    <div class="col-lg-6">
+        <label for="nombre" class="col-xs-4 control-label requerido">Medicamento</label>
+        <input type="text" name="nombre" id="nombre" class="form-control" readonly>
     </div>
+    <div class="col-lg-2">
+        <label for="cantidad" class="col-xs-4 control-label requerido">Cantidad</label>
+        <input type="text" name="cantidad" id="cantidad" class="form-control" readonly>
+    </div>
+    <div class="col-lg-2">
+        <label for="cums" class="col-xs-4 control-label requerido">Cód CUMS</label>
+        <input type="text" name="cums" id="cums" class="form-control" readonly>
+    </div>
+</div>
+<fieldset>
+    <legend style="color: #31df9d;">Gestionar el documento pendiente</legend>
     <div class="form-group row">
-        <div class="col-lg-3">
-            <label for="sexo" class="col-xs-4 control-label requerido">Sexo</label>
-            <select name="sex" id="sex" class="form-control select2bs4" style="width: 100%;" required>
-                <option value="">---seleccione---</option>
-                <option value="M">MASCULINO</option>
-                <option value="F">FEMENINO</option>
-            </select>
+        <div class="col-lg-2">
+            <label for="cantord" class="col-xs-4 control-label requerido">Cantidad Ordenada</label>
+            <input type="number" name="cantord" id="cantord" class="form-control" readonly>
+        </div>
+        <div class="col-lg-2">
+            <label for="cantdpx" class="col-xs-4 control-label requerido">Cantidad Entregada</label>
+            <input type="number" name="cantdpx" id="cantdpx" class="form-control" readonly>
+        </div>
+        <div class="col-lg-2">
+            <label for="cant_pndt" class="col-xs-4 control-label requerido">Cantidad Pendiente</label>
+            <input type="number" name="cant_pndt" id="cant_pndt" class="form-control" readonly>
+        </div>
+        <div id="futuro1" class="col-lg-3" style="display:none;">
+            <label for="fecha_entrega" class="col-xs-4 control-label ">Fecha Entrega</label>
+            <input type="date" name="fecha_entrega" id="fecha_entrega" class="form-control">
+            <input type="hidden" name="enviar_fecha_entrega" value="false">
+        </div>
+        <div id="futuro2" class="col-lg-3" style="display:none;">
+            <label for="fecha_impresion" class="col-xs-4 control-label ">Fecha Despachado</label>
+            <input type="date" name="fecha_impresion" id="fecha_impresion" class="form-control">
+            <input type="hidden" name="enviar_fecha_impresion" value="false">
+        </div>
+        <div id="futuro3" class="col-lg-3" style="display:none;">
+            <label for="fecha" class="col-xs-4 control-label ">Fecha Pendiente</label>
+            <input type="date" name="fecha" id="fecha" class="form-control" readonly>
         </div>
         <div class="col-lg-3">
-            <label for="eps" class="col-xs-4 control-label requerido">EAPB</label>
-            <select name="eapb" id="eapb" class="form-control select2bs4" style="width: 100%;" required>
-            <option value="">---seleccione---</option>
-            <option value="COMFENALCO">COMFENALCO</option>
-
-        </select>
-        </div>
-
-            <div class="col-lg-3">
-                <label for="eps" class="col-xs-4 control-label requerido">Motivo de la llamada</label>
-                <select name="consultation" id="consultation" class="form-control select2bs4" style="width: 100%;" required>
+            <label for="estado" class="col-xs-4 control-label requerido">Estado</label>
+            <select name="estado" id="estado" class="form-control select2bs4" style="width: 100%;" required>
                 <option value="">---seleccione---</option>
-                <option value="1">Orientación Psicológica</option>
-                <option value="2">Redireccionar llamada al call center</option>
+                <option value="PENDIENTE">PENDIENTE</option>
+                <option value="EN TRANSITO">EN TRANSITO</option>
+                <option value="ENTREGADO">ENTREGADO</option>
             </select>
-            </div>
-            <div class="form-group col-lg-3 clearfix" id="radio_button" style="display: none;">
-                <label for="radio_button">Paciente tiene diagnóstico psiquiátrico previo</label>
-                <div class="icheck-primary d-inline">
-                    <label for="radioPrimary1">SI
-                    </label>
-                    <input type="radio" id="radioPrimary1" name="r1" >
-
-                </div>
-                <div class="icheck-primary d-inline">
-                    <label for="radioPrimary2">NO
-                    </label>
-                    <input type="radio" id="radioPrimary2" name="r1" >
-
-                </div>
-            </div>
-            <input type="hidden" name="diagnosis" id="diagnosis" class="form-control" value="">
-
-
-
-    </div>
-    <div class="form-group row">
-        <div class="col-lg-12 col-md-12 col-xs-12">
-            <label for="motivo_consulta" class="col-xs-8 control-label requerido">Motivo de consulta</label>
-            <textarea name="reason_consultation" id="reason_consultation" class="form-control UpperCase" rows="3" placeholder="Ingrese el motivo de consulta ..." value="{{old('reason_consultation')}}" required></textarea>
         </div>
     </div>
+</fieldset>
+<div class="form-group row">
+    <div class="col-lg-12 col-md-12 col-xs-12">
+        <label for="observacion" class="col-xs-8 control-label requerido">Observaciones</label>
+        <textarea name="observacion" id="observacion" class="form-control UpperCase" rows="3" placeholder="Ingrese las observaciones ..."  required></textarea>
+    </div>
+</div>
 
-    <input type="hidden" name="user_id" id="user_id" class="form-control" value="{{Session()->get('usuario_id')}}" >
 
-
-
-
-
+<input type="hidden" name="user_id" id="user_id" class="form-control" value="{{Session()->get('usuario_id')}}">

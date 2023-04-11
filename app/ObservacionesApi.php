@@ -12,8 +12,7 @@ class ObservacionesApi extends Model
         'observacion',
         'usuario',
         'estado',
-        'pendiente_id',
-        'entregado_id'
+        'pendiente_id'
     ];
 
     protected function serializeDate(DateTimeInterface $date)

@@ -25,6 +25,7 @@ class PendientesApi extends Model
         'telefres',
         'documento',
         'factura',
+        'orden_externa',
         'codigo',
         'nombre',
         'cums',

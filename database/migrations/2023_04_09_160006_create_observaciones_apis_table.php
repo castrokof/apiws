@@ -20,7 +20,7 @@ class CreateObservacionesApisTable extends Migration
             $table->string('estado')->nullable();
             $table->unsignedBigInteger('pendiente_id');
             $table->foreign('pendiente_id', 'fk_pendienteapi_obs')->references('id')->on('pendientesapi')->onDelete('restrict')->onUpdate('restrict');
-            $table->unsignedBigInteger('entregado_id');
+            $table->unsignedBigInteger('entregado_id')->nullable();
             $table->foreign('entregado_id', 'fk_entregadoapi_obs')->references('id')->on('entregadosapi')->onDelete('restrict')->onUpdate('restrict');
             $table->timestamps();
         });

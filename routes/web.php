@@ -82,7 +82,9 @@ Route::get('/guardar_usuario', 'UsuarioApiContoller@createuserapi')->name('guard
 
 Route::get('/pendientes', 'PendienteApiController@index')->name('pendientes')->middleware('verified');
 Route::get('/porentregar', 'PendienteApiController@porentregar')->name('porentregar')->middleware('verified');
-Route::get('/entregados', 'EntregadosApiController@index')->name('entregados')->middleware('verified');
-Route::get('/guardar_observacion', 'PendienteApiController@saveObs')->name('guardar_observacion')->middleware('verified');
+Route::get('/entregados', 'PendienteApiController@entregados')->name('entregados')->middleware('verified');
+Route::get('/guardar_observacion', 'PendienteApiController@guardar')->name('guardar_observacion')->middleware('verified');
 
 Route::get('editpendientes/{id}', 'PendienteApiController@edit')->name('pendientes-edit')->middleware('verified');
+Route::put('pendientes/{id}', 'PendienteApiController@update')->name('actualizar_pendientes')->middleware('verified');
+Route::post('pendientes', 'PendienteApiController@saveObs')->name('crear_observacion')->middleware('verified');
