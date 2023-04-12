@@ -3,12 +3,12 @@
 
         <div class="card card-primary">
             <div class="card-header with-border">
-                <h3 class="card-title">Lista de pendientes en transito</h3>
+                <h3 class="card-title">Lista de pendientes desabastecidos</h3>
 
             </div>
             <div class="card-body table-responsive p-2">
 
-                <table id="porentregar" class="table table-hover  text-nowrap">
+                <table id="tdesabastecidos" class="table table-hover  text-nowrap">
                     {{-- class="table table-hover table-bordered text-nowrap" --}}
                     <thead>
                         <tr>

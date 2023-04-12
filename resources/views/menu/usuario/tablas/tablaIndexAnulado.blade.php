@@ -1,14 +1,14 @@
 <div class="row">
     <div class="col-lg-12">
 
-        <div class="card card-primary">
+        <div class="card card-danger">
             <div class="card-header with-border">
-                <h3 class="card-title">Lista de pendientes en transito</h3>
+                <h3 class="card-title">Lista de pendientes anulados</h3>
 
             </div>
             <div class="card-body table-responsive p-2">
 
-                <table id="porentregar" class="table table-hover  text-nowrap">
+                <table id="tanulados" class="table table-hover  text-nowrap">
                     {{-- class="table table-hover table-bordered text-nowrap" --}}
                     <thead>
                         <tr>

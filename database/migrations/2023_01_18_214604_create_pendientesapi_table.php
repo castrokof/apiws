@@ -30,7 +30,7 @@ class CreatePendientesapiTable extends Migration
             $table->string('telefres')->nullable();
             $table->string('documento');
             $table->string('factura');
-            $table->string('orden_externa');
+            $table->string('orden_externa')->nullable();
             $table->string('codigo');
             $table->string('nombre');
             $table->string('cums');

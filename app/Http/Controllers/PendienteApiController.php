@@ -25,7 +25,7 @@ class PendienteApiController extends Controller
         if ($request->ajax()) {
             $pendientesapi = PendientesApi::where('estado', 'PENDIENTE')
                 ->orWhere('estado', NULL)
-                ->where('orden_externa', 'LIKE', '%MP%')
+                /* ->where('orden_externa', 'LIKE', '%MP%') */
                 ->orderBy('id')
                 ->get();
 
@@ -62,7 +62,7 @@ class PendienteApiController extends Controller
         );
 
 
-       // $this->createapendientespi($request);
+        // $this->createapendientespi($request);
 
         $prueba = $response->json();
         $token = $prueba["token"];
@@ -115,12 +115,11 @@ class PendienteApiController extends Controller
         $this->createentregadospi();
 
 
-        if ($contador>0) {
-            return response()->json(['respuesta' => $contador.' Lineas creadas','titulo' => 'Creando lineas', 'icon' => 'success']);
-        }else{return response()->json(['respuesta' => $contador.' Lineas creadas','titulo' => 'No se crearon lineas', 'icon' => 'warning']);}
-
-
-
+        if ($contador > 0) {
+            return response()->json(['respuesta' => $contador . ' Lineas creadas', 'titulo' => 'Creando lineas', 'icon' => 'success']);
+        } else {
+            return response()->json(['respuesta' => $contador . ' Lineas creadas', 'titulo' => 'No se crearon lineas', 'icon' => 'warning']);
+        }
     }
 
 
@@ -134,13 +133,13 @@ class PendienteApiController extends Controller
     {
         //
         if ($request->ajax()) {
-            $pendientesapi = PendientesApi::where('estado', 'EN TRANSITO')
+            $pendientesapi = PendientesApi::where('estado', 'TRAMITADO')
                 ->orderBy('id')
                 ->get();
 
             return DataTables()->of($pendientesapi)
                 ->addColumn('action', function ($pendiente) {
-                    $button = '<button type="button" name="resumen" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar pendiente"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
+                    $button = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar pendiente"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
 
                     return $button;
                 })
@@ -160,7 +159,50 @@ class PendienteApiController extends Controller
 
             return DataTables()->of($pendientesapi)
                 ->addColumn('action', function ($pendiente) {
-                    $button = '<button type="button" name="resumen" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar pendiente"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
+                    $button = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar pendiente"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
+
+                    return $button;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+
+        return view('menu.usuario.indexAnalista');
+    }
+
+    public function getDesabastecidos(Request $request)
+    {
+        //
+        if ($request->ajax()) {
+            $pendientesapi = PendientesApi::where('estado', 'DESABASTECIDO')
+                ->orderBy('id')
+                ->get();
+
+            return DataTables()->of($pendientesapi)
+                ->addColumn('action', function ($pendiente) {
+                    $button = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar pendiente"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
+
+                    return $button;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+
+        return view('menu.usuario.indexAnalista');
+    }
+
+
+    public function getAnulados(Request $request)
+    {
+        //
+        if ($request->ajax()) {
+            $pendientesapi = PendientesApi::where('estado', 'ANULADO')
+                ->orderBy('id')
+                ->get();
+
+            return DataTables()->of($pendientesapi)
+                ->addColumn('action', function ($pendiente) {
+                    $button = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar pendiente"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
 
                     return $button;
                 })
@@ -174,8 +216,7 @@ class PendienteApiController extends Controller
     public function update(Request $request, $id)
     {
         $rules = array(
-            /* 'fecha_entrega',
-            'fecha_impresion', */
+
             'estado' => 'required'
         );
 
@@ -202,14 +243,14 @@ class PendienteApiController extends Controller
                 if ($request->fecha_entrega < $pendientesapi->fecha || $request->fecha_entrega > now()->format('Y-m-d')) {
                     return response()->json(['errors' => ['La fecha de entrega debe estar entre la fecha de la factura y la fecha actual']]);
                 }
-                /* $pendientesapi->fecha_entrega = $request->fecha_entrega; */
+                $pendientesapi->fecha_entrega = $request->fecha_entrega;
             }
 
             if ($request->input('enviar_fecha_impresion') == 'true') {
                 if ($request->fecha_impresion < $pendientesapi->fecha || $request->fecha_impresion > now()->format('Y-m-d')) {
                     return response()->json(['errors' => ['La fecha de impresión debe estar entre la fecha de la factura y la fecha actual']]);
                 }
-                /* $pendientesapi->fecha_impresion = $request->fecha_impresion; */
+                $pendientesapi->fecha_impresion = $request->fecha_impresion;
             }
 
             $pendientesapi->save();
@@ -225,7 +266,10 @@ class PendienteApiController extends Controller
         return response()->json(['success' => 'ok1']);
     }
 
-    public function update2(Request $request, $id)
+
+
+
+    public function update3(Request $request, $id)
     {
         $rules = array(
             'fecha_entrega' => 'required',
