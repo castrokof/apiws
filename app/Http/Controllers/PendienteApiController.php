@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\EntregadosApi;
 use App\PendientesApi;
 use App\ObservacionesApi;
 use Illuminate\Http\Request;
@@ -81,26 +82,28 @@ class PendienteApiController extends Controller
 
             if ($existe == 0 || $existe == '') {
                 PendientesApi::create([
-                    'Tipodocum' => $factura['Tipodocum'],
-                    'cantdpx' => $factura['cantdpx'],
-                    'cantord' => $factura['cantord'],
-                    'fecha_factura' => $factura['fecha_factura'],
-                    'fecha' => $factura['fecha'],
-                    'historia' => $factura['historia'],
-                    'apellido1' => $factura['apellido1'],
-                    'apellido2' => $factura['apellido2'],
-                    'nombre1' => $factura['nombre1'],
-                    'nombre2' => $factura['nombre2'],
-                    'cantedad' => $factura['cantedad'],
-                    'direcres' => $factura['direcres'],
-                    'telefres' => $factura['telefres'],
-                    'documento' => $factura['documento'],
-                    'factura' => $factura['factura'],
-                    'codigo' => $factura['codigo'],
-                    'nombre' => $factura['nombre'],
-                    'cums' => $factura['cums'],
-                    'cantidad' => $factura['cantidad'],
-                    'cajero' => $factura['cajero']
+                    'Tipodocum' => trim($factura['Tipodocum']),
+                    'cantdpx' => trim($factura['cantdpx']),
+                    'cantord' => trim($factura['cantord']),
+                    'fecha_factura' => trim($factura['fecha_factura']),
+                    'fecha' => trim($factura['fecha']),
+                    'historia' => trim($factura['historia']),
+                    'apellido1' => trim($factura['apellido1']),
+                    'apellido2' => trim($factura['apellido2']),
+                    'nombre1' => trim($factura['nombre1']),
+                    'nombre2' => trim($factura['nombre2']),
+                    'cantedad' => trim($factura['cantedad']),
+                    'direcres' => trim($factura['direcres']),
+                    'telefres' => trim($factura['telefres']),
+                    'documento' => trim($factura['documento']),
+                    'factura' => trim($factura['factura']),
+                    'codigo' => trim($factura['codigo']),
+                    'nombre' => trim($factura['nombre']),
+                    'cums' => trim($factura['cums']),
+                    'cantidad' => trim($factura['cantidad']),
+                    'cajero' => trim($factura['cajero']),
+                    'estado' => 'PENDIENTE',
+                    'orden_externa' => trim($factura['ORDEN_EXTERNA'])
                 ]);
 
                 $contador++;
@@ -108,6 +111,8 @@ class PendienteApiController extends Controller
         }
 
         Http::withToken($token)->get("http://190.145.32.226:8000/api/closeallacceso");
+
+        $this->createentregadospi();
 
 
         if ($contador>0) {
@@ -340,4 +345,117 @@ class PendienteApiController extends Controller
     {
         //
     }
+
+
+    public function createentregadospi()
+    {
+        $email = 'sistemas.saludtempus@gmail.com'; // Auth::user()->email
+        $password = '12345678';
+
+        $response = Http::post(
+            "http://190.145.32.226:8000/api/acceso",
+            [
+                'email' =>  $email,
+                'password' => $password,
+            ]
+        );
+
+
+       // $this->createapendientespi($request);
+
+        $prueba = $response->json();
+        $token = $prueba["token"];
+
+        $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/entregadosapi");
+
+        $facturassapi = $responsefacturas->json();
+
+        //dd($facturassapi);
+
+        $contador1 = 0;
+
+        foreach ($facturassapi['data'] as $factura) {
+
+
+            $existe =  EntregadosApi::where('factura', $factura['factura'])->count();
+
+            if ($existe == 0 || $existe == '') {
+                EntregadosApi::create([
+                    'Tipodocum' => trim($factura['Tipodocum']),
+                    'cantdpx' => trim($factura['cantdpx']),
+                    'cantord' => trim($factura['cantord']),
+                    'fecha_factura' => trim($factura['fecha_factura']),
+                    'fecha' => trim($factura['fecha']),
+                    'historia' => trim($factura['historia']),
+                    'apellido1' => trim($factura['apellido1']),
+                    'apellido2' => trim($factura['apellido2']),
+                    'nombre1' => trim($factura['nombre1']),
+                    'nombre2' => trim($factura['nombre2']),
+                    'cantedad' => trim($factura['cantedad']),
+                    'direcres' => trim($factura['direcres']),
+                    'telefres' => trim($factura['telefres']),
+                    'documento' => trim($factura['documento']),
+                    'factura' => trim($factura['factura']),
+                    'codigo' => trim($factura['codigo']),
+                    'nombre' => trim($factura['nombre']),
+                    'cums' => trim($factura['cums']),
+                    'cantidad' => trim($factura['cantidad']),
+                    'cajero' => trim($factura['cajero']),
+                    'orden_externa' => trim($factura['ORDEN_EXTERNA'])
+                ]);
+
+                $contador1++;
+            }
+        }
+
+        Http::withToken($token)->get("http://190.145.32.226:8000/api/closeallacceso");
+
+       $pendientes = DB::table('pendientesapi')
+       ->join('entregadosapi',function($join){
+        $join->on('pendientesapi.orden_externa','=','entregadosapi.orden_externa')
+        ->on('pendientesapi.codigo','=','entregadosapi.codigo');
+       })
+       ->select('entregadosapi.orden_externa','entregadosapi.codigo','entregadosapi.cantdpx', 'entregadosapi.fecha_factura')
+       ->get();
+
+
+foreach ($pendientes as $key => $value) {
+
+
+    DB::table('pendientesapi')
+    ->where([
+        ['pendientesapi.estado', '=', 'PENDIENTE'],
+        ['pendientesapi.orden_externa','=',$value->orden_externa],
+        ['pendientesapi.codigo','=',$value->codigo]
+        ])
+    ->update([
+        'pendientesapi.fecha_entrega'=>  $value->fecha_factura,
+        'pendientesapi.estado' => 'ENTREGADO',
+        'pendientesapi.cantdpx' => $value->cantdpx,
+        'pendientesapi.usuario'=> 'RFAST',
+        'pendientesapi.updated_at' => now()
+    ]);
+}
+
+
+
+
+       $datas1 = DB::table('pendientesapi')
+        ->join('entregadosapi',function($join){
+         $join->on('pendientesapi.orden_externa','=','entregadosapi.orden_externa')
+         ->on('pendientesapi.codigo','=','entregadosapi.codigo');
+        })
+         ->where([
+             ['pendientesapi.estado', '=', 'PENDIENTE']
+
+
+           ])->get();
+
+            dd($datas1);
+
+        return $datas1;
+
+
+    }
+
 }
