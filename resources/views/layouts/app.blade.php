@@ -222,7 +222,11 @@
 <script src="{{asset("assets/lte/dist/js/demo.js")}}"></script>
 <!-- Jq Sweet alert cdn -->
 <script src="{{asset("assets/lte/plugins/sweetalert2/sweetalert2.all.min.js")}}"></script>
-
+<script src="{{asset("assets/js/jquery-select2/select2.min.js")}}" type="text/javascript"></script>
+<script src="{{asset("assets/lte/plugins/moment/moment.min.js")}}" type="text/javascript"></script>
+<script src="{{asset("assets/lte/plugins/datatables/jquery.dataTables.js")}}" type="text/javascript"></script>
+<script src="{{asset("assets/lte/plugins/datatables-bs4/js/dataTables.bootstrap4.js")}}" type="text/javascript"></script>
+<script src="{{asset("assets/lte/plugins/datatables-responsive/js/dataTables.responsive.min.js")}}" type="text/javascript"></script>
 <!-- Jq Validate -->
 
 <script src="{{asset("assets/js/jquery-validation/jquery.validate.min.js")}}"></script>

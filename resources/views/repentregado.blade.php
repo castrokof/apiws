@@ -30,7 +30,7 @@ height:100%;
   </style>
 @endsection
 @section('content')
-<div class="container">
+<div class="container col-12">
     <div class="loader"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>
     <div class="row justify-content-center">
         <div class="col-12">

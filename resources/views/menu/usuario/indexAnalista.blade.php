@@ -14,6 +14,7 @@ Pendientes Medcol San Fernando
 
 
 
+
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.css" rel="stylesheet" type="text/css" />
 
@@ -113,7 +114,7 @@ Pendientes Medcol San Fernando
 <script src="{{asset("assets/lte/plugins/datatables-bs4/js/dataTables.bootstrap4.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/lte/plugins/datatables-responsive/js/dataTables.responsive.min.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/js/jquery-select2/select2.min.js")}}" type="text/javascript"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
 
 <script src="https://cdn.datatables.net/plug-ins/1.10.20/api/sum().js"></script>
 <script src="https://cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js"></script>
@@ -996,7 +997,7 @@ Pendientes Medcol San Fernando
             Swal.fire({
                 title: "¿Estás seguro?",
                 text: text,
-                icon: "success",
+                type: "warning",
                 showCancelButton: true,
                 showCloseButton: true,
                 confirmButtonText: 'Aceptar',
@@ -1028,7 +1029,7 @@ Pendientes Medcol San Fernando
                                 /* limpiarModal(); */
                                 $('#pendientes').DataTable().ajax.reload();
                                 Swal.fire({
-                                    icon: 'success',
+                                    type: 'success',
                                     title: 'Cuenta por pagar creada correctamente',
                                     showConfirmButton: false,
                                     timer: 1500

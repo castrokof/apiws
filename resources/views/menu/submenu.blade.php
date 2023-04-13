@@ -73,11 +73,11 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
                         </li>
-                  <!--  @if (Route::has('register'))
+                  {{-- <!--  @if (Route::has('register'))
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
                             </li>
-                    @endif-->
+                    @endif--> --}}
 
                     @else
 
@@ -224,14 +224,12 @@
 
                     <div class="top-right links">
                     @else
-                        <a href="{{ route('login') }}">Login</a>
+                        {{-- <a href="{{ route('login') }}">Login</a> --}}
 
                         @if (Route::has('register'))
-                            <a href="{{ route('register') }}">Register</a>
+                            {{-- <a href="{{ route('register') }}">Register</a> --}}
                         @endif
-                        <div class="title m-b-md">
-                            SALUD MEDCOL SAS
-                        </div>
+
                     @endauth
                 </div>
             @endif
