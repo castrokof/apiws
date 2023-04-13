@@ -244,7 +244,7 @@ class PendienteApiController extends Controller
 
             if ($request->input('enviar_fecha_impresion') == 'true') {
                 if ($request->fecha_impresion < $pendientesapi->fecha || $request->fecha_impresion > now()->format('Y-m-d')) {
-                    return response()->json(['errors' => ['La fecha de impresión debe estar entre la fecha de la factura y la fecha actual']]);
+                    return response()->json(['errors' => ['La fecha de tramite debe estar entre la fecha de la factura y la fecha actual']]);
                 }
                 $pendientesapi->fecha_impresion = $request->fecha_impresion;
             }
@@ -262,73 +262,6 @@ class PendienteApiController extends Controller
         return response()->json(['success' => 'ok1']);
     }
 
-
-
-
-    public function update3(Request $request, $id)
-    {
-        $rules = array(
-            'fecha_entrega' => 'required',
-            'estado' => 'required',
-            'Tipodocum' => 'required',
-            'cantdpx' => 'required',
-            'cantord' => 'required',
-            'fecha_factura' => 'required',
-            'fecha' => 'required',
-            'historia' => 'required',
-            'apellido1' => 'required',
-            'apellido2' => 'required',
-            'nombre1' => 'required',
-            'nombre2' => 'required',
-            'cantedad' => 'required',
-            'direcres' => 'required',
-            'telefres' => 'required',
-            'documento' => 'required',
-            'factura' => 'required',
-            'codigo' => 'required',
-            'nombre' => 'required',
-            'cums' => 'required',
-            'cantidad' => 'required',
-            'cajero' => 'required',
-            'usuario',
-            'fecha_impresion'
-        );
-
-        $error = Validator::make($request->all(), $rules);
-
-        if ($error->fails()) {
-            return response()->json(['errors' => $error->errors()->all()]);
-        }
-
-        $data = DB::table('pendientesapi')->where('id', '=', $id)
-            ->update([
-                'fecha_entrega' => $request->fecha_entrega,
-                'estado' => $request->estado,
-                'Tipodocum' => $request->Tipodocum,
-                'cantdpx' => $request->cantdpx,
-                'cantord' => $request->cantord,
-                'fecha_factura' => $request->fecha_factura,
-                'fecha' => $request->fecha,
-                'historia' => $request->historia,
-                'apellido1' => $request->apellido1,
-                'apellido2' => $request->apellido2,
-                'nombre1' => $request->nombre1,
-                'nombre2' => $request->nombre2,
-                'cantedad' => $request->cantedad,
-                'direcres' => $request->direcres,
-                'telefres' => $request->telefres,
-                'documento' => $request->documento,
-                'factura' => $request->factura,
-                'codigo' => $request->codigo,
-                'nombre' => $request->nombre,
-                'cums' => $request->cums,
-                'cantidad' => $request->cantidad,
-                'cajero' => $request->cajero,
-                'updated_at' => now(),
-            ]);
-
-        return response()->json(['success' => 'ok1']);
-    }
 
     public function saveObs(Request $request)
     {
