@@ -6,6 +6,7 @@ use App\EntregadosApi;
 use App\PendientesApi;
 use App\ObservacionesApi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -31,9 +32,14 @@ class PendienteApiController extends Controller
 
             return DataTables()->of($pendientesapi)
                 ->addColumn('action', function ($pendiente) {
-                    $button = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
+                    $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
+                    " class="payment btn btn-app bg-secondary tooltipsC" title="Detalle"  >
+                    <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
+                    $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
+                    " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
+                    <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i> </button>';
 
-                    return $button;
+                    return $button . ' ' . $button2;
                 })
                 ->rawColumns(['action'])
                 ->make(true);
@@ -74,6 +80,8 @@ class PendienteApiController extends Controller
         //dd($facturassapi);
 
         $contador = 0;
+
+
 
         foreach ($facturassapi['data'] as $factura) {
 
@@ -139,9 +147,14 @@ class PendienteApiController extends Controller
 
             return DataTables()->of($pendientesapi)
                 ->addColumn('action', function ($pendiente) {
-                    $button = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar pendiente"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
+                    $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
+                    " class="payment btn btn-app bg-secondary tooltipsC" title="Detalle"  >
+                    <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
+                    $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
+                    " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
+                    <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i> </button>';
 
-                    return $button;
+                    return $button . ' ' . $button2;
                 })
                 ->rawColumns(['action'])
                 ->make(true);
@@ -159,9 +172,14 @@ class PendienteApiController extends Controller
 
             return DataTables()->of($pendientesapi)
                 ->addColumn('action', function ($pendiente) {
-                    $button = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar pendiente"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
+                    $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
+                    " class="payment btn btn-app bg-secondary tooltipsC" title="Detalle"  >
+                    <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
+                    $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
+                    " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
+                    <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i> </button>';
 
-                    return $button;
+                    return $button . ' ' . $button2;
                 })
                 ->rawColumns(['action'])
                 ->make(true);
@@ -180,9 +198,14 @@ class PendienteApiController extends Controller
 
             return DataTables()->of($pendientesapi)
                 ->addColumn('action', function ($pendiente) {
-                    $button = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar pendiente"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
+                    $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
+                    " class="payment btn btn-app bg-secondary tooltipsC" title="Detalle"  >
+                    <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
+                    $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
+                    " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
+                    <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i> </button>';
 
-                    return $button;
+                    return $button . ' ' . $button2;
                 })
                 ->rawColumns(['action'])
                 ->make(true);
@@ -195,6 +218,7 @@ class PendienteApiController extends Controller
     public function getAnulados(Request $request)
     {
         //
+
         if ($request->ajax()) {
             $pendientesapi = PendientesApi::where('estado', 'ANULADO')
                 ->orderBy('id')
@@ -202,9 +226,14 @@ class PendienteApiController extends Controller
 
             return DataTables()->of($pendientesapi)
                 ->addColumn('action', function ($pendiente) {
-                    $button = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar pendiente"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
+                    $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
+                    " class="payment btn btn-app bg-secondary tooltipsC" title="Detalle"  >
+                    <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
+                    $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
+                    " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
+                    <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i> </button>';
 
-                    return $button;
+                    return $button . ' ' . $button2;
                 })
                 ->rawColumns(['action'])
                 ->make(true);
@@ -216,6 +245,7 @@ class PendienteApiController extends Controller
     public function update(Request $request, $id)
     {
         $rules = array(
+
 
             'estado' => 'required'
         );
@@ -234,10 +264,14 @@ class PendienteApiController extends Controller
             return response()->json(['errors' => $error->errors()->all()]);
         }
 
+        /* $usuario_id = $request->session()->get('id'); */
+        /* $usuario_id = Auth::user()->name; */
+
 
         if (request()->ajax()) {
             $pendientesapi = PendientesApi::findOrFail($id);
             $pendientesapi->fill($request->all());
+            $pendientesapi->usuario = $request->name;
 
             if ($request->input('enviar_fecha_entrega') == 'true') {
                 if ($request->fecha_entrega < $pendientesapi->fecha || $request->fecha_entrega > now()->format('Y-m-d')) {
@@ -259,6 +293,7 @@ class PendienteApiController extends Controller
             ObservacionesApi::create([
                 'pendiente_id' => $pendientesapi->id,
                 'observacion' => $request->input('observacion'),
+                'usuario' => $request->input('name'),
                 'estado' => $request->input('estado')
             ]);
         }
@@ -297,6 +332,9 @@ class PendienteApiController extends Controller
      */
     public function edit($id)
     {
+
+
+
         if (request()->ajax()) {
             $pendiente = PendientesApi::where('id', '=', $id)
                 ->first();
@@ -338,7 +376,7 @@ class PendienteApiController extends Controller
         );
 
 
-       // $this->createapendientespi($request);
+        // $this->createapendientespi($request);
 
         $prueba = $response->json();
         $token = $prueba["token"];
@@ -387,52 +425,57 @@ class PendienteApiController extends Controller
 
         Http::withToken($token)->get("http://190.145.32.226:8000/api/closeallacceso");
 
-       $pendientes = DB::table('pendientesapi')
-       ->join('entregadosapi',function($join){
-        $join->on('pendientesapi.orden_externa','=','entregadosapi.orden_externa')
-        ->on('pendientesapi.codigo','=','entregadosapi.codigo');
-       })
-       ->select('entregadosapi.orden_externa','entregadosapi.codigo','entregadosapi.cantdpx', 'entregadosapi.fecha_factura')
-       ->get();
-
-
-foreach ($pendientes as $key => $value) {
-
-
-    DB::table('pendientesapi')
-    ->where([
-        ['pendientesapi.estado', '=', 'PENDIENTE'],
-        ['pendientesapi.orden_externa','=',$value->orden_externa],
-        ['pendientesapi.codigo','=',$value->codigo]
-        ])
-    ->update([
-        'pendientesapi.fecha_entrega'=>  $value->fecha_factura,
-        'pendientesapi.estado' => 'ENTREGADO',
-        'pendientesapi.cantdpx' => $value->cantdpx,
-        'pendientesapi.usuario'=> 'RFAST',
-        'pendientesapi.updated_at' => now()
-    ]);
-}
+        $pendientes = DB::table('pendientesapi')
+            ->join('entregadosapi', function ($join) {
+                $join->on('pendientesapi.orden_externa', '=', 'entregadosapi.orden_externa')
+                    ->on('pendientesapi.codigo', '=', 'entregadosapi.codigo');
+            })
+            ->select('pendientesapi.id as idd', 'entregadosapi.orden_externa', 'entregadosapi.codigo', 'entregadosapi.cantdpx', 'entregadosapi.fecha_factura')
+            ->get();
 
 
 
 
-       $datas1 = DB::table('pendientesapi')
-        ->join('entregadosapi',function($join){
-         $join->on('pendientesapi.orden_externa','=','entregadosapi.orden_externa')
-         ->on('pendientesapi.codigo','=','entregadosapi.codigo');
-        })
-         ->where([
-             ['pendientesapi.estado', '=', 'PENDIENTE']
+        foreach ($pendientes as $key => $value) {
 
 
-           ])->get();
+            DB::table('pendientesapi')
+                ->where([
+                    ['pendientesapi.estado', '=', 'PENDIENTE'],
+                    ['pendientesapi.orden_externa', '=', $value->orden_externa],
+                    ['pendientesapi.codigo', '=', $value->codigo]
+                ])
+                ->update([
+                    'pendientesapi.fecha_entrega' =>  $value->fecha_factura,
+                    'pendientesapi.estado' => 'ENTREGADO',
+                    'pendientesapi.cantdpx' => $value->cantdpx,
+                    'pendientesapi.usuario' => 'RFAST',
+                    'pendientesapi.updated_at' => now()
+                ]);
 
-            dd($datas1);
+            // Guardar observación en la tabla ObservacionesApi
+            ObservacionesApi::create([
+                'pendiente_id' => $value->idd,
+                'observacion' => 'Este resgistro se genero automaticamente al consumir la api',
+                'usuario' => 'RFAST',
+                'estado' => 'ENTREGADO'
+            ]);
+        }
+
+
+
+        $datas1 = DB::table('pendientesapi')
+            ->join('entregadosapi', function ($join) {
+                $join->on('pendientesapi.orden_externa', '=', 'entregadosapi.orden_externa')
+                    ->on('pendientesapi.codigo', '=', 'entregadosapi.codigo');
+            })
+            ->where([
+                ['pendientesapi.estado', '=', 'PENDIENTE']
+
+            ])->get();
+
+        dd($datas1);
 
         return $datas1;
-
-
     }
-
 }

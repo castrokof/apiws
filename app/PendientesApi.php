@@ -34,7 +34,8 @@ class PendientesApi extends Model
         'usuario',
         'estado',
         'fecha_impresion',
-        'fecha_entrega'
+        'fecha_entrega',
+        'fecha_anulado'
     ];
 
     protected function serializeDate(DateTimeInterface $date)

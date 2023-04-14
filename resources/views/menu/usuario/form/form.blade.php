@@ -94,7 +94,7 @@
         </div>
         <div id="futuro1" class="col-lg-3" style="display:none;">
             <label for="fecha_entrega" class="col-xs-4 control-label ">Fecha Entrega</label>
-            <input type="date" name="fecha_entrega" id="fecha_entrega" class="form-control" >
+            <input type="date" name="fecha_entrega" id="fecha_entrega" class="form-control">
             <input type="hidden" name="enviar_fecha_entrega" id="enviar_fecha_entrega" value="false">
         </div>
         <div id="futuro2" class="col-lg-3" style="display:none;">
@@ -120,11 +120,14 @@
     </div>
 </fieldset>
 <div class="form-group row">
-    <div class="col-lg-12 col-md-12 col-xs-12">
+    <div class="col-lg-10 col-md-10 col-xs-10">
         <label for="observacion" class="col-xs-8 control-label requerido">Observaciones</label>
         <textarea name="observacion" id="observacion" class="form-control UpperCase" rows="3" placeholder="Ingrese las observaciones ..." required></textarea>
+    </div>
+    <div class="col-lg-2">
+        <label for="name" class="col-xs-4 control-label ">Usuario que registro</label>
+        <input name="name" id="name" class="form-control" value="{{ Auth::user()->name ?? '' }}" readonly>
     </div>
 </div>
 
 
-<input type="hidden" name="user_id" id="user_id" class="form-control" value="{{Session()->get('usuario_id')}}">

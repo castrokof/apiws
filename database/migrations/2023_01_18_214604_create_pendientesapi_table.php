@@ -40,6 +40,7 @@ class CreatePendientesapiTable extends Migration
             $table->string('estado')->nullable();
             $table->dateTime('fecha_impresion')->nullable();
             $table->dateTime('fecha_entrega')->nullable();
+            $table->dateTime('fecha_anulado')->nullable();
             $table->timestamps();
         });
     }
