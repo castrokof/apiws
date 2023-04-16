@@ -245,8 +245,6 @@ class PendienteApiController extends Controller
     public function update(Request $request, $id)
     {
         $rules = array(
-
-
             'estado' => 'required'
         );
 
@@ -258,14 +256,15 @@ class PendienteApiController extends Controller
             $rules['fecha_impresion'] = 'required';
         }
 
+        if ($request->input('enviar_fecha_anulado') == 'true') {
+            $rules['fecha_anulado'] = 'required';
+        }
+
         $error = Validator::make($request->all(), $rules);
 
         if ($error->fails()) {
             return response()->json(['errors' => $error->errors()->all()]);
         }
-
-        /* $usuario_id = $request->session()->get('id'); */
-        /* $usuario_id = Auth::user()->name; */
 
 
         if (request()->ajax()) {
@@ -275,16 +274,23 @@ class PendienteApiController extends Controller
 
             if ($request->input('enviar_fecha_entrega') == 'true') {
                 if ($request->fecha_entrega < $pendientesapi->fecha || $request->fecha_entrega > now()->format('Y-m-d')) {
-                    return response()->json(['errors' => ['La fecha de entrega debe estar entre la fecha de la factura y la fecha actual']]);
+                    return response()->json(['errors' => ['La fecha de ENTREGA debe estar entre la fecha de la factura y la fecha actual']]);
                 }
                 $pendientesapi->fecha_entrega = $request->fecha_entrega;
             }
 
             if ($request->input('enviar_fecha_impresion') == 'true') {
                 if ($request->fecha_impresion < $pendientesapi->fecha || $request->fecha_impresion > now()->format('Y-m-d')) {
-                    return response()->json(['errors' => ['La fecha de tramite debe estar entre la fecha de la factura y la fecha actual']]);
+                    return response()->json(['errors' => ['La fecha de TRAMITE debe estar entre la fecha de la factura y la fecha actual']]);
                 }
                 $pendientesapi->fecha_impresion = $request->fecha_impresion;
+            }
+
+            if ($request->input('enviar_fecha_anulado') == 'true') {
+                if ($request->fecha_anulado < $pendientesapi->fecha || $request->fecha_anulado > now()->format('Y-m-d')) {
+                    return response()->json(['errors' => ['La fecha de ANULACIÓN debe estar entre la fecha de la factura y la fecha actual']]);
+                }
+                $pendientesapi->fecha_anulado = $request->fecha_anulado;
             }
 
             $pendientesapi->save();
@@ -322,6 +328,18 @@ class PendienteApiController extends Controller
     public function show($id)
     {
         //
+        if (request()->ajax()) {
+            $pendiente = PendientesApi::where('id', '=', $id)
+                ->first();
+
+            $saldo_pendiente = $pendiente->cantord - $pendiente->cantdpx;
+
+            return response()->json([
+                'pendiente' => $pendiente,
+                'saldo_pendiente' => $saldo_pendiente
+            ]);
+        }
+        return view('menu.usuario.indexAnalista');
     }
 
     /**
@@ -332,9 +350,6 @@ class PendienteApiController extends Controller
      */
     public function edit($id)
     {
-
-
-
         if (request()->ajax()) {
             $pendiente = PendientesApi::where('id', '=', $id)
                 ->first();

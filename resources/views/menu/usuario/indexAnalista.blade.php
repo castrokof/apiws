@@ -133,48 +133,92 @@ Pendientes Medcol San Fernando
             var futuro1 = $('#futuro1');
             var futuro2 = $('#futuro2');
             var futuro3 = $('#futuro3');
+            var futuro4 = $('#futuro4');
+
             var enviar_fecha_entrega = $('#enviar_fecha_entrega');
             var enviar_fecha_impresion = $('#enviar_fecha_impresion');
+            var enviar_fecha_anulado = $('#enviar_fecha_anulado');
             var input1 = $('#fecha_entrega');
             var input2 = $('#fecha_impresion');
+            var anulado = $('#fecha_anulado');
             var input3 = $('#cantord');
             var input4 = $('#cantdpx');
 
             if (estado_texto == "TRAMITADO") {
                 futuro2.show();
-                enviar_fecha_impresion.val('true');
+
                 futuro1.hide();
                 futuro3.hide();
+                futuro4.hide();
+
+                enviar_fecha_impresion.val('true');
                 enviar_fecha_entrega.val('false');
+                enviar_fecha_anulado.val('false');
+
+                //Limpia los inputs de las fechas seleccionadas cuando esrtan en show luego pasan a hide
                 input1.val('');
+                anulado.val('');
+
 
             } else if (estado_texto == "ENTREGADO") {
                 futuro1.show();
-                enviar_fecha_entrega.val('true');
+
                 futuro2.hide();
                 futuro3.hide();
+                futuro4.hide();
+
+                enviar_fecha_entrega.val('true');
                 enviar_fecha_impresion.val('false');
+                enviar_fecha_anulado.val('false');
+
+                //Limpia los inputs de las fechas seleccionadas cuando esrtan en show luego pasan a hide
                 input2.val('');
+                anulado.val('');
 
                 var cant_entregada = parseInt(input3.val());
                 input4.val(cant_entregada);
 
-            } else if (estado_texto == "PENDIENTE") {
+            } else if (estado_texto == "ANULADO") {
+                futuro4.show();
+
                 futuro1.hide();
                 futuro2.hide();
-                futuro3.show();
+                futuro3.hide();
+
+                enviar_fecha_anulado.val('true');
                 enviar_fecha_entrega.val('false');
                 enviar_fecha_impresion.val('false');
+
+                //Limpia los inputs de las fechas seleccionadas cuando esrtan en show luego pasan a hide
                 input1.val('');
                 input2.val('');
+
+
+            } else if (estado_texto == "PENDIENTE") {
+                futuro3.show();
+
+                futuro1.hide();
+                futuro2.hide();
+                futuro4.hide();
+
+                enviar_fecha_entrega.val('false');
+                enviar_fecha_impresion.val('false');
+                enviar_fecha_anulado.val('false');
+
+                input1.val('');
+                input2.val('');
+                anulado.val('');
             } else {
                 futuro1.hide();
                 futuro2.hide();
                 futuro3.hide();
+                futuro4.hide();
                 enviar_fecha_entrega.val('false');
                 enviar_fecha_impresion.val('false');
+                enviar_fecha_anulado.val('false');
                 input1.val('');
                 input2.val('');
+                anulado.val('');
             }
         }
 
@@ -856,7 +900,7 @@ Pendientes Medcol San Fernando
                         data: 'estado'
                     },
                     {
-                        data: 'fecha_impresion'
+                        data: 'fecha_anulado'
                     },
                     {
                         data: 'fecha_entrega'
@@ -966,7 +1010,72 @@ Pendientes Medcol San Fernando
                 if (jqXHR.status === 403) {
 
                     Manteliviano.notificaciones('No tienes permisos para realizar esta accion',
-                        'Sistema pendientes por pagar', 'warning');
+                        'Sistema seguimiento medicamentos pendientes', 'warning');
+
+                }
+            });
+
+        });
+
+        //Función para abrir modal del detalle medicamento pendiente y muestra las observaciones agregadas
+        $(document).on('click', '.show_detail', function() {
+
+            $('#form-general-show')[0].reset();
+            var id = $(this).attr('id');
+
+
+            $.ajax({
+                url: "showpendientes/" + id,
+                dataType: "json",
+                success: function(data) {
+
+                    // Primer form de información pendientes por pagar
+                    $('#Tipodocum').val(data.pendiente.Tipodocum);
+                    $('#cantdpx').val(data.pendiente.cantdpx);
+                    $('#cantord').val(data.pendiente.cantord);
+                    $('#fecha_factura').val(moment(data.pendiente.fecha_factura).format('YYYY-MM-DD'));
+                    $('#fecha').val(moment(data.pendiente.fecha).format('YYYY-MM-DD'));
+                    $('#historia').val(data.pendiente.historia);
+                    $('#apellido1').val(data.pendiente.apellido1);
+                    $('#apellido2').val(data.pendiente.apellido2);
+                    $('#nombre1').val(data.pendiente.nombre1);
+                    $('#nombre2').val(data.pendiente.nombre2);
+                    $('#cantedad').val(data.pendiente.cantedad);
+                    $('#direcres').val(data.pendiente.direcres);
+                    $('#telefres').val(data.pendiente.telefres);
+                    $('#documento').val(data.pendiente.documento);
+                    $('#factura').val(data.pendiente.factura);
+                    $('#codigo').val(data.pendiente.codigo);
+                    $('#nombre').val(data.pendiente.nombre);
+                    $('#cant_pndt').val(data.saldo_pendiente);
+
+                    $('#cums').val(data.pendiente.cums);
+                    $('#cantidad').val(data.pendiente.cantidad);
+                    $('#cajero').val(data.pendiente.cajero);
+                    $('#usuario').val(data.pendiente.usuario);
+                    $('#estado').val(data.pendiente.estado);
+                    /* $('#fecha_impresion').val(data.pendiente.fecha_impresion); */
+                    $('#fecha_entrega').val(data.pendiente.fecha_entrega);
+
+
+                    $('#hidden_id').val(id)
+                    $('#edit_pendiente').text("Editando entrega pendiente: " + data.pendiente.documento +
+                        "-" + data.pendiente.factura);
+                    /* $('#action_button').val('Editar').removeClass('btn-sucess') */
+                    /* $('#action_button').addClass('btn-danger') */
+                    $('#action_button').val('Edit');
+                    $('#action').val('Edit');
+
+                    $('#modal-show-pendientes').modal('show');
+
+                },
+
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+
+                if (jqXHR.status === 403) {
+
+                    Manteliviano.notificaciones('No tienes permisos para realizar esta accion',
+                        'Sistema seguimiento medicamentos pendientes ', 'warning');
 
                 }
             });

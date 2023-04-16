@@ -36,7 +36,7 @@
                             <th>Cajero</th>
                             <th>Usuario</th>
                             <th>Estado</th>
-                            <th>Fecha de Tramite</th>
+                            <th>Fecha de Anulacioón</th>
                             <th>Fecha de Entrega</th>
                         </tr>
                     </thead>

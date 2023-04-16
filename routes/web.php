@@ -88,6 +88,7 @@ Route::get('/anulados', 'PendienteApiController@getAnulados')->name('anulados')-
 Route::get('/guardar_observacion', 'PendienteApiController@guardar')->name('guardar_observacion')->middleware('verified');
 
 Route::get('editpendientes/{id}', 'PendienteApiController@edit')->name('pendientes-edit')->middleware('verified');
+Route::get('showpendientes/{id}', 'PendienteApiController@show')->name('pendientes-show')->middleware('verified');
 Route::put('pendientes/{id}', 'PendienteApiController@update')->name('actualizar_pendientes')->middleware('verified');
 Route::post('pendientes', 'PendienteApiController@saveObs')->name('crear_observacion')->middleware('verified');
 
