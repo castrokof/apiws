@@ -11,9 +11,16 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Cache;
+use PhpParser\Node\Stmt\Return_;
+use stdClass;
 
 class PendienteApiController extends Controller
 {
+
+
+    public $var1 = null;
+
+
     /**
      * Display a listing of the resource.
      *
@@ -120,14 +127,16 @@ class PendienteApiController extends Controller
 
         Http::withToken($token)->get("http://190.145.32.226:8000/api/closeallacceso");
 
-        $this->createentregadospi();
+       $var = $this->createentregadospi(null);
+       $var;
 
-
-        if ($contador > 0) {
-            return response()->json(['respuesta' => $contador . ' Lineas creadas', 'titulo' => 'Creando lineas', 'icon' => 'success']);
-        } else {
-            return response()->json(['respuesta' => $contador . ' Lineas creadas', 'titulo' => 'No se crearon lineas', 'icon' => 'warning']);
-        }
+       // if ($contador > 0) {
+            return response()->json([['respuesta' => $contador . ' Lineas creadas y'. $var . ' Lineas entregadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']] );
+       // } else {
+       //     return response()->json([['respuesta' => $contador . ' Lineas creadas', 'titulo' => 'No se crearon lineas', 'icon' => 'warning',
+      //  ],
+      //  ['respuesta' => $var . ' Lineas entregadas', 'titulo' => 'No se entregaron lineas', 'icon' => 'warning'] ]);
+      //  }
     }
 
 
@@ -371,13 +380,18 @@ class PendienteApiController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function informes()
     {
-        //
+
+        $pendientes =  PendientesApi::where('estado', 'PENDIENTE')->count();
+        $entregados =  PendientesApi::where('estado', 'ENTREGADO')->count();
+
+
+        return response()->json(['pendientes' => $pendientes, 'entregados' => $entregados]);
     }
 
 
-    public function createentregadospi()
+    public function createentregadospi($var1)
     {
         $email = 'sistemas.saludtempus@gmail.com'; // Auth::user()->email
         $password = '12345678';
@@ -401,7 +415,7 @@ class PendienteApiController extends Controller
         $facturassapi = $responsefacturas->json();
 
         //dd($facturassapi);
-
+        $contadorei = 0;
         $contador1 = 0;
 
         foreach ($facturassapi['data'] as $factura) {
@@ -453,6 +467,16 @@ class PendienteApiController extends Controller
 
         foreach ($pendientes as $key => $value) {
 
+        $entregados =
+        DB::table('pendientesapi')
+        ->where([
+            ['pendientesapi.estado', '=', 'ENTREGADO'],
+            ['pendientesapi.orden_externa', '=', $value->orden_externa],
+            ['pendientesapi.codigo', '=', $value->codigo],
+            ['pendientesapi.usuario', 'RFAST']
+        ])->count();
+
+        if ($entregados == 0 || $entregados == null) {
 
             DB::table('pendientesapi')
                 ->where([
@@ -468,29 +492,39 @@ class PendienteApiController extends Controller
                     'pendientesapi.updated_at' => now()
                 ]);
 
+                $contadorei++;
+        }
+
+
+
             // Guardar observación en la tabla ObservacionesApi
+
+            $entregado = ObservacionesApi::where([
+                ['pendiente_id', $value->idd],
+                ['estado', 'ENTREGADO']
+                ])->count();
+
+           if ($entregado == 0 || $entregado == null) {
+
             ObservacionesApi::create([
                 'pendiente_id' => $value->idd,
                 'observacion' => 'Este resgistro se genero automaticamente al consumir la api',
                 'usuario' => 'RFAST',
                 'estado' => 'ENTREGADO'
             ]);
+
+           }
+
+
+
+
         }
 
 
 
-        $datas1 = DB::table('pendientesapi')
-            ->join('entregadosapi', function ($join) {
-                $join->on('pendientesapi.orden_externa', '=', 'entregadosapi.orden_externa')
-                    ->on('pendientesapi.codigo', '=', 'entregadosapi.codigo');
-            })
-            ->where([
-                ['pendientesapi.estado', '=', 'PENDIENTE']
+          return $this->var1 = $contadorei;
 
-            ])->get();
 
-        dd($datas1);
 
-        return $datas1;
     }
 }

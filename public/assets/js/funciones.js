@@ -39,16 +39,15 @@ var Apiws = function(){
                 }
             })
         },
-        notificaciones: function(mensaje, titulo, tipo){
-
+        notificaciones: function(mensaje, titulo, tipo, position){
 
             const Toast = Swal.mixin({
             toast: true,
-            position: 'bottom-left',
+            animation: true,
             showConfirmButton: false,
             timer: 3000,
-            timerProgressBar: true,
-            onOpen: (toast) => {
+           // timerProgressBar: true,
+           onBeforeOpen: (toast) => {
               toast.addEventListener('mouseenter', Swal.stopTimer)
               toast.addEventListener('mouseleave', Swal.resumeTimer)
             }
@@ -65,25 +64,35 @@ var Apiws = function(){
         if (tipo == 'success'){
             Toast.fire({
                 type: tipo,
-                title: mensaje
+                title: mensaje,
+                text: titulo,
+                position:position
                 });
         }else if(tipo == 'error'){
             Toast.fire({
                 type: tipo,
-                title: mensaje});
+                title: mensaje,
+                text: titulo,
+                position:position});
         }else if(tipo == 'info'){
             Toast.fire({
                 type: tipo,
-                title: mensaje});
+                title: mensaje,
+                text: titulo,
+                position:position});
         }else if(tipo == 'warning'){
             Toast.fire({
                 type: tipo,
-                title: mensaje
+                title: mensaje,
+                text: titulo,
+                position:position
                 });
         }else if(tipo == 'danger'){
             Toast.fire({
                 type: tipo,
-                title: mensaje
+                title: mensaje,
+                text: titulo,
+                position:position
                 });
         }
 

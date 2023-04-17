@@ -94,3 +94,5 @@ Route::post('pendientes', 'PendienteApiController@saveObs')->name('crear_observa
 
 Route::get('/syncapi', 'PendienteApiController@createapendientespi')->name('syncapi')->middleware('verified');
 
+Route::get('informe', 'PendienteApiController@informes')->name('informe')->middleware('verified');
+

@@ -88,6 +88,86 @@ Pendientes Medcol San Fernando
         width: 180px;
         height: 180px;
     }
+
+         /* // Colores para las tarjetas widget */
+         .card {
+            background-color: #fff;
+            border-radius: 10px;
+            border: none;
+            position: relative;
+            margin-bottom: 30px;
+            box-shadow: 0 0.46875rem 2.1875rem rgba(90, 97, 105, 0.1), 0 0.9375rem 1.40625rem rgba(90, 97, 105, 0.1), 0 0.25rem 0.53125rem rgba(90, 97, 105, 0.12), 0 0.125rem 0.1875rem rgba(90, 97, 105, 0.1);
+        }
+
+        .l-bg-blue-dark-card {
+            background-color: linear-gradient(to right, #373b44, #4286f4) !important;
+            color: #fff;
+        }
+
+
+
+        .l-bg-cherry {
+            background: linear-gradient(to right, #493240, #f09) !important;
+            color: #fff;
+        }
+
+        .l-bg-blue-dark {
+            background: linear-gradient(to right, #373b44, #4286f4) !important;
+            color: #fff;
+        }
+
+        .l-bg-green-dark {
+            background: linear-gradient(to right, #0a504a, #38ef7d) !important;
+            color: #fff;
+        }
+
+        .l-bg-orange-dark {
+            background: linear-gradient(to right, #a86008, #ffba56) !important;
+            color: #fff;
+        }
+
+        .l-bg-red-dark {
+            background: linear-gradient(to right, #a80d08, #ff6756) !important;
+            color: #fff;
+        }
+
+        .card .card-statistic-3 .card-icon-large .fas,
+        .card .card-statistic-3 .card-icon-large .far,
+        .card .card-statistic-3 .card-icon-large .fab,
+        .card .card-statistic-3 .card-icon-large .fal {
+            font-size: 110px;
+        }
+
+        .card .card-statistic-3 .card-icon {
+            text-align: center;
+            line-height: 50px;
+            margin-left: 15px;
+            color: #000;
+            position: absolute;
+            right: -5px;
+            top: 20px;
+            opacity: 0.1;
+        }
+
+        .l-bg-cyan {
+            background: linear-gradient(135deg, #289cf5, #84c0ec) !important;
+            color: #fff;
+        }
+
+        .l-bg-green {
+            background: linear-gradient(135deg, #23bdb8 0%, #43e794 100%) !important;
+            color: #fff;
+        }
+
+        .l-bg-orange {
+            background: linear-gradient(to right, #f9900e, #ffba56) !important;
+            color: #fff;
+        }
+
+        .l-bg-cyan {
+            background: linear-gradient(135deg, #289cf5, #84c0ec) !important;
+            color: #fff;
+        }
 </style>
 
 @endsection
@@ -101,6 +181,8 @@ Pendientes Medcol San Fernando
 
 @section('content')
 <div class="loaders"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>
+
+@include('menu.usuario.form.forminforme')
 @include('menu.usuario.tabs.tabsIndexAnalista')
 @include('menu.usuario.modal.modalindexresumen')
 @include('menu.usuario.modal.modalindexaddseguimiento')
@@ -126,6 +208,94 @@ Pendientes Medcol San Fernando
 
 <script>
     $(document).ready(function() {
+
+
+        fill_datatable1_resumen();
+
+
+
+        function fill_datatable1_resumen() {
+                $("#detalle").empty();
+                $("#detalle1").empty();
+                $("#detalle2").empty();
+                $("#detalle3").empty();
+                // $("#detalle4").empty();
+                //$("#detalle5").empty();
+                $.ajax({
+                    url: "{{ route('informe') }}",
+                    // data: {
+                    //     fechaini: fechaini,
+                    //     fechafin: fechafin
+                    // },
+                    dataType: "json",
+                    success: function(data) {
+                        //Widget Total Horas
+                       // $.each(data.pendientes, function(i, item) {
+                            var a = data.pendientes;
+                            if (a == null) {
+                                a = 0;
+                            } else {
+                                a = data.pendientes;
+                            }
+
+                            $("#detalle").append(
+                                '<div class="small-box shadow-lg  l-bg-red-dark"><div class="inner">' +
+                                '<h5>TOTAL PENDIENTES</h5>' +
+                                '<p><h5> ' + a +
+                                '</h5></p>' +
+                                '</div><div class="icon"><i class="fas fa-notes-medical"></i></div></div>'
+
+                            );
+
+                       // })
+
+                      //  $.each(data.entregados, function(i, item) {
+                            var a = data.entregados;
+                            if (a == null) {
+                                a = 0;
+                            } else {
+                                a = data.entregados;
+                            }
+                            $("#detalle1").append(
+
+
+                                '<div class="small-box shadow-lg l-bg-cherry"><div class="inner">' +
+                                '<h5>TOTAL ENTREGADOS</h5>' +
+                                '<p><h5> ' + a +
+                                '</h5></p>' +
+                                '</div><div class="icon"><i class="fas fa-briefcase-medical"></i></div></div>'
+
+                            );
+
+                       // })
+
+                          $("#detalle2").append(
+
+
+                                '<div class="small-box shadow-lg l-bg-green-dark"><div class="inner">' +
+                                '<h5>EN TRAMITE</h5>' +
+                                '<p><h5><i class="fas fa-comment-medical"></i> ' + 0 +
+                                '</h5></p>' +
+                                '</div><div class="icon"><i class="fas fa-capsules"></i></div></div>'
+
+                            );
+
+                            $("#detalle3").append(
+
+
+                            '<div class="small-box shadow-lg l-bg-blue-dark"><div class="inner">' +
+                            '<h5>ANULADOS</h5>' +
+                            '<p><h6><i class="fas fa-hospital"></i> ' + 0 + ' -- '+
+                            '<i class="far fa-hospital"></i> ' + 0 +
+                            '</h6></p>' +
+                            '</div><div class="icon"><i class="fas fa-capsules"></i></div></div>'
+
+                            );
+
+
+                    }
+                })
+            }
 
         function mostrarOcultarCampos() {
             var estado_id = $('#estado option:selected');
@@ -1208,7 +1378,19 @@ Pendientes Medcol San Fernando
                     $('#pendientes').DataTable().ajax.reload();
                     $('#porentregar').DataTable().ajax.reload();
                     $('#entregados').DataTable().ajax.reload();
-                    Apiws.notificaciones(data.respuesta, data.titulo, data.icon);
+
+                    // for (var count = 0; count < data.length; count++) {
+                    //     console.log(count);
+                    //     Apiws.notificaciones(data[count].respuesta, data[count].titulo, data[count].icon, data[count].position);
+                    //      }
+
+
+                    $.each(data, function(i, item) {
+                           Apiws.notificaciones(item.respuesta, item.titulo, item.icon, item.position);
+
+                         });
+                         fill_datatable1_resumen();
+
                 },
                 complete: function() {
                     $('.loaders').css("visibility", "hidden");
