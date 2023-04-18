@@ -40,7 +40,7 @@ class PendienteApiController extends Controller
             return DataTables()->of($pendientesapi)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
-                    " class="payment btn btn-app bg-secondary tooltipsC" title="Detalle"  >
+                    " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
                     <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
                     $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
                     " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
@@ -157,7 +157,7 @@ class PendienteApiController extends Controller
             return DataTables()->of($pendientesapi)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
-                    " class="payment btn btn-app bg-secondary tooltipsC" title="Detalle"  >
+                    " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
                     <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
                     $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
                     " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
@@ -182,7 +182,7 @@ class PendienteApiController extends Controller
             return DataTables()->of($pendientesapi)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
-                    " class="payment btn btn-app bg-secondary tooltipsC" title="Detalle"  >
+                    " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
                     <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
                     $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
                     " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
@@ -208,7 +208,7 @@ class PendienteApiController extends Controller
             return DataTables()->of($pendientesapi)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
-                    " class="payment btn btn-app bg-secondary tooltipsC" title="Detalle"  >
+                    " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
                     <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
                     $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
                     " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
@@ -236,7 +236,7 @@ class PendienteApiController extends Controller
             return DataTables()->of($pendientesapi)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
-                    " class="payment btn btn-app bg-secondary tooltipsC" title="Detalle"  >
+                    " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
                     <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
                     $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
                     " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >

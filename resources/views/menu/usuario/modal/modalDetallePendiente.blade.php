@@ -7,7 +7,7 @@
                     <span id="form_result"></span>
                     <div class="card card-info" style="transition: all 0.15s ease 0s; height: inherit; width: inherit;">
                         <div class="card-header with-border">
-                            <h3 class="card-title" id="edit_pendiente"></h3>
+                            <h3 class="card-title" id="edit_pendiente_n"></h3>
 
                             <div class="card-tools">
                                 <button type="button" class="btn btn-tool" data-card-widget="maximize">
@@ -41,7 +41,7 @@
                                                     <form id="form-general-show" class="form-horizontal">
                                                         @csrf
                                                         @include('menu.usuario.form.formDetalle')
-                                                        @include('includes.boton-form-crear-empresa-empleado-usuario')
+                                                        @include('includes.boton-form-consultar-pendientes')
                                                     </form>
                                                 </div>
                                             </div>
