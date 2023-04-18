@@ -66,77 +66,143 @@ class PendienteApiController extends Controller
         $email = 'sistemas.saludtempus@gmail.com'; // Auth::user()->email
         $password = '12345678';
 
-        $response = Http::post(
-            "http://190.145.32.226:8000/api/acceso",
-            [
+        try {
+            $response = Http::post("http://190.145.32.226:8000/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
-            ]
-        );
+            ]);
 
+            $token = $response->json()["token"];
 
-        // $this->createapendientespi($request);
+            $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/pendientesapi");
 
-        $prueba = $response->json();
-        $token = $prueba["token"];
+            $facturassapi = $responsefacturas->json()['data'];
 
-        $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/pendientesapi");
+            $contador = 0;
+            $pendientes = [];
 
-        $facturassapi = $responsefacturas->json();
+            foreach ($facturassapi as $factura) {
+                $existe = PendientesApi::where('factura', $factura['factura'])->count();
 
-        //dd($facturassapi);
+                if ($existe == 0 || $existe == '') {
+                    $pendientes[] = [
+                        'Tipodocum' => trim($factura['Tipodocum']),
+                        'cantdpx' => trim($factura['cantdpx']),
+                        'cantord' => trim($factura['cantord']),
+                        'fecha_factura' => trim($factura['fecha_factura']),
+                        'fecha' => trim($factura['fecha']),
+                        'historia' => trim($factura['historia']),
+                        'apellido1' => trim($factura['apellido1']),
+                        'apellido2' => trim($factura['apellido2']),
+                        'nombre1' => trim($factura['nombre1']),
+                        'nombre2' => trim($factura['nombre2']),
+                        'cantedad' => trim($factura['cantedad']),
+                        'direcres' => trim($factura['direcres']),
+                        'telefres' => trim($factura['telefres']),
+                        'documento' => trim($factura['documento']),
+                        'factura' => trim($factura['factura']),
+                        'codigo' => trim($factura['codigo']),
+                        'nombre' => trim($factura['nombre']),
+                        'cums' => trim($factura['cums']),
+                        'cantidad' => trim($factura['cantidad']),
+                        'cajero' => trim($factura['cajero']),
+                        'estado' => 'PENDIENTE',
+                        'orden_externa' => trim($factura['ORDEN_EXTERNA'])
+                    ];
 
-        $contador = 0;
-
-
-
-        foreach ($facturassapi['data'] as $factura) {
-
-
-            $existe =  PendientesApi::where('factura', $factura['factura'])->count();
-
-            if ($existe == 0 || $existe == '') {
-                PendientesApi::create([
-                    'Tipodocum' => trim($factura['Tipodocum']),
-                    'cantdpx' => trim($factura['cantdpx']),
-                    'cantord' => trim($factura['cantord']),
-                    'fecha_factura' => trim($factura['fecha_factura']),
-                    'fecha' => trim($factura['fecha']),
-                    'historia' => trim($factura['historia']),
-                    'apellido1' => trim($factura['apellido1']),
-                    'apellido2' => trim($factura['apellido2']),
-                    'nombre1' => trim($factura['nombre1']),
-                    'nombre2' => trim($factura['nombre2']),
-                    'cantedad' => trim($factura['cantedad']),
-                    'direcres' => trim($factura['direcres']),
-                    'telefres' => trim($factura['telefres']),
-                    'documento' => trim($factura['documento']),
-                    'factura' => trim($factura['factura']),
-                    'codigo' => trim($factura['codigo']),
-                    'nombre' => trim($factura['nombre']),
-                    'cums' => trim($factura['cums']),
-                    'cantidad' => trim($factura['cantidad']),
-                    'cajero' => trim($factura['cajero']),
-                    'estado' => 'PENDIENTE',
-                    'orden_externa' => trim($factura['ORDEN_EXTERNA'])
-                ]);
-
-                $contador++;
+                    $contador++;
+                }
             }
+
+            if (!empty($pendientes)) {
+                PendientesApi::insert($pendientes);
+            }
+
+            Http::withToken($token)->get("http://190.145.32.226:8000/api/closeallacceso");
+
+            $var = $this->createentregadospi(null);
+
+            return response()->json([
+                ['respuesta' => $contador . ' Lineas creadas y'. $var . ' Lineas entregadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                ['respuesta' => 'Error: ' . $e->getMessage(), 'titulo' => 'Error', 'icon' => 'error', 'position' => 'bottom-left']
+            ]);
         }
 
-        Http::withToken($token)->get("http://190.145.32.226:8000/api/closeallacceso");
+    //     $response = Http::post(
+    //         "http://190.145.32.226:8000/api/acceso",
+    //         [
+    //             'email' =>  $email,
+    //             'password' => $password,
+    //         ]
+    //     );
 
-       $var = $this->createentregadospi(null);
-       $var;
 
-       // if ($contador > 0) {
-            return response()->json([['respuesta' => $contador . ' Lineas creadas y'. $var . ' Lineas entregadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']] );
-       // } else {
-       //     return response()->json([['respuesta' => $contador . ' Lineas creadas', 'titulo' => 'No se crearon lineas', 'icon' => 'warning',
-      //  ],
-      //  ['respuesta' => $var . ' Lineas entregadas', 'titulo' => 'No se entregaron lineas', 'icon' => 'warning'] ]);
-      //  }
+    //     // $this->createapendientespi($request);
+
+    //     $prueba = $response->json();
+    //     $token = $prueba["token"];
+
+    //     $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/pendientesapi");
+
+    //     $facturassapi = $responsefacturas->json();
+
+    //     //dd($facturassapi);
+
+    //     $contador = 0;
+
+
+
+    //     foreach ($facturassapi['data'] as $factura) {
+
+
+    //         $existe =  PendientesApi::where('factura', $factura['factura'])->count();
+
+    //         if ($existe == 0 || $existe == '') {
+    //             PendientesApi::create([
+    //                 'Tipodocum' => trim($factura['Tipodocum']),
+    //                 'cantdpx' => trim($factura['cantdpx']),
+    //                 'cantord' => trim($factura['cantord']),
+    //                 'fecha_factura' => trim($factura['fecha_factura']),
+    //                 'fecha' => trim($factura['fecha']),
+    //                 'historia' => trim($factura['historia']),
+    //                 'apellido1' => trim($factura['apellido1']),
+    //                 'apellido2' => trim($factura['apellido2']),
+    //                 'nombre1' => trim($factura['nombre1']),
+    //                 'nombre2' => trim($factura['nombre2']),
+    //                 'cantedad' => trim($factura['cantedad']),
+    //                 'direcres' => trim($factura['direcres']),
+    //                 'telefres' => trim($factura['telefres']),
+    //                 'documento' => trim($factura['documento']),
+    //                 'factura' => trim($factura['factura']),
+    //                 'codigo' => trim($factura['codigo']),
+    //                 'nombre' => trim($factura['nombre']),
+    //                 'cums' => trim($factura['cums']),
+    //                 'cantidad' => trim($factura['cantidad']),
+    //                 'cajero' => trim($factura['cajero']),
+    //                 'estado' => 'PENDIENTE',
+    //                 'orden_externa' => trim($factura['ORDEN_EXTERNA'])
+    //             ]);
+
+    //             $contador++;
+    //         }
+    //     }
+
+    //     Http::withToken($token)->get("http://190.145.32.226:8000/api/closeallacceso");
+
+    //    $var = $this->createentregadospi(null);
+    //    $var;
+
+    //    // if ($contador > 0) {
+    //         return response()->json([['respuesta' => $contador . ' Lineas creadas y'. $var . ' Lineas entregadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']] );
+    //    // } else {
+    //    //     return response()->json([['respuesta' => $contador . ' Lineas creadas', 'titulo' => 'No se crearon lineas', 'icon' => 'warning',
+    //   //  ],
+    //   //  ['respuesta' => $var . ' Lineas entregadas', 'titulo' => 'No se entregaron lineas', 'icon' => 'warning'] ]);
+    //   //  }
     }
 
 

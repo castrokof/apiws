@@ -1218,7 +1218,6 @@ Pendientes Medcol San Fernando
                     $('#codigo').val(data.pendiente.codigo);
                     $('#nombre').val(data.pendiente.nombre);
                     $('#cant_pndt').val(data.saldo_pendiente);
-
                     $('#cums').val(data.pendiente.cums);
                     $('#cantidad').val(data.pendiente.cantidad);
                     $('#cajero').val(data.pendiente.cajero);
