@@ -92,15 +92,13 @@
             <label for="cant_pndt_n" class="col-xs-4 control-label requerido">Cantidad Pendiente</label>
             <input type="number" name="cant_pndt_n" id="cant_pndt_n" class="form-control" readonly>
         </div>
-        <div id="futuro1" class="col-lg-3" style="display:none;">
+        <!-- <div id="futuro1" class="col-lg-3" style="display:none;">
             <label for="fecha_entrega_n" class="col-xs-4 control-label ">Fecha Entrega</label>
             <input type="date" name="fecha_entrega_n" id="fecha_entrega_n" class="form-control" readonly>
-            <input type="hidden" name="enviar_fecha_entrega" id="enviar_fecha_entrega" value="false">
         </div>
         <div id="futuro2" class="col-lg-3" style="display:none;">
             <label for="fecha_impresion_n" class="col-xs-4 control-label ">Fecha Tramitado</label>
-            <input type="date" name="fecha_impresion_n" id="fecha_impresion_n" class="form-control">
-            <input type="hidden" name="enviar_fecha_impresion" id="enviar_fecha_impresion" value="false">
+            <input type="date" name="fecha_impresion_n" id="fecha_impresion_n" class="form-control" readonly>
         </div>
         <div id="futuro3" class="col-lg-3" style="display:none;">
             <label for="fecha_n" class="col-xs-4 control-label ">Fecha Pendiente</label>
@@ -108,8 +106,11 @@
         </div>
         <div id="futuro4" class="col-lg-3" style="display:none;">
             <label for="fecha_anulado_n" class="col-xs-4 control-label ">Fecha Anulación</label>
-            <input type="date" name="fecha_anulado_n" id="fecha_anulado_n" class="form-control">
-            <input type="hidden" name="enviar_fecha_anulado" id="enviar_fecha_anulado" value="false">
+            <input type="date" name="fecha_anulado_n" id="fecha_anulado_n" class="form-control" readonly>
+        </div> -->
+        <div class="col-lg-3" >
+            <label for="fecha_estado" class="col-xs-4 control-label "> </label>
+            <input type="date" name="fecha_estado" id="fecha_estado" class="form-control" readonly>
         </div>
         <div class="col-lg-3">
             <label for="estado_n" class="col-xs-4 control-label requerido">Estado</label>

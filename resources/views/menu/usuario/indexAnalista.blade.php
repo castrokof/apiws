@@ -1189,12 +1189,12 @@ Pendientes Medcol San Fernando
 
         });
 
+
         //Función para abrir modal del detalle medicamento pendiente y muestra las observaciones agregadas
         $(document).on('click', '.show_detail', function() {
 
             $('#form-general-show')[0].reset();
             var id = $(this).attr('id');
-
 
             $.ajax({
                 url: "showpendientes/" + id,
@@ -1202,32 +1202,33 @@ Pendientes Medcol San Fernando
                 success: function(data) {
 
                     // Primer form de información pendientes por pagar
-                    $('#Tipodocum').val(data.pendiente.Tipodocum);
-                    $('#cantdpx').val(data.pendiente.cantdpx);
-                    $('#cantord').val(data.pendiente.cantord);
-                    $('#fecha_factura').val(moment(data.pendiente.fecha_factura).format('YYYY-MM-DD'));
-                    $('#fecha').val(moment(data.pendiente.fecha).format('YYYY-MM-DD'));
-                    $('#historia').val(data.pendiente.historia);
-                    $('#apellido1').val(data.pendiente.apellido1);
-                    $('#apellido2').val(data.pendiente.apellido2);
-                    $('#nombre1').val(data.pendiente.nombre1);
-                    $('#nombre2').val(data.pendiente.nombre2);
-                    $('#cantedad').val(data.pendiente.cantedad);
-                    $('#direcres').val(data.pendiente.direcres);
-                    $('#telefres').val(data.pendiente.telefres);
-                    $('#documento').val(data.pendiente.documento);
-                    $('#factura').val(data.pendiente.factura);
-                    $('#codigo').val(data.pendiente.codigo);
-                    $('#nombre').val(data.pendiente.nombre);
-                    $('#cant_pndt').val(data.saldo_pendiente);
-
-                    $('#cums').val(data.pendiente.cums);
-                    $('#cantidad').val(data.pendiente.cantidad);
-                    $('#cajero').val(data.pendiente.cajero);
-                    $('#usuario').val(data.pendiente.usuario);
-                    $('#estado').val(data.pendiente.estado);
-                    /* $('#fecha_impresion').val(data.pendiente.fecha_impresion); */
-                    $('#fecha_entrega').val(data.pendiente.fecha_entrega);
+                    $('#Tipodocum_n').val(data.pendiente.Tipodocum);
+                    $('#cantdpx_n').val(data.pendiente.cantdpx);
+                    $('#cantord_n').val(data.pendiente.cantord);
+                    $('#fecha_factura_n').val(moment(data.pendiente.fecha_factura).format('YYYY-MM-DD'));
+                    $('#fecha_n').val(moment(data.pendiente.fecha).format('YYYY-MM-DD'));
+                    $('#historia_n').val(data.pendiente.historia);
+                    $('#apellido1_n').val(data.pendiente.apellido1);
+                    $('#apellido2_n').val(data.pendiente.apellido2);
+                    $('#nombre1_n').val(data.pendiente.nombre1);
+                    $('#nombre2_n').val(data.pendiente.nombre2);
+                    $('#cantedad_n').val(data.pendiente.cantedad);
+                    $('#direcres_n').val(data.pendiente.direcres);
+                    $('#telefres_n').val(data.pendiente.telefres);
+                    $('#documento_n').val(data.pendiente.documento);
+                    $('#factura_n').val(data.pendiente.factura);
+                    $('#codigo_n').val(data.pendiente.codigo);
+                    $('#nombre_n').val(data.pendiente.nombre);
+                    $('#cant_pndt_n').val(data.saldo_pendiente);
+                    $('#cums_n').val(data.pendiente.cums);
+                    $('#cantidad_n').val(data.pendiente.cantidad);
+                    $('#cajero_n').val(data.pendiente.cajero);
+                    $('#usuario_n').val(data.pendiente.usuario);
+                    $('#estado_n').val(data.pendiente.estado);
+                    $('#fecha_impresion_n').val(data.pendiente.fecha_impresion);
+                    $('#fecha_entrega_n').val(data.pendiente.fecha_entrega);
+                    $('#fecha_anulado_n').val(data.pendiente.fecha_anulado);
+                    $('#usuario_n').val(data.pendiente.usuario);
 
                     $('#hidden_id').val(id)
                     $('#edit_pendiente_n').text("Detalle documento pendiente: " + data.pendiente.documento +
@@ -1237,11 +1238,48 @@ Pendientes Medcol San Fernando
                     $('#action_button').val('Edit');
                     $('#action').val('Edit');
 
+                    // Cache the selector
+                    var estado = $('#estado_n').val();
+
+                    // Switch statement for showing the corresponding date based on the state of the document
+                    switch (estado) {
+                        case "PENDIENTE":
+                            $('#fecha_estado').val(moment(data.pendiente.fecha).format('YYYY-MM-DD'));
+                            $('label[for="fecha_estado"]').text('Fecha Pendiente');
+                            break;
+                        case "TRAMITADO":
+                            $('#fecha_estado').val(moment(data.pendiente.fecha_impresion).format('YYYY-MM-DD'));
+                            $('label[for="fecha_estado"]').text('Fecha Tramitado');
+                            break;
+                        case "ENTREGADO":
+                            $('#fecha_estado').val(moment(data.pendiente.fecha_entrega).format('YYYY-MM-DD'));
+                            $('label[for="fecha_estado"]').text('Fecha Entrega');
+                            break;
+                        case "ANULADO":
+                            $('#fecha_estado').val(moment(data.pendiente.fecha_anulado).format('YYYY-MM-DD'));
+                            $('label[for="fecha_estado"]').text('Fecha Anulación');
+                            break;
+                        default:
+                            $('#fecha_estado').val("");
+                            $('label[for="fecha_estado"]').text('Fecha Estado');
+                            break;
+                    }
+
                     $('#modal-show-pendientes').modal('show');
 
-                    $('#modal-show-pendientes').on('shown.bs.modal', function() {
-                        mostrarOcultarCampos();
-                    });
+                    // Condicional para mostrar en el input fecha_estado la fecha que corresponda al estado del documento
+                    /* if ($('#estado_n').val() === "PENDIENTE") {
+                        $('#fecha_estado').val(moment(data.pendiente.fecha).format('YYYY-MM-DD'));
+
+                    } else if ($('#estado_n').val() === "TRAMITADO") {
+                        $('#fecha_estado').val(moment(data.pendiente.fecha_impresion).format('YYYY-MM-DD'));
+
+                    } else if ($('#estado_n').val() === "ENTREGADO") {
+                        $('#fecha_estado').val(moment(data.pendiente.fecha_entrega).format('YYYY-MM-DD'));
+
+                    } else if ($('#estado_n').val() === "ANULADO") {
+                        $('#fecha_estado').val(moment(data.pendiente.fecha_anulado).format('YYYY-MM-DD'));
+                    } */
 
                 },
 
@@ -1254,14 +1292,11 @@ Pendientes Medcol San Fernando
                 }
             });
 
-            //Funcion que abre el modal infoModal si el documento no tienen ninguna gestion
-            /* $('.info-icon').click(function() {
-                if ($('#usuario_n').val() === '') {
-                    $('#infoModal').modal('show');
-                }
-            }); */
-
         });
+
+
+
+
 
         // Función que envían los datos de la factura al controlador
         $('#form-general1').on('submit', function(event) {
