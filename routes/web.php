@@ -92,6 +92,8 @@ Route::get('showpendientes/{id}', 'PendienteApiController@show')->name('pendient
 Route::put('pendientes/{id}', 'PendienteApiController@update')->name('actualizar_pendientes')->middleware('verified');
 Route::post('pendientes', 'PendienteApiController@saveObs')->name('crear_observacion')->middleware('verified');
 
+Route::get('pagos_cuenta', 'PendienteApiController@getPagosList')->name('pagos_cuenta')->middleware('verified');
+
 Route::get('/syncapi', 'PendienteApiController@createapendientespi')->name('syncapi')->middleware('verified');
 
 Route::get('informe', 'PendienteApiController@informes')->name('informe')->middleware('verified');

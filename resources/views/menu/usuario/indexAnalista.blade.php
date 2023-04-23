@@ -1123,12 +1123,114 @@ Pendientes Medcol San Fernando
 
 
 
+        //--------------------------------Tabla relacion Observaciones y los documentos pendientes----------------------------//
+        function fill_datatable_f(nivel_idp2 = '') {
+            var tobservaciones = $('#tobservaciones').DataTable({
+                language: idioma_espanol,
+                processing: true,
+                lengthMenu: [
+                    [25, 50, 100, 500, -1],
+                    [25, 50, 100, 500, "Mostrar Todo"]
+                ],
+                processing: true,
+                serverSide: true,
+                aaSorting: [
+                    [1, "asc"]
+                ],
+                ajax: {
+                    url: "{{ route('pagos_cuenta')}}",
+                    //type: "get",
+                    data: {
+                        id: nivel_idp2
+                    }
+                },
+                columns: [
+                    {
+                        data: 'id_obs',
+                        name: 'id_obs'
+                    },
+                    {
+                        data: 'created_at',
+                        name: 'created_at'
+                    },
+                    {
+                        data: 'observacion',
+                        name: 'observacion'
+                    },
+                    {
+                        data: 'usuario',
+                        name: 'usuario'
+                    },
+                    {
+                        data: 'estado',
+                        name: 'estado'
+                    }
+
+                ],
+
+                //Botones----------------------------------------------------------------------
+
+                "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+
+
+                buttons: [{
+
+                        extend: 'copyHtml5',
+                        titleAttr: 'Copiar Registros',
+                        title: "seguimiento",
+                        className: "btn  btn-outline-primary btn-sm"
+
+
+                    },
+                    {
+
+                        extend: 'excelHtml5',
+                        titleAttr: 'Exportar Excel',
+                        title: "seguimiento",
+                        className: "btn  btn-outline-success btn-sm"
+
+
+                    },
+                    {
+
+                        extend: 'csvHtml5',
+                        titleAttr: 'Exportar csv',
+                        className: "btn  btn-outline-warning btn-sm"
+                        //text: '<i class="fas fa-file-excel"></i>'
+
+                    },
+                    {
+
+                        extend: 'pdfHtml5',
+                        titleAttr: 'Exportar pdf',
+                        className: "btn  btn-outline-secondary btn-sm"
+
+
+                    }
+                ],
+
+            });
+
+        }
+
+
+
+
 
         //Función para abrir modal del detalle de la evolución y muestra las observaciones agregadas
         $(document).on('click', '.edit_pendiente', function() {
 
             $('#form-general')[0].reset();
             var id = $(this).attr('id');
+            var nivel_idp2 = $(this).attr('id');
+
+            if (nivel_idp2 != '') {
+
+                if ($.fn.DataTable.isDataTable('#tobservaciones')) {
+                    $('#tobservaciones').DataTable().destroy();
+                }
+                fill_datatable_f(nivel_idp2);
+            }
 
 
             $.ajax({
@@ -1349,10 +1451,15 @@ Pendientes Medcol San Fernando
                             }
 
                             if (data.success == 'ok') {
-                                $('#form-general')[0].reset();
+                                $('#form-general1')[0].reset();
                                 $('#modal-edit-pendientes').modal('hide');
                                 /* limpiarModal(); */
                                 $('#pendientes').DataTable().ajax.reload();
+                                $('#tobservaciones').DataTable().ajax.reload();
+                                $('#porentregar').DataTable().ajax.reload();
+                                $('#entregados').DataTable().ajax.reload();
+                                $('#tanulados').DataTable().ajax.reload();
+                                $('#tdesabastecidos').DataTable().ajax.reload();
                                 Swal.fire({
                                     type: 'success',
                                     title: 'Cuenta por pagar creada correctamente',
@@ -1363,9 +1470,10 @@ Pendientes Medcol San Fernando
 
 
                             } else if (data.success == 'ok1') {
-                                $('#form-general')[0].reset();
+                                $('#form-general1')[0].reset();
                                 $('#modal-edit-pendientes').modal('hide');
                                 $('#pendientes').DataTable().ajax.reload();
+                                $('#tobservaciones').DataTable().ajax.reload();
                                 $('#porentregar').DataTable().ajax.reload();
                                 $('#entregados').DataTable().ajax.reload();
                                 $('#tanulados').DataTable().ajax.reload();

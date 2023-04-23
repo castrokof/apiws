@@ -30,7 +30,9 @@
                                     <div class="card-header p-0 pt-1">
                                         <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
                                             <li class="nav-item">
-                                                <a class="nav-link active" id="custom-tabs-one-datos-del-paciente-tab" data-toggle="pill" href="#custom-tabs-one-datos-del-paciente" role="tab" aria-controls="custom-tabs-one-datos-del-paciente" aria-selected="false">Detalle de la Factura</a>
+                                                <a class="nav-link active" id="custom-tabs-one-datos-del-paciente-tab" data-toggle="pill"
+                                                href="#custom-tabs-one-datos-del-paciente" role="tab" aria-controls="custom-tabs-one-datos-del-paciente"
+                                                aria-selected="false">Detalle de la Factura</a>
                                             </li>
                                         </ul>
                                     </div>
