@@ -100,7 +100,7 @@ Pendientes Medcol San Fernando
     }
 
     .l-bg-blue-dark-card {
-        background-color: linear-gradient(to right, #373b44, #4286f4) !important;
+        background-color: linear-gradient(to right, #b7c7ec, #4286f4) !important;
         color: #fff;
     }
 
@@ -112,12 +112,12 @@ Pendientes Medcol San Fernando
     }
 
     .l-bg-blue-dark {
-        background: linear-gradient(to right, #373b44, #4286f4) !important;
+        background: linear-gradient(to right, #06b6cd, #319acb) !important;
         color: #fff;
     }
 
     .l-bg-green-dark {
-        background: linear-gradient(to right, #0a504a, #38ef7d) !important;
+        background: linear-gradient(to right, #0a504a, #3866ef) !important;
         color: #fff;
     }
 
@@ -241,7 +241,7 @@ Pendientes Medcol San Fernando
                     }
 
                     $("#detalle").append(
-                        '<div class="small-box shadow-lg  l-bg-red-dark"><div class="inner">' +
+                        '<div class="small-box shadow-lg  l-bg-blue-dark"><div class="inner">' +
                         '<h5>TOTAL PENDIENTES</h5>' +
                         '<p><h5> ' + a +
                         '</h5></p>' +
@@ -261,7 +261,7 @@ Pendientes Medcol San Fernando
                     $("#detalle1").append(
 
 
-                        '<div class="small-box shadow-lg l-bg-cherry"><div class="inner">' +
+                        '<div class="small-box shadow-lg l-bg-orange-dark"><div class="inner">' +
                         '<h5>TOTAL ENTREGADOS</h5>' +
                         '<p><h5> ' + a +
                         '</h5></p>' +
@@ -285,7 +285,7 @@ Pendientes Medcol San Fernando
                     $("#detalle3").append(
 
 
-                        '<div class="small-box shadow-lg l-bg-blue-dark"><div class="inner">' +
+                        '<div class="small-box shadow-lg l-bg-red-dark"><div class="inner">' +
                         '<h5>ANULADOS</h5>' +
                         '<p><h6><i class="fas fa-hospital"></i> ' + 0 + ' -- ' +
                         '<i class="far fa-hospital"></i> ' + 0 +
