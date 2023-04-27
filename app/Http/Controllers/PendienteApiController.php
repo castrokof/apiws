@@ -463,9 +463,11 @@ class PendienteApiController extends Controller
 
         $pendientes =  PendientesApi::where('estado', 'PENDIENTE')->count();
         $entregados =  PendientesApi::where('estado', 'ENTREGADO')->count();
+        $tramitados =  PendientesApi::where('estado', 'TRAMITADO')->count();
+        $agotados =  PendientesApi::where('estado', 'DESABASTECIDO')->count();
+        $anulados =  PendientesApi::where('estado', 'ANULADO')->count();
 
-
-        return response()->json(['pendientes' => $pendientes, 'entregados' => $entregados]);
+        return response()->json(['pendientes' => $pendientes, 'entregados' => $entregados, 'tramitados' => $tramitados, 'agotados' => $agotados, 'anulados' => $anulados]);
     }
 
 
