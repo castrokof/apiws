@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Medcol3;
 
-use App\EntregadosApi;
-use App\PendientesApi;
-use App\ObservacionesApi;
+use App\Http\Controllers\Controller;
+use App\Models\Medcol3\PendienteApiMedcol3;
+use App\Models\Medcol3\EntregadosApiMedcol3;
+use App\Models\Medcol3\ObservacionesApiMedcol3;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -14,14 +16,12 @@ use Illuminate\Support\Facades\Cache;
 use PhpParser\Node\Stmt\Return_;
 use stdClass;
 
-class PendienteApiController extends Controller
+class PendienteApiMedcol3Controller extends Controller
 {
-
 
     public $var1 = null;
     public $var2 = null;
     public $ip = null;
-
 
     /**
      * Display a listing of the resource.
@@ -33,13 +33,13 @@ class PendienteApiController extends Controller
 
 
         if ($request->ajax()) {
-            $pendientesapi = PendientesApi::where('estado', 'PENDIENTE')
+            $pendiente_api_medcol3 = PendienteApiMedcol3::where('estado', 'PENDIENTE')
                 ->orWhere('estado', NULL)
                 /* ->where('orden_externa', 'LIKE', '%MP%') */
                 ->orderBy('id')
                 ->get();
 
-            return DataTables()->of($pendientesapi)
+            return DataTables()->of($pendiente_api_medcol3)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
                     " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
@@ -54,9 +54,8 @@ class PendienteApiController extends Controller
                 ->make(true);
         }
 
-        return view('menu.usuario.indexAnalista');
+        return view('menu.Medcol3.indexAnalista');
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -82,7 +81,7 @@ class PendienteApiController extends Controller
 
             $token = $response->json()["token"];
 
-            $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/pendientesapi");
+            $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/pendiente_api_medcol3");
 
             $facturassapi = $responsefacturas->json()['data'];
 
@@ -90,7 +89,7 @@ class PendienteApiController extends Controller
             $pendientes = [];
 
             foreach ($facturassapi as $factura) {
-                $existe = PendientesApi::where('factura', $factura['factura'])->count();
+                $existe = PendienteApiMedcol3::where('factura', $factura['factura'])->count();
 
                 if ($existe == 0 || $existe == '') {
                     $pendientes[] = [
@@ -123,7 +122,7 @@ class PendienteApiController extends Controller
             }
 
             if (!empty($pendientes)) {
-                PendientesApi::insert($pendientes);
+                PendienteApiMedcol3::insert($pendientes);
             }
 
             Http::withToken($token)->get("http://190.145.32.226:8000/api/closeallacceso");
@@ -144,7 +143,7 @@ class PendienteApiController extends Controller
 
             $token = $response->json()["token"];
 
-            $responsefacturas = Http::withToken($token)->get("http://192.168.7.10:8000/api/pendientesapi");
+            $responsefacturas = Http::withToken($token)->get("http://192.168.7.10:8000/api/pendiente_api_medcol3");
 
             $facturassapi = $responsefacturas->json()['data'];
 
@@ -152,7 +151,7 @@ class PendienteApiController extends Controller
             $pendientes = [];
 
             foreach ($facturassapi as $factura) {
-                $existe = PendientesApi::where('factura', $factura['factura'])->count();
+                $existe = PendienteApiMedcol3::where('factura', $factura['factura'])->count();
 
                 if ($existe == 0 || $existe == '') {
                     $pendientes[] = [
@@ -185,7 +184,7 @@ class PendienteApiController extends Controller
             }
 
             if (!empty($pendientes)) {
-                PendientesApi::insert($pendientes);
+                PendienteApiMedcol3::insert($pendientes);
             }
 
             Http::withToken($token)->get("http://192.168.7.10:8000/api/closeallacceso");
@@ -216,7 +215,7 @@ class PendienteApiController extends Controller
         //     $prueba = $response->json();
         //     $token = $prueba["token"];
 
-        //     $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/pendientesapi");
+        //     $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/pendiente_api_medcol3");
 
         //     $facturassapi = $responsefacturas->json();
 
@@ -229,10 +228,10 @@ class PendienteApiController extends Controller
         //     foreach ($facturassapi['data'] as $factura) {
 
 
-        //         $existe =  PendientesApi::where('factura', $factura['factura'])->count();
+        //         $existe =  pendiente_api_medcol3::where('factura', $factura['factura'])->count();
 
         //         if ($existe == 0 || $existe == '') {
-        //             PendientesApi::create([
+        //             pendiente_api_medcol3::create([
         //                 'Tipodocum' => trim($factura['Tipodocum']),
         //                 'cantdpx' => trim($factura['cantdpx']),
         //                 'cantord' => trim($factura['cantord']),
@@ -275,7 +274,6 @@ class PendienteApiController extends Controller
         //   //  }
     }
 
-
     /**
      * Store a newly created resource in storage.
      *
@@ -286,11 +284,11 @@ class PendienteApiController extends Controller
     {
         //
         if ($request->ajax()) {
-            $pendientesapi = PendientesApi::where('estado', 'TRAMITADO')
+            $pendiente_api_medcol3 = PendienteApiMedcol3::where('estado', 'TRAMITADO')
                 ->orderBy('id')
                 ->get();
 
-            return DataTables()->of($pendientesapi)
+            return DataTables()->of($pendiente_api_medcol3)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
                     " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
@@ -305,18 +303,24 @@ class PendienteApiController extends Controller
                 ->make(true);
         }
 
-        return view('menu.usuario.indexAnalista');
+        return view('menu.Medcol3.indexAnalista');
     }
 
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Medcol3\PendienteApiMedcol3  $pendienteApiMedcol3
+     * @return \Illuminate\Http\Response
+     */
     public function entregados(Request $request)
     {
         //
         if ($request->ajax()) {
-            $pendientesapi = PendientesApi::where('estado', 'ENTREGADO')
+            $pendiente_api_medcol3 = PendienteApiMedcol3::where('estado', 'ENTREGADO')
                 ->orderBy('id')
                 ->get();
 
-            return DataTables()->of($pendientesapi)
+            return DataTables()->of($pendiente_api_medcol3)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
                     " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
@@ -331,18 +335,24 @@ class PendienteApiController extends Controller
                 ->make(true);
         }
 
-        return view('menu.usuario.indexAnalista');
+        return view('menu.Medcol3.indexAnalista');
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\Medcol3\PendienteApiMedcol3  $pendienteApiMedcol3
+     * @return \Illuminate\Http\Response
+     */
     public function getDesabastecidos(Request $request)
     {
         //
         if ($request->ajax()) {
-            $pendientesapi = PendientesApi::where('estado', 'DESABASTECIDO')
+            $pendiente_api_medcol3 = PendienteApiMedcol3::where('estado', 'DESABASTECIDO')
                 ->orderBy('id')
                 ->get();
 
-            return DataTables()->of($pendientesapi)
+            return DataTables()->of($pendiente_api_medcol3)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
                     " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
@@ -357,20 +367,26 @@ class PendienteApiController extends Controller
                 ->make(true);
         }
 
-        return view('menu.usuario.indexAnalista');
+        return view('menu.Medcol3.indexAnalista');
     }
 
-
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Medcol3\PendienteApiMedcol3  $pendienteApiMedcol3
+     * @return \Illuminate\Http\Response
+     */
     public function getAnulados(Request $request)
     {
         //
 
         if ($request->ajax()) {
-            $pendientesapi = PendientesApi::where('estado', 'ANULADO')
+            $pendiente_api_medcol3 = PendienteApiMedcol3::where('estado', 'ANULADO')
                 ->orderBy('id')
                 ->get();
 
-            return DataTables()->of($pendientesapi)
+            return DataTables()->of($pendiente_api_medcol3)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
                     " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
@@ -385,7 +401,7 @@ class PendienteApiController extends Controller
                 ->make(true);
         }
 
-        return view('menu.usuario.indexAnalista');
+        return view('menu.Medcol3.indexAnalista');
     }
 
     public function update(Request $request, $id)
@@ -414,36 +430,36 @@ class PendienteApiController extends Controller
 
 
         if (request()->ajax()) {
-            $pendientesapi = PendientesApi::findOrFail($id);
-            $pendientesapi->fill($request->all());
-            $pendientesapi->usuario = $request->name;
+            $pendiente_api_medcol3 = PendienteApiMedcol3::findOrFail($id);
+            $pendiente_api_medcol3->fill($request->all());
+            $pendiente_api_medcol3->usuario = $request->name;
 
             if ($request->input('enviar_fecha_entrega') == 'true') {
-                if ($request->fecha_entrega < $pendientesapi->fecha || $request->fecha_entrega > now()->format('Y-m-d')) {
+                if ($request->fecha_entrega < $pendiente_api_medcol3->fecha || $request->fecha_entrega > now()->format('Y-m-d')) {
                     return response()->json(['errors' => ['La fecha de ENTREGA debe estar entre la fecha de la factura y la fecha actual']]);
                 }
-                $pendientesapi->fecha_entrega = $request->fecha_entrega;
+                $pendiente_api_medcol3->fecha_entrega = $request->fecha_entrega;
             }
 
             if ($request->input('enviar_fecha_impresion') == 'true') {
-                if ($request->fecha_impresion < $pendientesapi->fecha || $request->fecha_impresion > now()->format('Y-m-d')) {
+                if ($request->fecha_impresion < $pendiente_api_medcol3->fecha || $request->fecha_impresion > now()->format('Y-m-d')) {
                     return response()->json(['errors' => ['La fecha de TRAMITE debe estar entre la fecha de la factura y la fecha actual']]);
                 }
-                $pendientesapi->fecha_impresion = $request->fecha_impresion;
+                $pendiente_api_medcol3->fecha_impresion = $request->fecha_impresion;
             }
 
             if ($request->input('enviar_fecha_anulado') == 'true') {
-                if ($request->fecha_anulado < $pendientesapi->fecha || $request->fecha_anulado > now()->format('Y-m-d')) {
+                if ($request->fecha_anulado < $pendiente_api_medcol3->fecha || $request->fecha_anulado > now()->format('Y-m-d')) {
                     return response()->json(['errors' => ['La fecha de ANULACIÓN debe estar entre la fecha de la factura y la fecha actual']]);
                 }
-                $pendientesapi->fecha_anulado = $request->fecha_anulado;
+                $pendiente_api_medcol3->fecha_anulado = $request->fecha_anulado;
             }
 
-            $pendientesapi->save();
+            $pendiente_api_medcol3->save();
 
-            // Guardar observación en la tabla ObservacionesApi
-            ObservacionesApi::create([
-                'pendiente_id' => $pendientesapi->id,
+            // Guardar observación en la tabla ObservacionesApiMedcol3
+            ObservacionesApiMedcol3::create([
+                'pendiente_id' => $pendiente_api_medcol3->id,
                 'observacion' => $request->input('observacion'),
                 'usuario' => $request->input('name'),
                 'estado' => $request->input('estado')
@@ -453,30 +469,34 @@ class PendienteApiController extends Controller
         return response()->json(['success' => 'ok1']);
     }
 
-
     public function saveObs(Request $request)
     {
-        /* ObservacionesApi::create([
+        /* ObservacionesApiMedcol3::create([
             'pendiente_id' => $id,
             'observacion' => $request->input('observacion'),
             'estado' => $request->input('estado')
         ]); */
     }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Medcol3\PendienteApiMedcol3  $pendienteApiMedcol3
+     * @return \Illuminate\Http\Response
+     */
     public function getObservaciones(Request $request)
     {
         $idlist = $request->id;
 
         if (request()->ajax()) {
-            $data = DB::table('observacionesapi')
-                ->where('observacionesapi.pendiente_id', '=', $idlist)
+            $data = DB::table('observaciones_api_medcol3')
+                ->where('observaciones_api_medcol3.pendiente_id', '=', $idlist)
                 ->get();
 
             return DataTables()->of($data)->make(true);
         }
-        return view('menu.usuario.indexAnalista');
+        return view('menu.Medcol3.indexAnalista');
     }
-
-
 
     /**
      * Display the specified resource.
@@ -488,7 +508,7 @@ class PendienteApiController extends Controller
     {
         //
         if (request()->ajax()) {
-            $pendiente = PendientesApi::where('id', '=', $id)
+            $pendiente = PendienteApiMedcol3::where('id', '=', $id)
                 ->first();
 
             $saldo_pendiente = $pendiente->cantord - $pendiente->cantdpx;
@@ -498,8 +518,9 @@ class PendienteApiController extends Controller
                 'saldo_pendiente' => $saldo_pendiente
             ]);
         }
-        return view('menu.usuario.indexAnalista');
+        return view('menu.Medcol3.indexAnalista');
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -510,7 +531,7 @@ class PendienteApiController extends Controller
     public function edit($id)
     {
         if (request()->ajax()) {
-            $pendiente = PendientesApi::where('id', '=', $id)
+            $pendiente = PendienteApiMedcol3::where('id', '=', $id)
                 ->first();
 
             $saldo_pendiente = $pendiente->cantord - $pendiente->cantdpx;
@@ -520,10 +541,8 @@ class PendienteApiController extends Controller
                 'saldo_pendiente' => $saldo_pendiente
             ]);
         }
-        return view('menu.usuario.indexAnalista');
+        return view('menu.Medcol3.indexAnalista');
     }
-
-
     /**
      * Remove the specified resource from storage.
      *
@@ -533,15 +552,14 @@ class PendienteApiController extends Controller
     public function informes()
     {
 
-        $pendientes =  PendientesApi::where('estado', 'PENDIENTE')->count();
-        $entregados =  PendientesApi::where('estado', 'ENTREGADO')->count();
-        $tramitados =  PendientesApi::where('estado', 'TRAMITADO')->count();
-        $agotados =  PendientesApi::where('estado', 'DESABASTECIDO')->count();
-        $anulados =  PendientesApi::where('estado', 'ANULADO')->count();
+        $pendientes =  PendienteApiMedcol3::where('estado', 'PENDIENTE')->count();
+        $entregados =  PendienteApiMedcol3::where('estado', 'ENTREGADO')->count();
+        $tramitados =  PendienteApiMedcol3::where('estado', 'TRAMITADO')->count();
+        $agotados =  PendienteApiMedcol3::where('estado', 'DESABASTECIDO')->count();
+        $anulados =  PendienteApiMedcol3::where('estado', 'ANULADO')->count();
 
         return response()->json(['pendientes' => $pendientes, 'entregados' => $entregados, 'tramitados' => $tramitados, 'agotados' => $agotados, 'anulados' => $anulados]);
     }
-
 
     public function createentregadospi($var1)
     {
@@ -562,7 +580,7 @@ class PendienteApiController extends Controller
         $prueba = $response->json();
         $token = $prueba["token"];
 
-        $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/entregadosapi");
+        $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/entregados_api_medcol3");
 
         $facturassapi = $responsefacturas->json();
 
@@ -573,10 +591,10 @@ class PendienteApiController extends Controller
         foreach ($facturassapi['data'] as $factura) {
 
 
-            $existe =  EntregadosApi::where('factura', $factura['factura'])->count();
+            $existe =  EntregadosApiMedcol3::where('factura', $factura['factura'])->count();
 
             if ($existe == 0 || $existe == '') {
-                EntregadosApi::create([
+                EntregadosApiMedcol3::create([
                     'Tipodocum' => trim($factura['Tipodocum']),
                     'cantdpx' => trim($factura['cantdpx']),
                     'cantord' => trim($factura['cantord']),
@@ -606,12 +624,12 @@ class PendienteApiController extends Controller
 
         Http::withToken($token)->get("http://190.145.32.226:8000/api/closeallacceso");
 
-        $pendientes = DB::table('pendientesapi')
-            ->join('entregadosapi', function ($join) {
-                $join->on('pendientesapi.orden_externa', '=', 'entregadosapi.orden_externa')
-                    ->on('pendientesapi.codigo', '=', 'entregadosapi.codigo');
+        $pendientes = DB::table('pendiente_api_medcol3')
+            ->join('entregados_api_medcol3', function ($join) {
+                $join->on('pendiente_api_medcol3.orden_externa', '=', 'entregados_api_medcol3.orden_externa')
+                    ->on('pendiente_api_medcol3.codigo', '=', 'entregados_api_medcol3.codigo');
             })
-            ->select('pendientesapi.id as idd', 'entregadosapi.orden_externa', 'entregadosapi.codigo', 'entregadosapi.cantdpx', 'entregadosapi.fecha_factura')
+            ->select('pendiente_api_medcol3.id as idd', 'entregados_api_medcol3.orden_externa', 'entregados_api_medcol3.codigo', 'entregados_api_medcol3.cantdpx', 'entregados_api_medcol3.fecha_factura')
             ->get();
 
 
@@ -620,28 +638,28 @@ class PendienteApiController extends Controller
         foreach ($pendientes as $key => $value) {
 
             $entregados =
-                DB::table('pendientesapi')
+                DB::table('pendiente_api_medcol3')
                 ->where([
-                    ['pendientesapi.estado', '=', 'ENTREGADO'],
-                    ['pendientesapi.orden_externa', '=', $value->orden_externa],
-                    ['pendientesapi.codigo', '=', $value->codigo],
-                    ['pendientesapi.usuario', 'RFAST']
+                    ['pendiente_api_medcol3.estado', '=', 'ENTREGADO'],
+                    ['pendiente_api_medcol3.orden_externa', '=', $value->orden_externa],
+                    ['pendiente_api_medcol3.codigo', '=', $value->codigo],
+                    ['pendiente_api_medcol3.usuario', 'RFAST']
                 ])->count();
 
             if ($entregados == 0 || $entregados == null) {
 
-                DB::table('pendientesapi')
+                DB::table('pendiente_api_medcol3')
                     ->where([
-                        ['pendientesapi.estado', '=', 'PENDIENTE'],
-                        ['pendientesapi.orden_externa', '=', $value->orden_externa],
-                        ['pendientesapi.codigo', '=', $value->codigo]
+                        ['pendiente_api_medcol3.estado', '=', 'PENDIENTE'],
+                        ['pendiente_api_medcol3.orden_externa', '=', $value->orden_externa],
+                        ['pendiente_api_medcol3.codigo', '=', $value->codigo]
                     ])
                     ->update([
-                        'pendientesapi.fecha_entrega' =>  $value->fecha_factura,
-                        'pendientesapi.estado' => 'ENTREGADO',
-                        'pendientesapi.cantdpx' => $value->cantdpx,
-                        'pendientesapi.usuario' => 'RFAST',
-                        'pendientesapi.updated_at' => now()
+                        'pendiente_api_medcol3.fecha_entrega' =>  $value->fecha_factura,
+                        'pendiente_api_medcol3.estado' => 'ENTREGADO',
+                        'pendiente_api_medcol3.cantdpx' => $value->cantdpx,
+                        'pendiente_api_medcol3.usuario' => 'RFAST',
+                        'pendiente_api_medcol3.updated_at' => now()
                     ]);
 
                 $contadorei++;
@@ -651,14 +669,14 @@ class PendienteApiController extends Controller
 
             // Guardar observación en la tabla ObservacionesApi
 
-            $entregado = ObservacionesApi::where([
+            $entregado = ObservacionesApiMedcol3::where([
                 ['pendiente_id', $value->idd],
                 ['estado', 'ENTREGADO']
             ])->count();
 
             if ($entregado == 0 || $entregado == null) {
 
-                ObservacionesApi::create([
+                ObservacionesApiMedcol3::create([
                     'pendiente_id' => $value->idd,
                     'observacion' => 'Este resgistro se genero automaticamente al consumir la api',
                     'usuario' => 'RFAST',
@@ -670,136 +688,5 @@ class PendienteApiController extends Controller
 
 
         return $this->var1 = $contadorei;
-    }
-
-
-
-    public function createentregadospilocal($var2)
-    {
-        $email = 'sistemas.saludtempus@gmail.com'; // Auth::user()->email
-        $password = '12345678';
-
-        $response = Http::post(
-            "http://192.168.7.10:8000/api/acceso",
-            [
-                'email' =>  $email,
-                'password' => $password,
-            ]
-        );
-
-
-        // $this->createapendientespi($request);
-
-        $prueba = $response->json();
-        $token = $prueba["token"];
-
-        $responsefacturas = Http::withToken($token)->get("http://192.168.7.10:8000/api/entregadosapi");
-
-        $facturassapi = $responsefacturas->json();
-
-        //dd($facturassapi);
-        $contadorei = 0;
-        $contador1 = 0;
-
-        foreach ($facturassapi['data'] as $factura) {
-
-
-            $existe =  EntregadosApi::where('factura', $factura['factura'])->count();
-
-            if ($existe == 0 || $existe == '') {
-                EntregadosApi::create([
-                    'Tipodocum' => trim($factura['Tipodocum']),
-                    'cantdpx' => trim($factura['cantdpx']),
-                    'cantord' => trim($factura['cantord']),
-                    'fecha_factura' => trim($factura['fecha_factura']),
-                    'fecha' => trim($factura['fecha']),
-                    'historia' => trim($factura['historia']),
-                    'apellido1' => trim($factura['apellido1']),
-                    'apellido2' => trim($factura['apellido2']),
-                    'nombre1' => trim($factura['nombre1']),
-                    'nombre2' => trim($factura['nombre2']),
-                    'cantedad' => trim($factura['cantedad']),
-                    'direcres' => trim($factura['direcres']),
-                    'telefres' => trim($factura['telefres']),
-                    'documento' => trim($factura['documento']),
-                    'factura' => trim($factura['factura']),
-                    'codigo' => trim($factura['codigo']),
-                    'nombre' => trim($factura['nombre']),
-                    'cums' => trim($factura['cums']),
-                    'cantidad' => trim($factura['cantidad']),
-                    'cajero' => trim($factura['cajero']),
-                    'orden_externa' => trim($factura['ORDEN_EXTERNA'])
-                ]);
-
-                $contador1++;
-            }
-        }
-
-        Http::withToken($token)->get("http://192.168.7.10:8000/api/closeallacceso");
-
-        $pendientes = DB::table('pendientesapi')
-            ->join('entregadosapi', function ($join) {
-                $join->on('pendientesapi.orden_externa', '=', 'entregadosapi.orden_externa')
-                    ->on('pendientesapi.codigo', '=', 'entregadosapi.codigo');
-            })
-            ->select('pendientesapi.id as idd', 'entregadosapi.orden_externa', 'entregadosapi.codigo', 'entregadosapi.cantdpx', 'entregadosapi.fecha_factura')
-            ->get();
-
-
-
-
-        foreach ($pendientes as $key => $value) {
-
-            $entregados =
-                DB::table('pendientesapi')
-                ->where([
-                    ['pendientesapi.estado', '=', 'ENTREGADO'],
-                    ['pendientesapi.orden_externa', '=', $value->orden_externa],
-                    ['pendientesapi.codigo', '=', $value->codigo],
-                    ['pendientesapi.usuario', 'RFAST']
-                ])->count();
-
-            if ($entregados == 0 || $entregados == null) {
-
-                DB::table('pendientesapi')
-                    ->where([
-                        ['pendientesapi.estado', '=', 'PENDIENTE'],
-                        ['pendientesapi.orden_externa', '=', $value->orden_externa],
-                        ['pendientesapi.codigo', '=', $value->codigo]
-                    ])
-                    ->update([
-                        'pendientesapi.fecha_entrega' =>  $value->fecha_factura,
-                        'pendientesapi.estado' => 'ENTREGADO',
-                        'pendientesapi.cantdpx' => $value->cantdpx,
-                        'pendientesapi.usuario' => 'RFAST',
-                        'pendientesapi.updated_at' => now()
-                    ]);
-
-                $contadorei++;
-            }
-
-
-
-            // Guardar observación en la tabla ObservacionesApi
-
-            $entregado = ObservacionesApi::where([
-                ['pendiente_id', $value->idd],
-                ['estado', 'ENTREGADO']
-            ])->count();
-
-            if ($entregado == 0 || $entregado == null) {
-
-                ObservacionesApi::create([
-                    'pendiente_id' => $value->idd,
-                    'observacion' => 'Este resgistro se genero automaticamente al consumir la api',
-                    'usuario' => 'RFAST',
-                    'estado' => 'ENTREGADO'
-                ]);
-            }
-        }
-
-
-
-        return $this->var2 = $contadorei;
     }
 }

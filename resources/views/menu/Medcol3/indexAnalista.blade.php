@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('titulo')
-Pendientes Medcol San Fernando
+Pendientes Medcol Limonar
 @endsection
 @section("styles")
 
@@ -182,13 +182,13 @@ Pendientes Medcol San Fernando
 @section('content')
 <div class="loaders"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>
 
-@include('menu.usuario.form.forminforme')
-@include('menu.usuario.tabs.tabsIndexAnalista')
-@include('menu.usuario.modal.modalindexresumen')
-@include('menu.usuario.modal.modalindexaddseguimiento')
+@include('menu.Medcol3.form.forminforme')
+@include('menu.Medcol3.tabs.tabsIndexAnalista')
+@include('menu.Medcol3.modal.modalindexresumen')
+@include('menu.Medcol3.modal.modalindexaddseguimiento')
 
-@include('menu.usuario.modal.modalPendientes')
-@include('menu.usuario.modal.modalDetallePendiente')
+@include('menu.Medcol3.modal.modalPendientes')
+@include('menu.Medcol3.modal.modalDetallePendiente')
 
 
 @endsection
@@ -223,7 +223,7 @@ Pendientes Medcol San Fernando
             $("#detalle4").empty();
             //$("#detalle5").empty();
             $.ajax({
-                url: "{{ route('informe') }}",
+                url: "{{ route('medcol3.informe') }}",
                 // data: {
                 //     fechaini: fechaini,
                 //     fechafin: fechafin
@@ -466,7 +466,7 @@ Pendientes Medcol San Fernando
                     [1, "desc"]
                 ],
                 ajax: {
-                    url: "{{route('pendientes')}}",
+                    url: "{{route('medcol3.pendientes')}}",
                 },
                 columns: [{
                         data: 'action',
@@ -606,7 +606,7 @@ Pendientes Medcol San Fernando
                     [1, "desc"]
                 ],
                 ajax: {
-                    url: "{{route('porentregar')}}",
+                    url: "{{route('medcol3.porentregar')}}",
                 },
                 columns: [{
                         data: 'action',
@@ -745,7 +745,7 @@ Pendientes Medcol San Fernando
                     [1, "desc"]
                 ],
                 ajax: {
-                    url: "{{route('entregados')}}",
+                    url: "{{route('medcol3.entregados')}}",
                 },
                 columns: [{
                         data: 'action',
@@ -884,7 +884,7 @@ Pendientes Medcol San Fernando
                     [1, "desc"]
                 ],
                 ajax: {
-                    url: "{{route('desabastecidos')}}",
+                    url: "{{route('medcol3.desabastecidos')}}",
                 },
                 columns: [{
                         data: 'action',
@@ -1023,7 +1023,7 @@ Pendientes Medcol San Fernando
                     [1, "desc"]
                 ],
                 ajax: {
-                    url: "{{route('anulados')}}",
+                    url: "{{route('medcol3.anulados')}}",
                 },
                 columns: [{
                         data: 'action',
@@ -1165,7 +1165,7 @@ Pendientes Medcol San Fernando
                     [1, "asc"]
                 ],
                 ajax: {
-                    url: "{{ route('observaciones')}}",
+                    url: "{{ route('medcol3.observaciones')}}",
                     //type: "get",
                     data: {
                         id: nivel_idp2
@@ -1261,7 +1261,7 @@ Pendientes Medcol San Fernando
 
 
             $.ajax({
-                url: "editpendientes/" + id,
+                url: "medcol3/editpendientes/" + id,
                 dataType: "json",
                 success: function(data) {
 
@@ -1326,7 +1326,7 @@ Pendientes Medcol San Fernando
             var id = $(this).attr('id');
 
             $.ajax({
-                url: "showpendientes/" + id,
+                url: "medcol3/showpendientes/" + id,
                 dataType: "json",
                 success: function(data) {
 
@@ -1444,7 +1444,7 @@ Pendientes Medcol San Fernando
             if ($('#action').val() == 'Edit') {
                 text = "Estás por entregar o despachar medicamentos pendientes"
                 var updateid = $('#hidden_id').val();
-                url = "pendientes/" + updateid;
+                url = "medcol3/pendientes/" + updateid;
                 method = 'put';
             }
 
@@ -1530,7 +1530,7 @@ Pendientes Medcol San Fernando
         // Función que envia el id al controlador y cambia el estado del registro
         $(document).on('click', '#syncapi', function() {
 
-            const text = 'De Medcol 2';
+            const text = 'De Medcol 3 - Limonar';
 
             Swal.fire({
                 title: "¿Estás por sincronizar pendientes?",

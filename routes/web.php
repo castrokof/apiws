@@ -78,7 +78,7 @@ Route::get('/submenu', 'MenuContoller@index')->name('submenu')->middleware('veri
 Route::get('/usuariosapi', 'UsuarioApiContoller@index')->name('usuariosapi')->middleware('verified');
 Route::get('/guardar_usuario', 'UsuarioApiContoller@createuserapi')->name('guardar_usuario')->middleware('verified');
 
-//Rutas de tablas de pendientes
+//Rutas de tablas de pendientes MEDCOL 2
 
 Route::get('/pendientes', 'PendienteApiController@index')->name('pendientes')->middleware('verified');
 Route::get('/porentregar', 'PendienteApiController@porentregar')->name('porentregar')->middleware('verified');
@@ -92,9 +92,32 @@ Route::get('showpendientes/{id}', 'PendienteApiController@show')->name('pendient
 Route::put('pendientes/{id}', 'PendienteApiController@update')->name('actualizar_pendientes')->middleware('verified');
 Route::post('pendientes', 'PendienteApiController@saveObs')->name('crear_observacion')->middleware('verified');
 
-Route::get('pagos_cuenta', 'PendienteApiController@getPagosList')->name('pagos_cuenta')->middleware('verified');
+Route::get('observaciones', 'PendienteApiController@getObservaciones')->name('observaciones')->middleware('verified');
 
 Route::get('/syncapi', 'PendienteApiController@createapendientespi')->name('syncapi')->middleware('verified');
 
 Route::get('informe', 'PendienteApiController@informes')->name('informe')->middleware('verified');
 
+/*
+**
+**
+*/
+//Rutas de tablas de pendientes MEDCOL 3
+
+Route::get('medcol3/pendientes', 'Medcol3\PendienteApiMedcol3Controller@index')->name('medcol3.pendientes')->middleware('verified');
+Route::get('medcol3/porentregar', 'Medcol3\PendienteApiMedcol3Controller@porentregar')->name('medcol3.porentregar')->middleware('verified');
+Route::get('medcol3/entregados', 'Medcol3\PendienteApiMedcol3Controller@entregados')->name('medcol3.entregados')->middleware('verified');
+Route::get('medcol3/desabastecidos', 'Medcol3\PendienteApiMedcol3Controller@getDesabastecidos')->name('medcol3.desabastecidos')->middleware('verified');
+Route::get('medcol3/anulados', 'Medcol3\PendienteApiMedcol3Controller@getAnulados')->name('medcol3.anulados')->middleware('verified');
+Route::get('medcol3/guardar_observacion', 'Medcol3\PendienteApiMedcol3Controller@guardar')->name('medcol3.guardar_observacion')->middleware('verified');
+
+Route::get('medcol3/editpendientes/{id}', 'Medcol3\PendienteApiMedcol3Controller@edit')->name('medcol3.pendientes-edit')->middleware('verified');
+Route::get('medcol3/showpendientes/{id}', 'Medcol3\PendienteApiMedcol3Controller@show')->name('medcol3.pendientes-show')->middleware('verified');
+Route::put('medcol3/pendientes/{id}', 'Medcol3\PendienteApiMedcol3Controller@update')->name('medcol3.actualizar_pendientes')->middleware('verified');
+Route::post('medcol3/pendientes', 'Medcol3\PendienteApiMedcol3Controller@saveObs')->name('medcol3.crear_observacion')->middleware('verified');
+
+Route::get('medcol3/observaciones', 'Medcol3\PendienteApiMedcol3Controller@getObservaciones')->name('medcol3.observaciones')->middleware('verified');
+
+Route::get('medcol3/syncapi', 'Medcol3\PendienteApiMedcol3Controller@createapendientespi')->name('medcol3.syncapi')->middleware('verified');
+
+Route::get('medcol3/informe', 'Medcol3\PendienteApiMedcol3Controller@informes')->name('medcol3.informe')->middleware('verified');

@@ -202,7 +202,7 @@
 
 
                                 <a href="{{ route('pendientes') }}" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-share-square"></i> Link San fernando <span
+                                    <i class="fas fa-share-square"></i> Gestionar Pendientes San Fernando <span
                                         class="badge badge-pill badge-primary pull-right">Salud Mental</span>
                                 </a>
 
@@ -213,8 +213,8 @@
                         <div class="card-body text-center">
                             <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Limonar</div>
                             <div class="list-group">
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <i class="far fa-share-square"></i> Medcol Limonar <span
+                                <a href="{{ route('medcol3.pendientes') }}" class="list-group-item list-group-item-action">
+                                    <i class="far fa-share-square"></i> Gestionar Pendientes Limonar <span
                                         class="badge badge-pill badge-primary pull-right">Dolor</span>
                                 </a>
                             </div>
