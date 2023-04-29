@@ -41,6 +41,8 @@ class CreatePendienteApiMedcol3sTable extends Migration
             $table->dateTime('fecha_impresion')->nullable();
             $table->dateTime('fecha_entrega')->nullable();
             $table->dateTime('fecha_anulado')->nullable();
+            $table->string('doc_entrega')->nullable();
+            $table->string('factura_entrega')->nullable();
             $table->timestamps();
         });
     }

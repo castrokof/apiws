@@ -66,8 +66,6 @@ class PendienteApiController extends Controller
     public function createapendientespi(Request $request)
     {
 
-
-
         $email = 'sistemas.saludtempus@gmail.com'; // Auth::user()->email
         $password = '12345678';
 
@@ -597,7 +595,9 @@ class PendienteApiController extends Controller
                     'cums' => trim($factura['cums']),
                     'cantidad' => trim($factura['cantidad']),
                     'cajero' => trim($factura['cajero']),
-                    'orden_externa' => trim($factura['ORDEN_EXTERNA'])
+                    'orden_externa' => trim($factura['ORDEN_EXTERNA']),
+                    'doc_entrega' => trim($factura['documento']),
+                    'factura_entrega' => trim($factura['factura'])
                 ]);
 
                 $contador1++;
@@ -611,10 +611,16 @@ class PendienteApiController extends Controller
                 $join->on('pendientesapi.orden_externa', '=', 'entregadosapi.orden_externa')
                     ->on('pendientesapi.codigo', '=', 'entregadosapi.codigo');
             })
-            ->select('pendientesapi.id as idd', 'entregadosapi.orden_externa', 'entregadosapi.codigo', 'entregadosapi.cantdpx', 'entregadosapi.fecha_factura')
+            ->select(
+                'pendientesapi.id as idd',
+                'entregadosapi.orden_externa',
+                'entregadosapi.codigo',
+                'entregadosapi.cantdpx',
+                'entregadosapi.fecha_factura',
+                'entregadosapi.documento',
+                'entregadosapi.factura'
+            )
             ->get();
-
-
 
 
         foreach ($pendientes as $key => $value) {
@@ -640,6 +646,8 @@ class PendienteApiController extends Controller
                         'pendientesapi.fecha_entrega' =>  $value->fecha_factura,
                         'pendientesapi.estado' => 'ENTREGADO',
                         'pendientesapi.cantdpx' => $value->cantdpx,
+                        'pendientesapi.doc_entrega' => $value->documento,
+                        'pendientesapi.factura_entrega' => $value->factura,
                         'pendientesapi.usuario' => 'RFAST',
                         'pendientesapi.updated_at' => now()
                     ]);
@@ -728,7 +736,9 @@ class PendienteApiController extends Controller
                     'cums' => trim($factura['cums']),
                     'cantidad' => trim($factura['cantidad']),
                     'cajero' => trim($factura['cajero']),
-                    'orden_externa' => trim($factura['ORDEN_EXTERNA'])
+                    'orden_externa' => trim($factura['ORDEN_EXTERNA']),
+                    'doc_entrega' => trim($factura['documento']),
+                    'factura_entrega' => trim($factura['factura'])
                 ]);
 
                 $contador1++;
@@ -742,11 +752,16 @@ class PendienteApiController extends Controller
                 $join->on('pendientesapi.orden_externa', '=', 'entregadosapi.orden_externa')
                     ->on('pendientesapi.codigo', '=', 'entregadosapi.codigo');
             })
-            ->select('pendientesapi.id as idd', 'entregadosapi.orden_externa', 'entregadosapi.codigo', 'entregadosapi.cantdpx', 'entregadosapi.fecha_factura')
+            ->select(
+                'pendientesapi.id as idd',
+                'entregadosapi.orden_externa',
+                'entregadosapi.codigo',
+                'entregadosapi.cantdpx',
+                'entregadosapi.fecha_factura',
+                'entregadosapi.documento',
+                'entregadosapi.factura'
+            )
             ->get();
-
-
-
 
         foreach ($pendientes as $key => $value) {
 
@@ -771,13 +786,14 @@ class PendienteApiController extends Controller
                         'pendientesapi.fecha_entrega' =>  $value->fecha_factura,
                         'pendientesapi.estado' => 'ENTREGADO',
                         'pendientesapi.cantdpx' => $value->cantdpx,
+                        'pendientesapi.doc_entrega' => $value->documento,
+                        'pendientesapi.factura_entrega' => $value->factura,
                         'pendientesapi.usuario' => 'RFAST',
                         'pendientesapi.updated_at' => now()
                     ]);
 
                 $contadorei++;
             }
-
 
 
             // Guardar observación en la tabla ObservacionesApi

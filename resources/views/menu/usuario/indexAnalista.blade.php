@@ -12,9 +12,6 @@ Pendientes Medcol San Fernando
 <link href="{{asset("assets/lte/plugins/fontawesome-free/css/all.min.css")}}" rel="stylesheet" type="text/css" />
 
 
-
-
-
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.css" rel="stylesheet" type="text/css" />
 
@@ -337,11 +334,14 @@ Pendientes Medcol San Fernando
             var enviar_fecha_entrega = $('#enviar_fecha_entrega');
             var enviar_fecha_impresion = $('#enviar_fecha_impresion');
             var enviar_fecha_anulado = $('#enviar_fecha_anulado');
+            var enviar_factura_entrega = $('#enviar_factura_entrega');
             var input1 = $('#fecha_entrega');
             var input2 = $('#fecha_impresion');
             var anulado = $('#fecha_anulado');
             var input3 = $('#cantord');
             var input4 = $('#cantdpx');
+            var input5 = $('#doc_entrega');
+            var input6 = $('#factura_entrega');
 
             if (estado_texto == "TRAMITADO") {
                 futuro2.show();
@@ -353,10 +353,14 @@ Pendientes Medcol San Fernando
                 enviar_fecha_impresion.val('true');
                 enviar_fecha_entrega.val('false');
                 enviar_fecha_anulado.val('false');
+                enviar_factura_entrega.val('false');
 
                 //Limpia los inputs de las fechas seleccionadas cuando esrtan en show luego pasan a hide
                 input1.val('');
                 anulado.val('');
+                input4.val('0');
+                input5.val('');
+                input6.val('');
 
 
             } else if (estado_texto == "ENTREGADO") {
@@ -369,10 +373,12 @@ Pendientes Medcol San Fernando
                 enviar_fecha_entrega.val('true');
                 enviar_fecha_impresion.val('false');
                 enviar_fecha_anulado.val('false');
+                enviar_factura_entrega.val('true');
 
                 //Limpia los inputs de las fechas seleccionadas cuando esrtan en show luego pasan a hide
                 input2.val('');
                 anulado.val('');
+                input5.val('MED');
 
                 var cant_entregada = parseInt(input3.val());
                 input4.val(cant_entregada);
@@ -387,10 +393,14 @@ Pendientes Medcol San Fernando
                 enviar_fecha_anulado.val('true');
                 enviar_fecha_entrega.val('false');
                 enviar_fecha_impresion.val('false');
+                enviar_factura_entrega.val('false');
 
                 //Limpia los inputs de las fechas seleccionadas cuando esrtan en show luego pasan a hide
                 input1.val('');
                 input2.val('');
+                input4.val('0');
+                input5.val('');
+                input6.val('');
 
 
             } else if (estado_texto == "PENDIENTE") {
@@ -403,10 +413,15 @@ Pendientes Medcol San Fernando
                 enviar_fecha_entrega.val('false');
                 enviar_fecha_impresion.val('false');
                 enviar_fecha_anulado.val('false');
+                enviar_factura_entrega.val('false');
 
                 input1.val('');
                 input2.val('');
                 anulado.val('');
+                input4.val('0');
+                input5.val('');
+                input6.val('');
+
             } else {
                 futuro1.hide();
                 futuro2.hide();
@@ -415,9 +430,13 @@ Pendientes Medcol San Fernando
                 enviar_fecha_entrega.val('false');
                 enviar_fecha_impresion.val('false');
                 enviar_fecha_anulado.val('false');
+                enviar_factura_entrega.val('false');
                 input1.val('');
                 input2.val('');
                 anulado.val('');
+                input4.val('0');
+                input5.val('');
+                input6.val('');
             }
         }
 
@@ -449,705 +468,760 @@ Pendientes Medcol San Fernando
             });
         }
 
+        $(function() {
+            // Se llama a la función correspondiente al tab activo al cargar la página
+            var activeTab = $(".nav-tabs .active");
+            var activeTabId = activeTab.attr("id");
+            callFunction(activeTabId);
 
-
-        // Funcion para pintar con data table la pestaña Lista de pendientes
-        var datatable =
-            $('#pendientes').DataTable({
-                language: idioma_espanol,
-                processing: true,
-                lengthMenu: [
-                    [25, 50, 100, 500, -1],
-                    [25, 50, 100, 500, "Mostrar Todo"]
-                ],
-                processing: true,
-                serverSide: true,
-                aaSorting: [
-                    [1, "desc"]
-                ],
-                ajax: {
-                    url: "{{route('pendientes')}}",
-                },
-                columns: [{
-                        data: 'action',
-                        orderable: false
-                    },
-                    {
-                        data: 'id'
-                    },
-                    {
-                        data: 'Tipodocum'
-                    },
-                    {
-                        data: 'cantdpx'
-                    },
-                    {
-                        data: 'cantord'
-                    },
-                    {
-                        data: 'fecha_factura'
-                    },
-                    {
-                        data: 'fecha'
-                    },
-                    {
-                        data: 'historia'
-                    },
-                    {
-                        data: 'apellido1'
-                    },
-                    {
-                        data: 'apellido2'
-                    },
-                    {
-                        data: 'nombre1'
-                    },
-                    {
-                        data: 'nombre2'
-                    },
-                    {
-                        data: 'cantedad'
-                    },
-                    {
-                        data: 'direcres'
-                    },
-                    {
-                        data: 'telefres'
-                    },
-                    {
-                        data: 'documento'
-                    },
-                    {
-                        data: 'factura'
-                    },
-                    {
-                        data: 'codigo'
-                    },
-                    {
-                        data: 'nombre'
-                    },
-                    {
-                        data: 'cums'
-                    },
-                    {
-                        data: 'cantidad'
-                    },
-                    {
-                        data: 'cajero'
-                    },
-                    {
-                        data: 'usuario'
-                    },
-                    {
-                        data: 'estado'
-                    },
-                    {
-                        data: 'fecha_impresion'
-                    },
-                    {
-                        data: 'fecha_entrega'
-                    }
-                ],
-
-                //Botones----------------------------------------------------------------------
-
-                "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
-
-                buttons: [{
-
-                        extend: 'copyHtml5',
-                        titleAttr: 'Copiar Registros',
-                        title: "Control de horas",
-                        className: "btn  btn-outline-primary btn-sm"
-
-
-                    },
-                    {
-
-                        extend: 'excelHtml5',
-                        titleAttr: 'Exportar Excel',
-                        title: "Control de horas",
-                        className: "btn  btn-outline-success btn-sm"
-
-
-                    },
-                    {
-
-                        extend: 'csvHtml5',
-                        titleAttr: 'Exportar csv',
-                        className: "btn  btn-outline-warning btn-sm"
-
-                    },
-                    {
-
-                        extend: 'pdfHtml5',
-                        titleAttr: 'Exportar pdf',
-                        className: "btn  btn-outline-secondary btn-sm"
-
-
-                    }
-                ],
-
+            // Se llama a la función correspondiente al tab seleccionado al cambiar de tab
+            $('a[data-toggle="pill"]').on("shown.bs.tab", function(e) {
+                var target = $(e.target);
+                var targetId = target.attr("id");
+                callFunction(targetId);
             });
 
+            function callFunction(tabId) {
+                if (tabId === "custom-tabs-one-datos-del-paciente-tab") {
+                    // Llamar a la función correspondiente al tab "Pendientes"
+                    /* console.log("Pendientes"); */
 
-        // Funcion para pintar con data table la pestaña de citas agendadas
-        var datatable =
-            $('#porentregar').DataTable({
-                language: idioma_espanol,
-                processing: true,
-                lengthMenu: [
-                    [25, 50, 100, 500, -1],
-                    [25, 50, 100, 500, "Mostrar Todo"]
-                ],
-                processing: true,
-                serverSide: true,
-                aaSorting: [
-                    [1, "desc"]
-                ],
-                ajax: {
-                    url: "{{route('porentregar')}}",
-                },
-                columns: [{
-                        data: 'action',
-                        orderable: false
-                    },
-                    {
-                        data: 'id'
-                    },
-                    {
-                        data: 'Tipodocum'
-                    },
-                    {
-                        data: 'cantdpx'
-                    },
-                    {
-                        data: 'cantord'
-                    },
-                    {
-                        data: 'fecha_factura'
-                    },
-                    {
-                        data: 'fecha'
-                    },
-                    {
-                        data: 'historia'
-                    },
-                    {
-                        data: 'apellido1'
-                    },
-                    {
-                        data: 'apellido2'
-                    },
-                    {
-                        data: 'nombre1'
-                    },
-                    {
-                        data: 'nombre2'
-                    },
-                    {
-                        data: 'cantedad'
-                    },
-                    {
-                        data: 'direcres'
-                    },
-                    {
-                        data: 'telefres'
-                    },
-                    {
-                        data: 'documento'
-                    },
-                    {
-                        data: 'factura'
-                    },
-                    {
-                        data: 'codigo'
-                    },
-                    {
-                        data: 'nombre'
-                    },
-                    {
-                        data: 'cums'
-                    },
-                    {
-                        data: 'cantidad'
-                    },
-                    {
-                        data: 'cajero'
-                    },
-                    {
-                        data: 'usuario'
-                    },
-                    {
-                        data: 'estado'
-                    },
-                    {
-                        data: 'fecha_impresion'
-                    },
-                    {
-                        data: 'fecha_entrega'
+                    // Destruir la tabla existente
+                    if ($.fn.DataTable.isDataTable("#pendientes")) {
+                        $("#pendientes").DataTable().destroy();
                     }
-                ],
+                    // Funcion para pintar con data table la pestaña Lista de pendientes
+                    var datatable =
+                        $('#pendientes').DataTable({
+                            language: idioma_espanol,
+                            processing: true,
+                            lengthMenu: [
+                                [25, 50, 100, 500, -1],
+                                [25, 50, 100, 500, "Mostrar Todo"]
+                            ],
+                            processing: true,
+                            serverSide: true,
+                            aaSorting: [
+                                [1, "desc"]
+                            ],
+                            ajax: {
+                                url: "{{route('pendientes')}}",
+                            },
+                            columns: [{
+                                    data: 'action',
+                                    orderable: false
+                                },
+                                {
+                                    data: 'id'
+                                },
+                                {
+                                    data: 'Tipodocum'
+                                },
+                                {
+                                    data: 'cantdpx'
+                                },
+                                {
+                                    data: 'cantord'
+                                },
+                                {
+                                    data: 'fecha_factura'
+                                },
+                                {
+                                    data: 'fecha'
+                                },
+                                {
+                                    data: 'historia'
+                                },
+                                {
+                                    data: 'apellido1'
+                                },
+                                {
+                                    data: 'apellido2'
+                                },
+                                {
+                                    data: 'nombre1'
+                                },
+                                {
+                                    data: 'nombre2'
+                                },
+                                {
+                                    data: 'cantedad'
+                                },
+                                {
+                                    data: 'direcres'
+                                },
+                                {
+                                    data: 'telefres'
+                                },
+                                {
+                                    data: 'documento'
+                                },
+                                {
+                                    data: 'factura'
+                                },
+                                {
+                                    data: 'codigo'
+                                },
+                                {
+                                    data: 'nombre'
+                                },
+                                {
+                                    data: 'cums'
+                                },
+                                {
+                                    data: 'cantidad'
+                                },
+                                {
+                                    data: 'cajero'
+                                },
+                                {
+                                    data: 'usuario'
+                                },
+                                {
+                                    data: 'estado'
+                                },
+                                {
+                                    data: 'fecha_impresion'
+                                },
+                                {
+                                    data: 'fecha_entrega'
+                                }
+                            ],
 
-                //Botones----------------------------------------------------------------------
+                            //Botones----------------------------------------------------------------------
 
-                "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+                            "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
 
-                buttons: [{
+                            buttons: [{
 
-                        extend: 'copyHtml5',
-                        titleAttr: 'Copiar Registros',
-                        title: "Control de horas",
-                        className: "btn  btn-outline-primary btn-sm"
-
-
-                    },
-                    {
-
-                        extend: 'excelHtml5',
-                        titleAttr: 'Exportar Excel',
-                        title: "Control de horas",
-                        className: "btn  btn-outline-success btn-sm"
+                                    extend: 'copyHtml5',
+                                    titleAttr: 'Copiar Registros',
+                                    title: "Control de horas",
+                                    className: "btn  btn-outline-primary btn-sm"
 
 
-                    },
-                    {
+                                },
+                                {
 
-                        extend: 'csvHtml5',
-                        titleAttr: 'Exportar csv',
-                        className: "btn  btn-outline-warning btn-sm"
-
-                    },
-                    {
-
-                        extend: 'pdfHtml5',
-                        titleAttr: 'Exportar pdf',
-                        className: "btn  btn-outline-secondary btn-sm"
+                                    extend: 'excelHtml5',
+                                    titleAttr: 'Exportar Excel',
+                                    title: "Control de horas",
+                                    className: "btn  btn-outline-success btn-sm"
 
 
+                                },
+                                {
+
+                                    extend: 'csvHtml5',
+                                    titleAttr: 'Exportar csv',
+                                    className: "btn  btn-outline-warning btn-sm"
+
+                                },
+                                {
+
+                                    extend: 'pdfHtml5',
+                                    titleAttr: 'Exportar pdf',
+                                    className: "btn  btn-outline-secondary btn-sm"
+
+
+                                }
+                            ],
+
+                        });
+                } else if (tabId === "custom-tabs-one-datos-agendados-tab") {
+                    // Llamar a la función correspondiente al tab "En Tramite"
+                    /* console.log("Pagos Parciales"); */
+
+                    // Destruir la tabla existente
+                    if ($.fn.DataTable.isDataTable("#porentregar")) {
+                        $("#porentregar").DataTable().destroy();
                     }
-                ],
+                    // Funcion para pintar con data table la pestaña de citas agendadas
+                    var datatable =
+                        $('#porentregar').DataTable({
+                            language: idioma_espanol,
+                            processing: true,
+                            lengthMenu: [
+                                [25, 50, 100, 500, -1],
+                                [25, 50, 100, 500, "Mostrar Todo"]
+                            ],
+                            processing: true,
+                            serverSide: true,
+                            aaSorting: [
+                                [1, "desc"]
+                            ],
+                            ajax: {
+                                url: "{{route('porentregar')}}",
+                            },
+                            columns: [{
+                                    data: 'action',
+                                    orderable: false
+                                },
+                                {
+                                    data: 'id'
+                                },
+                                {
+                                    data: 'Tipodocum'
+                                },
+                                {
+                                    data: 'cantdpx'
+                                },
+                                {
+                                    data: 'cantord'
+                                },
+                                {
+                                    data: 'fecha_factura'
+                                },
+                                {
+                                    data: 'fecha'
+                                },
+                                {
+                                    data: 'historia'
+                                },
+                                {
+                                    data: 'apellido1'
+                                },
+                                {
+                                    data: 'apellido2'
+                                },
+                                {
+                                    data: 'nombre1'
+                                },
+                                {
+                                    data: 'nombre2'
+                                },
+                                {
+                                    data: 'cantedad'
+                                },
+                                {
+                                    data: 'direcres'
+                                },
+                                {
+                                    data: 'telefres'
+                                },
+                                {
+                                    data: 'documento'
+                                },
+                                {
+                                    data: 'factura'
+                                },
+                                {
+                                    data: 'codigo'
+                                },
+                                {
+                                    data: 'nombre'
+                                },
+                                {
+                                    data: 'cums'
+                                },
+                                {
+                                    data: 'cantidad'
+                                },
+                                {
+                                    data: 'cajero'
+                                },
+                                {
+                                    data: 'usuario'
+                                },
+                                {
+                                    data: 'estado'
+                                },
+                                {
+                                    data: 'fecha_impresion'
+                                },
+                                {
+                                    data: 'fecha_entrega'
+                                }
+                            ],
 
-            });
+                            //Botones----------------------------------------------------------------------
 
-        // Funcion para pintar con data table la pestaña de seguimiento
-        var datatable =
-            $('#entregados').DataTable({
-                language: idioma_espanol,
-                processing: true,
-                lengthMenu: [
-                    [25, 50, 100, 500, -1],
-                    [25, 50, 100, 500, "Mostrar Todo"]
-                ],
-                processing: true,
-                serverSide: true,
-                aaSorting: [
-                    [1, "desc"]
-                ],
-                ajax: {
-                    url: "{{route('entregados')}}",
-                },
-                columns: [{
-                        data: 'action',
-                        orderable: false
-                    },
-                    {
-                        data: 'id'
-                    },
-                    {
-                        data: 'Tipodocum'
-                    },
-                    {
-                        data: 'cantdpx'
-                    },
-                    {
-                        data: 'cantord'
-                    },
-                    {
-                        data: 'fecha_factura'
-                    },
-                    {
-                        data: 'fecha'
-                    },
-                    {
-                        data: 'historia'
-                    },
-                    {
-                        data: 'apellido1'
-                    },
-                    {
-                        data: 'apellido2'
-                    },
-                    {
-                        data: 'nombre1'
-                    },
-                    {
-                        data: 'nombre2'
-                    },
-                    {
-                        data: 'cantedad'
-                    },
-                    {
-                        data: 'direcres'
-                    },
-                    {
-                        data: 'telefres'
-                    },
-                    {
-                        data: 'documento'
-                    },
-                    {
-                        data: 'factura'
-                    },
-                    {
-                        data: 'codigo'
-                    },
-                    {
-                        data: 'nombre'
-                    },
-                    {
-                        data: 'cums'
-                    },
-                    {
-                        data: 'cantidad'
-                    },
-                    {
-                        data: 'cajero'
-                    },
-                    {
-                        data: 'usuario'
-                    },
-                    {
-                        data: 'estado'
-                    },
-                    {
-                        data: 'fecha_impresion'
-                    },
-                    {
-                        data: 'fecha_entrega'
+                            "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+
+                            buttons: [{
+
+                                    extend: 'copyHtml5',
+                                    titleAttr: 'Copiar Registros',
+                                    title: "Control de horas",
+                                    className: "btn  btn-outline-primary btn-sm"
+
+
+                                },
+                                {
+
+                                    extend: 'excelHtml5',
+                                    titleAttr: 'Exportar Excel',
+                                    title: "Control de horas",
+                                    className: "btn  btn-outline-success btn-sm"
+
+
+                                },
+                                {
+
+                                    extend: 'csvHtml5',
+                                    titleAttr: 'Exportar csv',
+                                    className: "btn  btn-outline-warning btn-sm"
+
+                                },
+                                {
+
+                                    extend: 'pdfHtml5',
+                                    titleAttr: 'Exportar pdf',
+                                    className: "btn  btn-outline-secondary btn-sm"
+
+
+                                }
+                            ],
+
+                        });
+
+
+                } else if (tabId === "custom-tabs-one-datos-seguimiento-tab") {
+                    // Llamar a la función correspondiente al tab "En Tramite"
+                    /* console.log("Pagos Parciales"); */
+
+                    // Destruir la tabla existente
+                    if ($.fn.DataTable.isDataTable("#entregados")) {
+                        $("#entregados").DataTable().destroy();
                     }
-                ],
+                    // Funcion para pintar con data table la pestaña de seguimiento
+                    var datatable =
+                        $('#entregados').DataTable({
+                            language: idioma_espanol,
+                            processing: true,
+                            lengthMenu: [
+                                [25, 50, 100, 500, -1],
+                                [25, 50, 100, 500, "Mostrar Todo"]
+                            ],
+                            processing: true,
+                            serverSide: true,
+                            aaSorting: [
+                                [1, "desc"]
+                            ],
+                            ajax: {
+                                url: "{{route('entregados')}}",
+                            },
+                            columns: [{
+                                    data: 'action',
+                                    orderable: false
+                                },
+                                {
+                                    data: 'id'
+                                },
+                                {
+                                    data: 'Tipodocum'
+                                },
+                                {
+                                    data: 'cantdpx'
+                                },
+                                {
+                                    data: 'cantord'
+                                },
+                                {
+                                    data: 'fecha_factura'
+                                },
+                                {
+                                    data: 'fecha'
+                                },
+                                {
+                                    data: 'historia'
+                                },
+                                {
+                                    data: 'apellido1'
+                                },
+                                {
+                                    data: 'apellido2'
+                                },
+                                {
+                                    data: 'nombre1'
+                                },
+                                {
+                                    data: 'nombre2'
+                                },
+                                {
+                                    data: 'cantedad'
+                                },
+                                {
+                                    data: 'direcres'
+                                },
+                                {
+                                    data: 'telefres'
+                                },
+                                {
+                                    data: 'documento'
+                                },
+                                {
+                                    data: 'factura'
+                                },
+                                {
+                                    data: 'codigo'
+                                },
+                                {
+                                    data: 'nombre'
+                                },
+                                {
+                                    data: 'cums'
+                                },
+                                {
+                                    data: 'cantidad'
+                                },
+                                {
+                                    data: 'cajero'
+                                },
+                                {
+                                    data: 'usuario'
+                                },
+                                {
+                                    data: 'estado'
+                                },
+                                {
+                                    data: 'fecha_impresion'
+                                },
+                                {
+                                    data: 'fecha_entrega'
+                                }
+                            ],
 
-                //Botones----------------------------------------------------------------------
+                            //Botones----------------------------------------------------------------------
 
-                "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+                            "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
 
-                buttons: [{
+                            buttons: [{
 
-                        extend: 'copyHtml5',
-                        titleAttr: 'Copiar Registros',
-                        title: "Control de horas",
-                        className: "btn  btn-outline-primary btn-sm"
-
-
-                    },
-                    {
-
-                        extend: 'excelHtml5',
-                        titleAttr: 'Exportar Excel',
-                        title: "Control de horas",
-                        className: "btn  btn-outline-success btn-sm"
+                                    extend: 'copyHtml5',
+                                    titleAttr: 'Copiar Registros',
+                                    title: "Control de horas",
+                                    className: "btn  btn-outline-primary btn-sm"
 
 
-                    },
-                    {
+                                },
+                                {
 
-                        extend: 'csvHtml5',
-                        titleAttr: 'Exportar csv',
-                        className: "btn  btn-outline-warning btn-sm"
-
-                    },
-                    {
-
-                        extend: 'pdfHtml5',
-                        titleAttr: 'Exportar pdf',
-                        className: "btn  btn-outline-secondary btn-sm"
+                                    extend: 'excelHtml5',
+                                    titleAttr: 'Exportar Excel',
+                                    title: "Control de horas",
+                                    className: "btn  btn-outline-success btn-sm"
 
 
+                                },
+                                {
+
+                                    extend: 'csvHtml5',
+                                    titleAttr: 'Exportar csv',
+                                    className: "btn  btn-outline-warning btn-sm"
+
+                                },
+                                {
+
+                                    extend: 'pdfHtml5',
+                                    titleAttr: 'Exportar pdf',
+                                    className: "btn  btn-outline-secondary btn-sm"
+
+
+                                }
+                            ],
+
+                        });
+
+                } else if (tabId === "custom-tabs-one-datos-desabastecido-tab") {
+                    // Llamar a la función correspondiente al tab "En Tramite"
+                    /* console.log("Pagos Parciales"); */
+
+                    // Destruir la tabla existente
+                    if ($.fn.DataTable.isDataTable("#tdesabastecidos")) {
+                        $("#tdesabastecidos").DataTable().destroy();
                     }
-                ],
+                    // Funcion para pintar con data table la pestaña Lista de pendientes desabastecidos
+                    var datatable =
+                        $('#tdesabastecidos').DataTable({
+                            language: idioma_espanol,
+                            processing: true,
+                            lengthMenu: [
+                                [25, 50, 100, 500, -1],
+                                [25, 50, 100, 500, "Mostrar Todo"]
+                            ],
+                            processing: true,
+                            serverSide: true,
+                            aaSorting: [
+                                [1, "desc"]
+                            ],
+                            ajax: {
+                                url: "{{route('desabastecidos')}}",
+                            },
+                            columns: [{
+                                    data: 'action',
+                                    orderable: false
+                                },
+                                {
+                                    data: 'id'
+                                },
+                                {
+                                    data: 'Tipodocum'
+                                },
+                                {
+                                    data: 'cantdpx'
+                                },
+                                {
+                                    data: 'cantord'
+                                },
+                                {
+                                    data: 'fecha_factura'
+                                },
+                                {
+                                    data: 'fecha'
+                                },
+                                {
+                                    data: 'historia'
+                                },
+                                {
+                                    data: 'apellido1'
+                                },
+                                {
+                                    data: 'apellido2'
+                                },
+                                {
+                                    data: 'nombre1'
+                                },
+                                {
+                                    data: 'nombre2'
+                                },
+                                {
+                                    data: 'cantedad'
+                                },
+                                {
+                                    data: 'direcres'
+                                },
+                                {
+                                    data: 'telefres'
+                                },
+                                {
+                                    data: 'documento'
+                                },
+                                {
+                                    data: 'factura'
+                                },
+                                {
+                                    data: 'codigo'
+                                },
+                                {
+                                    data: 'nombre'
+                                },
+                                {
+                                    data: 'cums'
+                                },
+                                {
+                                    data: 'cantidad'
+                                },
+                                {
+                                    data: 'cajero'
+                                },
+                                {
+                                    data: 'usuario'
+                                },
+                                {
+                                    data: 'estado'
+                                },
+                                {
+                                    data: 'fecha_impresion'
+                                },
+                                {
+                                    data: 'fecha_entrega'
+                                }
+                            ],
 
-            });
+                            //Botones----------------------------------------------------------------------
 
-        // Funcion para pintar con data table la pestaña Lista de pendientes desabastecidos
-        var datatable =
-            $('#tdesabastecidos').DataTable({
-                language: idioma_espanol,
-                processing: true,
-                lengthMenu: [
-                    [25, 50, 100, 500, -1],
-                    [25, 50, 100, 500, "Mostrar Todo"]
-                ],
-                processing: true,
-                serverSide: true,
-                aaSorting: [
-                    [1, "desc"]
-                ],
-                ajax: {
-                    url: "{{route('desabastecidos')}}",
-                },
-                columns: [{
-                        data: 'action',
-                        orderable: false
-                    },
-                    {
-                        data: 'id'
-                    },
-                    {
-                        data: 'Tipodocum'
-                    },
-                    {
-                        data: 'cantdpx'
-                    },
-                    {
-                        data: 'cantord'
-                    },
-                    {
-                        data: 'fecha_factura'
-                    },
-                    {
-                        data: 'fecha'
-                    },
-                    {
-                        data: 'historia'
-                    },
-                    {
-                        data: 'apellido1'
-                    },
-                    {
-                        data: 'apellido2'
-                    },
-                    {
-                        data: 'nombre1'
-                    },
-                    {
-                        data: 'nombre2'
-                    },
-                    {
-                        data: 'cantedad'
-                    },
-                    {
-                        data: 'direcres'
-                    },
-                    {
-                        data: 'telefres'
-                    },
-                    {
-                        data: 'documento'
-                    },
-                    {
-                        data: 'factura'
-                    },
-                    {
-                        data: 'codigo'
-                    },
-                    {
-                        data: 'nombre'
-                    },
-                    {
-                        data: 'cums'
-                    },
-                    {
-                        data: 'cantidad'
-                    },
-                    {
-                        data: 'cajero'
-                    },
-                    {
-                        data: 'usuario'
-                    },
-                    {
-                        data: 'estado'
-                    },
-                    {
-                        data: 'fecha_impresion'
-                    },
-                    {
-                        data: 'fecha_entrega'
+                            "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+
+                            buttons: [{
+
+                                    extend: 'copyHtml5',
+                                    titleAttr: 'Copiar Registros',
+                                    title: "Control de horas",
+                                    className: "btn  btn-outline-primary btn-sm"
+
+
+                                },
+                                {
+
+                                    extend: 'excelHtml5',
+                                    titleAttr: 'Exportar Excel',
+                                    title: "Control de horas",
+                                    className: "btn  btn-outline-success btn-sm"
+
+
+                                },
+                                {
+
+                                    extend: 'csvHtml5',
+                                    titleAttr: 'Exportar csv',
+                                    className: "btn  btn-outline-warning btn-sm"
+
+                                },
+                                {
+
+                                    extend: 'pdfHtml5',
+                                    titleAttr: 'Exportar pdf',
+                                    className: "btn  btn-outline-secondary btn-sm"
+
+
+                                }
+                            ],
+
+                        });
+
+                } else if (tabId === "custom-tabs-one-datos-anulado-tab") {
+                    // Llamar a la función correspondiente al tab "En Tramite"
+                    /* console.log("Pagos Parciales"); */
+
+                    // Destruir la tabla existente
+                    if ($.fn.DataTable.isDataTable("#tanulados")) {
+                        $("#tanulados").DataTable().destroy();
                     }
-                ],
+                    // Funcion para pintar con data table la pestaña Lista de pendientes anulados
+                    var datatable =
+                        $('#tanulados').DataTable({
+                            language: idioma_espanol,
+                            processing: true,
+                            lengthMenu: [
+                                [25, 50, 100, 500, -1],
+                                [25, 50, 100, 500, "Mostrar Todo"]
+                            ],
+                            processing: true,
+                            serverSide: true,
+                            aaSorting: [
+                                [1, "desc"]
+                            ],
+                            ajax: {
+                                url: "{{route('anulados')}}",
+                            },
+                            columns: [{
+                                    data: 'action',
+                                    orderable: false
+                                },
+                                {
+                                    data: 'id'
+                                },
+                                {
+                                    data: 'Tipodocum'
+                                },
+                                {
+                                    data: 'cantdpx'
+                                },
+                                {
+                                    data: 'cantord'
+                                },
+                                {
+                                    data: 'fecha_factura'
+                                },
+                                {
+                                    data: 'fecha'
+                                },
+                                {
+                                    data: 'historia'
+                                },
+                                {
+                                    data: 'apellido1'
+                                },
+                                {
+                                    data: 'apellido2'
+                                },
+                                {
+                                    data: 'nombre1'
+                                },
+                                {
+                                    data: 'nombre2'
+                                },
+                                {
+                                    data: 'cantedad'
+                                },
+                                {
+                                    data: 'direcres'
+                                },
+                                {
+                                    data: 'telefres'
+                                },
+                                {
+                                    data: 'documento'
+                                },
+                                {
+                                    data: 'factura'
+                                },
+                                {
+                                    data: 'codigo'
+                                },
+                                {
+                                    data: 'nombre'
+                                },
+                                {
+                                    data: 'cums'
+                                },
+                                {
+                                    data: 'cantidad'
+                                },
+                                {
+                                    data: 'cajero'
+                                },
+                                {
+                                    data: 'usuario'
+                                },
+                                {
+                                    data: 'estado'
+                                },
+                                {
+                                    data: 'fecha_anulado'
+                                },
+                                {
+                                    data: 'fecha_entrega'
+                                }
+                            ],
 
-                //Botones----------------------------------------------------------------------
+                            //Botones----------------------------------------------------------------------
 
-                "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+                            "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
 
-                buttons: [{
+                            buttons: [{
 
-                        extend: 'copyHtml5',
-                        titleAttr: 'Copiar Registros',
-                        title: "Control de horas",
-                        className: "btn  btn-outline-primary btn-sm"
-
-
-                    },
-                    {
-
-                        extend: 'excelHtml5',
-                        titleAttr: 'Exportar Excel',
-                        title: "Control de horas",
-                        className: "btn  btn-outline-success btn-sm"
-
-
-                    },
-                    {
-
-                        extend: 'csvHtml5',
-                        titleAttr: 'Exportar csv',
-                        className: "btn  btn-outline-warning btn-sm"
-
-                    },
-                    {
-
-                        extend: 'pdfHtml5',
-                        titleAttr: 'Exportar pdf',
-                        className: "btn  btn-outline-secondary btn-sm"
-
-
-                    }
-                ],
-
-            });
-
-        // Funcion para pintar con data table la pestaña Lista de pendientes desabastecidos
-        var datatable =
-            $('#tanulados').DataTable({
-                language: idioma_espanol,
-                processing: true,
-                lengthMenu: [
-                    [25, 50, 100, 500, -1],
-                    [25, 50, 100, 500, "Mostrar Todo"]
-                ],
-                processing: true,
-                serverSide: true,
-                aaSorting: [
-                    [1, "desc"]
-                ],
-                ajax: {
-                    url: "{{route('anulados')}}",
-                },
-                columns: [{
-                        data: 'action',
-                        orderable: false
-                    },
-                    {
-                        data: 'id'
-                    },
-                    {
-                        data: 'Tipodocum'
-                    },
-                    {
-                        data: 'cantdpx'
-                    },
-                    {
-                        data: 'cantord'
-                    },
-                    {
-                        data: 'fecha_factura'
-                    },
-                    {
-                        data: 'fecha'
-                    },
-                    {
-                        data: 'historia'
-                    },
-                    {
-                        data: 'apellido1'
-                    },
-                    {
-                        data: 'apellido2'
-                    },
-                    {
-                        data: 'nombre1'
-                    },
-                    {
-                        data: 'nombre2'
-                    },
-                    {
-                        data: 'cantedad'
-                    },
-                    {
-                        data: 'direcres'
-                    },
-                    {
-                        data: 'telefres'
-                    },
-                    {
-                        data: 'documento'
-                    },
-                    {
-                        data: 'factura'
-                    },
-                    {
-                        data: 'codigo'
-                    },
-                    {
-                        data: 'nombre'
-                    },
-                    {
-                        data: 'cums'
-                    },
-                    {
-                        data: 'cantidad'
-                    },
-                    {
-                        data: 'cajero'
-                    },
-                    {
-                        data: 'usuario'
-                    },
-                    {
-                        data: 'estado'
-                    },
-                    {
-                        data: 'fecha_anulado'
-                    },
-                    {
-                        data: 'fecha_entrega'
-                    }
-                ],
-
-                //Botones----------------------------------------------------------------------
-
-                "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
-
-                buttons: [{
-
-                        extend: 'copyHtml5',
-                        titleAttr: 'Copiar Registros',
-                        title: "Control de horas",
-                        className: "btn  btn-outline-primary btn-sm"
+                                    extend: 'copyHtml5',
+                                    titleAttr: 'Copiar Registros',
+                                    title: "Control de horas",
+                                    className: "btn  btn-outline-primary btn-sm"
 
 
-                    },
-                    {
+                                },
+                                {
 
-                        extend: 'excelHtml5',
-                        titleAttr: 'Exportar Excel',
-                        title: "Control de horas",
-                        className: "btn  btn-outline-success btn-sm"
-
-
-                    },
-                    {
-
-                        extend: 'csvHtml5',
-                        titleAttr: 'Exportar csv',
-                        className: "btn  btn-outline-warning btn-sm"
-
-                    },
-                    {
-
-                        extend: 'pdfHtml5',
-                        titleAttr: 'Exportar pdf',
-                        className: "btn  btn-outline-secondary btn-sm"
+                                    extend: 'excelHtml5',
+                                    titleAttr: 'Exportar Excel',
+                                    title: "Control de horas",
+                                    className: "btn  btn-outline-success btn-sm"
 
 
-                    }
-                ],
+                                },
+                                {
 
-            });
+                                    extend: 'csvHtml5',
+                                    titleAttr: 'Exportar csv',
+                                    className: "btn  btn-outline-warning btn-sm"
+
+                                },
+                                {
+
+                                    extend: 'pdfHtml5',
+                                    titleAttr: 'Exportar pdf',
+                                    className: "btn  btn-outline-secondary btn-sm"
 
 
+                                }
+                            ],
+
+                        });
+
+                }
+
+            }
+
+        });
 
 
         //--------------------------------Tabla relacion Observaciones y los documentos pendientes----------------------------//
@@ -1171,8 +1245,7 @@ Pendientes Medcol San Fernando
                         id: nivel_idp2
                     }
                 },
-                columns: [
-                    {
+                columns: [{
                         data: 'id_obs',
                         name: 'id_obs'
                     },
@@ -1559,12 +1632,13 @@ Pendientes Medcol San Fernando
                     $('#pendientes').DataTable().ajax.reload();
                     $('#porentregar').DataTable().ajax.reload();
                     $('#entregados').DataTable().ajax.reload();
+                    $('#tanulados').DataTable().ajax.reload();
+                    $('#tdesabastecidos').DataTable().ajax.reload();
 
                     // for (var count = 0; count < data.length; count++) {
                     //     console.log(count);
                     //     Apiws.notificaciones(data[count].respuesta, data[count].titulo, data[count].icon, data[count].position);
                     //      }
-
 
                     $.each(data, function(i, item) {
                         Apiws.notificaciones(item.respuesta, item.titulo, item.icon, item.position);
@@ -1578,8 +1652,6 @@ Pendientes Medcol San Fernando
                 }
             });
         }
-
-
 
 
 

@@ -37,7 +37,10 @@ class EntregadosApiMedcol3 extends Model
         'estado',
         'fecha_impresion',
         'fecha_entrega',
-        'fecha_anulado'
+        'fecha_anulado',
+        'doc_entrega',
+        'factura_entrega'
+
     ];
 
     protected function serializeDate(DateTimeInterface $date)

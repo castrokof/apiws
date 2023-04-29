@@ -108,7 +108,7 @@
         </div>
         <div id="futuro4" class="col-lg-3" style="display:none;">
             <label for="fecha_anulado" class="col-xs-4 control-label ">Fecha Anulación</label>
-            <input type="date" name="fecha_anulado" id="fecha_anulado" class="form-control" >
+            <input type="date" name="fecha_anulado" id="fecha_anulado" class="form-control">
             <input type="hidden" name="enviar_fecha_anulado" id="enviar_fecha_anulado" value="false">
         </div>
         <div class="col-lg-3">
@@ -125,14 +125,20 @@
     </div>
 </fieldset>
 <div class="form-group row">
-    <div class="col-lg-10 col-md-10 col-xs-10">
+    <div class="col-lg-3">
+        <label for="doc_entrega" class="col-xs-4 control-label requerido">Doc Entrega</label>
+        <input type="text" name="doc_entrega" id="doc_entrega" class="form-control " minlength="6" value="MED" readonly> </br>
+
+        <label for="factura_entrega" class="col-xs-4 control-label requerido">Factura Entrega</label>
+        <input type="text" name="factura_entrega" id="factura_entrega" class="form-control" placeholder="Número Factura Rfast..." >
+        <input type="hidden" name="enviar_factura_entrega" id="enviar_factura_entrega" value="false">
+    </div>
+    <div class="col-lg-6 col-md-6 col-xs-6">
         <label for="observacion" class="col-xs-8 control-label requerido">Observaciones</label>
-        <textarea name="observacion" id="observacion" class="form-control UpperCase" rows="3" placeholder="Ingrese las observaciones ..." required></textarea>
+        <textarea name="observacion" id="observacion" class="form-control UpperCase" rows="5" placeholder="Ingrese las observaciones ..." required></textarea>
     </div>
     <div class="col-lg-2">
         <label for="name" class="col-xs-4 control-label ">Usuario que registro</label>
         <input name="name" id="name" class="form-control" value="{{ Auth::user()->name ?? '' }}" readonly>
     </div>
 </div>
-
-
