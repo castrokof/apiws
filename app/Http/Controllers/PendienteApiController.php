@@ -404,6 +404,11 @@ class PendienteApiController extends Controller
             $rules['fecha_anulado'] = 'required';
         }
 
+        if ($request->input('enviar_factura_entrega') == 'true') {
+            $rules['doc_entrega'] = 'required';
+            $rules['factura_entrega'] = 'required';
+        }
+
         $error = Validator::make($request->all(), $rules);
 
         if ($error->fails()) {
@@ -414,6 +419,8 @@ class PendienteApiController extends Controller
         if (request()->ajax()) {
             $pendientesapi = PendientesApi::findOrFail($id);
             $pendientesapi->fill($request->all());
+            $pendientesapi->doc_entrega = $request->doc_entrega;
+            $pendientesapi->factura_entrega = $request->factura_entrega;
             $pendientesapi->usuario = $request->name;
 
             if ($request->input('enviar_fecha_entrega') == 'true') {

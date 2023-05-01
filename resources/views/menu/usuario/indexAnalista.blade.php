@@ -353,14 +353,13 @@ Pendientes Medcol San Fernando
                 enviar_fecha_impresion.val('true');
                 enviar_fecha_entrega.val('false');
                 enviar_fecha_anulado.val('false');
-                enviar_factura_entrega.val('false');
+                enviar_factura_entrega.val('true');
 
                 //Limpia los inputs de las fechas seleccionadas cuando esrtan en show luego pasan a hide
                 input1.val('');
                 anulado.val('');
                 input4.val('0');
-                input5.val('');
-                input6.val('');
+                input5.val('MED');
 
 
             } else if (estado_texto == "ENTREGADO") {

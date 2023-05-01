@@ -422,6 +422,11 @@ class PendienteApiMedcol3Controller extends Controller
             $rules['fecha_anulado'] = 'required';
         }
 
+        if ($request->input('enviar_factura_entrega') == 'true') {
+            $rules['doc_entrega'] = 'required';
+            $rules['factura_entrega'] = 'required';
+        }
+
         $error = Validator::make($request->all(), $rules);
 
         if ($error->fails()) {
@@ -432,6 +437,8 @@ class PendienteApiMedcol3Controller extends Controller
         if (request()->ajax()) {
             $pendiente_api_medcol3 = PendienteApiMedcol3::findOrFail($id);
             $pendiente_api_medcol3->fill($request->all());
+            $pendiente_api_medcol3->doc_entrega = $request->doc_entrega;
+            $pendiente_api_medcol3->factura_entrega = $request->factura_entrega;
             $pendiente_api_medcol3->usuario = $request->name;
 
             if ($request->input('enviar_fecha_entrega') == 'true') {
@@ -615,7 +622,9 @@ class PendienteApiMedcol3Controller extends Controller
                     'cums' => trim($factura['cums']),
                     'cantidad' => trim($factura['cantidad']),
                     'cajero' => trim($factura['cajero']),
-                    'orden_externa' => trim($factura['ORDEN_EXTERNA'])
+                    'orden_externa' => trim($factura['ORDEN_EXTERNA']),
+                    'doc_entrega' => trim($factura['documento']),
+                    'factura_entrega' => trim($factura['factura'])
                 ]);
 
                 $contador1++;
@@ -629,7 +638,15 @@ class PendienteApiMedcol3Controller extends Controller
                 $join->on('pendiente_api_medcol3.orden_externa', '=', 'entregados_api_medcol3.orden_externa')
                     ->on('pendiente_api_medcol3.codigo', '=', 'entregados_api_medcol3.codigo');
             })
-            ->select('pendiente_api_medcol3.id as idd', 'entregados_api_medcol3.orden_externa', 'entregados_api_medcol3.codigo', 'entregados_api_medcol3.cantdpx', 'entregados_api_medcol3.fecha_factura')
+            ->select(
+                'pendiente_api_medcol3.id as idd',
+                'entregados_api_medcol3.orden_externa',
+                'entregados_api_medcol3.codigo',
+                'entregados_api_medcol3.cantdpx',
+                'entregados_api_medcol3.fecha_factura',
+                'entregados_api_medcol3.documento',
+                'entregados_api_medcol3.factura'
+            )
             ->get();
 
 
@@ -658,6 +675,8 @@ class PendienteApiMedcol3Controller extends Controller
                         'pendiente_api_medcol3.fecha_entrega' =>  $value->fecha_factura,
                         'pendiente_api_medcol3.estado' => 'ENTREGADO',
                         'pendiente_api_medcol3.cantdpx' => $value->cantdpx,
+                        'pendiente_api_medcol3.doc_entrega' => $value->documento,
+                        'pendiente_api_medcol3.factura_entrega' => $value->factura,
                         'pendiente_api_medcol3.usuario' => 'RFAST',
                         'pendiente_api_medcol3.updated_at' => now()
                     ]);
