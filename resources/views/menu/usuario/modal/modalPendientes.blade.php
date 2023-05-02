@@ -22,7 +22,6 @@
                                     <i class="fas fa-times"></i>
                                 </button>
 
-
                             </div>
                         </div>
                         <form id="form-general1" class="form-horizontal">

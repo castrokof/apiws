@@ -129,7 +129,7 @@ class PendienteApiController extends Controller
             $var = $this->createentregadospi(null);
 
             return response()->json([
-                ['respuesta' => $contador . ' Lineas creadas y' . $var . ' Lineas entregadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']
+                ['respuesta' => $contador . ' Lineas creadas y ' . $var . ' Lineas entregadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']
             ]);
         } catch (\Exception $e) {
 
@@ -191,7 +191,7 @@ class PendienteApiController extends Controller
             $var = $this->createentregadospilocal(null);
 
             return response()->json([
-                ['respuesta' => $contador . ' Lineas creadas y' . $var . ' Lineas entregadas', 'titulo' => 'Usando Api Local', 'icon' => 'error', 'position' => 'bottom-left']
+                ['respuesta' => $contador . ' Lineas creadas y ' . $var . ' Lineas entregadas', 'titulo' => 'Usando Api Local', 'icon' => 'error', 'position' => 'bottom-left']
             ]);
 
 

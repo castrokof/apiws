@@ -1373,6 +1373,10 @@ Pendientes Medcol San Fernando
                     /* $('#action_button').addClass('btn-danger') */
                     $('#action_button').val('Edit');
                     $('#action').val('Edit');
+                    $('#modal-edit-pendientes').modal({
+                        backdrop: 'static',
+                        keyboard: false
+                    });
 
                     $('#modal-edit-pendientes').modal('show');
 
