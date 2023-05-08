@@ -86,7 +86,7 @@
         </div>
         <div class="col-lg-2">
             <label for="cantdpx" class="col-xs-4 control-label requerido">Cantidad Entregada</label>
-            <input type="number" name="cantdpx" id="cantdpx" class="form-control" readonly>
+            <input type="number" name="cantdpx" id="cantdpx" class="form-control" >
         </div>
         <div class="col-lg-2">
             <label for="cant_pndt" class="col-xs-4 control-label requerido">Cantidad Pendiente</label>
@@ -127,7 +127,7 @@
 <div class="form-group row">
     <div class="col-lg-3">
         <label for="doc_entrega" class="col-xs-4 control-label requerido">Doc Entrega</label>
-        <input type="text" name="doc_entrega" id="doc_entrega" class="form-control " minlength="6" value="MED" readonly> </br>
+        <input type="text" name="doc_entrega" id="doc_entrega" class="form-control " minlength="6" value="MDC" readonly> </br>
 
         <label for="factura_entrega" class="col-xs-4 control-label requerido">Factura Entrega</label>
         <input type="text" name="factura_entrega" id="factura_entrega" class="form-control" placeholder="Número Factura Rfast..." >

@@ -210,7 +210,7 @@ Pendientes Medcol San Fernando
 
 
         fill_datatable1_resumen();
-
+        tabs();
 
         function fill_datatable1_resumen() {
             $("#detalle").empty();
@@ -467,7 +467,8 @@ Pendientes Medcol San Fernando
             });
         }
 
-        $(function() {
+
+       function tabs() {
             // Se llama a la función correspondiente al tab activo al cargar la página
             var activeTab = $(".nav-tabs .active");
             var activeTabId = activeTab.attr("id");
@@ -1220,7 +1221,7 @@ Pendientes Medcol San Fernando
 
             }
 
-        });
+        }
 
 
         //--------------------------------Tabla relacion Observaciones y los documentos pendientes----------------------------//
@@ -1558,11 +1559,11 @@ Pendientes Medcol San Fernando
                                 $('#modal-edit-pendientes').modal('hide');
                                 /* limpiarModal(); */
                                 $('#pendientes').DataTable().ajax.reload();
-                                $('#tobservaciones').DataTable().ajax.reload();
-                                $('#porentregar').DataTable().ajax.reload();
-                                $('#entregados').DataTable().ajax.reload();
-                                $('#tanulados').DataTable().ajax.reload();
-                                $('#tdesabastecidos').DataTable().ajax.reload();
+                                // $('#tobservaciones').DataTable().ajax.reload();
+                                // $('#porentregar').DataTable().ajax.reload();
+                                // $('#entregados').DataTable().ajax.reload();
+                                // $('#tanulados').DataTable().ajax.reload();
+                                // $('#tdesabastecidos').DataTable().ajax.reload();
                                 Swal.fire({
                                     type: 'success',
                                     title: 'Cuenta por pagar creada correctamente',
@@ -1576,11 +1577,11 @@ Pendientes Medcol San Fernando
                                 $('#form-general1')[0].reset();
                                 $('#modal-edit-pendientes').modal('hide');
                                 $('#pendientes').DataTable().ajax.reload();
-                                $('#tobservaciones').DataTable().ajax.reload();
-                                $('#porentregar').DataTable().ajax.reload();
-                                $('#entregados').DataTable().ajax.reload();
-                                $('#tanulados').DataTable().ajax.reload();
-                                $('#tdesabastecidos').DataTable().ajax.reload();
+                                // $('#tobservaciones').DataTable().ajax.reload();
+                                // $('#porentregar').DataTable().ajax.reload();
+                                // $('#entregados').DataTable().ajax.reload();
+                                // $('#tanulados').DataTable().ajax.reload();
+                                // $('#tdesabastecidos').DataTable().ajax.reload();
                                 Swal.fire({
                                     icon: 'warning',
                                     title: 'Documento pendiente actualizado correctamente',
@@ -1633,21 +1634,16 @@ Pendientes Medcol San Fernando
                 type: 'GET',
                 success: function(data) {
                     $('#pendientes').DataTable().ajax.reload();
-                    $('#porentregar').DataTable().ajax.reload();
-                    $('#entregados').DataTable().ajax.reload();
-                    $('#tanulados').DataTable().ajax.reload();
-                    $('#tdesabastecidos').DataTable().ajax.reload();
 
-                    // for (var count = 0; count < data.length; count++) {
-                    //     console.log(count);
-                    //     Apiws.notificaciones(data[count].respuesta, data[count].titulo, data[count].icon, data[count].position);
-                    //      }
+
+                    fill_datatable1_resumen();
 
                     $.each(data, function(i, item) {
+
                         Apiws.notificaciones(item.respuesta, item.titulo, item.icon, item.position);
 
                     });
-                    fill_datatable1_resumen();
+
 
                 },
                 complete: function() {

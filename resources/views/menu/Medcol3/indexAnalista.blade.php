@@ -440,10 +440,10 @@ Pendientes Medcol Limonar
                 data: data,
                 success: function(data) {
                     $('#pendientes').DataTable().ajax.reload();
-                    $('#porentregar').DataTable().ajax.reload();
-                    $('#entregados').DataTable().ajax.reload();
-                    $('#tanulados').DataTable().ajax.reload();
-                    $('#tdesabastecidos').DataTable().ajax.reload();
+                     $('#porentregar').DataTable().ajax.reload();
+                    // $('#entregados').DataTable().ajax.reload();
+                    // $('#tanulados').DataTable().ajax.reload();
+                    // $('#tdesabastecidos').DataTable().ajax.reload();
                     Manteliviano.notificaciones(data.respuesta, data.titulo, data.icon);
                 }
             });
@@ -1315,7 +1315,7 @@ Pendientes Medcol Limonar
 
 
             $.ajax({
-                url: "medcol3/editpendientes/" + id,
+                url: "editpendientes/" + id,
                 dataType: "json",
                 success: function(data) {
 
@@ -1380,7 +1380,7 @@ Pendientes Medcol Limonar
             var id = $(this).attr('id');
 
             $.ajax({
-                url: "medcol3/showpendientes/" + id,
+                url: "showpendientes/" + id,
                 dataType: "json",
                 success: function(data) {
 
@@ -1481,7 +1481,7 @@ Pendientes Medcol Limonar
 
 
 
-        // Función que envían los datos de la factura al controlador
+        // Función que envían los datos de la factura al controlador para cambiar el estado
         $('#form-general1').on('submit', function(event) {
             event.preventDefault();
             /* guardar($(this).serialize()); */
@@ -1498,7 +1498,7 @@ Pendientes Medcol Limonar
             if ($('#action').val() == 'Edit') {
                 text = "Estás por entregar o despachar medicamentos pendientes"
                 var updateid = $('#hidden_id').val();
-                url = "medcol3/pendientes/" + updateid;
+                url = "pendientes/" + updateid;
                 method = 'put';
             }
 
@@ -1536,11 +1536,11 @@ Pendientes Medcol Limonar
                                 $('#modal-edit-pendientes').modal('hide');
                                 /* limpiarModal(); */
                                 $('#pendientes').DataTable().ajax.reload();
-                                $('#tobservaciones').DataTable().ajax.reload();
-                                $('#porentregar').DataTable().ajax.reload();
-                                $('#entregados').DataTable().ajax.reload();
-                                $('#tanulados').DataTable().ajax.reload();
-                                $('#tdesabastecidos').DataTable().ajax.reload();
+                                // $('#tobservaciones').DataTable().ajax.reload();
+                                // $('#porentregar').DataTable().ajax.reload();
+                                // $('#entregados').DataTable().ajax.reload();
+                                // $('#tanulados').DataTable().ajax.reload();
+                                // $('#tdesabastecidos').DataTable().ajax.reload();
                                 Swal.fire({
                                     type: 'success',
                                     title: 'Cuenta por pagar creada correctamente',
@@ -1554,11 +1554,11 @@ Pendientes Medcol Limonar
                                 $('#form-general1')[0].reset();
                                 $('#modal-edit-pendientes').modal('hide');
                                 $('#pendientes').DataTable().ajax.reload();
-                                $('#tobservaciones').DataTable().ajax.reload();
-                                $('#porentregar').DataTable().ajax.reload();
-                                $('#entregados').DataTable().ajax.reload();
-                                $('#tanulados').DataTable().ajax.reload();
-                                $('#tdesabastecidos').DataTable().ajax.reload();
+                                // $('#tobservaciones').DataTable().ajax.reload();
+                                // $('#porentregar').DataTable().ajax.reload();
+                                // $('#entregados').DataTable().ajax.reload();
+                                // $('#tanulados').DataTable().ajax.reload();
+                                // $('#tdesabastecidos').DataTable().ajax.reload();
                                 Swal.fire({
                                     icon: 'warning',
                                     title: 'Documento pendiente actualizado correctamente',
@@ -1611,8 +1611,8 @@ Pendientes Medcol Limonar
                 type: 'GET',
                 success: function(data) {
                     $('#pendientes').DataTable().ajax.reload();
-                    $('#porentregar').DataTable().ajax.reload();
-                    $('#entregados').DataTable().ajax.reload();
+                    // $('#porentregar').DataTable().ajax.reload();
+                    // $('#entregados').DataTable().ajax.reload();
 
                     // for (var count = 0; count < data.length; count++) {
                     //     console.log(count);
