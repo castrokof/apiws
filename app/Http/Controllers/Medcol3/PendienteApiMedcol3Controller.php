@@ -22,6 +22,7 @@ class PendienteApiMedcol3Controller extends Controller
     public $var1 = null;
     public $var2 = null;
     public $ip = null;
+    public $res = false;
 
     /**
      * Display a listing of the resource.
@@ -32,14 +33,61 @@ class PendienteApiMedcol3Controller extends Controller
     {
 
 
+             return view('menu.Medcol3.indexAnalista');
+    }
+    
+      public function index1(Request $request)
+    {
+        
+        
+        $i = Auth::user()->drogueria;
+        
+        switch ($i) {
+                    case "1":
+                        $drogueria = '';
+                        break;
+                    case "2":
+                        $drogueria = 'SALUD';
+                        break;
+                    case "3":
+                       $drogueria = 'DOLOR';
+                        break;
+                    case "4":
+                        $drogueria = 'PAC';
+                        break;
+                    case "5":
+                        $drogueria = 'EHU1';
+                        break;
+                    case "6":
+                         $drogueria = 'BIO';
+                        break;    
+                }
+        
+        
+        
+        //dd($drogueria);
+
         if ($request->ajax()) {
-            $pendiente_api_medcol3 = PendienteApiMedcol3::where('estado', 'PENDIENTE')
-                ->orWhere('estado', NULL)
+            
+            if(Auth::user()->drogueria == '1'){
+            
+            $pendiente_api_medcol3 = PendienteApiMedcol3::where([['estado', 'PENDIENTE']])
+                 ->orWhere('estado', NULL)
                 /* ->where('orden_externa', 'LIKE', '%MP%') */
                 ->orderBy('id')
                 ->get();
 
-            return DataTables()->of($pendiente_api_medcol3)
+            
+        }else{
+                    $pendiente_api_medcol3 = PendienteApiMedcol3::where([['estado', 'PENDIENTE'],['centroproduccion',$drogueria]])
+                 ->orWhere('estado', NULL)
+                /* ->where('orden_externa', 'LIKE', '%MP%') */
+                ->orderBy('id')
+                ->get();
+
+           
+        }
+         return DataTables()->of($pendiente_api_medcol3)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
                     " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
@@ -52,10 +100,12 @@ class PendienteApiMedcol3Controller extends Controller
                 })
                 ->rawColumns(['action'])
                 ->make(true);
+            
         }
 
         return view('menu.Medcol3.indexAnalista');
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -64,24 +114,20 @@ class PendienteApiMedcol3Controller extends Controller
      */
     public function createapendientespi(Request $request)
     {
-
-
-
-        $email = 'castrokofdev@gmail.com'; // Auth::user()->email
-        $password = '123456';
+          $email = 'castrokofdev@gmail.com'; // Auth::user()->email
+        $password = 'colMed2023**';
 
         try {
 
-
-
-            $response = Http::post("http://190.85.46.245:8000/api/acceso", [
+            $response = Http::post("http://186.115.210.88:8001/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
             ]);
 
             $token = $response->json()["token"];
 
-            $responsefacturas = Http::withToken($token)->get("http://190.85.46.245:8000/api/pendienteapi");
+
+            $responsefacturas = Http::withToken($token)->get("http://186.115.210.88:8001/api/pendientesapi");
 
             $facturassapi = $responsefacturas->json()['data'];
 
@@ -114,7 +160,8 @@ class PendienteApiMedcol3Controller extends Controller
                         'cantidad' => trim($factura['cantidad']),
                         'cajero' => trim($factura['cajero']),
                         'estado' => 'PENDIENTE',
-                        'orden_externa' => trim($factura['ORDEN_EXTERNA'])
+                        'orden_externa' => trim($factura['ORDEN_EXTERNA']),
+                        'centroproduccion' => trim($factura['CENTROPRODUCCION'])
                     ];
 
                     $contador++;
@@ -125,25 +172,27 @@ class PendienteApiMedcol3Controller extends Controller
                 PendienteApiMedcol3::insert($pendientes);
             }
 
-            Http::withToken($token)->get("http://190.85.46.245:8000/api/closeallacceso");
+            Http::withToken($token)->get("http://186.115.210.88:8001/api/closeallacceso");
 
             $var = $this->createentregadospi(null);
-
+            
+            
+            
             return response()->json([
-                ['respuesta' => $contador . ' Lineas creadas y' . $var . ' Lineas entregadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']
+                ['respuesta' => $contador . ' Lineas creadas y ' . $var . ' Lineas entregadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']
             ]);
+
         } catch (\Exception $e) {
 
 
-
-            $response = Http::post("http://192.168.50.127:8000/api/acceso", [
+            $response = Http::post("http://192.168.1.27:8001/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
             ]);
 
-            $token1 = $response->json()["token"];
+            $token = $response->json()["token"];
 
-            $responsefacturas = Http::withToken($token1)->get("http://192.168.50.127:8000/api/pendientesapi");
+            $responsefacturas = Http::withToken($token)->get("http://192.168.1.27:8001/api/pendientesapi");
 
             $facturassapi = $responsefacturas->json()['data'];
 
@@ -176,7 +225,8 @@ class PendienteApiMedcol3Controller extends Controller
                         'cantidad' => trim($factura['cantidad']),
                         'cajero' => trim($factura['cajero']),
                         'estado' => 'PENDIENTE',
-                        'orden_externa' => trim($factura['ORDEN_EXTERNA'])
+                        'orden_externa' => trim($factura['ORDEN_EXTERNA']),
+                        'centroproduccion' => trim($factura['CENTROPRODUCCION'])
                     ];
 
                     $contador++;
@@ -187,19 +237,19 @@ class PendienteApiMedcol3Controller extends Controller
                 PendienteApiMedcol3::insert($pendientes);
             }
 
-            Http::withToken($token1)->get("http://192.168.50.127:8000/api/closeallacceso");
+            Http::withToken($token)->get("http://192.168.7.10:8001/api/closeallacceso");
 
             $var = $this->createentregadospilocal(null);
 
-            return response()->json([
-                ['respuesta' => $contador . ' Lineas creadas y' . $var . ' Lineas entregadas', 'titulo' => 'Usando Api Local', 'icon' => 'error', 'position' => 'bottom-left']
-            ]);
-
-
             // return response()->json([
-            //     ['respuesta' => 'Error: ' . $e->getMessage(), 'titulo' => 'Error', 'icon' => 'error', 'position' => 'bottom-left']
+            //     ['respuesta' => $contador . ' Lineas creadas y ' . $var . ' Lineas entregadas', 'titulo' => 'Usando Api Local', 'icon' => 'error', 'position' => 'bottom-left']
             // ]);
+
+            return response()->json([
+                ['respuesta' => 'Error: ' . $e->getMessage(), 'titulo' => 'Error', 'icon' => 'error', 'position' => 'bottom-left']
+            ]);
         }
+
 
 
     }
@@ -212,11 +262,45 @@ class PendienteApiMedcol3Controller extends Controller
      */
     public function porentregar(Request $request)
     {
-        //
+         $i = Auth::user()->drogueria;
+        
+        switch ($i) {
+                    case "1":
+                        $drogueria = '';
+                        break;
+                    case "2":
+                        $drogueria = 'SALUD';
+                        break;
+                    case "3":
+                       $drogueria = 'DOLOR';
+                        break;
+                    case "4":
+                        $drogueria = 'PAC';
+                        break;
+                    case "5":
+                        $drogueria = 'EHU1';
+                        break;
+                    case "6":
+                         $drogueria = 'BIO';
+                        break;    
+                }
+                
         if ($request->ajax()) {
-            $pendiente_api_medcol3 = PendienteApiMedcol3::where('estado', 'TRAMITADO')
+            
+             if(Auth::user()->drogueria == '1'){
+                 $pendiente_api_medcol3 = PendienteApiMedcol3::where([['estado', 'TRAMITADO']])
                 ->orderBy('id')
                 ->get();
+             }else{
+                 $pendiente_api_medcol3 = PendienteApiMedcol3::where([['estado', 'TRAMITADO'],['centroproduccion',$drogueria]])
+                ->orderBy('id')
+                ->get();
+             }
+            
+            
+            
+            
+            
 
             return DataTables()->of($pendiente_api_medcol3)
                 ->addColumn('action', function ($pendiente) {
@@ -244,11 +328,41 @@ class PendienteApiMedcol3Controller extends Controller
      */
     public function entregados(Request $request)
     {
-        //
+         $i = Auth::user()->drogueria;
+        
+        switch ($i) {
+                    case "1":
+                        $drogueria = '';
+                        break;
+                    case "2":
+                        $drogueria = 'SALUD';
+                        break;
+                    case "3":
+                       $drogueria = 'DOLOR';
+                        break;
+                    case "4":
+                        $drogueria = 'PAC';
+                        break;
+                    case "5":
+                        $drogueria = 'EHU1';
+                        break;
+                    case "6":
+                         $drogueria = 'BIO';
+                        break;    
+                }
         if ($request->ajax()) {
-            $pendiente_api_medcol3 = PendienteApiMedcol3::where('estado', 'ENTREGADO')
+            
+            if(Auth::user()->drogueria == '1'){
+                $pendiente_api_medcol3 = PendienteApiMedcol3::where([['estado', 'ENTREGADO']])
                 ->orderBy('id')
                 ->get();
+            }else{
+                $pendiente_api_medcol3 = PendienteApiMedcol3::where([['estado', 'ENTREGADO'],['centroproduccion',$drogueria]])
+                ->orderBy('id')
+                ->get();
+            }
+            
+            
 
             return DataTables()->of($pendiente_api_medcol3)
                 ->addColumn('action', function ($pendiente) {
@@ -276,11 +390,45 @@ class PendienteApiMedcol3Controller extends Controller
      */
     public function getDesabastecidos(Request $request)
     {
-        //
+         $i = Auth::user()->drogueria;
+        
+        switch ($i) {
+                    case "1":
+                        $drogueria = '';
+                        break;
+                    case "2":
+                        $drogueria = 'SALUD';
+                        break;
+                    case "3":
+                       $drogueria = 'DOLOR';
+                        break;
+                    case "4":
+                        $drogueria = 'PAC';
+                        break;
+                    case "5":
+                        $drogueria = 'EHU1';
+                        break;
+                    case "6":
+                         $drogueria = 'BIO';
+                        break;    
+                }
         if ($request->ajax()) {
-            $pendiente_api_medcol3 = PendienteApiMedcol3::where('estado', 'DESABASTECIDO')
+            
+            if(Auth::user()->drogueria == '1'){
+                
+                $pendiente_api_medcol3 = PendienteApiMedcol3::where([['estado', 'DESABASTECIDO']])
                 ->orderBy('id')
                 ->get();
+                
+            }else{
+                
+                
+                $pendiente_api_medcol3 = PendienteApiMedcol3::where([['estado', 'DESABASTECIDO'],['centroproduccion',$drogueria]])
+                ->orderBy('id')
+                ->get();
+            }
+            
+            
 
             return DataTables()->of($pendiente_api_medcol3)
                 ->addColumn('action', function ($pendiente) {
@@ -309,12 +457,44 @@ class PendienteApiMedcol3Controller extends Controller
      */
     public function getAnulados(Request $request)
     {
-        //
+         $i = Auth::user()->drogueria;
+        
+        switch ($i) {
+                    case "1":
+                        $drogueria = '';
+                        break;
+                    case "2":
+                        $drogueria = 'SALUD';
+                        break;
+                    case "3":
+                       $drogueria = 'DOLOR';
+                        break;
+                    case "4":
+                        $drogueria = 'PAC';
+                        break;
+                    case "5":
+                        $drogueria = 'EHU1';
+                        break;
+                    case "6":
+                         $drogueria = 'BIO';
+                        break;    
+                }
 
         if ($request->ajax()) {
-            $pendiente_api_medcol3 = PendienteApiMedcol3::where('estado', 'ANULADO')
+            
+            if(Auth::user()->drogueria == '1'){
+                $pendiente_api_medcol3 = PendienteApiMedcol3::where([['estado', 'ANULADO']])
                 ->orderBy('id')
                 ->get();
+                
+            }else{
+                
+                $pendiente_api_medcol3 = PendienteApiMedcol3::where([['estado', 'ANULADO'],['centroproduccion',$drogueria]])
+                ->orderBy('id')
+                ->get();
+            }
+            
+            
 
             return DataTables()->of($pendiente_api_medcol3)
                 ->addColumn('action', function ($pendiente) {
@@ -486,14 +666,48 @@ class PendienteApiMedcol3Controller extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function informes()
+    public function informes(Request $request)
     {
-
-        $pendientes =  PendienteApiMedcol3::where('estado', 'PENDIENTE')->count();
-        $entregados =  PendienteApiMedcol3::where('estado', 'ENTREGADO')->count();
-        $tramitados =  PendienteApiMedcol3::where('estado', 'TRAMITADO')->count();
-        $agotados =  PendienteApiMedcol3::where('estado', 'DESABASTECIDO')->count();
-        $anulados =  PendienteApiMedcol3::where('estado', 'ANULADO')->count();
+         $i = Auth::user()->drogueria;
+        
+        switch ($i) {
+                    case "1":
+                        $drogueria = '';
+                        break;
+                    case "2":
+                        $drogueria = 'SALUD';
+                        break;
+                    case "3":
+                       $drogueria = 'DOLOR';
+                        break;
+                    case "4":
+                        $drogueria = 'PAC';
+                        break;
+                    case "5":
+                        $drogueria = 'EHU1';
+                        break;
+                    case "6":
+                         $drogueria = 'BIO';
+                        break;    
+                }
+                
+    if(Auth::user()->drogueria == '1'){            
+        
+        $pendientes =  PendienteApiMedcol3::where([['estado', 'PENDIENTE']])->count();
+        $entregados =  PendienteApiMedcol3::where([['estado', 'ENTREGADO']])->count();
+        $tramitados =  PendienteApiMedcol3::where([['estado', 'TRAMITADO']])->count();
+        $agotados =  PendienteApiMedcol3::where([['estado', 'DESABASTECIDO']])->count();
+        $anulados =  PendienteApiMedcol3::where([['estado', 'ANULADO']])->count();
+    }else{
+        
+        $pendientes =  PendienteApiMedcol3::where([['estado', 'PENDIENTE'], ['centroproduccion',$drogueria]])->count();
+        $entregados =  PendienteApiMedcol3::where([['estado', 'ENTREGADO'], ['centroproduccion',$drogueria]])->count();
+        $tramitados =  PendienteApiMedcol3::where([['estado', 'TRAMITADO'], ['centroproduccion',$drogueria]])->count();
+        $agotados =  PendienteApiMedcol3::where([['estado', 'DESABASTECIDO'], ['centroproduccion',$drogueria]])->count();
+        $anulados =  PendienteApiMedcol3::where([['estado', 'ANULADO'], ['centroproduccion',$drogueria]])->count();
+    }
+        
+    
 
         return response()->json(['pendientes' => $pendientes, 'entregados' => $entregados, 'tramitados' => $tramitados, 'agotados' => $agotados, 'anulados' => $anulados]);
     }
@@ -501,10 +715,10 @@ class PendienteApiMedcol3Controller extends Controller
     public function createentregadospi($var1)
     {
         $email = 'castrokofdev@gmail.com'; // Auth::user()->email
-        $password = '123456';
+        $password = 'colMed2023**';
 
         $response = Http::post(
-            "http://190.85.46.245:8000/api/acceso",
+            "http://186.115.210.88:8001/api/acceso",
             [
                 'email' =>  $email,
                 'password' => $password,
@@ -517,11 +731,11 @@ class PendienteApiMedcol3Controller extends Controller
         $prueba = $response->json();
         $token = $prueba["token"];
 
-        $responsefacturas = Http::withToken($token)->get("http://190.85.46.245:8000/api/entregados_api_medcol3");
+        $responsefacturas = Http::withToken($token)->get("http://186.115.210.88:8001/api/entregadosapi");
 
         $facturassapi = $responsefacturas->json();
 
-        //dd($facturassapi);
+        
         $contadorei = 0;
         $contador1 = 0;
 
@@ -529,9 +743,14 @@ class PendienteApiMedcol3Controller extends Controller
 
 
             $existe =  EntregadosApiMedcol3::where('factura', $factura['factura'])->count();
+            
+          
 
             if ($existe == 0 || $existe == '') {
-                EntregadosApiMedcol3::create([
+                
+                
+                
+               EntregadosApiMedcol3::create([
                     'Tipodocum' => trim($factura['Tipodocum']),
                     'cantdpx' => trim($factura['cantdpx']),
                     'cantord' => trim($factura['cantord']),
@@ -552,16 +771,19 @@ class PendienteApiMedcol3Controller extends Controller
                     'cums' => trim($factura['cums']),
                     'cantidad' => trim($factura['cantidad']),
                     'cajero' => trim($factura['cajero']),
-                    'orden_externa' => trim($factura['ORDEN_EXTERNA']),
+                    'orden_externa' => trim($factura['orden_externa']),
                     'doc_entrega' => trim($factura['documento']),
-                    'factura_entrega' => trim($factura['factura'])
+                    'factura_entrega' => trim($factura['factura']),
+                    'centroproduccion' => trim($factura['CENTROPRODUCCION'])
                 ]);
-
-                $contador1++;
+                
+             
+                
+               $contador1++;
             }
         }
 
-        Http::withToken($token)->get("http://190.85.46.245:8000/api/closeallacceso");
+        Http::withToken($token)->get("http://186.115.210.88:8001/api/closeallacceso");
 
         $pendientes = DB::table('pendiente_api_medcol3')
             ->join('entregados_api_medcol3', function ($join) {
@@ -642,10 +864,10 @@ class PendienteApiMedcol3Controller extends Controller
     public function createentregadospilocal($var2)
     {
         $email = 'castrokofdev@gmail.com'; // Auth::user()->email
-        $password = '123456';
+        $password = 'colMed2023**';
 
         $response = Http::post(
-            "http://192.168.50.127:8000/api/acceso",
+            "http://192.168.1.27:8001/api/acceso",
             [
                 'email' =>  $email,
                 'password' => $password,
@@ -658,7 +880,7 @@ class PendienteApiMedcol3Controller extends Controller
         $prueba = $response->json();
         $token = $prueba["token"];
 
-        $responsefacturas = Http::withToken($token)->get("http://192.168.50.127:8000/api/entregadosapi");
+        $responsefacturas = Http::withToken($token)->get("http://192.168.1.27:8001/api/entregadosapi");
 
         $facturassapi = $responsefacturas->json();
 
@@ -693,16 +915,17 @@ class PendienteApiMedcol3Controller extends Controller
                     'cums' => trim($factura['cums']),
                     'cantidad' => trim($factura['cantidad']),
                     'cajero' => trim($factura['cajero']),
-                    'orden_externa' => trim($factura['ORDEN_EXTERNA']),
+                    'orden_externa' => trim($factura['orden_externa']),
                     'doc_entrega' => trim($factura['documento']),
-                    'factura_entrega' => trim($factura['factura'])
+                    'factura_entrega' => trim($factura['factura']),
+                    'centroproduccion' => trim($factura['CENTROPRODUCCION'])
                 ]);
 
                 $contador1++;
             }
         }
 
-        Http::withToken($token)->get("http://192.168.50.127:8000/api/closeallacceso");
+        Http::withToken($token)->get("http://192.168.1.27:8001/api/closeallacceso");
 
         $pendientes = DB::table('pendiente_api_medcol3')
             ->join('entregadosapi', function ($join) {
@@ -774,6 +997,64 @@ class PendienteApiMedcol3Controller extends Controller
 
 
         return $this->var2 = $contadorei;
+    }
+    
+       
+     public function informepedientes(Request $request)
+    {
+         $i = Auth::user()->drogueria;
+        
+        switch ($i) {
+                    case "1":
+                        $drogueria = '';
+                        break;
+                    case "2":
+                        $drogueria = 'SALUD';
+                        break;
+                    case "3":
+                       $drogueria = 'DOLOR';
+                        break;
+                    case "4":
+                        $drogueria = 'PAC';
+                        break;
+                    case "5":
+                        $drogueria = 'EHU1';
+                        break;
+                    case "6":
+                         $drogueria = 'BIO';
+                        break;    
+                }
+        
+
+        if (request()->ajax()) {
+            
+             if(Auth::user()->drogueria == '1'){
+            
+            $data = DB::table('pendiente_api_medcol3')
+                ->where('estado', '=', 'PENDIENTE')
+                ->select('nombre')
+                ->selectRaw('SUM(cantord) as cantord')
+                ->groupBy('nombre')
+                ->get();
+
+           
+            
+             }else{
+                 
+                  $data = DB::table('pendiente_api_medcol3')
+                ->where([['estado', '=', 'PENDIENTE'],['centroproduccion',$drogueria]])
+                ->select('nombre')
+                ->selectRaw('SUM(cantord) as cantord')
+                ->groupBy('nombre')
+                ->get();
+
+           
+             }
+              return DataTables()->of($data)->make(true);
+                 
+             }
+        
+        //return view('menu.usuario.indexAnalista');
     }
 
 

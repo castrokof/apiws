@@ -190,6 +190,8 @@ Pendientes Medcol Limonar
 @include('menu.Medcol3.modal.modalPendientes')
 @include('menu.Medcol3.modal.modalDetallePendiente')
 
+@include('menu.Medcol3.modal.modalindexresumenpendientes')
+
 
 @endsection
 
@@ -244,7 +246,7 @@ Pendientes Medcol Limonar
                         '<h5>TOTAL PENDIENTES</h5>' +
                         '<p><h5> ' + a +
                         '</h5></p>' +
-                        '</div><div class="icon"><i class="fas fa-notes-medical"></i></div></div>'
+                        '</div><a class="informependientes" id="informependientesclic" href="#"><div class="icon"><i class="fas fa-notes-medical informependientes"></i></div></a>'
 
                     );
 
@@ -487,7 +489,11 @@ Pendientes Medcol Limonar
                                 [1, "desc"]
                             ],
                             ajax: {
-                                url: "{{route('medcol3.pendientes')}}",
+                                url: "{{route('medcol3.pendientes1')}}",
+                                data:{
+                                     _token:"{{ csrf_token() }}"
+                                    },
+                                method: 'POST'
                             },
                             columns: [{
                                     data: 'action',
@@ -567,6 +573,9 @@ Pendientes Medcol Limonar
                                 },
                                 {
                                     data: 'fecha_entrega'
+                                },
+                                {
+                                    data: 'centroproduccion'
                                 }
                             ],
 
@@ -635,6 +644,10 @@ Pendientes Medcol Limonar
                             ],
                             ajax: {
                                 url: "{{route('medcol3.porentregar')}}",
+                                data:{
+                                     _token:"{{ csrf_token() }}"
+                                    },
+                                method: 'POST'
                             },
                             columns: [{
                                     data: 'action',
@@ -714,6 +727,9 @@ Pendientes Medcol Limonar
                                 },
                                 {
                                     data: 'fecha_entrega'
+                                },
+                                {
+                                    data: 'centroproduccion'
                                 }
                             ],
 
@@ -782,6 +798,10 @@ Pendientes Medcol Limonar
                             ],
                             ajax: {
                                 url: "{{route('medcol3.entregados')}}",
+                                data:{
+                                     _token:"{{ csrf_token() }}"
+                                    },
+                                method: 'POST'
                             },
                             columns: [{
                                     data: 'action',
@@ -861,6 +881,9 @@ Pendientes Medcol Limonar
                                 },
                                 {
                                     data: 'fecha_entrega'
+                                },
+                                {
+                                    data: 'centroproduccion'
                                 }
                             ],
 
@@ -929,6 +952,10 @@ Pendientes Medcol Limonar
                             ],
                             ajax: {
                                 url: "{{route('medcol3.desabastecidos')}}",
+                                data:{
+                                     _token:"{{ csrf_token() }}"
+                                    },
+                                method: 'POST'
                             },
                             columns: [{
                                     data: 'action',
@@ -1008,6 +1035,9 @@ Pendientes Medcol Limonar
                                 },
                                 {
                                     data: 'fecha_entrega'
+                                },
+                                {
+                                    data: 'centroproduccion'
                                 }
                             ],
 
@@ -1076,6 +1106,10 @@ Pendientes Medcol Limonar
                             ],
                             ajax: {
                                 url: "{{route('medcol3.anulados')}}",
+                                data:{
+                                     _token:"{{ csrf_token() }}"
+                                    },
+                                method: 'POST'
                             },
                             columns: [{
                                     data: 'action',
@@ -1155,6 +1189,9 @@ Pendientes Medcol Limonar
                                 },
                                 {
                                     data: 'fecha_entrega'
+                                },
+                                {
+                                    data: 'centroproduccion'
                                 }
                             ],
 
@@ -1338,8 +1375,15 @@ Pendientes Medcol Limonar
                     $('#codigo').val(data.pendiente.codigo);
                     $('#nombre').val(data.pendiente.nombre);
                     $('#cant_pndt').val(data.saldo_pendiente);
-
-                    $('#cums').val(data.pendiente.cums);
+                    
+                    if(data.pendiente.cums == '' || data.pendiente.cums == null){
+                        $('#cums').val(data.pendiente.codigo)
+                    }else{
+                        $('#cums').val(data.pendiente.cums);
+                    }
+                    
+                    
+                    
                     $('#cantidad').val(data.pendiente.cantidad);
                     $('#cajero').val(data.pendiente.cajero);
                     $('#usuario').val(data.pendiente.usuario);
@@ -1403,7 +1447,15 @@ Pendientes Medcol Limonar
                     $('#codigo_n').val(data.pendiente.codigo);
                     $('#nombre_n').val(data.pendiente.nombre);
                     $('#cant_pndt_n').val(data.saldo_pendiente);
-                    $('#cums_n').val(data.pendiente.cums);
+                    
+                     if(data.pendiente.cums == '' || data.pendiente.cums == null){
+                       $('#cums_n').val(data.pendiente.codigo);
+                    }else{
+                       $('#cums_n').val(data.pendiente.cums);
+                    }
+                    
+                    
+                    
                     $('#cantidad_n').val(data.pendiente.cantidad);
                     $('#cajero_n').val(data.pendiente.cajero);
                     $('#usuario_n').val(data.pendiente.usuario);
@@ -1584,7 +1636,7 @@ Pendientes Medcol Limonar
         // Función que envia el id al controlador y cambia el estado del registro
         $(document).on('click', '#syncapi', function() {
 
-            const text = 'De Medcol 3 - Limonar';
+            const text = 'De Medcol PCE-Huerfanas-Biologicos';
 
             Swal.fire({
                 title: "¿Estás por sincronizar pendientes?",
@@ -1596,18 +1648,18 @@ Pendientes Medcol Limonar
             }).then((result) => {
                 if (result.value) {
 
-                    ajaxRequestSync('syncapi');
+                    ajaxRequestSync();
 
                 }
             });
         });
 
-        function ajaxRequestSync(url) {
+        function ajaxRequestSync() {
             $.ajax({
                 beforeSend: function() {
                     $('.loaders').css("visibility", "visible");
                 },
-                url: url,
+                url: "{{route('medcol3.syncapi')}}",
                 type: 'GET',
                 success: function(data) {
                     $('#pendientes').DataTable().ajax.reload();
@@ -1632,6 +1684,100 @@ Pendientes Medcol Limonar
                 }
             });
         }
+        
+             // Consulta de resumen de pendientes
+        $(document).on('click', '#informependientesclic', function() {
+            $('.modal-title-resumen-pendientes').text('Resumen de pendientes');
+                $('#modal-resumen-pendientes').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                $('#modal-resumen-pendientes').modal('show');
+                $('#tablaIndexInformemedicamentos').DataTable().destroy();
+
+                 ajaxRequest1();
+        });
+
+        function ajaxRequest1() {
+
+            var tinformependientes = $('#tablaIndexInformemedicamentos').DataTable({
+                language: idioma_espanol,
+                processing: true,
+                lengthMenu: [
+                    [25, 50, 100, 500, -1],
+                    [25, 50, 100, 500, "Mostrar Todo"]
+                ],
+                processing: true,
+                serverSide: true,
+                aaSorting: [
+                    [1, "asc"]
+                ],
+                ajax: {
+                    url: "{{route('informepedientes3')}}",
+                    type: 'get',
+                },
+                columns: [
+
+                    // {
+                    //     data: 'codigo',
+                    //     name: 'codigo'
+                    // },
+                    {
+                        data: 'nombre',
+                        name: 'nombre'
+                    },
+                    {
+                        data: 'cantord',
+                        name: 'cantord'
+                    }
+
+                ],
+
+                //Botones----------------------------------------------------------------------
+
+                "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+
+
+                buttons: [{
+
+                        extend: 'copyHtml5',
+                        titleAttr: 'Copiar Registros',
+                        title: "seguimiento",
+                        className: "btn  btn-outline-primary btn-sm"
+
+
+                    },
+                    {
+
+                        extend: 'excelHtml5',
+                        titleAttr: 'Exportar Excel',
+                        title: "seguimiento",
+                        className: "btn  btn-outline-success btn-sm"
+
+
+                    },
+                    {
+
+                        extend: 'csvHtml5',
+                        titleAttr: 'Exportar csv',
+                        className: "btn  btn-outline-warning btn-sm"
+                        //text: '<i class="fas fa-file-excel"></i>'
+
+                    },
+                    {
+
+                        extend: 'pdfHtml5',
+                        titleAttr: 'Exportar pdf',
+                        className: "btn  btn-outline-secondary btn-sm"
+
+
+                    }
+                ],
+
+            });
+
+        }
+
 
 
 

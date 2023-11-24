@@ -37,7 +37,8 @@ class PendientesApi extends Model
         'fecha_entrega',
         'fecha_anulado',
         'doc_entrega',
-        'factura_entrega'
+        'factura_entrega',
+        'centroproduccion'
     ];
 
     protected function serializeDate(DateTimeInterface $date)

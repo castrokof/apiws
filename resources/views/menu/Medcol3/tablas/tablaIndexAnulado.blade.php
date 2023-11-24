@@ -15,7 +15,7 @@
                             <th>Acciones</th>
                             <th>Id</th>
                             <th>Tipo Documento</th>
-                            <th>Cantidad Entregada</th>
+                            <th>Cantidad Solicitada</th>
                             <th>Cantidad Ordenada</th>
                             <th>Fecha Factura</th>
                             <th>Fecha</th>
@@ -38,6 +38,7 @@
                             <th>Estado</th>
                             <th>Fecha de Anulacioón</th>
                             <th>Fecha de Entrega</th>
+                            <th>Centro Produccion</th>
                         </tr>
                     </thead>
                     <tbody>

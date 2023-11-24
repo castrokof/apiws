@@ -38,7 +38,48 @@
                                 @enderror
                             </div>
                         </div>
+                        <div class="form-group row">
+                            <label for="drogueria" class="col-md-4 col-form-label text-md-right">{{ __('drogueria ') }}</label>
 
+                            <div class="col-md-6">
+                                <select id="drogueria" type="drogueria" class="form-control @error('drogueria') is-invalid @enderror" name="drogueria" value="{{ old('drogueria') }}" required autocomplete="drogueria">
+                                    <option>-Seleccione-</option>
+                                    <option value="1">All</option>
+                                    <option value="2">Salud Mental</option>
+                                    <option value="3">Dolor y Paliativos</option>
+                                    <option value="4">Plan complementario</option>
+                                    <option value="5">Huerfanas</option>
+                                    <option value="6">Biologicos</option>
+                                    
+                                </select>    
+
+                                @error('drogueria')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                                                <div class="form-group row">
+                            <label for="rol" class="col-md-4 col-form-label text-md-right">{{ __('E-rol') }}</label>
+
+                            <div class="col-md-6">
+                                <select id="rol" type="rol" class="form-control @error('rol') is-invalid @enderror" name="rol" value="{{ old('rol') }}" required autocomplete="rol">
+                                    <option >-Seleccione-</option>
+                                    <option value="1">Administrador</option>
+                                    <option value="2">Supervisor</option>
+                                    <option value="3">Consultor</option>
+                                    
+                                </select>
+                                
+                                
+                                @error('rol')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
                         <div class="form-group row">
                             <label for="password" class="col-md-4 col-form-label text-md-right">{{ __('Password') }}</label>
 

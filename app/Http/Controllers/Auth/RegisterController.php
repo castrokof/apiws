@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
-
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use App\User;
@@ -36,10 +36,10 @@ class RegisterController extends Controller
      *
      * @return void
      */
-    public function __construct()
+   /*public function __construct()
     {
         $this->middleware('guest');
-    }
+    }*/
 
     /**
      * Get a validator for an incoming registration request.
@@ -53,6 +53,8 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'drogueria'=> ['required', 'string'],
+            'rol'=> ['required', 'string', 'min:1', 'max:1'],
         ]);
     }
 
@@ -68,6 +70,26 @@ class RegisterController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'drogueria' => $data['drogueria'],
+            'rol' => $data['rol'],
         ]);
     }
+    
+    
+      public function usuariosApiws(Request $request){
+        
+        
+          if ($request->ajax()) {
+              $usuarioapiws = User::all();
+                return  DataTables()->of($usuarioapiws)
+                ->make(true);
+            }
+
+
+                return view('auth.list');
+    }
+      
+  
+        
+    
 }

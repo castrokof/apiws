@@ -32,6 +32,12 @@ class PendienteApiController extends Controller
     public function index(Request $request)
     {
 
+        return view('menu.usuario.indexAnalista');
+    }
+    
+       public function index1(Request $request)
+    {
+
 
         if ($request->ajax()) {
             $pendientesapi = PendientesApi::where('estado', 'PENDIENTE')
@@ -54,7 +60,7 @@ class PendienteApiController extends Controller
                 ->rawColumns(['action'])
                 ->make(true);
         }
-
+   
         return view('menu.usuario.indexAnalista');
     }
 
@@ -353,6 +359,7 @@ class PendienteApiController extends Controller
             $pendientesapi->doc_entrega = $request->doc_entrega;
             $pendientesapi->factura_entrega = $request->factura_entrega;
             $pendientesapi->usuario = $request->name;
+            $pendientesapi->cantord = $request->cantord;
 
             if ($request->input('enviar_fecha_entrega') == 'true') {
                 if ($request->fecha_entrega < $pendientesapi->fecha || $request->fecha_entrega > now()->format('Y-m-d')) {
@@ -755,5 +762,21 @@ class PendienteApiController extends Controller
 
 
         return $this->var2 = $contadorei;
+    }
+    
+     public function informepedientes()
+    {
+
+        if (request()->ajax()) {
+            $data = DB::table('pendientesapi')
+                ->where([['estado', '=', 'PENDIENTE']])
+                ->select('nombre')
+                ->selectRaw('SUM(cantord) as cantord')
+                ->groupBy('nombre')
+                ->get();
+
+            return DataTables()->of($data)->make(true);
+        }
+        //return view('menu.usuario.indexAnalista');
     }
 }

@@ -81,7 +81,7 @@
 
                     @else
 
-                    @if(Auth::user()->email == 'castrokof@gmail.com' || Auth::user()->email == 'sistemasmedcol@gmail.com' || Auth::user()->email == 'sistemas3.tempus@gmail.com')
+                    @if(Auth::user()->rol == '1')
                    <div class="collapse navbar-collapse" id="navbarNavDropdown">
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url('/usuariosapi') }}">Usuarios API</a>
@@ -103,13 +103,16 @@
                                 <a class="dropdown-item" href="{{ route('submenu') }}">
                                     {{ __('Sub Menu') }}
                                 </a>
+                                 <a class="dropdown-item" href="{{ route('register') }}">
+                                    {{ __('Crear Usuario') }}
+                                     </a>
 
                                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                     @csrf
                                 </form>
                             </div>
                         </li>
-                        @elseif(Auth::user()->email == 'soluciones@saludtempus.com' || Auth::user()->email ==  'castrokofdev@gmail.com' )
+                        @elseif(Auth::user()->rol == '2' )
                         <div class="collapse navbar-collapse" id="navbarNavDropdown">
                           {{-- <li class="nav-item">
                             <a class="nav-link" href="{{ url('/programado') }}">Programados</a>
@@ -195,6 +198,7 @@
                             </div>
                         </div>
                     </div>
+                   
                     <div class="card bg-light">
                         <div class="card-body text-center">
                             <div class="card-header"> <i class="fas fa-capsules"></i>MedCol San Fernando</div>
@@ -209,17 +213,30 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card bg-info">
+                    <div class="card bg-warning">
                         <div class="card-body text-center">
-                            <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Limonar</div>
+                            <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Dolor y Paliativos</div>
                             <div class="list-group">
-                                <a href="{{ route('medcol3.pendientes') }}" class="list-group-item list-group-item-action">
-                                    <i class="far fa-share-square"></i> Gestionar Pendientes Limonar <span
-                                        class="badge badge-pill badge-primary pull-right">Dolor</span>
+                                <a href="{{ route('medcold.pendientes') }}" class="list-group-item list-group-item-action">
+                                    <i class="far fa-share-square"></i> Gestionar Pendientes Dolor y Paliativos <span
+                                        class="badge badge-pill badge-primary pull-right">Dolor y Paliativos</span>
                                 </a>
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="card bg-info">
+                        <div class="card-body text-center">
+                            <div class="card-header"> <i class="fas fa-capsules"></i>MedCol PCE-Huerfanas-Biologicos</div>
+                            <div class="list-group">
+                                <a href="{{ route('medcol3.pendientes') }}" class="list-group-item list-group-item-action">
+                                    <i class="far fa-share-square"></i> Gestionar Pendientes PCE-Huerfanas-Biologicos <span
+                                        class="badge badge-pill badge-primary pull-right">PCE-HUE-BIO</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
 
 
                     <div class="top-right links">
@@ -239,17 +256,7 @@
 
 
         </div>
-        <div class="card-columns">
-            <div class="card">
-            </div>
-            <div class="card">
-                <img class="img-fluid" src="{{ asset('assets/lte/dist/img/iconmedcol.png') }}" alt="Medcol image">
-
-            </div>
-            <div class="card">
-
-            </div>
-        </div>
+   
     </div>
 
     <!-- jQuery -->

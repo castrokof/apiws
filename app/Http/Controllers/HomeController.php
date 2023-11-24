@@ -24,30 +24,31 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-
-//Funcion para consulta de lo direccionado por la EPS a tempus
+    
+//Funcion para consulta de lo direccionado por la EPS a medcol     
     public function index(Request $request)
-    {
+    {   
         $fechaAi=now()->toDateString();
         $fechaini=$request->fechaini;
         $fechafin=$request->fechafin;
         $prescripcion = $request->prescripcion;
+        
 
-
-
+        
 
         $TokenHercules = session('tokenh');
-
-
+ 
+        if( $TokenHercules != '' ||  $TokenHercules != null){
+        
         $NIT='901601000';
         //$response = Http::withOptions([
           //  'debug' => true,
         //])->get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/GenerarToken/$NIT/$TokenHercules");
-
+     
         $response = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/GenerarToken/$NIT/$TokenHercules");
-
-
-
+        
+        
+     
         $token=$response->json();
         $statusF=$response->status();
 
@@ -64,25 +65,25 @@ class HomeController extends Controller
         $fechainicio = Carbon::parse($fechaini);
         $fechafinal = Carbon::parse($fechafin);
         $dias = $fechafinal->diffInDays($fechainicio);
-
-
+        
+         
         if($dias == 0){
 
-            $fechai[] = $fechaini;
+            $fechai[] = $fechaini; 
         }else{
             $dias = $dias + 1;
 
-          for ($i=0; $i < $dias; $i++) {
-
-
+          for ($i=0; $i < $dias; $i++) { 
+            
+            
             $fechai[] = $fechaini;
-
+           
             $fechaini++;
-
+        
           }
-
+         
         }
-
+   
 //Variable count de las fechas
     $pcf=count($fecha);
     $pcfi=count($fechai);
@@ -90,85 +91,98 @@ class HomeController extends Controller
 
 
     if(empty($fechaini) && empty($prescripcion)){
-    for ($i=0; $i < $pcf; $i++) {
+    for ($i=0; $i < $pcf; $i++) { 
 
         $medicamentosF = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/DireccionamientoXFecha/$NIT/$token/$fecha[$i]");
-
+    
         $medicamentos2[]= $medicamentosF->json();
-
+        
         $statusF= $medicamentosF->status();
-
+        
         }
 
 
         return view('home', compact('medicamentos2','statusF'));
 
         }else if(!empty($fechaini) && empty($prescripcion)){
-
-            for ($i=0; $i < $pcfi; $i++) {
+            
+            for ($i=0; $i < $pcfi; $i++) { 
 
                 $medicamentosF = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/DireccionamientoXFecha/$NIT/$token/$fechai[$i]");
-
+            
                 $medicamentos2[]= $medicamentosF->json();
-
+                
                 $statusF= $medicamentosF->status();
-
+                
                 }
-
+            
         return view('home', compact('medicamentos2','statusF'));
 
         }else if(empty($fechaini) && !empty($prescripcion)){
-
+            
              $prescripcion = preg_replace("/\s+/", "", trim($request->prescripcion));
-
+            
             $prescripciona = explode(',',$prescripcion);
-
+            
             $pc = count($prescripciona);
-
-            for ($i=0; $i < $pc; $i++) {
+            
+            for ($i=0; $i < $pc; $i++) { 
 
                 $medicamentosF = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/DireccionamientoXPrescripcion/$NIT/$token/$prescripciona[$i]");
-
+            
                 $medicamentos2[]= $medicamentosF->json();
-
+                
                 $statusF= $medicamentosF->status();
-
+                
             }
-
-
-
+            
+              
+            
         return view('home', compact('medicamentos2','statusF'));
 
         }
+        
+        
+           }else{
+                    
+                    return redirect('tokenhercules')->with('mensaje', 'Debes ingresar primero el token solicitado');
+                   
+                }
+                
 
 
     }
-
-//Funcion para consulta de lo direccionado por la EPS a tempus por documento
+    
+//Funcion para consulta de lo direccionado por la EPS a Medcol por documento  
     public function direccionado(Request $request)
-    {
+    {   
         $fechaAi=now()->toDateString();
         $fechaini=$request->fechaini;
         $fechafin=$request->fechafin;
         $prescripcion = $request->prescripcion;
         $tipo_documento = $request->tipo_documento;
         $documento = $request->documento;
+        
 
-
-
+        
 
         $TokenHercules = session('tokenh');
 
 
+
+
+        
+        if( $TokenHercules != '' ||  $TokenHercules != null){
+        
         $NIT='901601000';
         //$response = Http::withOptions([
           //  'debug' => true,
         //])->get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/GenerarToken/$NIT/$TokenHercules");
-
+     
         $response = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/GenerarToken/$NIT/$TokenHercules");
-
-
-
+        
+        
+     
         $token=$response->json();
         $statusF=$response->status();
 
@@ -185,25 +199,25 @@ class HomeController extends Controller
         $fechainicio = Carbon::parse($fechaini);
         $fechafinal = Carbon::parse($fechafin);
         $dias = $fechafinal->diffInDays($fechainicio);
-
-
+        
+         
         if($dias == 0){
 
-            $fechai[] = $fechaini;
+            $fechai[] = $fechaini; 
         }else{
             $dias = $dias + 1;
 
-          for ($i=0; $i < $dias; $i++) {
-
-
+          for ($i=0; $i < $dias; $i++) { 
+            
+            
             $fechai[] = $fechaini;
-
+           
             $fechaini++;
-
+        
           }
-
+         
         }
-
+   
 //Variable count de las fechas
     $pcf=count($fecha);
     $pcfi=count($fechai);
@@ -211,63 +225,71 @@ class HomeController extends Controller
 
 
     if(empty($fechaini) && empty($prescripcion)){
-    for ($i=0; $i < $pcf; $i++) {
+    for ($i=0; $i < $pcf; $i++) { 
 
         $medicamentosF = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/DireccionamientoXFecha/$NIT/$token/$fecha[$i]");
-
+    
         $medicamentos2[]= $medicamentosF->json();
-
+        
         $statusF= $medicamentosF->status();
-
+        
         }
 
 
         return view('direccionado', compact('medicamentos2','statusF'));
 
         }else if(!empty($fechaini) && !empty($documento) && !empty($tipo_documento)){
-
-            for ($i=0; $i < $pcfi; $i++) {
+            
+            for ($i=0; $i < $pcfi; $i++) { 
 
                 $medicamentosF = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/DireccionamientoXPacienteFecha/$NIT/$fechai[$i]/$token/$tipo_documento/$documento");
-
-                if($medicamentosF->status() == 200){
+                
+                if($medicamentosF->status() == 200){ 
                     $medicamentos2[]= $medicamentosF->json();
                 }
-
+               
                 $statusF= $medicamentosF->status();
-
+                
             }
-
-
+            
+         
         return view('direccionado', compact('medicamentos2','statusF'));
 
         }
 
+        
+           }else{
+                    
+                   return redirect('tokenhercules')->with('mensaje', 'Debes ingresar primero el token solicitado');
+                }
+                
 
-    }
-
+    }    
+    
 
 //Funcion para consultar lo programado
     public function indexp(Request $request)
-    {
+    {   
         $fechaAi=now()->toDateString();
         $fechaini=$request->fechaini;
         $fechafin=$request->fechafin;
         $prescripcion = $request->prescripcion;
+        
+         $TokenHercules = session('tokenh');
 
+        
+        if( $TokenHercules != '' ||  $TokenHercules != null){
 
+       
 
-
-        $TokenHercules = session('tokenh');
-
-
+        
         $NIT='901601000';
         $response = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/GenerarToken/$NIT/$TokenHercules");
-
+       
         $token=$response->json();
         $statusF=$response->status();
 
-
+   
         if($statusF != 200){
 
             return view('programado', compact('statusF'));
@@ -280,25 +302,25 @@ class HomeController extends Controller
         $fechainicio = Carbon::parse($fechaini);
         $fechafinal = Carbon::parse($fechafin);
         $dias = $fechafinal->diffInDays($fechainicio);
-
-
+        
+         
         if($dias == 0){
 
-            $fechai[] = $fechaini;
+            $fechai[] = $fechaini; 
         }else{
             $dias = $dias + 1;
 
-          for ($i=0; $i < $dias; $i++) {
-
-
+          for ($i=0; $i < $dias; $i++) { 
+            
+            
             $fechai[] = $fechaini;
-
+           
             $fechaini++;
-
+        
           }
-
+         
         }
-
+       
 //Variable count de las fechas
     $pcf=count($fecha);
     $pcfi=count($fechai);
@@ -306,81 +328,86 @@ class HomeController extends Controller
 
 
     if(empty($fechaini) && empty($prescripcion)){
-    for ($i=0; $i < $pcf; $i++) {
+    for ($i=0; $i < $pcf; $i++) { 
 
         $medicamentosF = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/ProgramacionXFecha/$NIT/$token/$fecha[$i]");
-
-
+        
+    
         $medicamentos2[]= $medicamentosF->json();
-
+        
         $statusF= $medicamentosF->status();
-
+        
         }
 
 
         return view('programado', compact('medicamentos2','statusF'));
 
         }else if(!empty($fechaini) && empty($prescripcion)){
-
-            for ($i=0; $i < $pcfi; $i++) {
+            
+            for ($i=0; $i < $pcfi; $i++) { 
 
                 $medicamentosF = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/ProgramacionXFecha/$NIT/$token/$fechai[$i]");
-
+            
                 $medicamentos2[]= $medicamentosF->json();
-
+                
                 $statusF= $medicamentosF->status();
-
+                
                 }
-
+            
         return view('programado', compact('medicamentos2','statusF'));
 
         }else if(empty($fechaini) && !empty($prescripcion)){
-
+            
             $prescripcion = preg_replace("/\s+/", "", trim($request->prescripcion));
-
+            
             $prescripciona = explode(',',$prescripcion);
-
+            
             $pc = count($prescripciona);
+            
+            for ($i=0; $i < $pc; $i++) { 
 
-            for ($i=0; $i < $pc; $i++) {
-
-
+           
 
                 $medicamentosF = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/ProgramacionXPrescripcion/$NIT/$token/$prescripciona[$i]");
-
-
+            
+            
                 $medicamentos2[]= $medicamentosF->json();
-
+                
                 $statusF= $medicamentosF->status();
-            }
-
-
+            } 
+              
+            
         return view('programado', compact('medicamentos2','statusF'));
 
         }
 
 
-    }
+        }else{
+            
+             return redirect('tokenhercules')->with('mensaje', 'Debes ingresar primero el token solicitado');
+        }
 
+    }
+   
 //Funcion para programar
     Public function Programarm(Request $request){
-
+        
         $TokenHercules = session('tokenh');
         $NIT='901601000';
         $response = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/GenerarToken/$NIT/$TokenHercules");
-
+       
         $token=$response->json();
 
 
-
+        
         $pmipres = $request->data;
-
-
+        
+        
         foreach($pmipres as $mipre){
-
+    
            $responsepost = Http::withHeaders(['Content-Type' => 'application/json'])
             ->put("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/Programacion/$NIT/$token",[
-
+              
                 'ID' => (int)$mipre['ID'],
                 'FecMaxEnt' => $mipre['FecMaxEnt'],
                 'TipoIDSedeProv' => $mipre['TipoIDSedeProv'],
@@ -388,78 +415,77 @@ class HomeController extends Controller
                 'CodSedeProv' => $mipre['CodSedeProv'],
                 'CodSerTecAEntregar' => $mipre['CodSerTecAEntregar'],
                 'CantTotAEntregar' => $mipre['CantTotAEntregar']
-
-
+              
+                
             ]);
 
             $status = $responsepost->status();
-            $data1=$responsepost->body();
-
-            if($status == 422){
-            return response()->json(['result'=>$data1, 'success' => 'ya']);
-
-        }else if($status == 200){
-                return response()->json(['result'=>$data1, 'success' => 'ok']);
-            }
+            $data1[]=$responsepost->body();
+        
+           
 
         }
-    }
-
-
+        
+       
+                return response()->json(['result'=>$data1, 'success' => 'ok']);
+          
+    }      
+        
+    
 //Funcion para direccionamiento de vista token hercules
     Public function tokenherculesindex(){
-
-
+    
+  
         return view('tokenhercules');
-
-
+  
+        
     }
 
 
 //Funcion para cargar el token hercules en variable de sesion
     Public function tokenhercules(Request $request){
-
+        
             session(['tokenh' => $request->tokenhercules]);
-
+            
             return redirect('tokenhercules')->with('mensaje', 'Token almacenado correctamente!!
             dirigete a direccionamiento en la barra superior');
-
+            
     }
-
+      
 //Funcion para anular programacion
     Public function Anularprogramacion(Request $request){
-
+        
             $TokenHercules = session('tokenh');
             $NIT='901601000';
             $response = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/GenerarToken/$NIT/$TokenHercules");
-
+           
             $token=$response->json();
-
-
-
+    
+           
+            
             $pmipres = $request->data;
-
-
+            
+            
             foreach($pmipres as $mipre){
-
+                
                 $idpro = $mipre['IDProgramacion'];
 
                $responsepost = Http::put("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/AnularProgramacion/$NIT/$token/$idpro");
-
+    
                 $status = $responsepost->status();
                 $data1=$responsepost->body();
-
+            
                 if($status != 200){
                 return response()->json(['result'=>$data1, 'success' => 'ya']);
-
+                
             }else if($status == 200){
                     return response()->json(['result'=>$data1, 'success' => 'ok']);
             }
-
-        }
-    }
-
-
+    
+        }        
+    } 
+    
+    
 //Funcion para Reportar dispensadión
     Public function  Reportardispensacion(Request $request)
     {
@@ -500,16 +526,16 @@ class HomeController extends Controller
 
         }else if($status == 200){
             return response()->json(['result'=>$data1, 'success' => 'ok']);
-
-
+        
+            
         }else if($status == 500){
             return response()->json(['result'=>$data1, 'success' => 'er']);
         }
 
     }
     }
-
-
+    
+    
 //Funcion para anular entrega
     Public function Anularentrega(Request $request)
     {
@@ -520,7 +546,7 @@ class HomeController extends Controller
 
        $token=$response->json();
 
-
+       $data1 = [];  
 
        $pmipres = $request->data;
 
@@ -532,16 +558,17 @@ class HomeController extends Controller
           $responsepost = Http::put("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/AnularEntrega/$NIT/$token/$idpro");
 
            $status = $responsepost->status();
-           $data1=$responsepost->body();
+           $data1[]=$responsepost->body();
 
-           if($status != 200){
+           
+       }
+       if($status != 200){
            return response()->json(['result'=>$data1, 'success' => 'ya']);
 
-       }else if($status == 200){
+            }else if($status == 200){
                return response()->json(['result'=>$data1, 'success' => 'ok']);
            }
 
-       }
    }
 
 
@@ -557,7 +584,8 @@ class HomeController extends Controller
 
 
             $TokenHercules = session('tokenh');
-
+            
+ if( $TokenHercules != '' ||  $TokenHercules != null){
 
             $NIT='901601000';
             $response = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/GenerarToken/$NIT/$TokenHercules");
@@ -651,13 +679,17 @@ class HomeController extends Controller
 
                     $statusF= $medicamentosF->status();
                 }
-
-
+                
+                
 
             return view('repentregado', compact('medicamentos2','statusF'));
 
             }
 
+             }else{
+            
+             return redirect('tokenhercules')->with('mensaje', 'Debes ingresar primero el token solicitado');
+        }
 
     }
 //Funcion para consulta de lo entregado por el dispensador
@@ -673,6 +705,8 @@ class HomeController extends Controller
 
         $TokenHercules = session('tokenh');
 
+
+ if( $TokenHercules != '' ||  $TokenHercules != null){
 
         $NIT='901601000';
         $response = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/GenerarToken/$NIT/$TokenHercules");
@@ -770,6 +804,13 @@ class HomeController extends Controller
         return view('entregado', compact('medicamentos2','statusF'));
 
         }
+        
+        
+           }else{
+                            
+                            return redirect('tokenhercules')->with('mensaje', 'Debes ingresar primero el token solicitado');
+                        }
+                
 
 
  }
@@ -800,7 +841,9 @@ class HomeController extends Controller
             'CausaNoEntrega' => $mipre['CausaNoEntrega'],
             'ValorEntregado' => $mipre['ValorEntregado'],
         ]);
-
+        
+       
+        
         $status = $responsepost->status();
         $data1=$responsepost->body();
 
@@ -813,7 +856,7 @@ class HomeController extends Controller
 
     }
     }
-
+    
 //Funcion para anular reporte de entrega
     Public function Anularrentrega(Request $request)
     {
@@ -823,7 +866,6 @@ class HomeController extends Controller
     $response = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/GenerarToken/$NIT/$TokenHercules");
 
     $token=$response->json();
-
 
 
     $pmipres = $request->data;
@@ -846,29 +888,29 @@ class HomeController extends Controller
         }
 
     }
-    }
-
+    }    
+    
 //Funcion para Reportar la facturacion
     Public function  Reportarfactura(Request $request)
     {
-
-
+    
+    
     $TokenHercules = session('tokenh');
     $NIT='901601000';
     $response = Http::get("https://wsmipres.sispro.gov.co/WSFACMIPRESNOPBS/api/GenerarToken/$NIT/$TokenHercules");
-
+    
     $token=$response->json();
-
-
-
+    
+    
+    
     $pmipres = $request->data;
-
-
+    
+    
     foreach($pmipres as $mipre){
-
+    
        $responsepost = Http::withHeaders(['Content-Type' => 'application/json'])
         ->put("https://wsmipres.sispro.gov.co/WSFACMIPRESNOPBS/api/Facturacion//$NIT/$token",[
-
+    
             "NoPrescripcion" => $mipre['NoPrescripcion'],
             "TipoTec" => $mipre['TipoTec'],
             "ConTec" => (int)$mipre['ConTec'],
@@ -885,22 +927,22 @@ class HomeController extends Controller
             "ValorTotFacturado" => $mipre['ValorTotFacturado'],
             "CuotaModer" => $mipre['CuotaModer'],
             "Copago" => $mipre['Copago']
-
+    
         ]);
-
+    
         $status = $responsepost->status();
         $data1=$responsepost->body();
-
+    
         if($status == 422){
         return response()->json(['result'=>$data1, 'success' => 'ya']);
-
+    
     }else if($status == 200){
             return response()->json(['result'=>$data1, 'success' => 'ok']);
         }
-
+    
     }
-    }
-
+    } 
+    
 //Funcion para consulta de lo reportado como facturado
     public function indexf(Request $request)
         {
@@ -914,6 +956,7 @@ class HomeController extends Controller
 
             $TokenHercules = session('tokenh');
 
+ if( $TokenHercules != '' ||  $TokenHercules != null){
 
             $NIT='901601000';
             $response = Http::get("https://wsmipres.sispro.gov.co/WSFACMIPRESNOPBS/api/GenerarToken/$NIT/$TokenHercules");
@@ -1013,7 +1056,12 @@ class HomeController extends Controller
             return view('repfacturacion', compact('medicamentos2','statusF'));
 
             }
-
+            
+            }else{
+                            
+                            return redirect('tokenhercules')->with('mensaje', 'Debes ingresar primero el token solicitado');
+                     }
+                
 
     }
 
@@ -1051,9 +1099,9 @@ class HomeController extends Controller
         }
 
     }
-}
-
-
+} 
+        
+        
 
 
 

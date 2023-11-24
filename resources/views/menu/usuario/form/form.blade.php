@@ -86,7 +86,7 @@
         </div>
         <div class="col-lg-2">
             <label for="cantdpx" class="col-xs-4 control-label requerido">Cantidad Entregada</label>
-            <input type="number" name="cantdpx" id="cantdpx" class="form-control" readonly>
+            <input type="number" name="cantdpx" id="cantdpx" class="form-control">
         </div>
         <div class="col-lg-2">
             <label for="cant_pndt" class="col-xs-4 control-label requerido">Cantidad Pendiente</label>

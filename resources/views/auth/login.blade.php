@@ -1,13 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
+
+
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-6">
             <div class="card">
                 <div class="card-header">{{ __('Login') }}</div>
 
                 <div class="card-body">
+                     <div class="container-fluid">
+                    <img src="{{asset("assets/lte/dist/img/iconmedcolup.png")}}" alt="Icon medcol" class="col-xs-12 col-sm-12 text-center justify-content-around img-size-250 mr-12 " >
+                   </div>
                     <form method="POST" action="{{ route('login') }}">
                         @csrf
 
