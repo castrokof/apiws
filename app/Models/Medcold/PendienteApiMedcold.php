@@ -39,7 +39,8 @@ class PendienteApiMedcold extends Model
         'fecha_anulado',
         'doc_entrega',
         'factura_entrega',
-        'centroproduccion'
+        'centroproduccion',
+        'observaciones'
     ];
 
     protected function serializeDate(DateTimeInterface $date)

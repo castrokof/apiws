@@ -43,6 +43,7 @@ class CreatePendienteApiMedcoldsTable extends Migration
             $table->dateTime('fecha_anulado')->nullable();
             $table->string('doc_entrega')->nullable();
             $table->string('factura_entrega')->nullable();
+            $table->string('observaciones')->nullable();
             $table->timestamps();
         });
     }

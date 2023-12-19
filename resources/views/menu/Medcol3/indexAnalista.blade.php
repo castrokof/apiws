@@ -1381,9 +1381,8 @@ Pendientes Medcol Limonar
                     }else{
                         $('#cums').val(data.pendiente.cums);
                     }
-                    
-                    
-                    
+                    $('#centroproduccion').val(data.pendiente.centroproduccion);
+                    $('#observ').val(data.pendiente.observaciones);                    
                     $('#cantidad').val(data.pendiente.cantidad);
                     $('#cajero').val(data.pendiente.cajero);
                     $('#usuario').val(data.pendiente.usuario);
@@ -1454,8 +1453,9 @@ Pendientes Medcol Limonar
                        $('#cums_n').val(data.pendiente.cums);
                     }
                     
-                    
-                    
+                    $('#centroproduccion_n').val(data.pendiente.centroproduccion);
+                    $('#observ_n').val(data.pendiente.observaciones);
+                    $('#fac_entrega').val(data.fac_entrega);
                     $('#cantidad_n').val(data.pendiente.cantidad);
                     $('#cajero_n').val(data.pendiente.cajero);
                     $('#usuario_n').val(data.pendiente.usuario);

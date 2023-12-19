@@ -25,8 +25,8 @@
                             <th>Primer Nombre</th>
                             <th>Segundo Nombre</th>
                             <th>Edad</th>
-                            <th>Direccion de Residencia</th>
-                            <th>Telefono de Residencia</th>
+                            <th>Direccion</th>
+                            <th>Telefono</th>
                             <th>Documento</th>
                             <th>Factura</th>
                             <th>Código</th>
@@ -36,8 +36,9 @@
                             <th>Cajero</th>
                             <th>Usuario</th>
                             <th>Estado</th>
-                            <th>Fecha de Anulacioón</th>
+                            <th>Fecha de Tramite</th>
                             <th>Fecha de Entrega</th>
+                            <th>Servicio</th>
                         </tr>
                     </thead>
                     <tbody>

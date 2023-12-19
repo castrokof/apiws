@@ -187,6 +187,8 @@ Pendientes Medcol San Fernando
 @include('menu.usuario.modal.modalPendientes')
 @include('menu.usuario.modal.modalDetallePendiente')
 
+@include('menu.usuario.modal.modalindexresumenpendientes')
+
 
 @endsection
 
@@ -241,7 +243,7 @@ Pendientes Medcol San Fernando
                         '<h5>TOTAL PENDIENTES</h5>' +
                         '<p><h5> ' + a +
                         '</h5></p>' +
-                        '</div><div class="icon"><i class="fas fa-notes-medical"></i></div></div>'
+                        '</div><a class="informependientes" id="informependientesclic" href="#"><div class="icon"><i class="fas fa-notes-medical informependientes"></i></div></a>'
 
                     );
 
@@ -505,7 +507,11 @@ Pendientes Medcol San Fernando
                                 [1, "desc"]
                             ],
                             ajax: {
-                                url: "{{route('pendientes')}}",
+                                url: "{{route('pendientes1')}}",
+                                data:{
+                                     _token:"{{ csrf_token() }}"
+                                    },
+                                method: 'POST'
                             },
                             columns: [{
                                     data: 'action',
@@ -585,6 +591,9 @@ Pendientes Medcol San Fernando
                                 },
                                 {
                                     data: 'fecha_entrega'
+                                },
+                                {
+                                    data: 'centroproduccion'
                                 }
                             ],
 
@@ -652,6 +661,11 @@ Pendientes Medcol San Fernando
                             ],
                             ajax: {
                                 url: "{{route('porentregar')}}",
+                                data:{
+                                     _token:"{{ csrf_token() }}"
+                                    },
+                                method: 'POST',
+                                
                             },
                             columns: [{
                                     data: 'action',
@@ -731,6 +745,9 @@ Pendientes Medcol San Fernando
                                 },
                                 {
                                     data: 'fecha_entrega'
+                                },
+                                {
+                                    data: 'centroproduccion'
                                 }
                             ],
 
@@ -799,6 +816,10 @@ Pendientes Medcol San Fernando
                                 [1, "desc"]
                             ],
                             ajax: {
+                                data:{
+                                     _token:"{{ csrf_token() }}"
+                                    },
+                                method: 'POST',
                                 url: "{{route('entregados')}}",
                             },
                             columns: [{
@@ -879,6 +900,9 @@ Pendientes Medcol San Fernando
                                 },
                                 {
                                     data: 'fecha_entrega'
+                                },
+                                {
+                                    data: 'centroproduccion'
                                 }
                             ],
 
@@ -946,6 +970,10 @@ Pendientes Medcol San Fernando
                                 [1, "desc"]
                             ],
                             ajax: {
+                                data:{
+                                     _token:"{{ csrf_token() }}"
+                                    },
+                                method: 'POST',
                                 url: "{{route('desabastecidos')}}",
                             },
                             columns: [{
@@ -1026,6 +1054,9 @@ Pendientes Medcol San Fernando
                                 },
                                 {
                                     data: 'fecha_entrega'
+                                },
+                                {
+                                    data: 'centroproduccion'
                                 }
                             ],
 
@@ -1093,6 +1124,10 @@ Pendientes Medcol San Fernando
                                 [1, "desc"]
                             ],
                             ajax: {
+                                data:{
+                                     _token:"{{ csrf_token() }}"
+                                    },
+                                method: 'POST',
                                 url: "{{route('anulados')}}",
                             },
                             columns: [{
@@ -1173,6 +1208,9 @@ Pendientes Medcol San Fernando
                                 },
                                 {
                                     data: 'fecha_entrega'
+                                },
+                                {
+                                    data: 'centroproduccion'
                                 }
                             ],
 
@@ -1357,8 +1395,9 @@ Pendientes Medcol San Fernando
                     $('#codigo').val(data.pendiente.codigo);
                     $('#nombre').val(data.pendiente.nombre);
                     $('#cant_pndt').val(data.saldo_pendiente);
-
                     $('#cums').val(data.pendiente.cums);
+                    $('#centroproduccion').val(data.pendiente.centroproduccion);
+                    $('#observ').val(data.pendiente.observaciones);
                     $('#cantidad').val(data.pendiente.cantidad);
                     $('#cajero').val(data.pendiente.cajero);
                     $('#usuario').val(data.pendiente.usuario);
@@ -1412,6 +1451,7 @@ Pendientes Medcol San Fernando
                     $('#cantdpx_n').val(data.pendiente.cantdpx);
                     $('#cantord_n').val(data.pendiente.cantord);
                     $('#fecha_factura_n').val(moment(data.pendiente.fecha_factura).format('YYYY-MM-DD'));
+                    $('#fecha_entrega_n').val(moment(data.pendiente.fecha_entrega).format('YYYY-MM-DD'));
                     $('#fecha_n').val(moment(data.pendiente.fecha).format('YYYY-MM-DD'));
                     $('#historia_n').val(data.pendiente.historia);
                     $('#apellido1_n').val(data.pendiente.apellido1);
@@ -1427,6 +1467,10 @@ Pendientes Medcol San Fernando
                     $('#nombre_n').val(data.pendiente.nombre);
                     $('#cant_pndt_n').val(data.saldo_pendiente);
                     $('#cums_n').val(data.pendiente.cums);
+                    $('#centroproduccion_n').val(data.pendiente.centroproduccion);
+                    $('#observ_n').val(data.pendiente.observaciones);
+                    $('#fac_entrega').val(data.fac_entrega);
+
                     $('#cantidad_n').val(data.pendiente.cantidad);
                     $('#cajero_n').val(data.pendiente.cajero);
                     $('#usuario_n').val(data.pendiente.usuario);
@@ -1650,6 +1694,99 @@ Pendientes Medcol San Fernando
                     $('.loaders').css("visibility", "hidden");
                 }
             });
+        }
+        
+         // Consulta de resumen de pendientes
+        $(document).on('click', '#informependientesclic', function() {
+            $('.modal-title-resumen-pendientes').text('Resumen de pendientes');
+                $('#modal-resumen-pendientes').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                $('#modal-resumen-pendientes').modal('show');
+                $('#tablaIndexInformemedicamentos').DataTable().destroy();
+
+                 ajaxRequest1();
+        });
+
+        function ajaxRequest1() {
+
+            var tinformependientes = $('#tablaIndexInformemedicamentos').DataTable({
+                language: idioma_espanol,
+                processing: true,
+                lengthMenu: [
+                    [25, 50, 100, 500, -1],
+                    [25, 50, 100, 500, "Mostrar Todo"]
+                ],
+                processing: true,
+                serverSide: true,
+                aaSorting: [
+                    [1, "asc"]
+                ],
+                ajax: {
+                    url: "{{route('informepedientes')}}",
+                    type: 'get',
+                },
+                columns: [
+
+                    // {
+                    //     data: 'codigo',
+                    //     name: 'codigo'
+                    // },
+                    {
+                        data: 'nombre',
+                        name: 'nombre'
+                    },
+                    {
+                        data: 'cantord',
+                        name: 'cantord'
+                    }
+
+                ],
+
+                //Botones----------------------------------------------------------------------
+
+                "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+
+
+                buttons: [{
+
+                        extend: 'copyHtml5',
+                        titleAttr: 'Copiar Registros',
+                        title: "seguimiento",
+                        className: "btn  btn-outline-primary btn-sm"
+
+
+                    },
+                    {
+
+                        extend: 'excelHtml5',
+                        titleAttr: 'Exportar Excel',
+                        title: "seguimiento",
+                        className: "btn  btn-outline-success btn-sm"
+
+
+                    },
+                    {
+
+                        extend: 'csvHtml5',
+                        titleAttr: 'Exportar csv',
+                        className: "btn  btn-outline-warning btn-sm"
+                        //text: '<i class="fas fa-file-excel"></i>'
+
+                    },
+                    {
+
+                        extend: 'pdfHtml5',
+                        titleAttr: 'Exportar pdf',
+                        className: "btn  btn-outline-secondary btn-sm"
+
+
+                    }
+                ],
+
+            });
+
         }
 
 

@@ -161,7 +161,8 @@ class PendienteApiMedcol3Controller extends Controller
                         'cajero' => trim($factura['cajero']),
                         'estado' => 'PENDIENTE',
                         'orden_externa' => trim($factura['ORDEN_EXTERNA']),
-                        'centroproduccion' => trim($factura['CENTROPRODUCCION'])
+                        'centroproduccion' => trim($factura['CENTROPRODUCCION']),
+                        'observaciones' => trim($factura['observaciones'])
                     ];
 
                     $contador++;
@@ -226,7 +227,8 @@ class PendienteApiMedcol3Controller extends Controller
                         'cajero' => trim($factura['cajero']),
                         'estado' => 'PENDIENTE',
                         'orden_externa' => trim($factura['ORDEN_EXTERNA']),
-                        'centroproduccion' => trim($factura['CENTROPRODUCCION'])
+                        'centroproduccion' => trim($factura['CENTROPRODUCCION']),
+                        'observaciones' => trim($factura['observaciones'])
                     ];
 
                     $contador++;
@@ -629,10 +631,13 @@ class PendienteApiMedcol3Controller extends Controller
                 ->first();
 
             $saldo_pendiente = $pendiente->cantord - $pendiente->cantdpx;
+            // Concatenar los campos doc_entrega y factura_entrega
+            $fac_entrega = $pendiente->doc_entrega . ' ' . $pendiente->factura_entrega;
 
             return response()->json([
                 'pendiente' => $pendiente,
-                'saldo_pendiente' => $saldo_pendiente
+                'saldo_pendiente' => $saldo_pendiente,
+                'fac_entrega' => $fac_entrega
             ]);
         }
         return view('menu.Medcol3.indexAnalista');
@@ -774,7 +779,8 @@ class PendienteApiMedcol3Controller extends Controller
                     'orden_externa' => trim($factura['orden_externa']),
                     'doc_entrega' => trim($factura['documento']),
                     'factura_entrega' => trim($factura['factura']),
-                    'centroproduccion' => trim($factura['CENTROPRODUCCION'])
+                    'centroproduccion' => trim($factura['CENTROPRODUCCION']),
+                    'observaciones' => trim($factura['observaciones'])
                 ]);
                 
              
@@ -918,7 +924,8 @@ class PendienteApiMedcol3Controller extends Controller
                     'orden_externa' => trim($factura['orden_externa']),
                     'doc_entrega' => trim($factura['documento']),
                     'factura_entrega' => trim($factura['factura']),
-                    'centroproduccion' => trim($factura['CENTROPRODUCCION'])
+                    'centroproduccion' => trim($factura['CENTROPRODUCCION']),
+                    'observaciones' => trim($factura['observaciones'])
                 ]);
 
                 $contador1++;

@@ -30,6 +30,7 @@ class PendienteApiMedcol3 extends Model
         'codigo',
         'nombre',
         'cums',
+        'observaciones',
         'cantidad',
         'cajero',
         'usuario',
@@ -39,7 +40,8 @@ class PendienteApiMedcol3 extends Model
         'fecha_anulado',
         'doc_entrega',
         'factura_entrega',
-        'centroproduccion'
+        'centroproduccion',
+        'observaciones'
     ];
 
     protected function serializeDate(DateTimeInterface $date)

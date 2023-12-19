@@ -12,7 +12,7 @@
                     {{-- class="table table-hover table-bordered text-nowrap" --}}
                     <thead>
                         <tr>
-                            <th>Acciones</th>
+                        <th>Acciones</th>
                             <th>Id</th>
                             <th>Tipo Documento</th>
                             <th>Cantidad Entregada</th>
@@ -25,8 +25,8 @@
                             <th>Primer Nombre</th>
                             <th>Segundo Nombre</th>
                             <th>Edad</th>
-                            <th>Direccion de Residencia</th>
-                            <th>Telefono de Residencia</th>
+                            <th>Direccion</th>
+                            <th>Telefono</th>
                             <th>Documento</th>
                             <th>Factura</th>
                             <th>Código</th>
@@ -38,6 +38,7 @@
                             <th>Estado</th>
                             <th>Fecha de Tramite</th>
                             <th>Fecha de Entrega</th>
+                            <th>Servicio</th>
                         </tr>
                     </thead>
                     <tbody>

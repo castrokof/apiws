@@ -119,7 +119,9 @@ class PendienteApiController extends Controller
                         'cantidad' => trim($factura['cantidad']),
                         'cajero' => trim($factura['cajero']),
                         'estado' => 'PENDIENTE',
-                        'orden_externa' => trim($factura['ORDEN_EXTERNA'])
+                        'orden_externa' => trim($factura['ORDEN_EXTERNA']),
+                        'centroproduccion' => trim($factura['CENTROPRODUCCION']),
+                        'observaciones' => trim($factura['observaciones'])
                     ];
 
                     $contador++;
@@ -181,7 +183,9 @@ class PendienteApiController extends Controller
                         'cantidad' => trim($factura['cantidad']),
                         'cajero' => trim($factura['cajero']),
                         'estado' => 'PENDIENTE',
-                        'orden_externa' => trim($factura['ORDEN_EXTERNA'])
+                        'orden_externa' => trim($factura['ORDEN_EXTERNA']),
+                        'centroproduccion' => trim($factura['CENTROPRODUCCION']),
+                        'observaciones' => trim($factura['observaciones'])
                     ];
 
                     $contador++;
@@ -436,9 +440,13 @@ class PendienteApiController extends Controller
 
             $saldo_pendiente = $pendiente->cantord - $pendiente->cantdpx;
 
+            // Concatenar los campos doc_entrega y factura_entrega
+            $fac_entrega = $pendiente->doc_entrega . ' ' . $pendiente->factura_entrega;
+
             return response()->json([
                 'pendiente' => $pendiente,
-                'saldo_pendiente' => $saldo_pendiente
+                'saldo_pendiente' => $saldo_pendiente,
+                'fac_entrega' => $fac_entrega
             ]);
         }
         return view('menu.usuario.indexAnalista');
@@ -542,7 +550,9 @@ class PendienteApiController extends Controller
                     'cajero' => trim($factura['cajero']),
                     'orden_externa' => trim($factura['ORDEN_EXTERNA']),
                     'doc_entrega' => trim($factura['documento']),
-                    'factura_entrega' => trim($factura['factura'])
+                    'factura_entrega' => trim($factura['factura']),
+                    'centroproduccion' => trim($factura['CENTROPRODUCCION']),
+                    'observaciones' => trim($factura['observaciones'])
                 ]);
 
                 $contador1++;
@@ -683,7 +693,9 @@ class PendienteApiController extends Controller
                     'cajero' => trim($factura['cajero']),
                     'orden_externa' => trim($factura['ORDEN_EXTERNA']),
                     'doc_entrega' => trim($factura['documento']),
-                    'factura_entrega' => trim($factura['factura'])
+                    'factura_entrega' => trim($factura['factura']),
+                    'centroproduccion' => trim($factura['CENTROPRODUCCION']),
+                    'observaciones' => trim($factura['observaciones'])
                 ]);
 
                 $contador1++;

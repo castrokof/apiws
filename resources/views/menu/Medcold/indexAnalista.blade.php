@@ -441,7 +441,7 @@ Pendientes Medcol Limonar
                 data: data,
                 success: function(data) {
                     $('#pendientes').DataTable().ajax.reload();
-                     $('#porentregar').DataTable().ajax.reload();
+                    $('#porentregar').DataTable().ajax.reload();
                     // $('#entregados').DataTable().ajax.reload();
                     // $('#tanulados').DataTable().ajax.reload();
                     // $('#tdesabastecidos').DataTable().ajax.reload();
@@ -489,9 +489,9 @@ Pendientes Medcol Limonar
                             ],
                             ajax: {
                                 url: "{{route('medcold.pendientes1')}}",
-                                data:{
-                                     _token:"{{ csrf_token() }}"
-                                    },
+                                data: {
+                                    _token: "{{ csrf_token() }}"
+                                },
                                 method: 'POST'
                             },
                             columns: [{
@@ -643,9 +643,9 @@ Pendientes Medcol Limonar
                             ],
                             ajax: {
                                 url: "{{route('medcold.porentregar')}}",
-                                data:{
-                                     _token:"{{ csrf_token() }}"
-                                    },
+                                data: {
+                                    _token: "{{ csrf_token() }}"
+                                },
                                 method: 'POST'
                             },
                             columns: [{
@@ -797,9 +797,9 @@ Pendientes Medcol Limonar
                             ],
                             ajax: {
                                 url: "{{route('medcold.entregados')}}",
-                                data:{
-                                     _token:"{{ csrf_token() }}"
-                                    },
+                                data: {
+                                    _token: "{{ csrf_token() }}"
+                                },
                                 method: 'POST'
                             },
                             columns: [{
@@ -951,9 +951,9 @@ Pendientes Medcol Limonar
                             ],
                             ajax: {
                                 url: "{{route('medcold.desabastecidos')}}",
-                                data:{
-                                     _token:"{{ csrf_token() }}"
-                                    },
+                                data: {
+                                    _token: "{{ csrf_token() }}"
+                                },
                                 method: 'POST'
                             },
                             columns: [{
@@ -1105,9 +1105,9 @@ Pendientes Medcol Limonar
                             ],
                             ajax: {
                                 url: "{{route('medcold.anulados')}}",
-                                data:{
-                                     _token:"{{ csrf_token() }}"
-                                    },
+                                data: {
+                                    _token: "{{ csrf_token() }}"
+                                },
                                 method: 'POST'
                             },
                             columns: [{
@@ -1375,6 +1375,8 @@ Pendientes Medcol Limonar
                     $('#nombre').val(data.pendiente.nombre);
                     $('#cant_pndt').val(data.saldo_pendiente);
                     $('#cums').val(data.pendiente.cums);
+                    $('#centroproduccion').val(data.pendiente.centroproduccion);
+                    $('#observ').val(data.pendiente.observaciones);
                     $('#cantidad').val(data.pendiente.cantidad);
                     $('#cajero').val(data.pendiente.cajero);
                     $('#usuario').val(data.pendiente.usuario);
@@ -1419,11 +1421,13 @@ Pendientes Medcol Limonar
                 dataType: "json",
                 success: function(data) {
 
+
                     // Primer form de información pendientes por pagar
                     $('#Tipodocum_n').val(data.pendiente.Tipodocum);
                     $('#cantdpx_n').val(data.pendiente.cantdpx);
                     $('#cantord_n').val(data.pendiente.cantord);
                     $('#fecha_factura_n').val(moment(data.pendiente.fecha_factura).format('YYYY-MM-DD'));
+                    $('#fecha_entrega_n').val(moment(data.pendiente.fecha_entrega).format('YYYY-MM-DD'));
                     $('#fecha_n').val(moment(data.pendiente.fecha).format('YYYY-MM-DD'));
                     $('#historia_n').val(data.pendiente.historia);
                     $('#apellido1_n').val(data.pendiente.apellido1);
@@ -1439,6 +1443,9 @@ Pendientes Medcol Limonar
                     $('#nombre_n').val(data.pendiente.nombre);
                     $('#cant_pndt_n').val(data.saldo_pendiente);
                     $('#cums_n').val(data.pendiente.cums);
+                    $('#centroproduccion_n').val(data.pendiente.centroproduccion);
+                    $('#observ_n').val(data.pendiente.observaciones);
+                    $('#fac_entrega').val(data.fac_entrega);
                     $('#cantidad_n').val(data.pendiente.cantidad);
                     $('#cajero_n').val(data.pendiente.cajero);
                     $('#usuario_n').val(data.pendiente.usuario);
@@ -1569,7 +1576,7 @@ Pendientes Medcol Limonar
                             if (data.success == 'ok') {
                                 $('#form-general1')[0].reset();
                                 $('#modal-edit-pendientes').modal('hide');
-                                 fill_datatable1_resumen();
+                                fill_datatable1_resumen();
                                 /* limpiarModal(); */
                                 $('#pendientes').DataTable().ajax.reload();
                                 // $('#tobservaciones').DataTable().ajax.reload();
@@ -1671,17 +1678,17 @@ Pendientes Medcol Limonar
         }
 
 
-      // Consulta de resumen de pendientes
+        // Consulta de resumen de pendientes
         $(document).on('click', '#informependientesclic', function() {
             $('.modal-title-resumen-pendientes').text('Resumen de pendientes');
-                $('#modal-resumen-pendientes').modal({
-                    backdrop: 'static',
-                    keyboard: false
-                });
-                $('#modal-resumen-pendientes').modal('show');
-                $('#tablaIndexInformemedicamentos').DataTable().destroy();
+            $('#modal-resumen-pendientes').modal({
+                backdrop: 'static',
+                keyboard: false
+            });
+            $('#modal-resumen-pendientes').modal('show');
+            $('#tablaIndexInformemedicamentos').DataTable().destroy();
 
-                 ajaxRequest1();
+            ajaxRequest1();
         });
 
         function ajaxRequest1() {

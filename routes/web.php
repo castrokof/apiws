@@ -51,78 +51,79 @@ Route::get('/home', 'HomeController@index')->name('home')->middleware('verified'
 Route::get('/direccionado', 'HomeController@direccionado')->name('direccionado')->middleware('verified')->middleware('verifyuser');
 
 //Ruta que se usa para enviar por el servicio put a programar las prescripciones desde la function index
-Route::post('/programar', 'HomeController@Programarm')->name('programar')->middleware('verified');
+Route::post('/programar', 'HomeController@Programarm')->name('programar')->middleware('verified')->middleware('verifyuser');
 
 //Ruta para consultar lo programado por el regente o administrador
-Route::get('/programado', 'HomeController@indexp')->name('programado')->middleware('verified');
+Route::get('/programado', 'HomeController@indexp')->name('programado')->middleware('verified')->middleware('verifyuser');
 
 //Ruta que se usa para enviar por el servicio put a anular lo programado desde la function indexp
-Route::post('/a-programar', 'HomeController@Anularprogramacion')->name('a-programar')->middleware('verified');
+Route::post('/a-programar', 'HomeController@Anularprogramacion')->name('a-programar')->middleware('verified')->middleware('verifyuser');
 
 
 //Ruta que se usa para enviar por el servicio put el reporte de la dispensación desde la function indexd
-Route::post('/dispensado', 'HomeController@Reportardispensacion')->name('dispensado')->middleware('verified');
+Route::post('/dispensado', 'HomeController@Reportardispensacion')->name('dispensado')->middleware('verified')->middleware('verifyuser');
 
 //Ruta que se usa para direccionar a la vista del ingreso del token hercules
 Route::get('/tokenhercules', 'HomeController@tokenherculesindex')->name('tokenhercules')->middleware('verified');
 
 //Ruta que se usa para enviar por el servicio put a generar el token del ws
-Route::post('/tokenhercules_token', 'HomeController@tokenhercules')->name('tokenhercules1')->middleware('verified');
+Route::post('/tokenhercules_token', 'HomeController@tokenhercules')->name('tokenhercules1')->middleware('verified')->middleware('verifyuser');
 
 //Ruta para consultar lo entregado
 Route::get('/entregado', 'HomeController@indexe')->name('entregado')->middleware('verified')->middleware('verifyuser');
 
 //Ruta que se usa para enviar por el servicio put a anular lo entregado desde la function indexe
-Route::post('/a-entrega', 'HomeController@Anularentrega')->name('a-entrega')->middleware('verified');
+Route::post('/a-entrega', 'HomeController@Anularentrega')->name('a-entrega')->middleware('verified')->middleware('verifyuser');
 
 //Ruta para consultar lo reportado y entregado
 Route::get('/repentregado', 'HomeController@indexrepe')->name('repentregado')->middleware('verified')->middleware('verifyuser');
 
 //Ruta que se usa para enviar por el servicio put el reporte de lo entregado desde la function indexe
-Route::post('/r-entrega', 'HomeController@Reportarentrega')->name('r-entrega')->middleware('verified');
+Route::post('/r-entrega', 'HomeController@Reportarentrega')->name('r-entrega')->middleware('verified')->middleware('verifyuser');
 
 //Ruta que se usa para enviar por el servicio put a anular el reporte de entrega desde la function indexrepe
-Route::post('/a-rentrega', 'HomeController@Anularrentrega')->name('a-rentrega')->middleware('verified');
+Route::post('/a-rentrega', 'HomeController@Anularrentrega')->name('a-rentrega')->middleware('verified')->middleware('verifyuser');
 
 //Ruta que se usa para enviar por el servicio put el reporte de lo entregado desde la function indexe
-Route::post('/r-factura', 'HomeController@Reportarfactura')->name('r-factura')->middleware('verified');
+Route::post('/r-factura', 'HomeController@Reportarfactura')->name('r-factura')->middleware('verified')->middleware('verifyuser');
 
 //Ruta para consultar lo facturado
-Route::get('/facturado', 'HomeController@indexf')->name('facturado')->middleware('verified')->middleware('verifyuser');
+Route::get('/facturado', 'HomeController@indexf')->name('facturado')->middleware('verified')->middleware('verifyuser')->middleware('verifyuser');
 
 //Ruta que se usa para enviar por el servicio put a anular el reporte de lo facturado desde la function indexf
-Route::post('/a-facturado', 'HomeController@Anularfactura')->name('a-facturado')->middleware('verified');
+Route::post('/a-facturado', 'HomeController@Anularfactura')->name('a-facturado')->middleware('verified')->middleware('verifyuser');
 
 
 // Nuevo
 //Ruta para direccionar los diferentes modulos
 
 Route::get('/submenu', 'MenuContoller@index')->name('submenu')->middleware('verified');
-Route::get('/usuariosapi', 'UsuarioApiContoller@index')->name('usuariosapi')->middleware('verified');
-Route::get('/guardar_usuario', 'UsuarioApiContoller@createuserapi')->name('guardar_usuario')->middleware('verified');
+Route::get('/menudispensado', 'MenuContoller@index1')->name('dismenu')->middleware('verified');
+Route::get('/usuariosapi', 'UsuarioApiContoller@index')->name('usuariosapi')->middleware('verified')->middleware('verifyuser');
+Route::get('/guardar_usuario', 'UsuarioApiContoller@createuserapi')->name('guardar_usuario')->middleware('verified')->middleware('verifyuser');
 
 //Rutas de tablas de pendientes MEDCOL 2
 
-Route::get('/pendientes', 'PendienteApiController@index')->name('pendientes')->middleware('verified');
-Route::post('/pendientes1', 'PendienteApiController@index1')->name('pendientes1')->middleware('verified');
-Route::post('/porentregar', 'PendienteApiController@porentregar')->name('porentregar')->middleware('verified');
-Route::post('/entregados', 'PendienteApiController@entregados')->name('entregados')->middleware('verified');
-Route::post('/desabastecidos', 'PendienteApiController@getDesabastecidos')->name('desabastecidos')->middleware('verified');
-Route::post('/anulados', 'PendienteApiController@getAnulados')->name('anulados')->middleware('verified');
-Route::get('/guardar_observacion', 'PendienteApiController@guardar')->name('guardar_observacion')->middleware('verified');
+Route::get('/pendientes', 'PendienteApiController@index')->name('pendientes')->middleware('verified')->middleware('verifyuser');
+Route::post('/pendientes1', 'PendienteApiController@index1')->name('pendientes1')->middleware('verified')->middleware('verifyuser');
+Route::post('/porentregar', 'PendienteApiController@porentregar')->name('porentregar')->middleware('verified')->middleware('verifyuser');
+Route::post('/entregados', 'PendienteApiController@entregados')->name('entregados')->middleware('verified')->middleware('verifyuser');
+Route::post('/desabastecidos', 'PendienteApiController@getDesabastecidos')->name('desabastecidos')->middleware('verified')->middleware('verifyuser');
+Route::post('/anulados', 'PendienteApiController@getAnulados')->name('anulados')->middleware('verified')->middleware('verifyuser');
+Route::get('/guardar_observacion', 'PendienteApiController@guardar')->name('guardar_observacion')->middleware('verified')->middleware('verifyuser');
 
-Route::get('editpendientes/{id}', 'PendienteApiController@edit')->name('pendientes-edit')->middleware('verified');
-Route::get('showpendientes/{id}', 'PendienteApiController@show')->name('pendientes-show')->middleware('verified');
-Route::put('pendientes/{id}', 'PendienteApiController@update')->name('actualizar_pendientes')->middleware('verified');
-Route::post('pendientes', 'PendienteApiController@saveObs')->name('crear_observacion')->middleware('verified');
+Route::get('editpendientes/{id}', 'PendienteApiController@edit')->name('pendientes-edit')->middleware('verified')->middleware('verifyuser');
+Route::get('showpendientes/{id}', 'PendienteApiController@show')->name('pendientes-show')->middleware('verified')->middleware('verifyuser');
+Route::put('pendientes/{id}', 'PendienteApiController@update')->name('actualizar_pendientes')->middleware('verified')->middleware('verifyuser');
+Route::post('pendientes', 'PendienteApiController@saveObs')->name('crear_observacion')->middleware('verified')->middleware('verifyuser');
 
-Route::get('observaciones', 'PendienteApiController@getObservaciones')->name('observaciones')->middleware('verified');
+Route::get('observaciones', 'PendienteApiController@getObservaciones')->name('observaciones')->middleware('verified')->middleware('verifyuser');
 
-Route::get('/syncapi', 'PendienteApiController@createapendientespi')->name('syncapi')->middleware('verified');
+Route::get('/syncapi', 'PendienteApiController@createapendientespi')->name('syncapi')->middleware('verified')->middleware('verifyuser');
 
-Route::get('informe', 'PendienteApiController@informes')->name('informe')->middleware('verified');
+Route::get('informe', 'PendienteApiController@informes')->name('informe')->middleware('verified')->middleware('verifyuser');
 
-Route::get('informepedientes', 'PendienteApiController@informepedientes')->name('informepedientes')->middleware('verified');
+Route::get('informepedientes', 'PendienteApiController@informepedientes')->name('informepedientes')->middleware('verified')->middleware('verifyuser');
 
 /*
 **
@@ -130,26 +131,36 @@ Route::get('informepedientes', 'PendienteApiController@informepedientes')->name(
 */
 //Rutas de tablas de pendientes MEDCOL 4
 
-Route::get('medcol3/pendientes', 'Medcol3\PendienteApiMedcol3Controller@index')->name('medcol3.pendientes')->middleware('verified');
-Route::post('medcol3/pendientes1', 'Medcol3\PendienteApiMedcol3Controller@index1')->name('medcol3.pendientes1')->middleware('verified');
-Route::post('medcol3/porentregar', 'Medcol3\PendienteApiMedcol3Controller@porentregar')->name('medcol3.porentregar')->middleware('verified');
-Route::post('medcol3/entregados', 'Medcol3\PendienteApiMedcol3Controller@entregados')->name('medcol3.entregados')->middleware('verified');
-Route::post('medcol3/desabastecidos', 'Medcol3\PendienteApiMedcol3Controller@getDesabastecidos')->name('medcol3.desabastecidos')->middleware('verified');
-Route::post('medcol3/anulados', 'Medcol3\PendienteApiMedcol3Controller@getAnulados')->name('medcol3.anulados')->middleware('verified');
-Route::get('medcol3/guardar_observacion', 'Medcol3\PendienteApiMedcol3Controller@guardar')->name('medcol3.guardar_observacion')->middleware('verified');
+Route::get('medcol3/pendientes', 'Medcol3\PendienteApiMedcol3Controller@index')->name('medcol3.pendientes')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol3/pendientes1', 'Medcol3\PendienteApiMedcol3Controller@index1')->name('medcol3.pendientes1')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol3/porentregar', 'Medcol3\PendienteApiMedcol3Controller@porentregar')->name('medcol3.porentregar')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol3/entregados', 'Medcol3\PendienteApiMedcol3Controller@entregados')->name('medcol3.entregados')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol3/desabastecidos', 'Medcol3\PendienteApiMedcol3Controller@getDesabastecidos')->name('medcol3.desabastecidos')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol3/anulados', 'Medcol3\PendienteApiMedcol3Controller@getAnulados')->name('medcol3.anulados')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol3/guardar_observacion', 'Medcol3\PendienteApiMedcol3Controller@guardar')->name('medcol3.guardar_observacion')->middleware('verified')->middleware('verifyuser');
 
-Route::get('medcol3/editpendientes/{id}', 'Medcol3\PendienteApiMedcol3Controller@edit')->name('medcol3.pendientes-edit')->middleware('verified');
-Route::get('medcol3/showpendientes/{id}', 'Medcol3\PendienteApiMedcol3Controller@show')->name('medcol3.pendientes-show')->middleware('verified');
-Route::put('medcol3/pendientes/{id}', 'Medcol3\PendienteApiMedcol3Controller@update')->name('medcol3.actualizar_pendientes')->middleware('verified');
-Route::post('medcol3/pendientes', 'Medcol3\PendienteApiMedcol3Controller@saveObs')->name('medcol3.crear_observacion')->middleware('verified');
+Route::get('medcol3/editpendientes/{id}', 'Medcol3\PendienteApiMedcol3Controller@edit')->name('medcol3.pendientes-edit')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol3/showpendientes/{id}', 'Medcol3\PendienteApiMedcol3Controller@show')->name('medcol3.pendientes-show')->middleware('verified')->middleware('verifyuser');
+Route::put('medcol3/pendientes/{id}', 'Medcol3\PendienteApiMedcol3Controller@update')->name('medcol3.actualizar_pendientes')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol3/pendientes', 'Medcol3\PendienteApiMedcol3Controller@saveObs')->name('medcol3.crear_observacion')->middleware('verified')->middleware('verifyuser');
 
-Route::get('medcol3/observaciones', 'Medcol3\PendienteApiMedcol3Controller@getObservaciones')->name('medcol3.observaciones')->middleware('verified');
+Route::get('medcol3/observaciones', 'Medcol3\PendienteApiMedcol3Controller@getObservaciones')->name('medcol3.observaciones')->middleware('verified')->middleware('verifyuser');
 
-Route::get('medcol3/syncapi', 'Medcol3\PendienteApiMedcol3Controller@createapendientespi')->name('medcol3.syncapi')->middleware('verified');
+Route::get('medcol3/syncapi', 'Medcol3\PendienteApiMedcol3Controller@createapendientespi')->name('medcol3.syncapi')->middleware('verified')->middleware('verifyuser');
 
-Route::get('medcol3/informe', 'Medcol3\PendienteApiMedcol3Controller@informes')->name('medcol3.informe')->middleware('verified');
+Route::get('medcol3/informe', 'Medcol3\PendienteApiMedcol3Controller@informes')->name('medcol3.informe')->middleware('verified')->middleware('verifyuser');
 
-Route::get('informepedientes3', 'Medcol3\PendienteApiMedcol3Controller@informepedientes')->name('informepedientes3')->middleware('verified');
+Route::get('informepedientes3', 'Medcol3\PendienteApiMedcol3Controller@informepedientes')->name('informepedientes3')->middleware('verified')->middleware('verifyuser');
+
+
+//Rutas de tablas de Dispensado MEDCOL 4
+
+Route::get('medcol3/dispensado', 'Medcol3\DispensadoApiMedcol4Controller@index')->name('medcol3.dispensado')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol3/dispensado1', 'Medcol3\DispensadoApiMedcol4Controller@index1')->name('medcol3.dispensado1')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol3/disrevisado', 'Medcol3\DispensadoApiMedcol4Controller@disrevisado')->name('medcol3.disrevisado')->middleware('verified')->middleware('verifyuser');
+Route::put('medcol3/dispensado/{id}', 'Medcol3\DispensadoApiMedcol4Controller@update')->name('medcol3.actualizar_dispensado')->middleware('verified')->middleware('verifyuser');
+
+Route::get('medcol3/dispensado/syncdisapi', 'Medcol3\DispensadoApiMedcol4Controller@createdispensadoapi')->name('medcol3.dispensadosyncapi')->middleware('verified')->middleware('verifyuser');
 
 
 /*
@@ -159,28 +170,32 @@ Route::get('informepedientes3', 'Medcol3\PendienteApiMedcol3Controller@informepe
 
     //Rutas de tablas de pendientes MEDCOL DOLOR
 
-    Route::get('medcold/pendientes', 'Medcold\PendienteApiMedcoldController@index')->name('medcold.pendientes')->middleware('verified');
-    Route::post('medcold/pendientes1', 'Medcold\PendienteApiMedcoldController@index1')->name('medcold.pendientes1')->middleware('verified');
-    Route::post('medcold/porentregar', 'Medcold\PendienteApiMedcoldController@porentregar')->name('medcold.porentregar')->middleware('verified');
-    Route::post('medcold/entregados', 'Medcold\PendienteApiMedcoldController@entregados')->name('medcold.entregados')->middleware('verified');
-    Route::post('medcold/desabastecidos', 'Medcold\PendienteApiMedcoldController@getDesabastecidos')->name('medcold.desabastecidos')->middleware('verified');
-    Route::post('medcold/anulados', 'Medcold\PendienteApiMedcoldController@getAnulados')->name('medcold.anulados')->middleware('verified');
-    Route::get('medcold/guardar_observacion', 'Medcold\PendienteApiMedcoldController@guardar')->name('medcold.guardar_observacion')->middleware('verified');
+    Route::get('medcold/pendientes', 'Medcold\PendienteApiMedcoldController@index')->name('medcold.pendientes')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/pendientes1', 'Medcold\PendienteApiMedcoldController@index1')->name('medcold.pendientes1')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/porentregar', 'Medcold\PendienteApiMedcoldController@porentregar')->name('medcold.porentregar')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/entregados', 'Medcold\PendienteApiMedcoldController@entregados')->name('medcold.entregados')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/desabastecidos', 'Medcold\PendienteApiMedcoldController@getDesabastecidos')->name('medcold.desabastecidos')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/anulados', 'Medcold\PendienteApiMedcoldController@getAnulados')->name('medcold.anulados')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcold/guardar_observacion', 'Medcold\PendienteApiMedcoldController@guardar')->name('medcold.guardar_observacion')->middleware('verified')->middleware('verifyuser');
     
-    Route::get('medcold/editpendientes/{id}', 'Medcold\PendienteApiMedcoldController@edit')->name('medcold.pendientes-edit')->middleware('verified');
+    Route::get('medcold/editpendientes/{id}', 'Medcold\PendienteApiMedcoldController@edit')->name('medcold.pendientes-edit')->middleware('verified')->middleware('verifyuser');
     Route::get('medcold/showpendientes/{id}', 'Medcold\PendienteApiMedcoldController@show')->name('medcold.pendientes-show')->middleware('verified');
-    Route::put('medcold/pendientes/{id}', 'Medcold\PendienteApiMedcoldController@update')->name('medcold.actualizar_pendientes')->middleware('verified');
-    Route::post('medcold/pendientes', 'Medcold\PendienteApiMedcoldController@saveObs')->name('medcold.crear_observacion')->middleware('verified');
+    Route::put('medcold/pendientes/{id}', 'Medcold\PendienteApiMedcoldController@update')->name('medcold.actualizar_pendientes')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/pendientes', 'Medcold\PendienteApiMedcoldController@saveObs')->name('medcold.crear_observacion')->middleware('verified')->middleware('verifyuser');
     
-    Route::get('medcold/observaciones', 'Medcold\PendienteApiMedcoldController@getObservaciones')->name('medcold.observaciones')->middleware('verified');
+    Route::get('medcold/observaciones', 'Medcold\PendienteApiMedcoldController@getObservaciones')->name('medcold.observaciones')->middleware('verified')->middleware('verifyuser');
     
-    Route::get('medcold/syncapi', 'Medcold\PendienteApiMedcoldController@createapendientespi')->name('medcold.syncapi')->middleware('verified');
+    Route::get('medcold/syncapi', 'Medcold\PendienteApiMedcoldController@createapendientespi')->name('medcold.syncapi')->middleware('verified')->middleware('verifyuser');
     
-    Route::get('medcold/informe', 'Medcold\PendienteApiMedcoldController@informes')->name('medcold.informe')->middleware('verified');
+    Route::get('medcold/informe', 'Medcold\PendienteApiMedcoldController@informes')->name('medcold.informe')->middleware('verified')->middleware('verifyuser');
     
-    Route::get('informepedientesd', 'Medcold\PendienteApiMedcoldController@informepedientes')->name('informepedientesd')->middleware('verified');
+    Route::get('informepedientesd', 'Medcold\PendienteApiMedcoldController@informepedientes')->name('informepedientesd')->middleware('verified')->middleware('verifyuser');
+    
+     //Rutas de views de pendientes MEDCOL CLIENTES
 
-
-//Rutas para la generacion de informes y graficas
-
+    Route::get('medcolcli/pendientes', 'Medcolcli\PendienteMedcolCliController@index')->name('medcolCli.pendientes')->middleware('verified');
+    Route::post('medcolcli/pendientes1', 'Medcolcli\PendienteMedcolCliController@index1')->name('medcolCli.pendientes1')->middleware('verified');
+    
+    Route::get('selectcie10', 'DiagnosticosCie10Controller@selectcie10')->name('selectcie10')->middleware('verified');
+    
 
