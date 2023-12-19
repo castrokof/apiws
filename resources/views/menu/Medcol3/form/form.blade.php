@@ -140,7 +140,7 @@
     </div>
     <div class="col-lg-2">
         <label for="doc_entrega" class="col-xs-4 control-label requerido">Doc Entrega</label>
-        <input type="text" name="doc_entrega" id="doc_entrega" class="form-control " minlength="6" value="MDC" readonly> </br>
+        <input type="text" name="doc_entrega" id="doc_entrega" class="form-control " minlength="6" value="MCD" readonly> </br>
 
         <label for="factura_entrega" class="col-xs-4 control-label requerido">Factura Entrega</label>
         <input type="text" name="factura_entrega" id="factura_entrega" class="form-control" placeholder="No. Factura Rfast...">
