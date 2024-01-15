@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DiagnosticosCie10;
 use Illuminate\Http\Request;
 
-class MenuContoller extends Controller
+class DiagnosticosCie10Controller extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -13,7 +14,7 @@ class MenuContoller extends Controller
      */
     public function index()
     {
-        return view('menu.submenu');
+        //
     }
 
     /**
@@ -21,9 +22,38 @@ class MenuContoller extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index1()
+      public function selectcie10(Request $request)
     {
-        return view('menu.menudispensado');
+
+        $array=[];
+
+
+        if($request->has('q'))
+        {
+            $term = $request->get('q');
+
+
+                array_push($array, DiagnosticosCie10::orderBy('id')->where([
+                ['estado', 'ACTIVO']])->where('codigo', 'LIKE', '%' . $term . '%')
+                ->get());
+
+            return response()->json(['array'=>$array]);
+        }
+        
+        /*else{
+
+
+
+                array_push($array, DiagnosticosCie10::orderBy('codigo')->where([
+                    ['estado', 'ACTIVO']])
+                ->get());
+
+
+                return response()->json(['array'=>$array]);
+
+
+
+        }*/
     }
 
     /**

@@ -161,6 +161,8 @@ Route::post('medcol3/disrevisado', 'Medcol3\DispensadoApiMedcol4Controller@disre
 Route::put('medcol3/dispensado/{id}', 'Medcol3\DispensadoApiMedcol4Controller@update')->name('medcol3.actualizar_dispensado')->middleware('verified')->middleware('verifyuser');
 
 Route::get('medcol3/dispensado/syncdisapi', 'Medcol3\DispensadoApiMedcol4Controller@createdispensadoapi')->name('medcol3.dispensadosyncapi')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol3/add_dispensado', 'Medcol3\DispensadoApiMedcol4Controller@adddispensacionarray')->name('add_dispensacion')->middleware('verified')->middleware('verifyuser');
+
 
 
 /*
@@ -191,10 +193,25 @@ Route::get('medcol3/dispensado/syncdisapi', 'Medcol3\DispensadoApiMedcol4Control
     
     Route::get('informepedientesd', 'Medcold\PendienteApiMedcoldController@informepedientes')->name('informepedientesd')->middleware('verified')->middleware('verifyuser');
     
+    
+    //Rutas de tablas de Dispensado MEDCOL DOLOR
+
+Route::get('medcold/dispensado', 'Medcold\DispensadoApiMedcoldController@index')->name('medcold.dispensado')->middleware('verified')->middleware('verifyuser');
+Route::post('medcold/dispensado1', 'Medcold\DispensadoApiMedcoldController@index1')->name('medcold.dispensado1')->middleware('verified')->middleware('verifyuser');
+Route::post('medcold/disrevisado', 'Medcold\DispensadoApiMedcoldController@disrevisado')->name('medcold.disrevisado')->middleware('verified')->middleware('verifyuser');
+Route::put('medcold/dispensado/{id}', 'Medcold\DispensadoApiMedcoldController@update')->name('medcold.actualizar_dispensado')->middleware('verified')->middleware('verifyuser');
+
+Route::get('medcold/dispensado/syncdisapi', 'Medcold\DispensadoApiMedcoldController@createdispensadoapi')->name('medcold.dispensadosyncapi')->middleware('verified')->middleware('verifyuser');
+Route::post('medcold/add_dispensado', 'Medcold\DispensadoApiMedcoldController@adddispensacionarray')->name('add_dispensaciond')->middleware('verified')->middleware('verifyuser');
+    
+    
      //Rutas de views de pendientes MEDCOL CLIENTES
 
     Route::get('medcolcli/pendientes', 'Medcolcli\PendienteMedcolCliController@index')->name('medcolCli.pendientes')->middleware('verified');
     Route::post('medcolcli/pendientes1', 'Medcolcli\PendienteMedcolCliController@index1')->name('medcolCli.pendientes1')->middleware('verified');
+    
+    Route::get('medcolcli/dispensado', 'Medcolcli\DispensadoMedcolCliController@index')->name('medcolCli.dispensado')->middleware('verified');
+    Route::post('medcolcli/dispensado1', 'Medcolcli\DispensadoMedcolCliController@index1')->name('medcolCli.dispensado1')->middleware('verified');
     
     Route::get('selectcie10', 'DiagnosticosCie10Controller@selectcie10')->name('selectcie10')->middleware('verified');
     

@@ -90,6 +90,11 @@
                                     <span class="badge badge-pill badge-primary pull-right">consolidado Medcol</span>
                                 </a>
                             </li>
+                             <li class="nav-item">
+                               <a href="{{ route('medcolCli.dispensado') }}" class="list-group-item list-group-item-action">
+                                    <span class="badge badge-pill badge-warning pull-right">consolidado dis Medcol</span>
+                                </a>
+                            </li>
                     </div>
                         <li class="nav-item dropdown">
                             <a id="navbarDropdown" class="btn btn-info dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
@@ -251,7 +256,7 @@
                         <div class="card-body text-center">
                             <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Dolor y Paliativos</div>
                             <div class="list-group">
-                                <a href="{{ route('medcol3.dispensado') }}" class="list-group-item list-group-item-action">
+                                <a href="{{ route('medcold.dispensado') }}" class="list-group-item list-group-item-action">
                                     <i class="far fa-share-square"></i> Gestionar Dispensación de Dolor y Paliativos <span
                                         class="badge badge-pill badge-primary pull-right">Dolor y Paliativos</span>
                                 </a>

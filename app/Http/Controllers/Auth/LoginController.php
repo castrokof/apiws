@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -36,6 +38,30 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
+    }
+    
+     protected function authenticated(Request $request, $user)
+    {
+        
+        
+        
+        $rol = $user;
+        
+        if ($rol->rol == '1' || $rol->rol == '2'  ) {
+           
+            return redirect(RouteServiceProvider::HOME);
+
+        }else if ($rol->rol == '3') {
+          
+            return redirect('submenu');
+
+        
+        }else{
+            $this->guard()->logout();
+            $request->session()->invalidate();
+            return redirect('/login')->withErrors(['error'=>'Este usuario no esta activo y no tiene rol ']);
+        }
+
     }
     
     

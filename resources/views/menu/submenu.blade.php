@@ -90,6 +90,11 @@
                                     <span class="badge badge-pill badge-primary pull-right">consolidado Medcol</span>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                               <a href="{{ route('medcolCli.dispensado') }}" class="list-group-item list-group-item-action">
+                                    <span class="badge badge-pill badge-warning pull-right">consolidado dis Medcol</span>
+                                </a>
+                            </li>
                     </div>
                         <li class="nav-item dropdown">
                             <a id="navbarDropdown" class="btn btn-info dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
@@ -196,7 +201,7 @@
                                 </a>
                                 
                                 <a class="dropdown-item" href="{{ route('submenu') }}">
-                                    {{ __('Pendientes') }}
+                                    {{ __('Menú') }}
                                 </a>
 
                                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
@@ -278,6 +283,20 @@
                                 <a href="{{ route('medcolCli.pendientes') }}" class="list-group-item list-group-item-action">
                                     <i class="fas fa-share-square"></i> Consultar Pendientes Medcol <span
                                         class="badge badge-pill badge-primary pull-right">consolidado Medcol</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card bg-primary">
+                        <div class="card-body text-center">
+                            <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Consolidado Dispensado</div>
+                            <div class="list-group">
+
+
+                                <a href="{{ route('medcolCli.dispensado') }}" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-share-square"></i> Consultar Dispensaado Medcol <span
+                                        class="badge badge-pill badge-secondary pull-right">consolidado Medcol</span>
                                 </a>
 
                             </div>

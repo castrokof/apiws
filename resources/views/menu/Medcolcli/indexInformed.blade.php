@@ -3,7 +3,7 @@
 
 @section('title')
 
-Pendientes Medcol
+Dispensado Medcol
 
 @endsection
 
@@ -87,7 +87,7 @@ Pendientes Medcol
 
                   <div class="row">
                     <div class="col-12">
-                      <div class="card shadow-lg p-3 mb-5 card-success card-tabs">
+                      <div class="card shadow-lg p-3 mb-5 card-warning card-tabs">
                         <div class="card-header p-0 pt-1">
                           <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
                             <li class="nav-item">
@@ -97,7 +97,7 @@ Pendientes Medcol
                               href="#custom-tabs-one-datos-del-pago"
                               role="tab"
                               aria-controls="custom-tabs-one-datos-del-pago"
-                              aria-selected="false">Lista de Pendientes</a>
+                              aria-selected="false">Lista de Dispensados</a>
                             </li>
                           </ul>
                         </div>
@@ -108,7 +108,7 @@ Pendientes Medcol
 
 
                                   @csrf
-                                  @include('menu.Medcolcli.tablas.tablaIndexPendientes')
+                                  @include('menu.Medcolcli.tablas.tablaIndexDispensados')
 
                             </div>
                            </div>
@@ -169,7 +169,7 @@ fechafin = $('#fechafin').val();
 
     if(fechaini != '' && fechafin != ''){
 
-        $('#pendientescli').DataTable().destroy();
+        $('#dispensadocli').DataTable().destroy();
 
         fill_datatable_tabla(fechaini, fechafin);
 
@@ -192,7 +192,7 @@ $('#reset').click(function(){
 $('#fechaini').val('');
 $('#fechafin').val('');
 
-$('#pendientescli').DataTable().destroy();
+$('#dispensadocli').DataTable().destroy();
 fill_datatable_tabla();
 
 });
@@ -202,7 +202,7 @@ fill_datatable_tabla();
 
 function  fill_datatable_tabla(fechaini = '', fechafin = ''){
 
-var datatable =  $('#pendientescli').DataTable({
+var datatable =  $('#dispensadocli').DataTable({
                             language: idioma_espanol,
                             processing: true,
                             lengthMenu: [
@@ -215,88 +215,43 @@ var datatable =  $('#pendientescli').DataTable({
                                 [3, "desc"]
                             ],
                             ajax: {
-                                url: "{{route('medcolCli.pendientes1')}}",
+                                url: "{{route('medcolCli.dispensado1')}}",
                                 data:{
-                                    fechaini:fechaini, fechafin:fechafin,
-                                     _token:"{{ csrf_token() }}"
-                                    },
+                                         fechaini:fechaini, fechafin:fechafin,
+                                          _token:"{{ csrf_token() }}"
+                                         },
                                 method: 'POST'
                             },
                             columns: [
                                 
-                                {
-                                    data: 'centroproduccion'
-                                },
-                                {
-                                    data: 'Tipodocum'
-                                },
-                                {
-                                    data: 'cantdpx'
-                                },
-                                {
-                                    data: 'cantord'
-                                },
-                                {
-                                    data: 'fecha_factura'
-                                },
-                                {
-                                    data: 'fecha'
-                                },
-                                {
-                                    data: 'historia'
-                                },
-                                {
-                                    data: 'apellido1'
-                                },
-                                {
-                                    data: 'apellido2'
-                                },
-                                {
-                                    data: 'nombre1'
-                                },
-                                {
-                                    data: 'nombre2'
-                                },
-                                {
-                                    data: 'cantedad'
-                                },
-                                {
-                                    data: 'direcres'
-                                },
-                                {
-                                    data: 'telefres'
-                                },
-                                {
-                                    data: 'documento'
-                                },
-                                {
-                                    data: 'factura'
-                                },
-                                {
-                                    data: 'codigo'
-                                },
-                                {
-                                    data: 'nombre'
-                                },
-                                {
-                                    data: 'cums'
-                                },
-                                {
-                                    data: 'cantidad'
-                                },
-                                {
-                                    data: 'cajero'
-                                },
-                                {
-                                    data: 'usuario'
-                                },
-                                {
-                                    data: 'estado'
-                                },
-                                
-                                {
-                                    data: 'fecha_entrega'
-                                }
+                                 
+                                 {data: 'drogueria'},
+                                 {data: 'tipodocument'},
+                                 {data: 'idusuario'},
+                                 {data: 'paciente'},
+                                 {data: 'factura'},
+                                 {data: 'autorizacion'},
+                                 {data: 'cums'},
+                                 {data: 'expediente'},
+                                 {data: 'consecutivo'},
+                                 {data: 'cums_rips'},
+                                 {data: 'codigo'},
+                                 {data: 'tipo_medicamento'},
+                                 {data: 'nombre_generico'},
+                                 {data: 'atc'},
+                                 {data: 'forma'},
+                                 {data: 'concentracion'},
+                                 {data: 'unidad_medicamento'},
+                                 {data: 'numero_unidades'},
+                                 {data: 'regimen'},
+                                 {data: 'fecha_suministro'},
+                                 {data: 'id_medico'},
+                                 {data: 'medico'},
+                                 {data: 'estado'},
+                                 {data: 'centroprod'},
+                                 {data: 'cajero'}
+                               
+                               
                             ],
 
                             //Botones----------------------------------------------------------------------
