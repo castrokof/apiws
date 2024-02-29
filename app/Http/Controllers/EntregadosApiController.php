@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Medcold;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Medcold\EntregadosApiMedcold;
-
+use App\EntregadosApi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
-class EntregadosApiMedcoldController extends Controller
+class EntregadosApiController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,7 +18,7 @@ class EntregadosApiMedcoldController extends Controller
         /* $this->createapendientespi($request); */
 
         if ($request->ajax()) {
-            $entregadosapi = EntregadosApiMedcol3::orderBy('id')->get();
+            $entregadosapi = EntregadosApi::orderBy('id')->get();
 
             return DataTables()->of($entregadosapi)
                 ->addColumn('action', function ($entregado) {
@@ -31,7 +30,7 @@ class EntregadosApiMedcoldController extends Controller
                 ->make(true);
         }
 
-        return view('menu.Medcol3.indexAnalista');
+        return view('menu.usuario.indexAnalista');
     }
 
     /**
@@ -58,10 +57,10 @@ class EntregadosApiMedcoldController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Medcol3\EntregadosApiMedcol3  $entregadosApiMedcol3
+     * @param  \App\EntregadosApi  $entregadosApi
      * @return \Illuminate\Http\Response
      */
-    public function show(EntregadosApiMedcol3 $entregadosApiMedcol3)
+    public function show(EntregadosApi $entregadosApi)
     {
         //
     }
@@ -69,10 +68,10 @@ class EntregadosApiMedcoldController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Medcol3\EntregadosApiMedcol3  $entregadosApiMedcol3
+     * @param  \App\EntregadosApi  $entregadosApi
      * @return \Illuminate\Http\Response
      */
-    public function edit(EntregadosApiMedcol3 $entregadosApiMedcol3)
+    public function edit(EntregadosApi $entregadosApi)
     {
         //
     }
@@ -81,10 +80,10 @@ class EntregadosApiMedcoldController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Medcol3\EntregadosApiMedcol3  $entregadosApiMedcol3
+     * @param  \App\EntregadosApi  $entregadosApi
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, EntregadosApiMedcol3 $entregadosApiMedcol3)
+    public function update(Request $request, EntregadosApi $entregadosApi)
     {
         //
     }
@@ -92,10 +91,10 @@ class EntregadosApiMedcoldController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Medcol3\EntregadosApiMedcol3  $entregadosApiMedcol3
+     * @param  \App\EntregadosApi  $entregadosApi
      * @return \Illuminate\Http\Response
      */
-    public function destroy(EntregadosApiMedcol3 $entregadosApiMedcol3)
+    public function destroy(EntregadosApi $entregadosApi)
     {
         //
     }

@@ -125,6 +125,17 @@ Route::get('informe', 'PendienteApiController@informes')->name('informe')->middl
 
 Route::get('informepedientes', 'PendienteApiController@informepedientes')->name('informepedientes')->middleware('verified')->middleware('verifyuser');
 
+
+    //Rutas de tablas de Dispensado MEDCOL 2
+
+Route::get('medcol2/dispensado', 'Medcol2\DispensadoApiMedcol2Controller@index')->name('medcol2.dispensado')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol2/dispensado1', 'Medcol2\DispensadoApiMedcol2Controller@index1')->name('medcol2.dispensado1')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol2/disrevisado', 'Medcol2\DispensadoApiMedcol2Controller@disrevisado')->name('medcol2.disrevisado')->middleware('verified')->middleware('verifyuser');
+Route::put('medcol2/dispensado/{id}', 'Medcol2\DispensadoApiMedcol2Controller@update')->name('medcol2.actualizar_dispensado')->middleware('verified')->middleware('verifyuser');
+
+Route::get('medcol2/dispensado/syncdisapi', 'Medcol2\DispensadoApiMedcol2Controller@createdispensadoapi')->name('medcol2.dispensadosyncapi')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol2/add_dispensado', 'Medcol2\DispensadoApiMedcol2Controller@adddispensacionarray')->name('add_dispensacion2')->middleware('verified')->middleware('verifyuser');
+
 /*
 **
 **
@@ -157,6 +168,7 @@ Route::get('informepedientes3', 'Medcol3\PendienteApiMedcol3Controller@informepe
 
 Route::get('medcol3/dispensado', 'Medcol3\DispensadoApiMedcol4Controller@index')->name('medcol3.dispensado')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol3/dispensado1', 'Medcol3\DispensadoApiMedcol4Controller@index1')->name('medcol3.dispensado1')->middleware('verified')->middleware('verifyuser');
+
 Route::post('medcol3/disrevisado', 'Medcol3\DispensadoApiMedcol4Controller@disrevisado')->name('medcol3.disrevisado')->middleware('verified')->middleware('verifyuser');
 Route::put('medcol3/dispensado/{id}', 'Medcol3\DispensadoApiMedcol4Controller@update')->name('medcol3.actualizar_dispensado')->middleware('verified')->middleware('verifyuser');
 
@@ -214,5 +226,34 @@ Route::post('medcold/add_dispensado', 'Medcold\DispensadoApiMedcoldController@ad
     Route::post('medcolcli/dispensado1', 'Medcolcli\DispensadoMedcolCliController@index1')->name('medcolCli.dispensado1')->middleware('verified');
     
     Route::get('selectcie10', 'DiagnosticosCie10Controller@selectcie10')->name('selectcie10')->middleware('verified');
+    
+    
+    
+    //RUTA PARA LISTAS 
+
+    Route::get('/listas-index', 'Listas\ListasController@index')->name('listasIndex')->middleware('verified')->middleware('verifyuser');
+    Route::post('/crear-listas', 'Listas\ListasController@store')->name('crearlistas')->middleware('verified')->middleware('verifyuser');
+    Route::get('/editar-listas/{id}', 'Listas\ListasController@show')->name('editar-listas')->middleware('verified')->middleware('verifyuser');
+    Route::put('/actualizar-listas/{id}', 'Listas\ListasController@update')->name('actualizar-listas')->middleware('verified')->middleware('verifyuser');
+    Route::delete('/borrar-listas/{id}', 'Listas\ListasController@destroy')->name('borrar-listas')->middleware('verified')->middleware('verifyuser');
+
+    Route::post('/listas-estado', 'Listas\ListasController@updateestado')->name('lisestado')->middleware('verified')->middleware('verifyuser');
+
+    //RUTA PARA LISTAS DETALLE 
+
+    Route::get('/detallelistas', 'Listas\ListasDetalleController@indexDetalle')->name('listasdetalledetalle')->middleware('verified')->middleware('verifyuser');
+    Route::post('/detallecrear-listas', 'Listas\ListasDetalleController@store')->name('crearlistasdetalle')->middleware('verified')->middleware('verifyuser');
+    Route::get('/detalleeditar-listas/{id}', 'Listas\ListasDetalleController@show')->name('editar-listasdetalle')->middleware('verified')->middleware('verifyuser');
+    Route::put('/detalleactualizar-listas/{id}', 'Listas\ListasDetalleController@update')->name('actualizar-listasdetalle')->middleware('verified')->middleware('verifyuser');
+    Route::delete('/detalleborrar-listas/{id}', 'Listas\ListasDetalleController@destroy')->name('borrar-listasdetalle')->middleware('verified')->middleware('verifyuser');
+
+    Route::post('/detalle-estado', 'Listas\ListasDetalleController@updateestado')->name('detestado')->middleware('verified')->middleware('verifyuser');
+
+
+    
+
+    //SELECT DE LISTAS
+
+    route::get('selectlist', 'Listas\ListasDetalleController@select')->name('selectlist')->middleware('verified')->middleware('verifyuser');
     
 

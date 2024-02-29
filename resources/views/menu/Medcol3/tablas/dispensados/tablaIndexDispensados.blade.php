@@ -5,7 +5,6 @@
             <div class="card-header with-border">
                 <h3 class="card-title">Lista de dispensados</h3>
                 <div class="card-tools pull-right">
-                   
                 </div>
             </div>
             <div class="card-body table-responsive p-2">
@@ -44,6 +43,7 @@
                             <th>Fecha Ordenamiento</th>
                             <th>Fecha Suministro</th>
                             <th>DX</th>
+                            <th>ips</th>
                             <th>Autorización</th>
                             <th>MIPRES</th>
                             <th>Reporte Entrega NOPBS</th>

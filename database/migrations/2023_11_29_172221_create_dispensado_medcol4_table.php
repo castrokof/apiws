@@ -46,6 +46,7 @@ class CreateDispensadoMedcol4Table extends Migration
             $table->date('fecha_ordenamiento')->nullable();
             $table->date('fecha_suministro');
             $table->string('dx');
+            $table->string('ips')->nullable();
             $table->string('id_medico');
             $table->string('medico');
             $table->string('mipres')->nullable();

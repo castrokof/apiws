@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDispensadoMedcoldTable extends Migration
+class CreateDispensadoMedcol2Table extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class CreateDispensadoMedcoldTable extends Migration
      */
     public function up()
     {
-        Schema::create('dispensado_medcold', function (Blueprint $table) {
-            $table->bigIncrements('id');
+        Schema::create('dispensado_medcol2', function (Blueprint $table) {
+           $table->bigIncrements('id');
             $table->string('idusuario');
             $table->string('tipo');
             $table->string('facturad')->nullable();
@@ -67,6 +67,6 @@ class CreateDispensadoMedcoldTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('dispensado_medcold');
+        Schema::dropIfExists('dispensado_medcol2');
     }
 }
