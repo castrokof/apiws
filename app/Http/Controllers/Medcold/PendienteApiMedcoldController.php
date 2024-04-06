@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Medcold\PendienteApiMedcold;
 use App\Models\Medcold\EntregadosApiMedcold;
 use App\Models\Medcold\ObservacionesApiMedcold;
+use Illuminate\Support\Facades\Log;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,10 +34,10 @@ class PendienteApiMedcoldController extends Controller
     {
 
 
-             return view('menu.Medcold.indexAnalista');
+        return view('menu.Medcold.indexAnalista');
     }
-    
-      public function index1(Request $request)
+
+    public function index1(Request $request)
     {
 
 
@@ -75,6 +76,8 @@ class PendienteApiMedcoldController extends Controller
     {
         $email = 'castrokofdev@gmail.com'; // Auth::user()->email
         $password = '123456';
+        $usuario = Auth::user()->email;
+
 
         try {
 
@@ -82,16 +85,16 @@ class PendienteApiMedcoldController extends Controller
                 'email' =>  $email,
                 'password' => $password,
             ]);
-            
+
 
             $token = $response->json()["token"];
-            
-        
+
+
             $responsefacturas = Http::withToken($token)->get("http://190.85.46.246:8000/api/pendientesapi");
 
             $facturassapi = $responsefacturas->json()['data'];
-            
-           
+
+
             $contador = 0;
             $pendientes = [];
 
@@ -139,10 +142,11 @@ class PendienteApiMedcoldController extends Controller
 
             $var = $this->createentregadospi(null);
 
+            Log::info('Desde la web syncapi Dolor ' . $contador . ' Lineas pendientes y ' . $var . ' Lineas entregadas' . ' Usuario: ' . $usuario);
+
             return response()->json([
                 ['respuesta' => $contador . ' Lineas creadas y ' . $var . ' Lineas entregadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']
             ]);
-
         } catch (\Exception $e) {
 
 
@@ -203,17 +207,12 @@ class PendienteApiMedcoldController extends Controller
 
             $var = $this->createentregadospilocal(null);
 
-            // return response()->json([
-            //     ['respuesta' => $contador . ' Lineas creadas y ' . $var . ' Lineas entregadas', 'titulo' => 'Usando Api Local', 'icon' => 'error', 'position' => 'bottom-left']
-            // ]);
+            Log::info('Desde la web syncapi Dolor local ' . $contador . ' Lineas pendientes y ' . $var . ' Lineas entregadas' . ' Usuario: ' . $usuario);
 
             return response()->json([
                 ['respuesta' => 'Error: ' . $e->getMessage(), 'titulo' => 'Error', 'icon' => 'error', 'position' => 'bottom-left']
             ]);
         }
-
-
-
     }
 
     /**
@@ -461,7 +460,6 @@ class PendienteApiMedcoldController extends Controller
                 ->first();
 
             $saldo_pendiente = $pendiente->cantord - $pendiente->cantdpx;
-
             // Concatenar los campos doc_entrega y factura_entrega
             $fac_entrega = $pendiente->doc_entrega . ' ' . $pendiente->factura_entrega;
 
@@ -536,9 +534,9 @@ class PendienteApiMedcoldController extends Controller
         $responsefacturas = Http::withToken($token)->get("http://190.85.46.246:8000/api/entregadosapi");
 
         $facturassapi = $responsefacturas->json();
-        
+
         //dd($facturassapi);
-        
+
         $contadorei = 0;
         $contador1 = 0;
 
@@ -546,8 +544,8 @@ class PendienteApiMedcoldController extends Controller
 
 
             $existe =  EntregadosApiMedcold::where('factura', $factura['factura'])->count();
-            
-            
+
+
 
             if ($existe == 0 || $existe == '') {
                 EntregadosApiMedcold::create([
@@ -691,7 +689,7 @@ class PendienteApiMedcoldController extends Controller
 
 
             $existe =  EntregadosApiMedcold::where('factura', $factura['factura'])->count();
-            
+
             //dd($existe);
 
             if ($existe == 0 || $existe == '') {
@@ -800,63 +798,55 @@ class PendienteApiMedcoldController extends Controller
 
         return $this->var2 = $contadorei;
     }
-    
-     public function informepedientes(Request $request)
+
+    public function informepedientes(Request $request)
     {
-         $i = Auth::user()->drogueria;
-        
+        $i = Auth::user()->drogueria;
+
         switch ($i) {
-                    case "1":
-                        $drogueria = '';
-                        break;
-                    case "2":
-                        $drogueria = 'SALUD';
-                        break;
-                    case "3":
-                       $drogueria = 'DOLOR';
-                        break;
-                    case "4":
-                        $drogueria = 'PAC';
-                        break;
-                    case "5":
-                        $drogueria = 'EHU1';
-                        break;
-                    case "6":
-                         $drogueria = 'BIO';
-                        break;    
-                }
-        
+            case "1":
+                $drogueria = '';
+                break;
+            case "2":
+                $drogueria = 'SALUD';
+                break;
+            case "3":
+                $drogueria = 'DOLOR';
+                break;
+            case "4":
+                $drogueria = 'PAC';
+                break;
+            case "5":
+                $drogueria = 'EHU1';
+                break;
+            case "6":
+                $drogueria = 'BIO1';
+                break;
+        }
+
 
         if (request()->ajax()) {
-            
-             if(Auth::user()->drogueria == '1'){
-            
-            $data = DB::table('pendiente_api_medcold')
-                ->where('estado', '=', 'PENDIENTE')
-                ->select('nombre')
-                ->selectRaw('SUM(cantord) as cantord')
-                ->groupBy('nombre')
-                ->get();
 
-           
-            
-             }else{
-                 
-                  $data = DB::table('pendiente_api_medcold')
-                ->where([['estado', '=', 'PENDIENTE'],['centroproduccion',$drogueria]])
-                ->select('nombre')
-                ->selectRaw('SUM(cantord) as cantord')
-                ->groupBy('nombre')
-                ->get();
+            if (Auth::user()->drogueria == '1') {
 
-           
-             }
-              return DataTables()->of($data)->make(true);
-                 
-             }
-        
+                $data = DB::table('pendiente_api_medcold')
+                    ->where('estado', '=', 'PENDIENTE')
+                    ->select('nombre')
+                    ->selectRaw('SUM(cantord) as cantord')
+                    ->groupBy('nombre')
+                    ->get();
+            } else {
+
+                $data = DB::table('pendiente_api_medcold')
+                    ->where([['estado', '=', 'PENDIENTE']])
+                    ->select('nombre')
+                    ->selectRaw('SUM(cantord) as cantord')
+                    ->groupBy('nombre')
+                    ->get();
+            }
+            return DataTables()->of($data)->make(true);
+        }
+
         //return view('menu.usuario.indexAnalista');
     }
-
-
 }

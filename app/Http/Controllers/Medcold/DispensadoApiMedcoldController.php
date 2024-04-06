@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Medcold;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
+use App\Models\Listas\ListasDetalle;
 use App\Models\Medcold\DispensadoApiMedcold;
 use Carbon\Carbon;
 
@@ -27,15 +29,56 @@ class DispensadoApiMedcoldController extends Controller
      * 
      */
 
+    public function informes(Request $request)
+    {
+        $i = Auth::user()->drogueria;
+
+        switch ($i) {
+            case "1":
+                $drogueria = '';
+                break;
+            case "2":
+                $drogueria = 'SALUD';
+                break;
+            case "3":
+                $drogueria = 'DOLOR';
+                break;
+            case "4":
+                $drogueria = 'PAC';
+                break;
+            case "5":
+                $drogueria = 'EHU1';
+                break;
+            case "6":
+                $drogueria = 'BIO1';
+                break;
+        }
+
+        if (Auth::user()->drogueria == '1') {
+
+            $dispensado =  DispensadoApiMedcold::where([['estado', 'DISPENSADO'], ['fecha_suministro', '>=', '2024-03-01 00:00:00']])->count();
+            $revisado =  DispensadoApiMedcold::where([['estado', 'REVISADO'],  ['fecha_suministro', '>=', '2024-03-01 00:00:00']])->count();
+            $anulado =  DispensadoApiMedcold::where([['estado', 'ANULADA'],  ['fecha_suministro', '>=', '2024-03-01 00:00:00']])->count();
+        } else {
+
+            $dispensado =  DispensadoApiMedcold::where([['estado', 'DISPENSADO'], ['centroprod', $drogueria],  ['fecha_suministro', '>=', '2024-03-01 00:00:00']])->count();
+            $revisado =  DispensadoApiMedcold::where([['estado', 'REVISADO'], ['centroprod', $drogueria],  ['fecha_suministro', '>=', '2024-03-01 00:00:00']])->count();
+            $anulado =  DispensadoApiMedcold::where([['estado', 'ANULADA'], ['centroprod', $drogueria],  ['fecha_suministro', '>=', '2024-03-01 00:00:00']])->count();
+        }
+
+
+
+        return response()->json(['dispensado' => $dispensado, 'revisado' => $revisado, 'anulado' => $anulado]);
+    }
+
+
     public function index(Request $request)
     {
-
-
         return view('menu.Medcold.indexDispensado');
     }
     public function index1(Request $request)
     {
-        $fechaAi = now()->toDateString() . " 00:00:01";
+        $fechaAi = now()->toDateString() . " 00:00:00";
         $fechaAf = now()->toDateString() . " 23:59:59";
 
         $droguerias = [
@@ -75,62 +118,68 @@ class DispensadoApiMedcoldController extends Controller
                 $dispensado_api_medcold->whereBetween('fecha_suministro', [$fechaAi, $fechaAf]);
             }
 
+            // Agregar una subconsulta para calcular la suma de la cuota moderadora
+            $dispensado_api_medcold->selectRaw('*, 
+                (CASE 
+                    WHEN ROW_NUMBER() OVER(PARTITION BY factura ORDER BY id) = 1 
+                        THEN (SELECT SUM(cuota_moderadora) FROM dispensado_medcold AS d2 WHERE d2.factura = dispensado_medcold.factura) 
+                    ELSE 0 
+                END) AS cuota_moderadora_sumada');
+
             $dispensado_api_medcold->where('estado', 'DISPENSADO')->orWhereNull('estado');
 
             $resultados = $dispensado_api_medcold->orderBy('fecha_suministro')->get();
 
+            //dd($resultados);
 
             return DataTables()->of($resultados)
                 ->addColumn('action', function ($pendiente) {
-                    return '<button type="button" name="add_medicamento" id="' . $pendiente->id . '"
-                            class="add_medicamento btn btn-app bg-secondary tooltipsC" title="Revisado">
-                            <span class="badge bg-teal">Add+</span><i class="fas fa-prescription-bottle-alt"></i>
-                        </button>';
+                    return '<input class="add_medicamento checkbox-large case tooltipsC" type="checkbox" title="Selecciona Orden" id="' . $pendiente->id . '" value="' . $pendiente->id . '">';
                 })
                 ->addColumn('fecha_orden', function ($pendiente) {
                     return '<input type="date" name="date_orden" id="' . $pendiente->id . '"
-                            class="show_detail btn btn-xl bg-secondary tooltipsC" title="Fecha">';
+                                class="show_detail btn btn-xl bg-secondary tooltipsC" title="Fecha">';
                 })
                 ->addColumn('numero_entrega1', function ($pendiente) {
                     return '<input type="text" name="entrega" id="' . $pendiente->id . '"
-                            class="show_detail btn btn-xl bg-secondary tooltipsC" title="entrega">';
+                                class="show_detail btn btn-xl bg-secondary tooltipsC" title="entrega">';
                 })
                 ->addColumn('diagnostico', function ($pendiente) {
                     return '<select name="dx" id="' . $pendiente->id . '"
-                            class="diagnos form-control select2bs4" style="width: 100%;" required></select>';
+                                class="diagnos form-control select2bs4" style="width: 100%;" required></select>';
                 })
 
                 ->addColumn('autorizacion1', function ($pendiente) {
                     return '<input type="text" name="autorizacion" id="' . $pendiente->id . '"
-                            class="show_detail btn btn-xl bg-warning tooltipsC"  title="autorizacion"
-                            value="' . $pendiente->autorizacion . '">';
+                                class="show_detail btn btn-xl bg-warning tooltipsC"  title="autorizacion"
+                                value="' . $pendiente->autorizacion . '">';
                 })
                 ->addColumn('mipres1', function ($pendiente) {
                     return '<input type="text" name="mipres" id="' . $pendiente->id . '"
-                            class="show_detail btn btn-xl bg-warning tooltipsC" title="mipres">';
+                                class="show_detail btn btn-xl bg-warning tooltipsC" title="mipres">';
                 })
                 ->addColumn('reporte_entrega1', function ($pendiente) {
                     return '<input type="text" name="reporte" id="' . $pendiente->id . '"
-                            class="show_detail btn btn-xl bg-info tooltipsC" title="Reporte de entrega">';
+                                class="show_detail btn btn-xl bg-info tooltipsC" title="Reporte de entrega">';
                 })
                 ->addColumn('id_medico1', function ($pendiente) {
                     return '<input type="text" name="id_medico1" id="' . $pendiente->id . '"
-                            class="show_detail btn btn-xl bg-info tooltipsC" title="Id medico"
-                            value="' . $pendiente->id_medico . '">';
+                                class="show_detail btn btn-xl bg-info tooltipsC" title="Id medico"
+                                value="' . $pendiente->id_medico . '">';
                 })
                 ->addColumn('medico1', function ($pendiente) {
                     return '<input type="text" name="medico1" id="' . $pendiente->id . '"
-                            class="show_detail btn btn-xl bg-info tooltipsC" title="Medico"
-                            value="' . $pendiente->medico . '">';
+                                class="show_detail btn btn-xl bg-info tooltipsC" title="Medico"
+                                value="' . $pendiente->medico . '">';
                 })
                 ->addColumn('copago1', function ($pendiente) {
                     return '<input type="text" name="medico1" id="' . $pendiente->id . '"
-                            class="show_detail btn btn-xl bg-info tooltipsC" title="Copago"
-                            value="' . $pendiente->copago . '">';
+                        class="show_detail btn btn-xl bg-info tooltipsC" title="Copago"
+                        value="' . $pendiente->cuota_moderadora_sumada . '">';
                 })
                 ->addColumn('ips', function ($pendiente) {
                     return '<select name="ips" id="' . $pendiente->id . '"
-                            class="ipsss form-control select2bs4" style="width: 100%;" required></select>';
+                                class="ipsss form-control select2bs4" style="width: 100%;" required></select>';
                 })
                 ->rawColumns([
                     'action', 'fecha_orden', 'numero_entrega1', 'diagnostico',
@@ -152,7 +201,7 @@ class DispensadoApiMedcoldController extends Controller
     {
         $email = 'castrokofdev@gmail.com'; // Auth::user()->email
         $password = '123456';
-
+        $usuario = Auth::user()->email;
 
 
         try {
@@ -250,6 +299,8 @@ class DispensadoApiMedcoldController extends Controller
 
                     Http::withToken($token)->get("http://190.85.46.246:8000/api/closeallacceso");
 
+                    Log::info('Desde la web syncapi Dolor ' . $contador . ' Lineas dispensadas' . ' Usuario: ' . $usuario);
+
 
                     return response()->json([
                         ['respuesta' => $contador . ' Lineas creadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']
@@ -257,7 +308,7 @@ class DispensadoApiMedcoldController extends Controller
                 } catch (\Exception $e) {
 
                     // Manejo de la excepción
-                    \Log::error($e->getMessage()); // Registrar el error en los logs de Laravel
+                    Log::error($e->getMessage()); // Registrar el error en los logs de Laravel
 
                     return response()->json([
                         ['respuesta' => 'Error: ' . $e->getMessage(), 'titulo' => 'Error', 'icon' => 'error', 'position' => 'bottom-left']
@@ -358,6 +409,7 @@ class DispensadoApiMedcoldController extends Controller
                         Http::withToken($token)->get("http://192.168.10.27/api/closeallacceso");
 
 
+                        Log::info('Desde la web syncapi Dolor local' . $contador . ' Lineas dispensadas' . ' Usuario: ' . $usuario);
 
                         return response()->json([
                             ['respuesta' => $contador . ' Lineas creadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']
@@ -383,7 +435,7 @@ class DispensadoApiMedcoldController extends Controller
 
 
                 // Manejo de la excepción
-                \Log::error($e->getMessage()); // Registrar el error en los logs de Laravel
+                Log::error($e->getMessage()); // Registrar el error en los logs de Laravel
 
 
                 return response()->json([
@@ -432,17 +484,29 @@ class DispensadoApiMedcoldController extends Controller
 
             if (Auth::user()->drogueria == '1') {
 
-                $dispensado_api_medcold = DispensadoApiMedcold::where([['estado', 'REVISADO']])
+                $dispensado_api_medcol4 = DispensadoApiMedcold::where([['estado', 'REVISADO']])
                     ->orWhere('estado', NULL)
                     ->orderBy('id')
-                    ->get();
+                    ->get()
+                    ->map(function ($item) {
+                        $ipsId = $item->ips;
+                        $lista = ListasDetalle::where('id', $ipsId)->first();
+                        $item->ips_nombre = $lista ? $lista->nombre : '';
+                        return $item;
+                    });
             } else {
-                $dispensado_api_medcold = DispensadoApiMedcold::where([['estado', 'REVISADO'], ['centroproduccion', $drogueria]])
+                $dispensado_api_medcol4 = DispensadoApiMedcold::where([['estado', 'REVISADO'], ['centroprod', $drogueria]])
                     ->orWhere('estado', NULL)
                     ->orderBy('id')
-                    ->get();
+                    ->get()
+                    ->map(function ($item) {
+                        $ipsId = $item->ips;
+                        $lista = ListasDetalle::where('id', $ipsId)->first();
+                        $item->ips_nombre = $lista ? $lista->nombre : '';
+                        return $item;
+                    });
             }
-            return DataTables()->of($dispensado_api_medcold)
+            return DataTables()->of($dispensado_api_medcol4)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
                     " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
@@ -463,7 +527,7 @@ class DispensadoApiMedcoldController extends Controller
                 ->make(true);
         }
 
-        return view('menu.Medcol3.indexAnalista');
+        return view('menu.Medcol3.indexDispensado');
     }
 
     /**
@@ -474,12 +538,34 @@ class DispensadoApiMedcoldController extends Controller
      */
     public function adddispensacionarray(Request $request)
     {
-        $add_factura = $request->data;
 
+        $request->validate([
+            'data.*.diagnostico' => 'required', // Campo 'diagnostico' requerido
+            'data.*.fecha_orden' => 'required', // Campo 'fecha_orden' requerido
+            'data.*.ips' => 'required', // Campo 'ips' requerido
+            'data.*.numero_entrega1' => 'required', // Campo 'numero_entrega1' requerido
+            'data.*.fecha_suministro',
+        ]);
+
+
+        $add_factura = $request->data;
+        $fecha_suministro = Carbon::parse($request->input('fecha_suministro'))->format('Y-m-d');
 
         foreach ($add_factura as $add) {
+            $fecha_orden = Carbon::parse($add['fecha_orden']);
 
-            DispensadoApiMedcold::where(id, $add[id])
+            // Verificar si la fecha_orden es mayor a la fecha_suministro
+            if ($fecha_orden->gt($fecha_suministro)) {
+                return response()->json([
+                    'errors' => [
+                        'fecha_orden' => [
+                            'La Fecha de Ordenamiento no puede ser superior a la Fecha de Suministro'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            DispensadoApiMedcold::where('id', $add['ID'])
                 ->update(
                     [
                         'autorizacion'  => trim($add['autorizacion1']),
@@ -487,10 +573,11 @@ class DispensadoApiMedcoldController extends Controller
                         'numero_entrega'  => trim($add['numero_entrega1']),
                         'fecha_ordenamiento'  => trim($add['fecha_orden']),
                         'dx'  => trim($add['diagnostico']),
+                        'ips'  => trim($add['ips']),
                         'id_medico'  => trim($add['id_medico1']),
                         'medico'  => trim($add['medico1']),
                         'mipres'  => trim($add['mipres1']),
-                        'reporte_entrega_nopbs'  => trim($add['reporte_entrega_nopbs1']),
+                        'reporte_entrega_nopbs'  => trim($add['reporte_entrega1']),
                         'estado'  => trim($add['estado']),
                         'user_id'  => trim($add['user_id']),
                         'updated_at' => now()
@@ -501,6 +588,167 @@ class DispensadoApiMedcoldController extends Controller
 
 
         return response()->json(['success' => 'ok']);
+    }
+
+
+    public function updateanuladosapi(Request $request)
+    {
+        $email = 'castrokofdev@gmail.com'; // Auth::user()->email
+        $password = '123456';
+        $usuario = Auth::user()->email;
+
+        try {
+            $response = Http::post("http://190.85.46.246:8000/api/acceso", [
+                'email' => $email,
+                'password' => $password,
+            ]);
+
+            $token = $response->json()["token"];
+
+            if ($token) {
+                try {
+                    $response = Http::post("http://190.85.46.246:8000/api/acceso", [
+                        'email' => $email,
+                        'password' => $password,
+                    ]);
+
+                    $token = $response->json()["token"];
+
+                    $responsefacturas = Http::withToken($token)->get("http://190.85.46.246:8000/api/anuladosapi");
+                    $facturassapi = $responsefacturas->json()['data'];
+
+                    $contadorActualizados = 0;
+
+                    foreach ($facturassapi as $factura) {
+                        $actualizados = DispensadoApiMedcold::where('factura', $factura['factura'])
+                            ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
+                            ->update([
+                                'estado' => 'ANULADA',
+                                'updated_at' => now()
+                            ]);
+
+                        if ($actualizados) {
+                            $contadorActualizados++;
+                        }
+                    }
+
+                    Http::withToken($token)->get("http://190.85.46.246:8000/api/closeallacceso");
+
+                    Log::info('Desde la web syncapi autopista anulados', [
+                        'lineas_actualizadas' => $contadorActualizados,
+                        'usuario' => $usuario
+                    ]);
+
+                    return response()->json([
+                        'respuesta' => "$contadorActualizados Líneas actualizadas",
+                        'titulo' => 'Líneas actualizadas',
+                        'icon' => 'success',
+                        'position' => 'bottom-left'
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error($e->getMessage());
+
+                    return response()->json([
+                        'respuesta' => 'Error: ' . $e->getMessage(),
+                        'titulo' => 'Error',
+                        'icon' => 'error',
+                        'position' => 'bottom-left'
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return response()->json([
+                'respuesta' => 'Error: ' . $e->getMessage(),
+                'titulo' => 'Error',
+                'icon' => 'error',
+                'position' => 'bottom-left'
+            ]);
+        }
+    }
+
+
+
+    public function disanulado(Request $request)
+    {
+
+
+        $i = Auth::user()->drogueria;
+
+        switch ($i) {
+            case "1":
+                $drogueria = '';
+                break;
+            case "2":
+                $drogueria = 'SALUD';
+                break;
+            case "3":
+                $drogueria = 'DOLOR';
+                break;
+            case "4":
+                $drogueria = 'PAC';
+                break;
+            case "5":
+                $drogueria = 'EHU1';
+                break;
+            case "6":
+                $drogueria = 'BIO1';
+                break;
+        }
+
+
+
+        //dd($drogueria);
+
+        if ($request->ajax()) {
+
+            if (Auth::user()->drogueria == '1') {
+
+                $dispensado_api_medcol4 = DispensadoApiMedcold::where([['estado', 'ANULADA']])
+                    ->orWhere('estado', NULL)
+                    ->orderBy('id')
+                    ->get()
+                    ->map(function ($item) {
+                        $ipsId = $item->ips;
+                        $lista = ListasDetalle::where('id', $ipsId)->first();
+                        $item->ips_nombre = $lista ? $lista->nombre : '';
+                        return $item;
+                    });
+            } else {
+                $dispensado_api_medcol4 = DispensadoApiMedcold::where([['estado', 'ANULADA'], ['centroprod', $drogueria]])
+                    ->orWhere('estado', NULL)
+                    ->orderBy('id')
+                    ->get()
+                    ->map(function ($item) {
+                        $ipsId = $item->ips;
+                        $lista = ListasDetalle::where('id', $ipsId)->first();
+                        $item->ips_nombre = $lista ? $lista->nombre : '';
+                        return $item;
+                    });
+            }
+            return DataTables()->of($dispensado_api_medcol4)
+                ->addColumn('action', function ($pendiente) {
+                    $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
+                    " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
+                    <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
+                    $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
+                    " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
+                    <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i> </button>';
+
+                    return $button . ' ' . $button2;
+                })
+                ->addColumn('fecha Orden', function ($pendiente) {
+                    $inputdate = '<input type="date" name="date_orden" id="' . $pendiente->id . '
+                    " class="show_detail btn btn-app bg-secondary tooltipsC" title="Fecha">';
+
+                    return $inputdate;
+                })
+                ->rawColumns(['action', 'fecha Orden'])
+                ->make(true);
+        }
+
+        return view('menu.Medcol3.indexDispensado');
     }
 
     /**

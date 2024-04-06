@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Medcol3\PendienteApiMedcol3;
 use App\Models\Medcol3\EntregadosApiMedcol3;
 use App\Models\Medcol3\ObservacionesApiMedcol3;
+use Illuminate\Support\Facades\Log;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,7 +60,7 @@ class PendienteApiMedcol3Controller extends Controller
                         $drogueria = 'EHU1';
                         break;
                     case "6":
-                         $drogueria = 'BIO';
+                         $drogueria = 'BIO1';
                         break;    
                 }
         
@@ -114,12 +115,13 @@ class PendienteApiMedcol3Controller extends Controller
      */
     public function createapendientespi(Request $request)
     {
-          $email = 'castrokofdev@gmail.com'; // Auth::user()->email
+        $email = 'castrokofdev@gmail.com'; // Auth::user()->email
         $password = 'colMed2023**';
+        $usuario = Auth::user()->email;
 
         try {
 
-            $response = Http::post("http://186.115.210.88:8001/api/acceso", [
+            $response = Http::post("http://hcp080m81s7.sn.mynetname.net:8001/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
             ]);
@@ -127,7 +129,7 @@ class PendienteApiMedcol3Controller extends Controller
             $token = $response->json()["token"];
 
 
-            $responsefacturas = Http::withToken($token)->get("http://186.115.210.88:8001/api/pendientesapi");
+            $responsefacturas = Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/pendientesapi");
 
             $facturassapi = $responsefacturas->json()['data'];
 
@@ -173,11 +175,11 @@ class PendienteApiMedcol3Controller extends Controller
                 PendienteApiMedcol3::insert($pendientes);
             }
 
-            Http::withToken($token)->get("http://186.115.210.88:8001/api/closeallacceso");
+            Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/closeallacceso");
 
             $var = $this->createentregadospi(null);
             
-            
+            Log::info('Desde la web syncapi '.$contador . ' Lineas creadas y ' . $var . ' Lineas entregadas'.' Usuario: '.$usuario);
             
             return response()->json([
                 ['respuesta' => $contador . ' Lineas creadas y ' . $var . ' Lineas entregadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']
@@ -186,14 +188,14 @@ class PendienteApiMedcol3Controller extends Controller
         } catch (\Exception $e) {
 
 
-            $response = Http::post("http://192.168.1.27:8001/api/acceso", [
+            $response = Http::post("http://192.168.10.27:8001/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
             ]);
 
             $token = $response->json()["token"];
 
-            $responsefacturas = Http::withToken($token)->get("http://192.168.1.27:8001/api/pendientesapi");
+            $responsefacturas = Http::withToken($token)->get("http://192.168.10.27:8001/api/pendientesapi");
 
             $facturassapi = $responsefacturas->json()['data'];
 
@@ -239,17 +241,31 @@ class PendienteApiMedcol3Controller extends Controller
                 PendienteApiMedcol3::insert($pendientes);
             }
 
-            Http::withToken($token)->get("http://192.168.7.10:8001/api/closeallacceso");
+            Http::withToken($token)->get("http://192.168.10.27/api/closeallacceso");
 
             $var = $this->createentregadospilocal(null);
 
-            // return response()->json([
-            //     ['respuesta' => $contador . ' Lineas creadas y ' . $var . ' Lineas entregadas', 'titulo' => 'Usando Api Local', 'icon' => 'error', 'position' => 'bottom-left']
-            // ]);
-
+            
+            
+            if($e->getMessage()){
+                
+            
+             Log::error('Desde la web syncapi '.$e->getMessage().' Usuario: '.$usuario);    
+            
+                
             return response()->json([
                 ['respuesta' => 'Error: ' . $e->getMessage(), 'titulo' => 'Error', 'icon' => 'error', 'position' => 'bottom-left']
             ]);
+            
+            }else{
+                
+             Log::info('Desde la web syncapi '.$contador . ' Lineas creadas y ' . $var . ' Lineas entregadas'.' Usuario: '.$usuario);
+                
+            return response()->json([
+                 ['respuesta' => $contador . ' Lineas creadas y ' . $var . ' Lineas entregadas', 'titulo' => 'Usando Api Local', 'icon' => 'error', 'position' => 'bottom-left']
+             ]);
+             
+            }
         }
 
 
@@ -283,7 +299,7 @@ class PendienteApiMedcol3Controller extends Controller
                         $drogueria = 'EHU1';
                         break;
                     case "6":
-                         $drogueria = 'BIO';
+                         $drogueria = 'BIO1';
                         break;    
                 }
                 
@@ -349,7 +365,7 @@ class PendienteApiMedcol3Controller extends Controller
                         $drogueria = 'EHU1';
                         break;
                     case "6":
-                         $drogueria = 'BIO';
+                         $drogueria = 'BIO1';
                         break;    
                 }
         if ($request->ajax()) {
@@ -411,7 +427,7 @@ class PendienteApiMedcol3Controller extends Controller
                         $drogueria = 'EHU1';
                         break;
                     case "6":
-                         $drogueria = 'BIO';
+                         $drogueria = 'BIO1';
                         break;    
                 }
         if ($request->ajax()) {
@@ -478,7 +494,7 @@ class PendienteApiMedcol3Controller extends Controller
                         $drogueria = 'EHU1';
                         break;
                     case "6":
-                         $drogueria = 'BIO';
+                         $drogueria = 'BIO1';
                         break;    
                 }
 
@@ -692,7 +708,7 @@ class PendienteApiMedcol3Controller extends Controller
                         $drogueria = 'EHU1';
                         break;
                     case "6":
-                         $drogueria = 'BIO';
+                         $drogueria = 'BIO1';
                         break;    
                 }
                 
@@ -723,7 +739,7 @@ class PendienteApiMedcol3Controller extends Controller
         $password = 'colMed2023**';
 
         $response = Http::post(
-            "http://186.115.210.88:8001/api/acceso",
+            "http://hcp080m81s7.sn.mynetname.net:8001/api/acceso",
             [
                 'email' =>  $email,
                 'password' => $password,
@@ -736,7 +752,7 @@ class PendienteApiMedcol3Controller extends Controller
         $prueba = $response->json();
         $token = $prueba["token"];
 
-        $responsefacturas = Http::withToken($token)->get("http://186.115.210.88:8001/api/entregadosapi");
+        $responsefacturas = Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/entregadosapi");
 
         $facturassapi = $responsefacturas->json();
 
@@ -789,7 +805,7 @@ class PendienteApiMedcol3Controller extends Controller
             }
         }
 
-        Http::withToken($token)->get("http://186.115.210.88:8001/api/closeallacceso");
+        Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/closeallacceso");
 
         $pendientes = DB::table('pendiente_api_medcol3')
             ->join('entregados_api_medcol3', function ($join) {
@@ -806,8 +822,6 @@ class PendienteApiMedcol3Controller extends Controller
                 'entregados_api_medcol3.factura'
             )
             ->get();
-
-
 
 
         foreach ($pendientes as $key => $value) {
@@ -873,7 +887,7 @@ class PendienteApiMedcol3Controller extends Controller
         $password = 'colMed2023**';
 
         $response = Http::post(
-            "http://192.168.1.27:8001/api/acceso",
+            "http://192.168.10.27:8001/api/acceso",
             [
                 'email' =>  $email,
                 'password' => $password,
@@ -886,7 +900,7 @@ class PendienteApiMedcol3Controller extends Controller
         $prueba = $response->json();
         $token = $prueba["token"];
 
-        $responsefacturas = Http::withToken($token)->get("http://192.168.1.27:8001/api/entregadosapi");
+        $responsefacturas = Http::withToken($token)->get("http://192.168.10.27:8001/api/entregadosapi");
 
         $facturassapi = $responsefacturas->json();
 
@@ -932,7 +946,7 @@ class PendienteApiMedcol3Controller extends Controller
             }
         }
 
-        Http::withToken($token)->get("http://192.168.1.27:8001/api/closeallacceso");
+        Http::withToken($token)->get("http://192.168.10.27:8001/api/closeallacceso");
 
         $pendientes = DB::table('pendiente_api_medcol3')
             ->join('entregadosapi', function ($join) {
@@ -1028,7 +1042,7 @@ class PendienteApiMedcol3Controller extends Controller
                         $drogueria = 'EHU1';
                         break;
                     case "6":
-                         $drogueria = 'BIO';
+                         $drogueria = 'BIO1';
                         break;    
                 }
         
