@@ -56,6 +56,7 @@ class CreateDispensadoMedcol2Table extends Migration
             $table->string('estado')->nullable();
             $table->string('centroprod');
             $table->string('drogueria');
+            $table->string('cajero');
             $table->timestamps();
         });
     }

@@ -12,9 +12,6 @@ Dispensado Medcol Salud Mental
 <link href="{{asset("assets/lte/plugins/fontawesome-free/css/all.min.css")}}" rel="stylesheet" type="text/css" />
 
 
-
-
-
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.css" rel="stylesheet" type="text/css" />
 
@@ -24,8 +21,75 @@ Dispensado Medcol Salud Mental
 
 
 <style>
-    /*btn flotante*/
+    .checkbox-large {
+        transform: scale(1.5);
+        /* ajusta el tamaño como desees */
+    }
+
+    /*btn flotante para dispensados y anulados*/
+    .btn-flotante-container {
+        position: fixed;
+        top: 146px;
+        right: 40px;
+        z-index: 99;
+    }
+
     .btn-flotante {
+        font-size: 14px;
+        text-transform: uppercase;
+        font-weight: bold;
+        color: #ffffff;
+        border-radius: 40px 40px 40px 40px;
+        border-color: #ffffff;
+        letter-spacing: 2px;
+        background: linear-gradient(to right, #0880a8, #56e6ff) !important;
+        padding: 8px 15px;
+        transition: all 300ms ease 0ms;
+        box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.5);
+        display: inline-block;
+    }
+
+    .btn-flotante:hover {
+        background-color: #2c2fa5;
+        box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.3);
+        transform: translateY(-5px);
+    }
+
+    .btn-flotante-second {
+        font-size: 14px;
+        text-transform: uppercase;
+        font-weight: bold;
+        color: #ffffff;
+        border-radius: 40px 40px 40px 40px;
+        border-color: #ffffff;
+        letter-spacing: 2px;
+        background: linear-gradient(to right, #e9321e, #f58742) !important;
+        padding: 8px 15px;
+        transition: all 300ms ease 0ms;
+        box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.5);
+        margin-left: 10px;
+        display: inline-block;
+    }
+
+    .btn-flotante-second:hover {
+        background-color: #d32f2f;
+        box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.3);
+        transform: translateY(-5px);
+    }
+
+    @media only screen and (max-width: 300px) {
+
+        .btn-flotante,
+        .btn-flotante-second {
+            font-size: 14px;
+            padding: 12px 20px 0 0;
+            bottom: 20px;
+            right: 20px;
+        }
+    }
+
+    /*btn flotante 2 abajo*/
+    .btn-flotante1 {
         font-size: 14px;
         /* Cambiar el tamaño de la tipografia */
         text-transform: uppercase;
@@ -34,38 +98,36 @@ Dispensado Medcol Salud Mental
         /* Fuente en negrita o bold */
         color: #ffffff;
         /* Color del texto */
-        border-radius: 40px 40px 40px 40px;
-        border-color: #ffffff;
+        border-radius: 120px;
         /* Borde del boton */
         letter-spacing: 2px;
         /* Espacio entre letras */
-        background: linear-gradient(to right, #0880a8, #56e6ff) !important;
+        background: linear-gradient(to right, #a80d08, #ff6756) !important;
         /* Color de fondo */
         /*background-color: #e9321e; /* Color de fondo */
-        padding: 8px 15px;
+        padding: 18px 30px;
         /* Relleno del boton */
         position: fixed;
-        top: 146px;
-
+        bottom: 40px;
         right: 40px;
         transition: all 300ms ease 0ms;
         box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.5);
         z-index: 99;
-        /* border: none;
-    outline: none; */
+        border: none;
+        outline: none;
     }
 
-    .btn-flotante:hover {
+    .btn-flotante1:hover {
         background-color: #2c2fa5;
         /* Color de fondo al pasar el cursor */
         box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.3);
-        transform: translateY(-5px);
+        transform: translateY(-7px);
     }
 
-    @media only screen and (max-width: 300px) {
-        .btn-flotante {
+    @media only screen and (max-width: 600px) {
+        .btn-flotante1 {
             font-size: 14px;
-            padding: 12px 20px 0 0;
+            padding: 12px 20px;
             bottom: 20px;
             right: 20px;
         }
@@ -181,44 +243,6 @@ Dispensado Medcol Salud Mental
 
 @section('content')
 <div class="loaders"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>
-<div class="content-header">
-    <div class="container-fluid">
-        <div class="row lg-12">
-            <div class="col-sm-12">
-                <h1 class="m-0 text-dark">Ingrese Rango de Fechas </h1>
-            </div><!-- /.col -->
-
-            @csrf
-            <div class="card-body">
-
-                <div class="form-group row">
-                    <div class="col-lg-3">
-                        <label for="fecha" class="col-xs-4 control-label ">Fecha inicial</label>
-                        <input type="date" name="fechaini" id="fechaini" class="form-control" value="{{old('fechaini')}}">
-                    </div>
-                    <div class="col-lg-3">
-                        <label for="fechafin" class="col-xs-4 control-label ">Fecha final</label>
-                        <input type="date" name="fechafin" id="fechafin" class="form-control" value="{{old('fechafin')}}">
-                    </div>
-                </div>
-
-
-
-                <div class="row col-12">
-                    <label>&nbsp;</label>
-                    <div class="form-group row">
-                        <button type="submit" name="reset" id="reset" class="btn btn-warning btn-xl col-md-6">Limpiar</button>
-                        <button type="submit" name="buscar" id="buscar" class="btn btn-success btn-xl col-md-6">Buscar</button>
-                    </div>
-                    <!-- /.row -->
-                </div>
-
-
-            </div>
-            <!-- /.container-fluid -->
-        </div>
-    </div>
-</div>
 
 @include('menu.usuario.form.dispensado.forminformedispensado')
 @include('menu.usuario.tabs.tabsIndexDispensado')
@@ -242,6 +266,75 @@ Dispensado Medcol Salud Mental
 
 <script>
     $(document).ready(function() {
+
+
+        $("#selectall").on('click', function() {
+            $(".case").prop("checked", this.checked);
+        });
+
+        fill_datatable1_resumen();
+
+
+        function fill_datatable1_resumen() {
+            $("#detalle").empty();
+            $("#detalle1").empty();
+            $("#detalle2").empty();
+
+            $.ajax({
+                url: "{{ route('medcol2.informedis') }}",
+                // data: {
+                //     fechaini: fechaini,
+                //     fechafin: fechafin
+                // },
+                dataType: "json",
+                success: function(data) {
+                    const {
+                        dispensado,
+                        revisado,
+                        anulado
+                    } = data;
+
+                    $("#detalle").append(`
+                    <div class="small-box shadow-lg l-bg-blue-dark">
+                      <div class="inner">
+                        <h5>PENDIENTES X REVISAR</h5>
+                        <p><h5>${dispensado ?? 0}</h5></p>
+                      </div>
+                      <a class="informependientes" id="informependientesclic" href="#">
+                        <div class="icon">
+                          <i class="fas fa-notes-medical informependientes"></i>
+                        </div>
+                      </a>
+                    </div>
+                  `);
+
+                    $("#detalle1").append(`
+                    <div class="small-box shadow-lg l-bg-orange-dark">
+                      <div class="inner">
+                        <h5>REVISADAS</h5>
+                        <p><h5>${revisado ?? 0}</h5></p>
+                      </div>
+                      <div class="icon">
+                        <i class="fas fa-briefcase-medical"></i>
+                      </div>
+                    </div>
+                  `);
+
+                    $("#detalle2").append(`
+                    <div class="small-box shadow-lg l-bg-red-dark">
+                      <div class="inner">
+                        <h5>ANULADAS</h5>
+                        <p><h5>${anulado ?? 0}</h5></p>
+                      </div>
+                      <div class="icon">
+                        <i class="fas fa-ban"></i>
+                      </div>
+                    </div>
+                  `);
+                }
+            });
+        }
+
 
         var fechaini;
         var fechafin;
@@ -310,10 +403,15 @@ Dispensado Medcol Salud Mental
                         // Destruir la tabla existente
                         if ($.fn.DataTable.isDataTable("#dispensados")) {
                             $("#dispensados").DataTable().destroy();
-                            $(".diagnos").select2({
-                                language: "es",
-                                theme: "bootstrap4"
-                            }).trigger('change');
+                            /* $(".diagnos").select2({
+                                 language: "es",
+                                 theme: "bootstrap4"
+                                 }).trigger('change');
+                                 
+                                 $(".ipsss").select2({
+                                 language: "es",
+                                 theme: "bootstrap4"
+                                 }).trigger('change');*/
 
                         }
                         // Funcion para pintar con data table la pestaña Lista de dispensados
@@ -740,7 +838,245 @@ Dispensado Medcol Salud Mental
                                     }, //30
 
                                     {
-                                        data: 'ips',
+                                        //data: 'ips',
+                                        data: 'ips_nombre',
+                                        orderable: false
+                                    },
+
+                                    {
+                                        data: 'autorizacion',
+                                        orderable: true
+                                    }, //31
+
+                                    {
+                                        data: 'mipres',
+                                        orderable: true
+                                    }, //32
+
+                                    {
+                                        data: 'reporte_entrega_nopbs',
+                                        orderable: false
+                                    }, //33
+
+                                    {
+                                        data: 'id_medico',
+                                        orderable: false
+                                    }, //34
+
+                                    {
+                                        data: 'medico',
+                                        orderable: false
+                                    }, //35
+
+
+                                    {
+                                        data: 'precio_unitario'
+                                    },
+                                    {
+                                        data: 'valor_total'
+                                    },
+                                    {
+                                        data: 'estado'
+                                    }, //38
+                                    {
+                                        data: 'centroprod'
+                                    },
+                                    {
+                                        data: 'drogueria'
+                                    },
+                                    {
+                                        data: 'user_id'
+                                    }, //41
+                                    {
+                                        data: 'cajero'
+                                    },
+
+                                    {
+                                        data: 'action',
+                                        orderable: false
+                                    }
+
+                                ],
+
+                                //Botones----------------------------------------------------------------------
+
+                                "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+
+                                buttons: [{
+
+                                        extend: 'copyHtml5',
+                                        titleAttr: 'Copiar Registros',
+                                        title: "Control de horas",
+                                        className: "btn  btn-outline-primary btn-sm"
+
+
+                                    },
+                                    {
+
+                                        extend: 'excelHtml5',
+                                        titleAttr: 'Exportar Excel',
+                                        title: "Control de horas",
+                                        className: "btn  btn-outline-success btn-sm",
+                                        customize: function(xlsx) {
+                                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                                            $('row c[r^="AG"]', sheet).each(function() {
+                                                $(this).attr('t', 's');
+                                            });
+                                        }
+
+
+                                    },
+                                    {
+
+                                        extend: 'csvHtml5',
+                                        titleAttr: 'Exportar csv',
+                                        className: "btn  btn-outline-warning btn-sm"
+
+                                    },
+                                    {
+
+                                        extend: 'pdfHtml5',
+                                        titleAttr: 'Exportar pdf',
+                                        className: "btn  btn-outline-secondary btn-sm"
+
+
+                                    }
+                                ],
+
+                            });
+
+                    } else if (tabId === "custom-tabs-one-datos-disanulado-tab") {
+                        // Llamar a la función correspondiente al tab "Anulados"
+                        /* console.log("Pagos Parciales"); */
+
+                        // Destruir la tabla existente
+                        if ($.fn.DataTable.isDataTable("#anulados")) {
+                            $("#anulados").DataTable().destroy();
+                        }
+                        // Funcion para pintar con data table la pestaña Lista Anulados
+                        var datatable =
+                            $('#anulados').DataTable({
+                                language: idioma_espanol,
+                                processing: true,
+                                lengthMenu: [
+                                    [25, 50, 100, 500, -1],
+                                    [25, 50, 100, 500, "Mostrar Todo"]
+                                ],
+                                processing: true,
+                                serverSide: true,
+                                aaSorting: [
+                                    [28, "desc"]
+                                ],
+                                ajax: {
+                                    url: "{{route('medcol2.disanulado')}}",
+                                    data: {
+                                        _token: "{{ csrf_token() }}"
+                                    },
+                                    method: 'POST'
+                                },
+                                columns: [
+
+                                    {
+                                        data: 'idusuario'
+                                    },
+                                    {
+                                        data: 'tipo'
+                                    },
+                                    {
+                                        data: 'facturad'
+                                    },
+                                    {
+                                        data: 'factura'
+                                    },
+                                    {
+                                        data: 'tipodocument'
+                                    },
+                                    {
+                                        data: 'historia'
+                                    },
+                                    {
+                                        data: 'cums'
+                                    },
+                                    {
+                                        data: 'expediente'
+                                    },
+                                    {
+                                        data: 'consecutivo'
+                                    },
+                                    {
+                                        data: 'cums_rips'
+                                    },
+                                    {
+                                        data: 'codigo'
+                                    },
+                                    {
+                                        data: 'tipo_medicamento'
+                                    },
+                                    {
+                                        data: 'nombre_generico'
+                                    },
+                                    {
+                                        data: 'atc'
+                                    },
+                                    {
+                                        data: 'forma'
+                                    },
+                                    {
+                                        data: 'concentracion'
+                                    },
+                                    {
+                                        data: 'unidad_medicamento'
+                                    },
+                                    {
+                                        data: 'numero_unidades'
+                                    },
+                                    {
+                                        data: 'regimen'
+                                    },
+                                    {
+                                        data: 'paciente'
+                                    },
+                                    {
+                                        data: 'primer_apellido'
+                                    },
+                                    {
+                                        data: 'segundo_apellido'
+                                    },
+                                    {
+                                        data: 'primer_nombre'
+                                    },
+                                    {
+                                        data: 'segundo_nombre'
+                                    },
+                                    {
+                                        data: 'cuota_moderadora'
+                                    },
+
+                                    {
+                                        data: 'copago',
+                                        orderable: false
+                                    }, //26
+                                    {
+                                        data: 'numero_entrega',
+                                        orderable: false
+                                    }, //27
+                                    {
+                                        data: 'fecha_ordenamiento',
+                                        orderable: false
+                                    }, //28
+
+                                    {
+                                        data: 'fecha_suministro'
+                                    },
+
+                                    {
+                                        data: 'dx',
+                                        orderable: false
+                                    }, //30
+
+                                    {
+                                        //data: 'ips',
+                                        data: 'ips_nombre',
                                         orderable: false
                                     },
 
@@ -817,7 +1153,13 @@ Dispensado Medcol Salud Mental
                                         extend: 'excelHtml5',
                                         titleAttr: 'Exportar Excel',
                                         title: "Control de horas",
-                                        className: "btn  btn-outline-success btn-sm"
+                                        className: "btn  btn-outline-success btn-sm",
+                                        customize: function(xlsx) {
+                                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                                            $('row c[r^="AG"]', sheet).each(function() {
+                                                $(this).attr('t', 's');
+                                            });
+                                        }
 
 
                                     },
@@ -961,13 +1303,13 @@ Dispensado Medcol Salud Mental
             }).then((result) => {
                 if (result.value) {
 
-                    ajaxRequestSync();
+                    ajaxRequestSyncDispensados();
 
                 }
             });
         });
 
-        function ajaxRequestSync() {
+        function ajaxRequestSyncDispensados() {
             $.ajax({
                 beforeSend: function() {
                     $('.loaders').css("visibility", "visible");
@@ -991,26 +1333,67 @@ Dispensado Medcol Salud Mental
             });
         }
 
-        //Funcion de envio de datos
+        $(document).on('click', '#synanulados', function() {
 
-        $(document).on('click', '.add_medicamento', function() {
+            const text = 'De Medcol Salud Mental';
+
+            Swal.fire({
+                title: "¿Estás por sincronizar los anulados?",
+                text: text,
+                type: "info",
+                showCancelButton: true,
+                showCloseButton: true,
+                confirmButtonText: 'Aceptar',
+            }).then((result) => {
+                if (result.value) {
+
+                    ajaxRequestSyncAnulados();
+
+                }
+            });
+        });
+
+        function ajaxRequestSyncAnulados() {
+            $.ajax({
+                beforeSend: function() {
+                    $('.loaders').css("visibility", "visible");
+                },
+                url: "{{route('medcol2.anuladosapi')}}",
+                type: 'GET',
+                success: function(data) {
+                    $('#dispensados').DataTable().ajax.reload();
+
+
+                    $.each(data, function(i, item) {
+                        Apiws.notificaciones(item.respuesta, item.titulo, item.icon, item.position);
+
+                    });
+                    // fill_datatable1_resumen();
+
+                },
+                complete: function() {
+                    $('.loaders').css("visibility", "hidden");
+                }
+            });
+        }
+
+        //Funcion de envio de datos
+        $(document).on('click', '#syncdis', function() {
 
             var dispensado = [];
-            var dispensadotrue = [];
+            var dispensadotrue1 = [];
 
-            var id = $(this).attr('id');
 
-            // Encuentra la fila (tr) más cercana que contiene el botón al que se le dio clic
-            var tr = $(this).closest('tr');
+
 
             // Utiliza 'tr' en lugar de 'tbody tr' para recorrer solo la fila específica
-            tr.each(function(el) {
+            $("tbody tr").each(function(el) {
 
                 var itemdispensado = {};
 
                 var tds = $(this).find("td");
-                // itemdispensado.checked = tds.find(":checkbox").prop("checked");
-                itemdispensado.id = id.trim();
+                itemdispensado.checked = tds.find(":checkbox").prop("checked");
+                itemdispensado.id = tds.find(":checkbox:checked").attr('id');
                 itemdispensado.copago1 = tds.filter(":eq(25)").find('input').val();
                 itemdispensado.numero_entrega1 = tds.filter(":eq(26)").find('input').val();
                 itemdispensado.fecha_orden = tds.filter(":eq(27)").find('input').val();
@@ -1029,7 +1412,38 @@ Dispensado Medcol Salud Mental
 
             });
 
+
             $.each(dispensado, function(i, items) {
+
+                var dispensadotrue = {};
+
+                if (items.checked == true) {
+
+                    console.log("entra acá");
+                    dispensadotrue.ID = items.id;
+                    dispensadotrue.copago1 = items.copago1;
+                    dispensadotrue.numero_entrega1 = items.numero_entrega1;
+                    dispensadotrue.fecha_orden = items.fecha_orden;
+                    dispensadotrue.diagnostico = items.diagnostico;
+                    dispensadotrue.ips = items.ips;
+                    dispensadotrue.autorizacion1 = items.autorizacion1;
+                    dispensadotrue.mipres1 = items.mipres1;
+                    dispensadotrue.reporte_entrega1 = items.reporte_entrega1;
+                    dispensadotrue.id_medico1 = items.id_medico1;
+                    dispensadotrue.medico1 = items.medico1;
+                    dispensadotrue.estado = items.estado;
+                    dispensadotrue.user_id = items.user_id;
+
+                    dispensadotrue1.push(dispensadotrue);
+
+                }
+
+
+
+
+            });
+
+            $.each(dispensadotrue1, function(i, items) {
 
                 console.log(items.id);
                 console.log(items.fecha_orden);
@@ -1043,22 +1457,22 @@ Dispensado Medcol Salud Mental
                 console.log(items.estado);
                 console.log(items.user_id);
 
-                if (items.numero_entrega1 == '' || items.fecha_orden == '' || items.diagnostico == '') {
+                if (items.numero_entrega1 == '' || items.fecha_orden == '' || items.diagnostico == '' || items.ips == '') {
 
                     Swal.fire({
                         icon: 'warning',
-                        title: "Los campos numero de entrega, fecha orden y diagnostico no pueden estar vacios",
+                        title: "Los campos numero de entrega, fecha orden, IPS y diagnostico no pueden estar vacios",
                         showConfirmButton: true,
                         timer: 1500
                     })
 
                 } else if (items.autorizacion1 == '') {
 
-                    enviardatos(dispensado);
+                    enviardatos(dispensadotrue1);
 
                 } else if (items.autorizacion1 != '' && items.mipre1 != '' && items.reporte_entrega1 != '') {
 
-                    enviardatos(dispensado);
+                    enviardatos(dispensadotrue1);
 
                 } else {
 
@@ -1074,7 +1488,7 @@ Dispensado Medcol Salud Mental
             });
         })
 
-        function enviardatos(dispensado) {
+        function enviardatos(dispensadotrue1) {
 
 
             Swal.fire({
@@ -1092,7 +1506,7 @@ Dispensado Medcol Salud Mental
                     url: "{{route('add_dispensacion2')}}",
                     method: 'post',
                     data: {
-                        data: dispensado,
+                        data: dispensadotrue1,
                         "_token": $("meta[name='csrf-token']").attr("content")
                     },
 
@@ -1120,6 +1534,28 @@ Dispensado Medcol Salud Mental
                             $("#dispensados").DataTable().ajax.reload();
 
                         }
+                    },
+                    error: function(xhr) {
+                        // Manejar errores de validación de la solicitud AJAX
+                        var errorMessage = "Revise los siguientes errores:<br>";
+                        var errorMessage2 = "";
+                        if (xhr.responseJSON && xhr.responseJSON.errors) {
+                            $.each(xhr.responseJSON.errors, function(fieldName, fieldErrors) {
+
+                                errorMessage2 += "<strong>" + fieldName + ":</strong><br>";
+                                $.each(fieldErrors, function(index, error) {
+                                    errorMessage2 += "- " + error + "<br>";
+                                });
+                            });
+                        } else {
+                            errorMessage += "Error en la solicitud.";
+                        }
+                        Swal.fire({
+                            type: 'error',
+                            title: errorMessage,
+                            showConfirmButton: true,
+                            html: errorMessage2
+                        });
                     }
                 });
         }
