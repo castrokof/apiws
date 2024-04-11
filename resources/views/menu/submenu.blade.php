@@ -20,33 +20,31 @@
 
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <style>
+        .navbar-logo {
+            display: inline-block;
+            vertical-align: middle;
+            width: 180px;
+        }
 
-        .navbar-logo{
-         display: inline-block;
-         vertical-align: middle;
-         width: 180px;
-       }
-
-       .navbar-logo img{
-         display: block;
-         width: 100%;
-         height: 100%;
-       }
+        .navbar-logo img {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
 
 
-        .loader1{
-         position: fixed;
-         left: 0px;
-         top: 0px;
-         width: 100%;
-         height: 100%;
-         z-index: 9999;
-         background: url(./assets/lte/dist/img/loader.gif) 50% 50% no-repeat rgb(249,249,249);
+        .loader1 {
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: url(./assets/lte/dist/img/loader.gif) 50% 50% no-repeat rgb(249, 249, 249);
 
-         opacity: 8;
-       }
-
-        </style>
+            opacity: 8;
+        }
+    </style>
 
 </head>
 
@@ -54,7 +52,7 @@
     <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
         <div class="container">
             <a class="navbar-logo" href="{{ url('/') }}">
-                <img src="{{asset("assets/lte/dist/img/iconmedcol.png")}}" alt="medcol_logo_header"  style="top: 12px">
+                <img src="{{asset("assets/lte/dist/img/iconmedcol.png")}}" alt="medcol_logo_header" style="top: 12px">
             </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                 <span class="navbar-toggler-icon"></span>
@@ -70,147 +68,161 @@
                 <ul class="navbar-nav ml-auto">
                     <!-- Authentication Links -->
                     @guest
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
-                        </li>
-                
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+                    </li>
+
 
                     @else
 
                     @if(Auth::user()->rol == '1')
-                   <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                    <div class="collapse navbar-collapse" id="navbarNavDropdown">
                         <li class="nav-item">
-                             <a href="{{ url('/usuariosapi') }}" class="list-group-item list-group-item-action">
-                                    <span class="badge badge-pill badge-secondary pull-right">Usuarios API</span>
-                                </a>
-                            
-                          </li>
-                          <li class="nav-item">
-                               <a href="{{ route('medcolCli.pendientes') }}" class="list-group-item list-group-item-action">
-                                    <span class="badge badge-pill badge-primary pull-right">consolidado Medcol</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                               <a href="{{ route('medcolCli.dispensado') }}" class="list-group-item list-group-item-action">
-                                    <span class="badge badge-pill badge-warning pull-right">consolidado dis Medcol</span>
-                                </a>
-                            </li>
+                            <a href="{{ url('/usuariosapi') }}" class="list-group-item list-group-item-action">
+                                <span class="badge badge-pill badge-secondary pull-right">Usuarios API</span>
+                            </a>
+
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('medcolCli.pendientes') }}" class="list-group-item list-group-item-action">
+                                <span class="badge badge-pill badge-primary pull-right">Pendientes Medcol</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('medcolCli.dispensado') }}" class="list-group-item list-group-item-action">
+                                <span class="badge badge-pill badge-warning pull-right">Dispensado Medcol</span>
+                            </a>
+                        </li>
                     </div>
-                        <li class="nav-item dropdown">
-                            <a id="navbarDropdown" class="btn btn-info dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                {{ Auth::user()->name }}
+                    <li class="nav-item dropdown">
+                        <a id="navbarDropdown" class="btn btn-info dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                            {{ Auth::user()->name }}
+                        </a>
+
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();
+                                                 document.getElementById('logout-form').submit();">
+                                {{ __('Logout') }}
+                            </a>
+                            <a class="dropdown-item" href="{{ route('tokenhercules') }}">
+                                {{ __('Mipres 2.0') }}
+                            </a>
+                            <a class="dropdown-item" href="{{ route('submenu') }}">
+                                {{ __('Pendientes') }}
+                            </a>
+                            <a class="dropdown-item" href="{{ route('dismenu') }}">
+                                {{ __('Dispensado') }}
+                            </a>
+                            <a class="dropdown-item" href="{{ route('register') }}">
+                                {{ __('Crear Usuario') }}
+                            </a>
+                            <a class="dropdown-item" href="{{ route('listasIndex') }}">
+                                {{ __('Crear listas') }}
                             </a>
 
-                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="{{ route('logout') }}"
-                                   onclick="event.preventDefault();
-                                                 document.getElementById('logout-form').submit();">
-                                    {{ __('Logout') }}
-                                </a>
-                                 <a class="dropdown-item" href="{{ route('tokenhercules') }}">
-                                    {{ __('Mipres 2.0') }}
-                                </a>
-                                <a class="dropdown-item" href="{{ route('submenu') }}">
-                                    {{ __('Pendientes') }}
-                                </a>
-                                <a class="dropdown-item" href="{{ route('dismenu') }}">
-                                    {{ __('Dispensado') }}
-                                </a>
-                                 <a class="dropdown-item" href="{{ route('register') }}">
-                                    {{ __('Crear Usuario') }}
-                                     </a>
-
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                    @csrf
-                                </form>
-                            </div>
-                        </li>
-                        @elseif(Auth::user()->rol == '2' )
-                        <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                          
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                @csrf
+                            </form>
                         </div>
-                        <li class="nav-item dropdown">
-                            <a id="navbarDropdown" class="btn btn-info dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                {{ Auth::user()->name }}
+                    </li>
+                    @elseif(Auth::user()->rol == '2' )
+                    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                        <li class="nav-item">
+                            <a href="{{ url('/usuariosapi') }}" class="list-group-item list-group-item-action">
+                                <span class="badge badge-pill badge-secondary pull-right">Usuarios API</span>
                             </a>
 
-                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="{{ route('logout') }}"
-                                   onclick="event.preventDefault();
-                                                 document.getElementById('logout-form').submit();">
-                                    {{ __('Logout') }}
-                                </a>
-                                 <a class="dropdown-item" href="{{ route('tokenhercules') }}">
-                                    {{ __('Mipres 2.0') }}
-                                </a>
-
-                                <a class="dropdown-item" href="{{ route('submenu') }}">
-                                    {{ __('Pendientes') }}
-                                </a>
-                                <a class="dropdown-item" href="{{ route('dismenu') }}">
-                                    {{ __('Dispensado') }}
-                                </a>
-
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                    @csrf
-                                </form>
-                            </div>
                         </li>
-                         @elseif(Auth::user()->email == 'luzcve@hotmail.com')
-                        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                        <li class="nav-item">
+                            <a href="{{ route('medcolCli.pendientes') }}" class="list-group-item list-group-item-action">
+                                <span class="badge badge-pill badge-primary pull-right">Pendientes Medcol</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('medcolCli.dispensado') }}" class="list-group-item list-group-item-action">
+                                <span class="badge badge-pill badge-warning pull-right">Dispensado Medcol</span>
+                            </a>
+                        </li>
+                    </div>
+                    <li class="nav-item dropdown">
+                        <a id="navbarDropdown" class="btn btn-info dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                            {{ Auth::user()->name }}
+                        </a>
 
-                          
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();
+                                                 document.getElementById('logout-form').submit();">
+                                {{ __('Logout') }}
+                            </a>
+                            <a class="dropdown-item" href="{{ route('tokenhercules') }}">
+                                {{ __('Mipres 2.0') }}
+                            </a>
+
+                            <a class="dropdown-item" href="{{ route('submenu') }}">
+                                {{ __('Pendientes') }}
+                            </a>
+                            <a class="dropdown-item" href="{{ route('dismenu') }}">
+                                {{ __('Dispensado') }}
+                            </a>
+
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                @csrf
+                            </form>
                         </div>
-                        <li class="nav-item dropdown">
-                            <a id="navbarDropdown" class="btn btn-info dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                {{ Auth::user()->name }}
+                    </li>
+                    @elseif(Auth::user()->email == 'luzcve@hotmail.com')
+                    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+
+
+                    </div>
+                    <li class="nav-item dropdown">
+                        <a id="navbarDropdown" class="btn btn-info dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                            {{ Auth::user()->name }}
+                        </a>
+
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();
+                                                 document.getElementById('logout-form').submit();">
+                                {{ __('Logout') }}
+                            </a>
+                            <a class="dropdown-item" href="{{ route('tokenhercules') }}">
+                                {{ __('Mipres 2.0') }}
+                            </a>
+                            <a class="dropdown-item" href="{{ route('submenu') }}">
+                                {{ __('Pendientes') }}
                             </a>
 
-                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="{{ route('logout') }}"
-                                   onclick="event.preventDefault();
-                                                 document.getElementById('logout-form').submit();">
-                                    {{ __('Logout') }}
-                                </a>
-                                 <a class="dropdown-item" href="{{ route('tokenhercules') }}">
-                                    {{ __('Mipres 2.0') }}
-                                </a>
-                                <a class="dropdown-item" href="{{ route('submenu') }}">
-                                    {{ __('Pendientes') }}
-                                </a>
-                                
 
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                    @csrf
-                                </form>
-                            </div>
-                        </li>
-                         @elseif(Auth::user()->rol == '3' )
-                        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                @csrf
+                            </form>
                         </div>
-                        <li class="nav-item dropdown">
-                            <a id="navbarDropdown" class="btn btn-info dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                {{ Auth::user()->name }}
+                    </li>
+                    @elseif(Auth::user()->rol == '3' )
+                    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                    </div>
+                    <li class="nav-item dropdown">
+                        <a id="navbarDropdown" class="btn btn-info dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                            {{ Auth::user()->name }}
+                        </a>
+
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();
+                                                 document.getElementById('logout-form').submit();">
+                                {{ __('Logout') }}
                             </a>
 
-                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="{{ route('logout') }}"
-                                   onclick="event.preventDefault();
-                                                 document.getElementById('logout-form').submit();">
-                                    {{ __('Logout') }}
-                                </a>
-                                
-                                <a class="dropdown-item" href="{{ route('submenu') }}">
-                                    {{ __('Menú') }}
-                                </a>
+                            <a class="dropdown-item" href="{{ route('submenu') }}">
+                                {{ __('Menú') }}
+                            </a>
 
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                    @csrf
-                                </form>
-                            </div>
-                        </li>
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                @csrf
+                            </form>
+                        </div>
+                    </li>
 
-                         @endif
+                    @endif
                     @endguest
                 </ul>
             </div>
@@ -220,9 +232,9 @@
         <div class="card-columns">
 
             @if (Route::has('login'))
-                @auth
-                 @if(Auth::user()->rol == '1' || Auth::user()->rol == '2')
-                   <!-- <div class="card bg-primary">
+            @auth
+            @if(Auth::user()->rol == '1' || Auth::user()->rol == '2')
+            <!-- <div class="card bg-primary">
                         <div class="card-body text-center">
                             <div class="card-header"> <i class="fas fa-prescription-bottle-alt"></i> Registrar token</div>
                             <div class="list-group">
@@ -234,110 +246,104 @@
                             </div>
                         </div>
                     </div> -->
-                   
-                    <div class="card bg-light">
-                        <div class="card-body text-center">
-                            <div class="card-header"> <i class="fas fa-capsules"></i>MedCol San Fernando</div>
-                            <div class="list-group">
+
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol San Fernando</div>
+                    <div class="list-group">
 
 
-                                <a href="{{ route('pendientes') }}" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-share-square"></i> Gestionar Pendientes San Fernando <span
-                                        class="badge badge-pill badge-primary pull-right">Salud Mental</span>
-                                </a>
+                        <a href="{{ route('pendientes') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-share-square"></i> Gestionar Pendientes San Fernando <span class="badge badge-pill badge-primary pull-right">Salud Mental</span>
+                        </a>
 
-                            </div>
-                        </div>
                     </div>
-                    <div class="card bg-warning">
-                        <div class="card-body text-center">
-                            <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Dolor y Paliativos</div>
-                            <div class="list-group">
-                                <a href="{{ route('medcold.pendientes') }}" class="list-group-item list-group-item-action">
-                                    <i class="far fa-share-square"></i> Gestionar Pendientes Dolor y Paliativos <span
-                                        class="badge badge-pill badge-primary pull-right">Dolor y Paliativos</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card bg-info">
-                        <div class="card-body text-center">
-                            <div class="card-header"> <i class="fas fa-capsules"></i>MedCol PCE-Huerfanas-Biologicos</div>
-                            <div class="list-group">
-                                <a href="{{ route('medcol3.pendientes') }}" class="list-group-item list-group-item-action">
-                                    <i class="far fa-share-square"></i> Gestionar Pendientes PCE-Huerfanas-Biologicos <span
-                                        class="badge badge-pill badge-primary pull-right">PCE-HUE-BIO</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                     @elseif(Auth::user()->rol == '3')
-                     <div class="card bg-light">
-                        <div class="card-body text-center">
-                            <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Consolidado de pendientes</div>
-                            <div class="list-group">
-
-
-                                <a href="{{ route('medcolCli.pendientes') }}" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-share-square"></i> Consultar Pendientes Medcol <span
-                                        class="badge badge-pill badge-primary pull-right">consolidado Medcol</span>
-                                </a>
-
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card bg-primary">
-                        <div class="card-body text-center">
-                            <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Consolidado Dispensado</div>
-                            <div class="list-group">
-
-
-                                <a href="{{ route('medcolCli.dispensado') }}" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-share-square"></i> Consultar Dispensaado Medcol <span
-                                        class="badge badge-pill badge-secondary pull-right">consolidado Medcol</span>
-                                </a>
-
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-
-                    <div class="top-right links">
-                    @else
-                     <div class="card bg-primary">
-                        <div class="card-body text-center">
-                           <img class="img-fluid" src="{{ asset('assets/lte/dist/img/iconmedcol.png') }}" alt="Medcol image">
-                          
-                        </div>
-                    </div>
-                     <div class="card bg-primary">
-                        <div class="card-body text-center">
-                            <div class="card-header"> <i class="fas fa-prescription-bottle-alt"></i> Iniciar sesión</div>
-                            <div class="list-group">
-                                <a href="{{ route('login') }}" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-key"></i> Link Ininiciar sesión <span
-                                        class="badge badge-pill badge-primary pull-right">Login</span>
-                                </a>
-
-                            </div>
-                        </div>
-                    </div>
-                     <div class="card bg-primary">
-                        <div class="card-body text-center">
-                            <img class="img-fluid" src="{{ asset('assets/lte/dist/img/iconmedcol.png') }}" alt="Medcol image">
-                           
-                        </div>
-                    </div>
-                       
-
-                        @if (Route::has('register'))
-                            {{-- <a href="{{ route('register') }}">Register</a> --}}
-                        @endif
-
-                    @endauth
                 </div>
+            </div>
+            <div class="card bg-warning">
+                <div class="card-body text-center">
+                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Dolor y Paliativos</div>
+                    <div class="list-group">
+                        <a href="{{ route('medcold.pendientes') }}" class="list-group-item list-group-item-action">
+                            <i class="far fa-share-square"></i> Gestionar Pendientes Dolor y Paliativos <span class="badge badge-pill badge-primary pull-right">Dolor y Paliativos</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-info">
+                <div class="card-body text-center">
+                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol PCE-Huerfanas-Biologicos</div>
+                    <div class="list-group">
+                        <a href="{{ route('medcol3.pendientes') }}" class="list-group-item list-group-item-action">
+                            <i class="far fa-share-square"></i> Gestionar Pendientes PCE-Huerfanas-Biologicos <span class="badge badge-pill badge-primary pull-right">PCE-HUE-BIO</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            @elseif(Auth::user()->rol == '3')
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Consolidado de pendientes</div>
+                    <div class="list-group">
+
+
+                        <a href="{{ route('medcolCli.pendientes') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-share-square"></i> Consultar Pendientes Medcol <span class="badge badge-pill badge-primary pull-right">consolidado Medcol</span>
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+            <div class="card bg-primary">
+                <div class="card-body text-center">
+                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Consolidado Dispensado</div>
+                    <div class="list-group">
+
+
+                        <a href="{{ route('medcolCli.dispensado') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-share-square"></i> Consultar Dispensaado Medcol <span class="badge badge-pill badge-secondary pull-right">consolidado Medcol</span>
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <div class="top-right links">
+                @else
+                <div class="card bg-primary">
+                    <div class="card-body text-center">
+                        <img class="img-fluid" src="{{ asset('assets/lte/dist/img/iconmedcol.png') }}" alt="Medcol image">
+
+                    </div>
+                </div>
+                <div class="card bg-primary">
+                    <div class="card-body text-center">
+                        <div class="card-header"> <i class="fas fa-prescription-bottle-alt"></i> Iniciar sesión</div>
+                        <div class="list-group">
+                            <a href="{{ route('login') }}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-key"></i> Link Ininiciar sesión <span class="badge badge-pill badge-primary pull-right">Login</span>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="card bg-primary">
+                    <div class="card-body text-center">
+                        <img class="img-fluid" src="{{ asset('assets/lte/dist/img/iconmedcol.png') }}" alt="Medcol image">
+
+                    </div>
+                </div>
+
+
+                @if (Route::has('register'))
+                {{-- <a href="{{ route('register') }}">Register</a> --}}
+                @endif
+
+                @endauth
+            </div>
             @endif
 
 
@@ -345,33 +351,31 @@
 
 
         </div>
-   
+
     </div>
 
     <!-- jQuery -->
-<script src="{{asset("assets/lte/plugins/jquery/jquery.min.js")}}"></script>
-<!-- Bootstrap 4 -->
+    <script src="{{asset("assets/lte/plugins/jquery/jquery.min.js")}}"></script>
+    <!-- Bootstrap 4 -->
 
-<script src="{{asset("assets/lte/plugins/bootstrap/js/bootstrap.bundle.min.js")}}"></script>
-<!-- AdminLTE App -->
-<script src="{{asset("assets/lte/dist/js/adminlte.min.js")}}"></script>
-<!-- AdminLTE for demo purposes -->
-<script src="{{asset("assets/lte/dist/js/demo.js")}}"></script>
-<!-- Jq Sweet alert cdn -->
+    <script src="{{asset("assets/lte/plugins/bootstrap/js/bootstrap.bundle.min.js")}}"></script>
+    <!-- AdminLTE App -->
+    <script src="{{asset("assets/lte/dist/js/adminlte.min.js")}}"></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="{{asset("assets/lte/dist/js/demo.js")}}"></script>
+    <!-- Jq Sweet alert cdn -->
 
-<!-- Jq Validate -->
+    <!-- Jq Validate -->
 
-<script src="{{asset("assets/js/jquery-validation/jquery.validate.min.js")}}"></script>
-<script src="{{asset("assets/js/jquery-validation/localization/messages_es.min.js")}}"></script>
-<script src="{{asset("assets/js/funciones.js")}}"></script>
-<script src="{{asset("assets/js/scripts.js")}}"></script>
-<script type="text/javascript">
-
-$(window).on("load",function() {
-    $(".loader1").fadeOut("slow");
-});
-
-</script>
+    <script src="{{asset("assets/js/jquery-validation/jquery.validate.min.js")}}"></script>
+    <script src="{{asset("assets/js/jquery-validation/localization/messages_es.min.js")}}"></script>
+    <script src="{{asset("assets/js/funciones.js")}}"></script>
+    <script src="{{asset("assets/js/scripts.js")}}"></script>
+    <script type="text/javascript">
+        $(window).on("load", function() {
+            $(".loader1").fadeOut("slow");
+        });
+    </script>
 </body>
 
 </html>

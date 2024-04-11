@@ -69,8 +69,14 @@ class DispensadoApiMedcol4Controller extends Controller
             $anulado =  DispensadoApiMedcol4::where([['estado', 'ANULADA'], ['centroprod', $drogueria],  ['fecha_suministro', '>=', '2024-03-01 00:00:00']])->count();
         }
 
+
+
         return response()->json(['dispensado' => $dispensado, 'revisado' => $revisado, 'anulado' => $anulado]);
     }
+
+
+
+
 
 
     public function index(Request $request)
