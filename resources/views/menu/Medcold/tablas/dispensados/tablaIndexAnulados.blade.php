@@ -1,16 +1,13 @@
 <div class="row">
     <div class="col-lg-12">
-
-        <div class="card card-info">
+        <div class="card card-danger">
             <div class="card-header with-border">
-                <h3 class="card-title">Lista de dispensados</h3>
-                <div class="card-tools pull-right">
-                   
-                </div>
+                <h3 class="card-title">Lista de Anulados</h3>
+
             </div>
             <div class="card-body table-responsive p-2">
 
-                <table id="dispensados" class="table table-hover  text-nowrap">
+                <table id="anulados" class="table table-hover  text-nowrap">
 
                     <thead>
                         <tr>
@@ -57,7 +54,7 @@
                             <th>Droguería</th>
                             <th>User_id</th>
                             <th>Cajero</th>
-                            <th><input name="selectall" id="selectall" type="checkbox" class="select-all checkbox-large tooltipsC" title="Seleccionar todo" />  Acciones  </th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>

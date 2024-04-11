@@ -9,12 +9,9 @@
                     <li class="nav-item">
                         <a class="nav-link" id="custom-tabs-one-datos-disrevisado-tab" data-toggle="pill" href="#custom-tabs-one-datos-disrevisado" role="tab" aria-controls="custom-tabs-one-datos-disrevisado" aria-selected="false">Revisados</a>
                     </li>
-                   <!-- <li class="nav-item">
-                        <a class="nav-link" id="custom-tabs-one-datos-desabastecido-tab" data-toggle="pill" href="#custom-tabs-one-datos-desabastecido" role="tab" aria-controls="custom-tabs-one-datos-desabastecido" aria-selected="false">Desabastecido</a>
-                    </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="custom-tabs-one-datos-anulado-tab" data-toggle="pill" href="#custom-tabs-one-datos-anulado" role="tab" aria-controls="custom-tabs-one-datos-anulado" aria-selected="false">Anulado</a>
-                    </li>-->
+                        <a class="nav-link" id="custom-tabs-one-datos-disanulado-tab" data-toggle="pill" href="#custom-tabs-one-datos-disanulado" role="tab" aria-controls="custom-tabs-one-datos-disanulado" aria-selected="false">Anulados</a>
+                    </li>
 
                     <div class="card-tools pull-right">
 
@@ -26,25 +23,33 @@
                 <div class="tab-content" id="custom-tabs-one-tabContent">
                     <div class="tab-pane fade active show" id="custom-tabs-one-datos-de-dispensado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-de-dispensado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.dispensados.tablaIndexDispensados')
+                            @include('menu.Medcold.tablas.dispensados.tablaIndexDispensados')
                         </div>
                     </div>
 
                     <div class="tab-pane fade " id="custom-tabs-one-datos-disrevisado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-disrevisado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.dispensados.tablaIndexRevisados')
+                            @include('menu.Medcold.tablas.dispensados.tablaIndexRevisados')
                         </div>
 
                     </div>
+                    
+                    <div class="tab-pane fade " id="custom-tabs-one-datos-disanulado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-disanulado-tab">
+                        <div class="card-body">
+                            @include('menu.Medcold.tablas.dispensados.tablaIndexAnulados')
+                        </div>
+
+                    </div>
+                    
                     <!--<div class="tab-pane fade " id="custom-tabs-one-datos-desabastecido" role="tabpanel" aria-labelledby="custom-tabs-one-datos-desabastecido-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.tablaIndexDesabastecido')
+                            @include('menu.Medcold.tablas.tablaIndexDesabastecido')
                         </div>
 
                     </div>
                     <div class="tab-pane fade " id="custom-tabs-one-datos-anulado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-anulado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.tablaIndexAnulado')
+                            @include('menu.Medcold.tablas.tablaIndexAnulado')
                         </div>
 
                     </div>-->
@@ -52,9 +57,20 @@
             </div>
         </div>
     </div>
-    <button type="button" id="syncapidis" class="btn-flotante tooltipsC" title="Sync Dispensados">
-        <i class="fas fa-capsules fa-1x"></i>
-        <span class="badge badge-pill badge-primary pull-right">Sync Dispensados</span>
+    <div class="btn-flotante-container">
+        <button type="button" id="syncapidis" class="btn-flotante tooltipsC" title="Sync Dispensados">
+            <i class="fas fa-capsules fa-1x"></i>
+            <span class="badge badge-pill badge-primary pull-right">Sync Dispensados</span>
+        </button>
+        <button type="button" id="synanulados" class="btn-flotante-second tooltipsC" title="Sync Anulados">
+            <i class="fas fa-capsules fa-1x"></i>
+            <span class="badge badge-pill badge-warning pull-left">Sync Anulados</span>
+        </button>
+    </div>
+    
+    <button type="button" id="syncdis" class="btn-flotante1 tooltipsC" title="Enviar Dispensados">
+        <i class="fas fa-capsules fa-2x"></i>
+        <span class="badge badge-pill badge-primary pull-right">Enviar Dispensados</span>
     </button>
 
 

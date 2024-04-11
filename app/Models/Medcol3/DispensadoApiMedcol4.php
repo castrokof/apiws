@@ -53,6 +53,7 @@ class DispensadoApiMedcol4 extends Model
         'estado',
         'centroprod',
         'drogueria',
+        'user_id',
         'cajero'
     ];
 
