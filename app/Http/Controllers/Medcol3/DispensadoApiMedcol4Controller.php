@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Log;
 
 use App\Models\Listas\ListasDetalle;
 use App\Models\Medcol3\DispensadoApiMedcol4;
+use App\Events\DispensadoUpdatedEvent;
+
 use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Auth;
@@ -301,6 +303,8 @@ class DispensadoApiMedcol4Controller extends Controller
 
                             if (!empty($dispensados)) {
                                 DispensadoApiMedcol4::insert($dispensados);
+                                // Disparar el evento de DispensadoCreatedEvent
+                                //event(new DispensadoUpdatedEvent($dispensados));
                             }
 
                             $contador++;
@@ -413,6 +417,9 @@ class DispensadoApiMedcol4Controller extends Controller
 
                                 if (!empty($dispensados)) {
                                     DispensadoApiMedcol4::insert($dispensados);
+
+                                    // Disparar el evento de DispensadoCreatedEvent
+                                    event(new DispensadoUpdatedEvent($dispensados));
                                 }
 
                                 $contador++;
@@ -641,15 +648,19 @@ class DispensadoApiMedcol4Controller extends Controller
 
                     Log::info('Desde la web syncapi autopista anulados', [
                         'lineas_actualizadas' => $contadorActualizados,
-                        'usuario' => $usuario
+                        'Usuario' => $usuario
                     ]);
 
-                    return response()->json([
-                        'respuesta' => "$contadorActualizados Líneas actualizadas",
-                        'titulo' => 'Líneas actualizadas',
-                        'icon' => 'success',
-                        'position' => 'bottom-left'
-                    ]);
+                    return response()->json(
+                        [
+                            [
+                                'respuesta' => $contadorActualizados . " Facturas anuladas",
+                                'titulo' => 'Lineas Actualizadas',
+                                'icon' => 'success',
+                                'position' => 'bottom-left'
+                            ]
+                        ]
+                    );
                 } catch (\Exception $e) {
                     Log::error($e->getMessage());
 

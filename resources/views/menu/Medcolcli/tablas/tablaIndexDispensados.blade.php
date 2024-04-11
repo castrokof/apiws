@@ -34,7 +34,7 @@
                             <th>fecha_suministro</th>
                             <th>id_medico</th>
                             <th>medico</th>
-                            <th>estado</th>
+                            <!--<th>ips</th>-->
                             <th>centroprod</th>
                             <th>cajero</th>
                            

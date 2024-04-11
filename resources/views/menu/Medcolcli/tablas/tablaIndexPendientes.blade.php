@@ -3,7 +3,7 @@
 
         <div class="card ">
             <div class="card-header with-border">
-
+               
             </div>
             <div class="card-body table-responsive p-2">
 
@@ -14,7 +14,7 @@
                             <th>Servicio</th>
                             <th>Tipo Documento</th>
                             <th>Cantidad Entregada</th>
-                            <th>Cantidad Ordenada</th>
+                            <th>Cantidad Pendiente</th>
                             <th>Fecha Pendiente</th>
                             <th>Fecha</th>
                             <th>Historia</th>
@@ -30,11 +30,12 @@
                             <th>Código</th>
                             <th>Medicamento</th>
                             <th>CUMS</th>
-                            <th>Cantidad</th>
                             <th>Cajero</th>
                             <th>Usuario</th>
                             <th>Estado</th>
                             <th>Fecha de Entrega</th>
+                            <!--<th>Días</th>-->
+                            
                         </tr>
                     </thead>
                     <tbody>

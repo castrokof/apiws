@@ -636,12 +636,16 @@ class DispensadoApiMedcol2Controller extends Controller
                         'usuario' => $usuario
                     ]);
 
-                    return response()->json([
-                        'respuesta' => "$contadorActualizados Líneas actualizadas",
-                        'titulo' => 'Líneas actualizadas',
-                        'icon' => 'success',
-                        'position' => 'bottom-left'
-                    ]);
+                    return response()->json(
+                        [
+                            [
+                                'respuesta' => $contadorActualizados . " Facturas anuladas",
+                                'titulo' => 'Lineas Actualizadas',
+                                'icon' => 'success',
+                                'position' => 'bottom-left'
+                            ]
+                        ]
+                    );
                 } catch (\Exception $e) {
                     Log::error($e->getMessage());
 
