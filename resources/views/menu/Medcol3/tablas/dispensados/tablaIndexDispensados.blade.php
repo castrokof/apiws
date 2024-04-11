@@ -56,7 +56,7 @@
                             <th>Droguería</th>
                             <th>User_id</th>
                             <th>Cajero</th>
-                            <th>Acciones</th>
+                            <th><input name="selectall" id="selectall" type="checkbox" class="select-all checkbox-large tooltipsC" title="Seleccionar todo" /> Acciones </th>
                         </tr>
                     </thead>
                     <tbody>

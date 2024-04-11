@@ -23,20 +23,22 @@
                 <div class="tab-content" id="custom-tabs-one-tabContent">
                     <div class="tab-pane fade active show" id="custom-tabs-one-datos-de-dispensado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-de-dispensado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.dispensados.tablaIndexDispensados')
+                            @include('menu.usuario.tablas.dispensados.tablaIndexDispensados')
                         </div>
                     </div>
 
                     <div class="tab-pane fade " id="custom-tabs-one-datos-disrevisado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-disrevisado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.dispensados.tablaIndexRevisados')
+                            @include('menu.usuario.tablas.dispensados.tablaIndexRevisados')
                         </div>
 
                     </div>
+                    
                     <div class="tab-pane fade " id="custom-tabs-one-datos-disanulado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-disanulado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.dispensados.tablaIndexAnulados')
+                            @include('menu.usuario.tablas.dispensados.tablaIndexAnulados')
                         </div>
+
                     </div>
                     <!--<div class="tab-pane fade " id="custom-tabs-one-datos-desabastecido" role="tabpanel" aria-labelledby="custom-tabs-one-datos-desabastecido-tab">
                         <div class="card-body">
@@ -65,12 +67,9 @@
         </button>
     </div>
 
-
-    
-    <button type="button" id="syncdis" class="btn-flotante1 tooltipsC" title="Enviar Dispensados">
+     <button type="button" id="syncdis" class="btn-flotante1 tooltipsC" title="Enviar Dispensados">
         <i class="fas fa-capsules fa-2x"></i>
         <span class="badge badge-pill badge-primary pull-right">Enviar Dispensados</span>
     </button>
-
 
 </div>
