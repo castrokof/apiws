@@ -1387,27 +1387,41 @@ Dispensado Medcol Limonar
         }
 
         $(document).ready(function() {
+
+
             $('#tablaRegistros').DataTable({
-                // Configuración de DataTables
-                "paging": true,
-                "lengthChange": false,
-                "searching": true,
-                "ordering": true,
-                "info": true,
-                "autoWidth": false,
-                "responsive": true,
-                "data": [], // Inicialmente, no hay datos para mostrar
-                "columns": [{
-                        "data": "codigo"
+                paging: true,
+                lengthChange: false,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true,
+                data: [], // Inicialmente, no hay datos para mostrar
+                columns: [{
+                        data: 'action',
+                        orderable: false
                     },
                     {
-                        "data": "nombre_generico"
+                        data: 'codigo'
                     },
                     {
-                        "data": "tipo_medicamento"
+                        data: 'nombre_generico'
                     },
                     {
-                        "data": "numero_unidades"
+                        data: 'tipo'
+                    },
+                    {
+                        data: 'numero_unidades'
+                    },
+                    {
+                        data: 'autorizacion'
+                    },
+                    {
+                        data: 'mipres'
+                    },
+                    {
+                        data: 'reporte_entrega_nopbs'
                     }
                 ]
             });

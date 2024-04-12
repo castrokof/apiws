@@ -70,7 +70,7 @@
 <div class="container-fluid mt-4">
     <fieldset>
         <legend style="color: #008080; font-weight: bold; font-size: 20px;">Verificar la dispensación de la Fórmula</legend>
-        <!-- Aquí puedes agregar más contenido relacionado con la dispensación -->
+        <!-- Agrega más contenido relacionado con la dispensación aquí -->
         <div class="row">
             <div class="col-md-2">
                 <div class="form-group">
@@ -88,7 +88,7 @@
                 <div class="form-group">
                     <label for="diagnostico">Diagnóstico</label>
                     <select name="dx" class="diagnos form-control select2bs4" style="width: 100%;" required>
-
+                        <!-- Agrega opciones de diagnóstico -->
                     </select>
                 </div>
             </div>
@@ -96,17 +96,17 @@
                 <div class="form-group">
                     <label for="ips">IPS Formulación</label>
                     <select name="ips" class="ipsss form-control select2bs4" style="width: 100%;" required>
-
+                        <!-- Agrega opciones de IPS -->
                     </select>
                 </div>
             </div>
         </div>
 
-        <div class="row">
+        <!-- <div class="row">
             <div class="col-md-4">
                 <div class="form-group">
-                    <label for="autorizacion1">Autorización</label>
-                    <input type="number" class="form-control" id="autorizacion1" name="autorizacion1" placeholder="Ingrese la autorización">
+                    <label for="autorizacion">Autorización</label>
+                    <input type="number" class="form-control" id="autorizacion" name="autorizacion" placeholder="Ingrese la autorización">
                 </div>
             </div>
             <div class="col-md-4">
@@ -121,16 +121,23 @@
                     <input type="number" class="form-control" id="reporte_entrega1" name="reporte_entrega1" placeholder="Ingrese el reporte de entrega">
                 </div>
             </div>
-        </div>
+        </div> -->
     </fieldset>
+
+    <!-- Agrega el contenedor de la tabla DataTable -->
     <div class="container-fluid mt-4">
         <table id="tablaRegistros" class="table table-striped">
             <thead>
                 <tr>
+                    <!-- <th><input name="selectall" id="selectall" type="checkbox" class="select-all checkbox-large tooltipsC" title="Seleccionar todo" /> Acciones </th> -->
+                    <th>Acciones</th>
                     <th>Código</th>
                     <th>Nombre Genérico</th>
                     <th>Tipo de Medicamento</th>
                     <th>Número de Unidades</th>
+                    <th>Autorización</th>
+                    <th>MIPRES</th>
+                    <th>Reporte de Entrega</th>
                 </tr>
             </thead>
             <tbody>
@@ -140,40 +147,36 @@
     </div>
 </div>
 
+<!-- Script para manejar la lógica de búsqueda y DataTable -->
 <script>
-
     function buscarFactura() {
-        // Obtener el número de factura ingresado
-        const numeroFactura = document.getElementById('numero_factura').value;
+        const numeroFactura = $('#numero_factura').val();
 
-        // Realizar la solicitud al controlador
         $.ajax({
-            url: "{{ route('dispensado.buscar', ['factura' => ':numero_factura']) }}".replace(':numero_factura', numeroFactura),
+            url: `{{ route('dispensado.buscar', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
             type: 'GET',
             success: function(data) {
-                // Verificar si se recibieron datos válidos y si hay al menos un registro
                 if (data && Array.isArray(data) && data.length > 0) {
-                    // Obtener el primer elemento del arreglo
                     const firstRecord = data[0];
 
-                    // Asignar los valores del primer registro a los campos de formulario
-                    document.getElementById('factura').value = firstRecord.factura;
-                    document.getElementById('paciente').value = firstRecord.paciente;
-                    document.getElementById('drogueria').value = firstRecord.drogueria;
-                    document.getElementById('regimen').value = firstRecord.regimen;
-                    document.getElementById('tipodocument').value = firstRecord.tipodocument;
-                    document.getElementById('medico1').value = firstRecord.medico;
+                    $('#factura').val(firstRecord.factura);
+                    $('#paciente').val(firstRecord.paciente);
+                    $('#drogueria').val(firstRecord.drogueria);
+                    $('#regimen').val(firstRecord.regimen);
+                    $('#tipodocument').val(firstRecord.tipodocument);
+                    $('#medico1').val(firstRecord.medico);
 
-                    // Verificar y formatear la fecha de suministro
                     if (firstRecord.fecha_suministro) {
-                        const formattedFechaSuministro = moment(firstRecord.fecha_suministro).format('YYYY-MM-DD');
-                        document.getElementById('fecha_suministro').value = formattedFechaSuministro;
+                        const formattedFechaSuministro = new Date(firstRecord.fecha_suministro).toISOString().split('T')[0];
+                        $('#fecha_suministro').val(formattedFechaSuministro);
                     } else {
-                        document.getElementById('fecha_suministro').value = '';
+                        $('#fecha_suministro').val('');
                     }
 
-                    document.getElementById('idusuario').value = firstRecord.idusuario;
-                    document.getElementById('cajero').value = firstRecord.cajero;
+                    $('#idusuario').val(firstRecord.idusuario);
+                    $('#cajero').val(firstRecord.cajero);
+
+                    actualizarDataTable(data);
                 } else {
                     console.error('Error: no se recibieron datos válidos o no se encontraron registros.');
                 }
@@ -182,5 +185,10 @@
                 console.error('Error al buscar la factura:', error);
             }
         });
+    }
+
+    function actualizarDataTable(data) {
+        const tablaRegistros = $('#tablaRegistros').DataTable();
+        tablaRegistros.clear().rows.add(data).draw();
     }
 </script>

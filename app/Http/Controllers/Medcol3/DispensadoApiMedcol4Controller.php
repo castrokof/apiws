@@ -765,82 +765,33 @@ class DispensadoApiMedcol4Controller extends Controller
 
     public function buscar($factura)
     {
-        // Realizar la búsqueda en la base de datos utilizando el valor de $factura
-        $resultados = DispensadoApiMedcol4::where('factura', $factura)->get(); // Utilizar get() para obtener múltiples resultados
+        // Realizar la búsqueda en la base de datos utilizando el valor de $factura y filtrando por estado = DISPENSADO
+        $resultados = DispensadoApiMedcol4::where('factura', $factura)
+            ->where('estado', 'DISPENSADO')
+            ->get();
 
         // Verificar si se encontraron resultados
         if ($resultados->isNotEmpty()) {
-            // Retornar los datos en formato JSON
-            return response()->json($resultados);
+            // Obtener un array de datos que representa los resultados
+            $data = $resultados->map(function ($item) {
+                // Convertir el modelo a un array asociativo
+                $dataArray = $item->toArray();
+        
+                // Agregar el campo 'action' al array resultante
+                $dataArray['action'] = '<input class="add_medicamento checkbox-large case tooltipsC" type="checkbox" title="Selecciona Orden" id="' . $item->id . '" value="' . $item->id . '">';
+        
+                return $dataArray;
+            });
+        
+            // Retornar los datos en formato JSON para DataTable
+            return response()->json($data);
         } else {
             // Retornar un error si no se encontraron resultados
-            return response()->json(['error' => 'Factura no encontrada'], 404);
+            return response()->json(['error' => 'Factura no encontrada o no tiene estado DISPENSADO'], 404);
         }
     }
 
 
-
-
-    /* public function filfech(Request $request)
-        {
-            
-                $fechaAi=now()->toDateString()." 00:00:01";
-                $fechaAf=now()->toDateString()." 23:59:59";
-    
-            if ($request->ajax()) {
-                
-                $dispensadoapi = DispensadoApiMedcol4::query();
-                
-              if($request->fechaini != '' && $request->fechafin != '' ){  
-                
-                $fechaini = new Carbon($request->fechaini);
-                $fechaini = $fechaini->toDateString();
-    
-                $fechafin = new Carbon($request->fechafin);
-                $fechafin = $fechafin->toDateString();
-                
-                $dispensadoapi->whereBetween('fecha_suministro', [$fechaini.' 00:00:00',$fechafin.' 23:59:59']);
-                
-              }
-              
-              
-              /*if($request->historia != ''){  
-                  
-                $historia = preg_replace("/\s+/", "", trim($request->historia));
-                
-                $historia = explode(',',$historia);
-                
-                $pc = count($historia);
-                
-                for ($i=0; $i < $pc; $i++) { 
-    
-                     $dispensadoapi->WhereIn('historia', $historia);
-                    
-                }
-                
-              }*/
-
-
-    /* if($request->fechaini == '' && $request->fechafin == ''){  
-                
-                  $dispensadoapi->whereBetween('fecha_suministro', [$fechaAi,$fechaAf]);
-                  $dispensadoapi->where([
-                    ['fecha_suministro', '>=', '2024-02-01'.' 00:00:00']]
-                );
-                
-              }
-              
-              
-                
-               $dispensadoapi->get();
-               
-               
-               return DataTables()->of($dispensadoapi)
-                ->make(true);
-              }
-                  
-              
-            }*/
 
     /**
      * Display the specified resource.

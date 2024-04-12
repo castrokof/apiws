@@ -61,10 +61,9 @@
 
  </style>
 </head>
-<body>
-    <div class="loader1"></div> 
-    <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+
+ <div id="app">
+  <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
                 <a class="navbar-logo" href="{{ url('/') }}">
                     <img src="{{asset("assets/lte/dist/img/iconmedcol.png")}}" alt="medcol_logo_header"  style="top: 12px">
@@ -144,9 +143,6 @@
                                      </a>
                                      <a class="dropdown-item" href="{{ route('usuariosapiws') }}">
                                     {{ __('Listar Usuarios') }}
-                                     </a>
-                                     <a class="dropdown-item" href="{{ route('listasIndex') }}">
-                                    {{ __('Crear listas') }}
                                      </a>
                                      
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
@@ -267,45 +263,51 @@
                 </div>
             </div>
         </nav>
+         
+    </div>      
 
-        <main class="py-4">
-            @yield('content')
-        </main>
+  <div class="modal fade" tabindex="-1" id ="modal-xl" role="dialog" aria-labelledby="myLargeModalLabel">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">   
+        <div class="row">
+            <div class="col-lg-12">
+             
+               <div class="card card-warning">
+                <div class="card-header">
+                  <h3 class="card-title">Editar Contraseña del usuario:{{$iduser ?? ''}}</h3>
+                  <div class="card-tools pull-right">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+                <form action="" id="form-general-pass" class="form-horizontal" method="POST">
+                  @csrf @method('put')
+                  <div class="card-body">
+                                    @include('includes.form-password')
+                  </div>
+                                <!-- /.card-body -->
+                                <div class="card-footer">
+                                    <div class="col-lg-3"></div>
+                                    <div class="col-lg-6">
+                                    @include('includes.boton-form-editar-pass')
+                                </div>
+                                 </div>
+                                <!-- /.card-footer -->
+                    </form>
+                         
+            
+               
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+</div>
 
- <!-- jQuery -->
-<script src="{{asset("assets/lte/plugins/jquery/jquery.min.js")}}"></script>
-<!-- Bootstrap 4 -->
 
-<script src="{{asset("assets/lte/plugins/bootstrap/js/bootstrap.bundle.min.js")}}"></script>
-<!-- AdminLTE App -->
-<script src="{{asset("assets/lte/dist/js/adminlte.min.js")}}"></script>
-<!-- AdminLTE for demo purposes -->
-<script src="{{asset("assets/lte/dist/js/demo.js")}}"></script>
-<!-- Jq Sweet alert cdn -->
-<!-- Jq Sweet alert cdn -->
-<script src="{{asset("assets/lte/plugins/sweetalert2/sweetalert2.all.min.js")}}"></script>
-<script src="{{asset("assets/js/jquery-select2/select2.min.js")}}" type="text/javascript"></script>
-<script src="{{asset("assets/lte/plugins/moment/moment.min.js")}}" type="text/javascript"></script>
-<script src="{{asset("assets/lte/plugins/datatables/jquery.dataTables.js")}}" type="text/javascript"></script>
-<script src="{{asset("assets/lte/plugins/datatables-bs4/js/dataTables.bootstrap4.js")}}" type="text/javascript"></script>
-<script src="{{asset("assets/lte/plugins/datatables-responsive/js/dataTables.responsive.min.js")}}" type="text/javascript"></script>
 
-<!-- Jq Validate -->
 
-<script src="{{asset("assets/js/jquery-validation/jquery.validate.min.js")}}"></script>
-<script src="{{asset("assets/js/jquery-validation/localization/messages_es.min.js")}}"></script>
-<script src="{{asset("assets/js/funciones.js")}}"></script>
-<script src="{{asset("assets/js/scripts.js")}}"></script>   
-<script type="text/javascript">
-  
-$(window).on("load",function() {
-    $(".loader1").fadeOut("slow");
-});
 
-</script>
-{{-- <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script> --}}
-@yield("scriptsPlugins")
-</body> 
-</html>
+
+
+
+  <!-- /.navbar -->
