@@ -763,6 +763,21 @@ class DispensadoApiMedcol4Controller extends Controller
         return view('menu.Medcol3.indexDispensado', ['droguerias' => $drogueria]);
     }
 
+    public function buscar($factura)
+    {
+        // Realizar la búsqueda en la base de datos utilizando el valor de $factura
+        $resultados = DispensadoApiMedcol4::where('factura', $factura)->get(); // Utilizar get() para obtener múltiples resultados
+
+        // Verificar si se encontraron resultados
+        if ($resultados->isNotEmpty()) {
+            // Retornar los datos en formato JSON
+            return response()->json($resultados);
+        } else {
+            // Retornar un error si no se encontraron resultados
+            return response()->json(['error' => 'Factura no encontrada'], 404);
+        }
+    }
+
 
 
 

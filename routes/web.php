@@ -183,6 +183,8 @@ Route::post('medcol3/add_dispensado', 'Medcol3\DispensadoApiMedcol4Controller@ad
 Route::get('medcol3/informedis', 'Medcol3\DispensadoApiMedcol4Controller@informes')->name('medcol3.informedis')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol3/disanulado', 'Medcol3\DispensadoApiMedcol4Controller@disanulado')->name('medcol3.disanulado')->middleware('verified')->middleware('verifyuser');
 
+Route::get('buscar/{factura}', 'Medcol3\DispensadoApiMedcol4Controller@buscar')->name('dispensado.buscar')->middleware('verified')->middleware('verifyuser');
+
 
 
 /*

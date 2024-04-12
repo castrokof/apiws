@@ -1,16 +1,15 @@
-
 <div class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
                 @if(Auth::user()->drogueria == '1')
-                    <h1 class="m-0">Dispensado Medcol PCE, HUE Y BIO</h1>
+                <h1 class="m-0">Dispensado Medcol PCE, HUE Y BIO</h1>
                 @elseif(Auth::user()->drogueria == '4')
-                    <h1 class="m-0">Dispensado Medcol PCE</h1>
+                <h1 class="m-0">Dispensado Medcol PCE</h1>
                 @elseif(Auth::user()->drogueria == '5')
-                    <h1 class="m-0">Dispensado Medcol Huerfanas</h1>
+                <h1 class="m-0">Dispensado Medcol Huerfanas</h1>
                 @elseif(Auth::user()->drogueria == '6')
-                    <h1 class="m-0">Dispensado Medcol BIOLOGICOS</h1>
+                <h1 class="m-0">Dispensado Medcol BIOLOGICOS</h1>
                 @endif
             </div>
             <div class="col-sm-6">
@@ -20,7 +19,7 @@
                 </ol>
             </div>
         </div>
-        
+
         <div class="row">
             <div class="col-md-6">
                 @csrf
@@ -43,6 +42,11 @@
                             </div>
                             <div class="col-md-6">
                                 <button type="submit" name="buscar" id="buscar" class="btn btn-success btn-block">Buscar</button>
+                            </div>
+                            <div class="col-md-12 mt-3">
+                                <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#gestion_multiple">
+                                    Gestion Multiple
+                                </button>
                             </div>
                         </div>
                     </div>

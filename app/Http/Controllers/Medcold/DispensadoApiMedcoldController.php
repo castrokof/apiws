@@ -507,16 +507,24 @@ class DispensadoApiMedcoldController extends Controller
                     });
             }
             return DataTables()->of($dispensado_api_medcol4)
-                ->addColumn('action', function ($pendiente) {
-                    $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
-                    " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
-                    <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
-                    $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
-                    " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
-                    <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i> </button>';
-
-                    return $button . ' ' . $button2;
-                })
+            ->addColumn('action', function ($pendiente) {
+                $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '" class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle">
+                              <span class="badge bg-teal">Detalle</span>
+                              <i class="fas fa-prescription-bottle-alt"></i>
+                          </button>';
+            
+                $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar">
+                              <span class="badge bg-teal">Editar</span>
+                              <i class="fas fa-pencil-alt"></i>
+                          </button>';
+            
+                $button3 = '<button type="button" name="gestionar_masivamente" id="' . $pendiente->id . '" class="gestionar_masivamente btn btn-app bg-warning tooltipsC" title="Gestionar Masivamente">
+                              <span class="badge bg-teal">Gestionar</span>
+                              <i class="fas fa-users"></i>
+                          </button>';
+            
+                return $button . ' ' . $button2 . ' ' . $button3;
+            })
                 ->addColumn('fecha Orden', function ($pendiente) {
                     $inputdate = '<input type="date" name="date_orden" id="' . $pendiente->id . '
                     " class="show_detail btn btn-app bg-secondary tooltipsC" title="Fecha">';
@@ -732,16 +740,24 @@ class DispensadoApiMedcoldController extends Controller
                     });
             }
             return DataTables()->of($dispensado_api_medcol4)
-                ->addColumn('action', function ($pendiente) {
-                    $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
-                    " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
-                    <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
-                    $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
-                    " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
-                    <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i> </button>';
-
-                    return $button . ' ' . $button2;
-                })
+            ->addColumn('action', function ($pendiente) {
+                $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '" class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle">
+                              <span class="badge bg-teal">Detalle</span>
+                              <i class="fas fa-prescription-bottle-alt"></i>
+                          </button>';
+            
+                $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar">
+                              <span class="badge bg-teal">Editar</span>
+                              <i class="fas fa-pencil-alt"></i>
+                          </button>';
+            
+                $button3 = '<button type="button" name="gestionar_masivamente" id="' . $pendiente->id . '" class="gestionar_masivamente btn btn-app bg-warning tooltipsC" title="Gestionar Masivamente">
+                              <span class="badge bg-teal">Gestionar</span>
+                              <i class="fas fa-users"></i>
+                          </button>';
+            
+                return $button . ' ' . $button2 . ' ' . $button3;
+            })
                 ->addColumn('fecha Orden', function ($pendiente) {
                     $inputdate = '<input type="date" name="date_orden" id="' . $pendiente->id . '
                     " class="show_detail btn btn-app bg-secondary tooltipsC" title="Fecha">';

@@ -11,7 +11,6 @@ Dispensado Medcol Limonar
 <link href="{{asset("assets/lte/plugins/icheck-bootstrap/icheck-bootstrap.min.css")}}" rel="stylesheet" type="text/css" />
 <link href="{{asset("assets/lte/plugins/fontawesome-free/css/all.min.css")}}" rel="stylesheet" type="text/css" />
 
-
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.css" rel="stylesheet" type="text/css" />
 
@@ -36,6 +35,7 @@ Dispensado Medcol Limonar
 
 @include('menu.Medcol3.form.dispensado.forminformedispensado')
 @include('menu.Medcol3.tabs.tabsIndexDispensado')
+@include('menu.Medcol3.modal.modalGestionMultiple')
 
 @endsection
 
@@ -119,8 +119,6 @@ Dispensado Medcol Limonar
                 }
             });
         }
-
-
 
         var fechaini;
         var fechafin;
@@ -1310,7 +1308,6 @@ Dispensado Medcol Limonar
 
         function enviardatos(dispensadotrue1) {
 
-
             Swal.fire({
                     icon: "info",
                     title: 'Espere por favor !',
@@ -1387,10 +1384,34 @@ Dispensado Medcol Limonar
 
                 });
 
-
-
         }
 
+        $(document).ready(function() {
+            $('#tablaRegistros').DataTable({
+                // Configuración de DataTables
+                "paging": true,
+                "lengthChange": false,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "data": [], // Inicialmente, no hay datos para mostrar
+                "columns": [{
+                        "data": "codigo"
+                    },
+                    {
+                        "data": "nombre_generico"
+                    },
+                    {
+                        "data": "tipo_medicamento"
+                    },
+                    {
+                        "data": "numero_unidades"
+                    }
+                ]
+            });
+        });
 
     });
 
