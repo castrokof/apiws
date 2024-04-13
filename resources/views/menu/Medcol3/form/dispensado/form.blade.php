@@ -147,6 +147,7 @@
     </div>
 </div>
 
+
 <!-- Script para manejar la lógica de búsqueda y DataTable -->
 <script>
     function buscarFactura() {
@@ -179,10 +180,13 @@
                     actualizarDataTable(data);
                 } else {
                     console.error('Error: no se recibieron datos válidos o no se encontraron registros.');
+                    // Mostrar alerta de SweetAlert2 cuando no se encuentran registros
+                    mostrarError('No se encontraron registros para la factura ingresada.');
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Error al buscar la factura:', error);
+                mostrarError('Error al buscar la factura. Por favor, inténtalo de nuevo.');
             }
         });
     }
@@ -190,5 +194,15 @@
     function actualizarDataTable(data) {
         const tablaRegistros = $('#tablaRegistros').DataTable();
         tablaRegistros.clear().rows.add(data).draw();
+    }
+
+    function mostrarError(mensaje) {
+        // Mostrar alerta de SweetAlert2
+        Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: mensaje,
+            confirmButtonText: 'OK'
+        });
     }
 </script>

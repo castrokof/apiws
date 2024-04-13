@@ -10,6 +10,7 @@ Dispensado Medcol Limonar
 <link href="{{asset("assets/lte/plugins/datatables-bs4/css/dataTables.bootstrap4.css")}}" rel="stylesheet" type="text/css" />
 <link href="{{asset("assets/lte/plugins/icheck-bootstrap/icheck-bootstrap.min.css")}}" rel="stylesheet" type="text/css" />
 <link href="{{asset("assets/lte/plugins/fontawesome-free/css/all.min.css")}}" rel="stylesheet" type="text/css" />
+<!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script> -->
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.css" rel="stylesheet" type="text/css" />
@@ -1388,7 +1389,6 @@ Dispensado Medcol Limonar
 
         $(document).ready(function() {
 
-
             $('#tablaRegistros').DataTable({
                 paging: true,
                 lengthChange: false,
@@ -1398,7 +1398,8 @@ Dispensado Medcol Limonar
                 autoWidth: false,
                 responsive: true,
                 data: [], // Inicialmente, no hay datos para mostrar
-                columns: [{
+                columns: [
+                    {
                         data: 'action',
                         orderable: false
                     },
@@ -1415,13 +1416,13 @@ Dispensado Medcol Limonar
                         data: 'numero_unidades'
                     },
                     {
-                        data: 'autorizacion'
+                        data: 'autorizacion2'
                     },
                     {
-                        data: 'mipres'
+                        data: 'mipres2'
                     },
                     {
-                        data: 'reporte_entrega_nopbs'
+                        data: 'reporte_entrega2'
                     }
                 ]
             });
