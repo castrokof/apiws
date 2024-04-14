@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
+/* Route::get('/', function () {
     return view('menu.submenu');
-});
+}); */
 
 /*Route::prefix('usuarios')->group(function() {
   Auth::routes();

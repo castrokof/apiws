@@ -30,12 +30,12 @@ height:100%;
   </style>
 @endsection
 @section('content')
-<div class="container">
+<div class="container col-12">
     <div class="loader"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>
     <div class="row justify-content-center">
         <div class="col-12">
             <div class="card col-l-12">
-                <div class="card-header">{{ __('Reporte de Facturado') }}</div>
+                <div class="card-header bg-dark">{{ __('Reporte de Facturado') }}</div>
 
                 <div class="card-body">
                     @if (session('status'))
@@ -147,7 +147,7 @@ $(document).ready(function(){
 
         language: idioma_espanol,
         processing: true,
-
+         lengthMenu: [ [10, 25, 50, 100, 500, -1 ], [10, 25, 50, 100, 500, "Mostrar Todo"] ],
 
 
          //Botones----------------------------------------------------------------------
@@ -280,7 +280,7 @@ $(document).ready(function(){
                     Swal.fire(
                         {
                           icon: 'success',
-                          title: item.Message,
+                          title: item.Mensaje,
                           showConfirmButton: true,
                           //timer: 1500
                         }

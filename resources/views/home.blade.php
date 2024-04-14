@@ -1,16 +1,17 @@
 @extends('layouts.app')
 @section("styles")
 <link href="{{asset("assets/lte/plugins/datatables-bs4/css/dataTables.bootstrap4.css")}}" rel="stylesheet" type="text/css"/>
-<link href="//cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css" rel="stylesheet">
+<link href="{{asset("assets/lte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.css")}}" rel="stylesheet"  type="text/css"/>
 <link href="{{asset("assets/lte/plugins/toastr/toastr.css")}}" rel="stylesheet" type="text/css"/>
-<style>
-    .loader {
 
-    visibility: hidden;
-    background-color: rgba(255, 253, 253, 0.952);
+<style>
+    .loader { 
+     
+    visibility: hidden; 
+    background-color: rgba(255, 253, 253, 0.952); 
     position: absolute;
     z-index: +100 !important;
-    width: 100%;
+    width: 100%;  
     height:100%;
    }
       .loader img { position: relative; top:50%; left:40%;
@@ -19,11 +20,11 @@
 @endsection
 @section('content')
 <div class="container col-12">
-    <div class="loader"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>
-
+    <div class="loader"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>                   
+    <div class="row justify-content-center">
         <div class="col-12">
             <div class="card col-l-12">
-                <div class="card-header">{{ __('Direccionamientos') }}</div>
+                <div class="card-header bg-info">{{ __('Direccionados') }}</div>
 
                 <div class="card-body">
                     @if (session('status'))
@@ -38,26 +39,30 @@
                     @include('form-consulta')
                     <button type="submit" id="consultar" class="btn btn-success">Consultar</button><button type="button" id="enviar" class="btn btn-warning">Programar</button>
                     </form>
-
+                    
                     <div class="card-body col-md-12 table-responsive p-2">
                         <table id="mipres" class="table text-nowrap table-bordered" style="width:100%">
-
+                        
                     <thead>
                         <tr>
                         <th>Seleccione</th>
                         <th>ID:</th>
                         <th>ID Direccionamiento:</th>
                         <th>Prescripcion:</th>
+                        <th>Cons.:</th>
                         <th>Tipo documento:</th>
                         <th>Documento:</th>
+                        <th>Cums:</th>
+                        <th>Desc Mipres:</th>
                         <th>Cantidad a entregar:</th>
                         <th>Numero entrega:</th>
                         <th>TipoIDProv:</th>
                         <th>NoIDProv:</th>
-                        <th>Cums:</th>
                         <th>Fecha máxima de entrega:</th>
                         <th>Fecha Direccionamiento:</th>
                         <th>CodSedeProv:</th>
+                        <th>NIT EPS:</th>
+                        <th>Cod EPS:</th>
                        </tr>
                     </thead>
                        <tbody>
@@ -68,67 +73,96 @@
                             <td> {{$item['ID'] ?? ''}}</td>
                             <td> {{$item['IDDireccionamiento'] ?? ''}}</td>
                             <td> {{$item['NoPrescripcion'] ?? ''}}</td>
+                            <td> {{$item['ConTec'] ?? ''}}</td>
                             <td>{{$item['TipoIDPaciente'] ?? ''}}</td>
                             <td>{{$item['NoIDPaciente'] ?? ''}}</td>
+                            <td>{{$item['CodSerTecAEntregar'] ?? ''}}</td>
+                            @switch($item['CodSerTecAEntregar'])
+                                @case(107)
+                                <td>ASEO PERSONAL (GEL ANTIBACTERIAL, DESODORANTES, PROTECTORES LABIALES, TOALLAS DE PAPEL, TOALLAS HIGIENICAS, MAQUILLAJE, ENTRE OTRAS)</td> 
+                                    @break
+
+                                @case(108)
+                                <td> BLOQUEADORES SOLARES</td>
+                                    @break
+
+                                 @case(109)
+                                <td>CHAMPÚ Y LOCIONES CAPILARES</td> 
+                                    @break
+
+                                @case(112)
+                                <td> CREMAS ANTIPAÑALITIS</td>
+                                    @break
+                                
+                                @case(113)
+                                <td>CREMAS CICATRIZANTES Y REPARADORES DÉRMICOS</td> 
+                                   @break
+    
+                                @case(114)
+                                <td> CREMAS Y LOCIONES HUMECTANTES, HIDRATANTES Y EMOLIENTES</td>
+                                    @break
+                            
+                                @case(121)
+                                <td>HIGIENE ORAL (CEPILLO, CREMA, SEDA DENTAL, ENJUAGUE)</td> 
+                                    @break
+    
+                                @case(127)
+                                <td> JABONES COSMÉTICOS, ANTIALÉRGICOS Y ANTIBACTERIALES</td>
+                                     @break
+                            
+                                @case(130)
+                                <td>LOCIONES REPELENTES DE USO PERSONAL Y DOMÉSTICO</td> 
+                                     @break
+        
+                                @case(133)
+                                <td>MEDICAMENTOS FITOTERAPEÚTICOS</td>
+                                     @break
+
+                                @case(134)
+                                <td>MEDICAMENTOS HOMEOPÁTICOS</td> 
+                                @break
+        
+                                @case(139)
+                                <td>PAÑALES</td> 
+                                 @break
+            
+                                @case(140)
+                                <td> PAÑITOS HÚMEDOS</td>
+                                @break
+         
+                                @case(146)
+                                <td> SUPLEMENTOS DIETARIOS</td>
+                                @break
+                
+
+                                @default
+                                <td>Medicamento</td> 
+                            @endswitch
+                                                    
                             <td>{{$item['CantTotAEntregar'] ?? ''}}</td>
                             <td>{{$item['NoEntrega'] ?? ''}}</td>
                             <td>{{$item['TipoIDProv'] ?? ''}}</td>
                             <td>{{$item['NoIDProv'] ?? ''}}</td>
-                            <td>{{$item['CodSerTecAEntregar'] ?? ''}}</td>
                             <td>{{$item['FecMaxEnt'] ?? ''}}</td>
                             <td>{{$item['FecDireccionamiento'] ?? ''}}</td>
-                            <td>PROV005664</td>
+                            <td>PROV007788</td>
+                            <td>{{$item['NoIDEPS'] ?? ''}}</td>
+                            <td>{{$item['CodEPS'] ?? ''}}</td>
                         </tr>
                         @endforeach
                         @endforeach
-                        </tbody>
+                        </tbody>    
                         </table>
                     </div>
-                    {{-- Estatus prescripcion: {{$statusP ?? ''}}
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-
-                     <thead>
-                        <tr>
-                        <th>Seleccione</th>
-                        <th>ID:</th>
-                        <th>ID Direccionamiento:</th>
-                        <th>Prescripcion:</th>
-                        <th>Tipo y numero de documento:</th>
-                        <th>Cantidad a entregar:</th>
-                        <th>Cums:</th>
-                        <th>Fecha máxima de entrega:</th>
-                        <th>Fecha Direccionamiento:</th>
-                       </tr>
-                        @foreach ($medicamentos2 ?? '' ?? '' as $item3)
-                        @foreach ($item3 as $item2)
-                    </thead>
-                        <tbody>
-                        <tr>
-                            <td><input type="checkbox" id="{{$item2['ID']}}" aria-label="Checkbox for following text input"></td>
-                            <td> {{$item2['ID']}}</td>
-                            <td> {{$item2['IDDireccionamiento']}}</td>
-                            <td> {{$item2['NoPrescripcion']}}</td>
-                            <td>{{$item2['TipoIDPaciente']}}.{{$item2['NoIDPaciente']}}</td>
-                            <td>{{$item2['CantTotAEntregar']}}</td>
-                            <td>{{$item2['CodSerTecAEntregar']}}</td>
-                            <td>{{$item2['FecMaxEnt']}}</td>
-                            <td>{{$item2['FecDireccionamiento']}}</td>
-
-                        </tr>
-                        @endforeach
-                        @endforeach
-                        </tbody>
-                        </table>
-                    </div> --}}
+                   
                 </div>
+               
 
-
-
+                    
 
                 </div>
             </div>
-
+        </div>
     </div>
 </div>
 
@@ -149,55 +183,53 @@
 
 $(document).ready(function(){
 
-    // $('.textarea').on('#prescripcion', function(){
-    //     this.value=this.value.replace(/(\r\n|\n|\r)/g, '').replace(/ /g, '').replace(/[^0-9.]/g, '');
-    // });
-
     $('#mipres').DataTable({
-
+        
+        lengthMenu: [ [25, 50, 100, 500, -1 ], [25, 50, 100, 500, "Mostrar Todo"] ],
         language: idioma_espanol,
         processing: true,
 
 
-
+        
          //Botones----------------------------------------------------------------------
-
-         "dom":'<"row"<"col-md-9 form-inline"l><"col-xs-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
-
+     
+        "dom":'<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+         
+                   
                    buttons: [
                       {
-
+    
                    extend:'copyHtml5',
                    titleAttr: 'Copy',
                    title:"seguimiento",
                    className: "btn btn-info"
-
-
+    
+    
                       },
                       {
-
+    
                    extend:'excelHtml5',
                    titleAttr: 'Excel',
                    title:"seguimiento",
                    className: "btn btn-success"
-
-
+    
+    
                       },
                        {
-
+    
                    extend:'csvHtml5',
                    titleAttr: 'csv',
                    className: "btn btn-warning"
-
-
+    
+    
                       },
                       {
-
+    
                    extend:'pdfHtml5',
                    titleAttr: 'pdf',
                    className: "btn btn-primary"
-
-
+    
+    
                       }
                    ],
     });
@@ -214,38 +246,38 @@ $(document).ready(function(){
     //     showCloseButton: true,
     //     confirmButtonText: 'Aceptar',
     //     }).then((result)=>{
-    //    if(result.value){
-
-    $("#enviar").click(function(){
+    //    if(result.value){      
+        
+        $("#enviar").click(function(){
 
             var mipre =[];
             var mipretrue =[];
-
+                   
     $("tbody tr").each(function(el){
-
+                
                     var itemmipres = {};
 
-
+            
 
                 var tds = $(this).find("td");
                 itemmipres.checked = tds.find(":checkbox").prop("checked");
                 itemmipres.ID = parseFloat(tds.filter(":eq(1)").text());
-                itemmipres.FecMaxEnt = tds.filter(":eq(11)").text();
-                itemmipres.TipoIDSedeProv = tds.filter(":eq(8)").text();
-                itemmipres.NoIDSedeProv = tds.filter(":eq(9)").text();
-                itemmipres.CodSedeProv = tds.filter(":eq(13)").text();
-                itemmipres.CodSerTecAEntregar = tds.filter(":eq(10)").text();
-                itemmipres.CantTotAEntregar = tds.filter(":eq(6)").text();
-
+                itemmipres.FecMaxEnt = tds.filter(":eq(13)").text();
+                itemmipres.TipoIDSedeProv = tds.filter(":eq(11)").text();
+                itemmipres.NoIDSedeProv = tds.filter(":eq(12)").text();
+                itemmipres.CodSedeProv = tds.filter(":eq(15)").text();
+                itemmipres.CodSerTecAEntregar = tds.filter(":eq(7)").text();
+                itemmipres.CantTotAEntregar = tds.filter(":eq(9)").text();
+                
                 // Ingreso cada array en la variable itemmipres
-                mipre.push(itemmipres);
-
-
-
-
-            });
-
-
+                mipre.push(itemmipres);       
+           
+          
+              
+                       
+            });           
+            
+            
             $.each(mipre, function(i, items) {
 
                 var itemmiprestrue = {};
@@ -258,20 +290,27 @@ $(document).ready(function(){
                     itemmiprestrue.CodSedeProv = items.CodSedeProv;
                     itemmiprestrue.CodSerTecAEntregar = items.CodSerTecAEntregar;
                     itemmiprestrue.CantTotAEntregar = items.CantTotAEntregar;
-
+                
                     mipretrue.push(itemmiprestrue);
-
+             
                  }
+               
+                
 
-
-
-
+                
             });
-
-
-
+         /* Swal.fire({
+                icon: "info",
+                title: 'Espere por favor !',
+                html: 'Realizando la programación..',// add html attribute if you want or remove
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                willOpen: () => {
+                    Swal.showLoading()
+                },
+            }), */   
           $.ajax({
-            beforeSend: function(){
+            beforeSend: function(){ 
             $('.loader').css("visibility", "visible"); },
            url:"{{route('programar')}}",
            method: 'post',
@@ -281,8 +320,7 @@ $(document).ready(function(){
            //dataType:"json",
            success:function(data){
             if(data.success == 'ya'){
-
-                for (var i = 0; i< data.result.length; i++) {
+             for (var i = 0; i< data.result.length; i++) {
                 $.each(JSON.parse(data.result[i]), function(a, items) {
 
                     toastr.warning('¡ '+items+ ' !');
@@ -297,37 +335,45 @@ $(document).ready(function(){
 
                 });
                 }
-            //$('#mipres').DataTable().destroy();
+            //$('#mipres').DataTable().destroy(); 
             }else if(data.success == 'ok'){
-
-            for (var i = 0; i< data.result.length; i++) {
+                
+                for (var i = 0; i< data.result.length; i++) {
 
                 $.each(JSON.parse(data.result[i]), function(a, item) {
+                    console.log(item);
+                   if(Array.isArray(item) == true){
+                    toastr.warning(item + '!');   
+                   }else{
+                       
+                       if(item.IdProgramacion > 0){
+                           
+                           let respuesta = item.IdProgramacion;
+                           let respuesta1 = item.Id;
+                            toastr.success("El ID: " + respuesta1 +"/n"+"Quedo programado con Id de programación: "+ respuesta + '!');  
+                           
+                          
+                           
+                       }
+                       
+                      }
+                    
+                    
+                   });
 
-
-                    toastr.success('¡El ID: '+item.Id+ ' Fue programado correctamente y quedo con id de programacion: '+item.IdProgramacion+'!');
-                    //  Swal.fire(
-                    //          {
-                    //          icon: 'info',
-                    //          title: "El ID: "+item.Id,
-                    //          text:"Fue programado correctamente y quedo con id de programacion: "+item.IdProgramacion,
-                    //          showConfirmButton: true,
-                    //          timer: 1000
-                    //          }
-                    //      )
-
-                        });
+                      
 
                     }
-                }
-
-            },complete: function(){
+                   
+                } 
+                    
+            },complete: function(){ 
                 $('.loader').css("visibility", "hidden");
                 }
 
 
           });
-
+           
         })
 
     //    }
@@ -335,8 +381,7 @@ $(document).ready(function(){
     });
 
 
-
-
+ 
 });
 
 
@@ -368,7 +413,7 @@ var idioma_espanol =
                     "copy": "Copiar",
                     "colvis": "Visibilidad"
                 }
-                }
-
+                }   
+       
 </script>
 @endsection

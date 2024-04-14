@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Tempus SW</title>
+        <title>Medcol WS</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;600&display=swap" rel="stylesheet">
@@ -68,33 +68,26 @@
             @if (Route::has('login'))
                 <div class="top-right links">
                     @auth
-                        <a href="{{route('tokenhercules') }}">Registrar token hercules</a>
-
+                        <a href="{{route('tokenhercules') }}">Registrar token hercules Medcol</a>
+                        
                     @else
                         <a href="{{ route('login') }}">Login</a>
 
-                        @if (Route::has('register'))
+                        <!--@if (Route::has('register'))
                             <a href="{{ route('register') }}">Register</a>
-                        @endif
+                        @endif -->
                     @endauth
                 </div>
             @endif
 
             <div class="content">
                 <div class="title m-b-md">
-                    SALUD MEDCOL SAS
+                   SALUD MEDCOL SAS
                 </div>
 
-                <div class="links">
-                    {{-- <a href="https://laravel.com/docs">Docs</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://blog.laravel.com">Blog</a>
-                    <a href="https://nova.laravel.com">Nova</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://vapor.laravel.com">Vapor</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a> --}}
-                </div>
+                
+                  
+                
             </div>
         </div>
     </body>

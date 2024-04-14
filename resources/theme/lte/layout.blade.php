@@ -8,8 +8,8 @@
   <title>@yield("titulo",'Medcol')</title>
 
     <!-- Favicons -->
-    <link href="{{asset("assets/img/fidem_icon.jpeg")}}" rel="icon">
-    <link href="{{asset("assets/img/fidem_icon.jpeg")}}" rel="fidem_icon">
+    <link href="{{asset("assets/lte/dist/img/iconmedcol.png")}}" rel="icon">
+    <link href="{{asset("assets/lte/dist/img/iconmedcol.png")}}" rel="fidem_icon">
 
   <!-- Tell the browser to be responsive to screen width -->
   <meta name="viewport" content="width=device-width, initial-scale=1">

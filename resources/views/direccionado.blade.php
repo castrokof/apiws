@@ -1,25 +1,31 @@
 @extends('layouts.app')
 @section("styles")
-<link href="{{asset("assets/lte/plugins/datatables-bs4/css/dataTables.bootstrap4.css")}}" rel="stylesheet" type="text/css"/>
+<link href="{{asset("assets/lte/plugins/datatables-bs4/css/dataTables.bootstrap4.css")}}" rel="stylesheet" type="text/css" />
 <link href="//cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css" rel="stylesheet">
 
 <style>
-    .loader { 
-     
-    visibility: hidden; 
-    background-color: rgba(255, 253, 253, 0.952); 
-    position: absolute;
-    z-index: +100 !important;
-    width: 100%;  
-    height:100%;
-   }
-      .loader img { position: relative; top:50%; left:40%;
-        width: 180px; height: 180px; }
-  </style>
+    .loader {
+
+        visibility: hidden;
+        background-color: rgba(255, 253, 253, 0.952);
+        position: absolute;
+        z-index: +100 !important;
+        width: 100%;
+        height: 100%;
+    }
+
+    .loader img {
+        position: relative;
+        top: 50%;
+        left: 40%;
+        width: 180px;
+        height: 180px;
+    }
+</style>
 @endsection
 @section('content')
 <div class="container col-12">
-    <div class="loader"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>                   
+    <div class="loader"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>
     <div class="row justify-content-center">
         <div class="col-12">
             <div class="card col-l-12">
@@ -27,113 +33,113 @@
 
                 <div class="card-body">
                     @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
+                    <div class="alert alert-success" role="alert">
+                        {{ session('status') }}
+                    </div>
                     @endif
 
                     {{-- {{ __('You are logged in!') }} --}}
                     Estatus Body: {{$statusP ?? $statusF ?? ''}}
-                    <form  action="{{route('direccionado')}}" method="get">
-                    @include('form-consulta-documento')
-                    <button type="submit" id="consultar" class="btn btn-success">Consultar</button><button type="button" id="enviar" class="btn btn-warning">Programar</button>
+                    <form action="{{route('direccionado')}}" method="get">
+                        @include('form-consulta-documento')
+                        <button type="submit" id="consultar" class="btn btn-success">Consultar</button><button type="button" id="enviar" class="btn btn-warning">Programar</button>
                     </form>
-                    
+
                     <div class="card-body col-md-12 table-responsive p-2">
                         <table id="mipres" class="table text-nowrap table-bordered" style="width:100%">
-                        
-                    <thead>
-                        <tr>
-                        <th>Seleccione</th>
-                        <th>ID:</th>
-                        <th>ID Direccionamiento:</th>
-                        <th>Prescripcion:</th>
-                        <th>Tipo documento:</th>
-                        <th>Documento:</th>
-                        <th>Cantidad a entregar:</th>
-                        <th>Numero entrega:</th>
-                        <th>TipoIDProv:</th>
-                        <th>NoIDProv:</th>
-                        <th>Cums:</th>
-                        <th>Fecha máxima de entrega:</th>
-                        <th>Fecha Direccionamiento:</th>
-                        <th>CodSedeProv:</th>
-                        <th>NIT EPS:</th>
-                        <th>Cod EPS:</th>
-                       </tr>
-                    </thead>
-                       <tbody>
-                        @foreach ($medicamentos2 ?? '' as $item3)
-                        @foreach ($item3 as $item)
-                        <tr>
-                            <td><input class="case" type="checkbox" title="Selecciona Orden" value="{{$item['ID'] ?? ''}}"></td>
-                            <td> {{$item['ID'] ?? ''}}</td>
-                            <td> {{$item['IDDireccionamiento'] ?? ''}}</td>
-                            <td> {{$item['NoPrescripcion'] ?? ''}}</td>
-                            <td>{{$item['TipoIDPaciente'] ?? ''}}</td>
-                            <td>{{$item['NoIDPaciente'] ?? ''}}</td>
-                            <td>{{$item['CantTotAEntregar'] ?? ''}}</td>
-                            <td>{{$item['NoEntrega'] ?? ''}}</td>
-                            <td>{{$item['TipoIDProv'] ?? ''}}</td>
-                            <td>{{$item['NoIDProv'] ?? ''}}</td>                            
-                            <td>{{$item['CodSerTecAEntregar'] ?? ''}}</td>
-                            <td>{{$item['FecMaxEnt'] ?? ''}}</td>
-                            <td>{{$item['FecDireccionamiento'] ?? ''}}</td>
-                            <td>PROV007788</td>
-                            <td>{{$item['NoIDEPS'] ?? ''}}</td>
-                            <td>{{$item['CodEPS'] ?? ''}}</td>
-                        </tr>
-                        @endforeach
-                        @endforeach
-                        </tbody>    
+
+                            <thead>
+                                <tr>
+                                    <th>Seleccione</th>
+                                    <th>ID:</th>
+                                    <th>ID Direccionamiento:</th>
+                                    <th>Prescripcion:</th>
+                                    <th>Tipo documento:</th>
+                                    <th>Documento:</th>
+                                    <th>Cantidad a entregar:</th>
+                                    <th>Numero entrega:</th>
+                                    <th>TipoIDProv:</th>
+                                    <th>NoIDProv:</th>
+                                    <th>Cums:</th>
+                                    <th>Fecha máxima de entrega:</th>
+                                    <th>Fecha Direccionamiento:</th>
+                                    <th>CodSedeProv:</th>
+                                    <th>NIT EPS:</th>
+                                    <th>Cod EPS:</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($medicamentos2 ?? '' as $item3)
+                                @foreach ($item3 as $item)
+                                <tr>
+                                    <td><input class="case" type="checkbox" title="Selecciona Orden" value="{{$item['ID'] ?? ''}}"></td>
+                                    <td> {{$item['ID'] ?? ''}}</td>
+                                    <td> {{$item['IDDireccionamiento'] ?? ''}}</td>
+                                    <td> {{$item['NoPrescripcion'] ?? ''}}</td>
+                                    <td>{{$item['TipoIDPaciente'] ?? ''}}</td>
+                                    <td>{{$item['NoIDPaciente'] ?? ''}}</td>
+                                    <td>{{$item['CantTotAEntregar'] ?? ''}}</td>
+                                    <td>{{$item['NoEntrega'] ?? ''}}</td>
+                                    <td>{{$item['TipoIDProv'] ?? ''}}</td>
+                                    <td>{{$item['NoIDProv'] ?? ''}}</td>
+                                    <td>{{$item['CodSerTecAEntregar'] ?? ''}}</td>
+                                    <td>{{$item['FecMaxEnt'] ?? ''}}</td>
+                                    <td>{{$item['FecDireccionamiento'] ?? ''}}</td>
+                                    <td>PROV007788</td>
+                                    <td>{{$item['NoIDEPS'] ?? ''}}</td>
+                                    <td>{{$item['CodEPS'] ?? ''}}</td>
+                                </tr>
+                                @endforeach
+                                @endforeach
+                            </tbody>
                         </table>
                     </div>
                     {{-- Estatus prescripcion: {{$statusP ?? ''}}
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">
-                      
-                     <thead>  
-                        <tr>
-                        <th>Seleccione</th>
-                        <th>ID:</th>
-                        <th>ID Direccionamiento:</th>
-                        <th>Prescripcion:</th>
-                        <th>Tipo y numero de documento:</th>
-                        <th>Cantidad a entregar:</th>
-                        <th>Cums:</th>
-                        <th>Fecha máxima de entrega:</th>
-                        <th>Fecha Direccionamiento:</th>
-                       </tr>
-                        @foreach ($medicamentos2 ?? '' ?? '' as $item3)
-                        @foreach ($item3 as $item2)
-                    </thead>
-                        <tbody>
-                        <tr>
-                            <td><input type="checkbox" id="{{$item2['ID']}}" aria-label="Checkbox for following text input"></td>
-                            <td> {{$item2['ID']}}</td>
-                            <td> {{$item2['IDDireccionamiento']}}</td>
-                            <td> {{$item2['NoPrescripcion']}}</td>
-                            <td>{{$item2['TipoIDPaciente']}}.{{$item2['NoIDPaciente']}}</td>
-                            <td>{{$item2['CantTotAEntregar']}}</td>
-                            <td>{{$item2['CodSerTecAEntregar']}}</td>
-                            <td>{{$item2['FecMaxEnt']}}</td>
-                            <td>{{$item2['FecDireccionamiento']}}</td>
-                                                  
-                        </tr>
-                        @endforeach  
-                        @endforeach
-                        </tbody>    
+
+                            <thead>
+                                <tr>
+                                    <th>Seleccione</th>
+                                    <th>ID:</th>
+                                    <th>ID Direccionamiento:</th>
+                                    <th>Prescripcion:</th>
+                                    <th>Tipo y numero de documento:</th>
+                                    <th>Cantidad a entregar:</th>
+                                    <th>Cums:</th>
+                                    <th>Fecha máxima de entrega:</th>
+                                    <th>Fecha Direccionamiento:</th>
+                                </tr>
+                                @foreach ($medicamentos2 ?? '' ?? '' as $item3)
+                                @foreach ($item3 as $item2)
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="checkbox" id="{{$item2['ID']}}" aria-label="Checkbox for following text input"></td>
+                                    <td> {{$item2['ID']}}</td>
+                                    <td> {{$item2['IDDireccionamiento']}}</td>
+                                    <td> {{$item2['NoPrescripcion']}}</td>
+                                    <td>{{$item2['TipoIDPaciente']}}.{{$item2['NoIDPaciente']}}</td>
+                                    <td>{{$item2['CantTotAEntregar']}}</td>
+                                    <td>{{$item2['CodSerTecAEntregar']}}</td>
+                                    <td>{{$item2['FecMaxEnt']}}</td>
+                                    <td>{{$item2['FecDireccionamiento']}}</td>
+
+                                </tr>
+                                @endforeach
+                                @endforeach
+                            </tbody>
                         </table>
                     </div> --}}
                 </div>
-               
 
-                    
 
-                </div>
+
+
             </div>
         </div>
     </div>
+</div>
 </div>
 
 @endsection
@@ -149,223 +155,221 @@
 <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
 
 <script>
+    $(document).ready(function() {
 
-$(document).ready(function(){
+        $('#mipres').DataTable({
 
-    $('#mipres').DataTable({
-        
-        lengthMenu: [ [25, 50, 100, 500, -1 ], [25, 50, 100, 500, "Mostrar Todo"] ],
-        language: idioma_espanol,
-        processing: true,
+            lengthMenu: [
+                [25, 50, 100, 500, -1],
+                [25, 50, 100, 500, "Mostrar Todo"]
+            ],
+            language: idioma_espanol,
+            processing: true,
 
 
-        
-         //Botones----------------------------------------------------------------------
-     
-        "dom":'<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
-         
-                   
-                   buttons: [
-                      {
-    
-                   extend:'copyHtml5',
-                   titleAttr: 'Copy',
-                   title:"seguimiento",
-                   className: "btn btn-info"
-    
-    
-                      },
-                      {
-    
-                   extend:'excelHtml5',
-                   titleAttr: 'Excel',
-                   title:"seguimiento",
-                   className: "btn btn-success"
-    
-    
-                      },
-                       {
-    
-                   extend:'csvHtml5',
-                   titleAttr: 'csv',
-                   className: "btn btn-warning"
-    
-    
-                      },
-                      {
-    
-                   extend:'pdfHtml5',
-                   titleAttr: 'pdf',
-                   className: "btn btn-primary"
-    
-    
-                      }
-                   ],
-    });
 
-//Funcion de envio de datos
+            //Botones----------------------------------------------------------------------
 
-    $(function(){
+            "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
 
-    //     Swal.fire({
-    //     title: "¿Estás seguro?",
-    //     text: "Estás por programar prescripciones",
-    //     icon: "success",
-    //     showCancelButton: true,
-    //     showCloseButton: true,
-    //     confirmButtonText: 'Aceptar',
-    //     }).then((result)=>{
-    //    if(result.value){      
-        
-        $("#enviar").click(function(){
 
-            var mipre =[];
-            var mipretrue =[];
-                   
-    $("tbody tr").each(function(el){
-                
+            buttons: [{
+
+                    extend: 'copyHtml5',
+                    titleAttr: 'Copy',
+                    title: "seguimiento",
+                    className: "btn btn-info"
+
+
+                },
+                {
+
+                    extend: 'excelHtml5',
+                    titleAttr: 'Excel',
+                    title: "seguimiento",
+                    className: "btn btn-success"
+
+
+                },
+                {
+
+                    extend: 'csvHtml5',
+                    titleAttr: 'csv',
+                    className: "btn btn-warning"
+
+
+                },
+                {
+
+                    extend: 'pdfHtml5',
+                    titleAttr: 'pdf',
+                    className: "btn btn-primary"
+
+
+                }
+            ],
+        });
+
+        //Funcion de envio de datos
+
+        $(function() {
+
+            //     Swal.fire({
+            //     title: "¿Estás seguro?",
+            //     text: "Estás por programar prescripciones",
+            //     icon: "success",
+            //     showCancelButton: true,
+            //     showCloseButton: true,
+            //     confirmButtonText: 'Aceptar',
+            //     }).then((result)=>{
+            //    if(result.value){      
+
+            $("#enviar").click(function() {
+
+                var mipre = [];
+                var mipretrue = [];
+
+                $("tbody tr").each(function(el) {
+
                     var itemmipres = {};
 
-            
 
-                var tds = $(this).find("td");
-                itemmipres.checked = tds.find(":checkbox").prop("checked");
-                itemmipres.ID = parseFloat(tds.filter(":eq(1)").text());
-                itemmipres.FecMaxEnt = tds.filter(":eq(11)").text();
-                itemmipres.TipoIDSedeProv = tds.filter(":eq(8)").text();
-                itemmipres.NoIDSedeProv = tds.filter(":eq(9)").text();
-                itemmipres.CodSedeProv = tds.filter(":eq(13)").text();
-                itemmipres.CodSerTecAEntregar = tds.filter(":eq(10)").text();
-                itemmipres.CantTotAEntregar = tds.filter(":eq(6)").text();
-                
-                // Ingreso cada array en la variable itemmipres
-                mipre.push(itemmipres);       
-           
-          
-              
-                       
-            });           
-            
-            
-            $.each(mipre, function(i, items) {
 
-                var itemmiprestrue = {};
+                    var tds = $(this).find("td");
+                    itemmipres.checked = tds.find(":checkbox").prop("checked");
+                    itemmipres.ID = parseFloat(tds.filter(":eq(1)").text());
+                    itemmipres.FecMaxEnt = tds.filter(":eq(11)").text();
+                    itemmipres.TipoIDSedeProv = tds.filter(":eq(8)").text();
+                    itemmipres.NoIDSedeProv = tds.filter(":eq(9)").text();
+                    itemmipres.CodSedeProv = tds.filter(":eq(13)").text();
+                    itemmipres.CodSerTecAEntregar = tds.filter(":eq(10)").text();
+                    itemmipres.CantTotAEntregar = tds.filter(":eq(6)").text();
 
-                 if(items.checked == true){
-                    itemmiprestrue.ID = items.ID;
-                    itemmiprestrue.FecMaxEnt = items.FecMaxEnt;
-                    itemmiprestrue.TipoIDSedeProv = items.TipoIDSedeProv;
-                    itemmiprestrue.NoIDSedeProv = items.NoIDSedeProv;
-                    itemmiprestrue.CodSedeProv = items.CodSedeProv;
-                    itemmiprestrue.CodSerTecAEntregar = items.CodSerTecAEntregar;
-                    itemmiprestrue.CantTotAEntregar = items.CantTotAEntregar;
-                
-                    mipretrue.push(itemmiprestrue);
-             
-                 }
-               
-                
+                    // Ingreso cada array en la variable itemmipres
+                    mipre.push(itemmipres);
 
-                
-            });
-          Swal.fire({
-                icon: "info",
-                title: 'Espere por favor !',
-                html: 'Realizando la programación..',// add html attribute if you want or remove
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                willOpen: () => {
-                    Swal.showLoading()
-                },
-            }),    
-          $.ajax({
-            beforeSend: function(){ 
-            $('.loader').css("visibility", "visible"); },
-           url:"{{route('programar')}}",
-           method: 'post',
-           data:{data:mipretrue,
-            "_token": $("meta[name='csrf-token']").attr("content")
-           },
-           //dataType:"json",
-           success:function(data){
-            if(data.success == 'ya'){
-             
-                $.each(JSON.parse(data.result), function(i, items) {
-                    Swal.fire(
-                        {
-                          icon: 'warning',
-                          title: items,
-                          showConfirmButton: true,
-                          //timer: 1500
-                        }
-                      )
+
+
 
                 });
-            //$('#mipres').DataTable().destroy(); 
-            }else if(data.success == 'ok'){
 
-             $.each(JSON.parse(data.result), function(i, item) {
-                    Swal.fire(
-                        {
-                          icon: 'success',
-                          title: "El ID: "+item.Id,
-                          text:"Fue programado correctamente y quedo con id de programacion: "+item.IdProgramacion,
-                          showConfirmButton: true,
-                          //timer: 1500
+
+                $.each(mipre, function(i, items) {
+
+                    var itemmiprestrue = {};
+
+                    if (items.checked == true) {
+                        itemmiprestrue.ID = items.ID;
+                        itemmiprestrue.FecMaxEnt = items.FecMaxEnt;
+                        itemmiprestrue.TipoIDSedeProv = items.TipoIDSedeProv;
+                        itemmiprestrue.NoIDSedeProv = items.NoIDSedeProv;
+                        itemmiprestrue.CodSedeProv = items.CodSedeProv;
+                        itemmiprestrue.CodSerTecAEntregar = items.CodSerTecAEntregar;
+                        itemmiprestrue.CantTotAEntregar = items.CantTotAEntregar;
+
+                        mipretrue.push(itemmiprestrue);
+
+                    }
+
+
+
+
+                });
+                Swal.fire({
+                        icon: "info",
+                        title: 'Espere por favor !',
+                        html: 'Realizando la programación..', // add html attribute if you want or remove
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        willOpen: () => {
+                            Swal.showLoading()
+                        },
+                    }),
+                    $.ajax({
+                        beforeSend: function() {
+                            $('.loader').css("visibility", "visible");
+                        },
+                        url: "{{route('programar')}}",
+                        method: 'post',
+                        data: {
+                            data: mipretrue,
+                            "_token": $("meta[name='csrf-token']").attr("content")
+                        },
+                        //dataType:"json",
+                        success: function(data) {
+                            if (data.success == 'ya') {
+
+                                $.each(JSON.parse(data.result), function(i, items) {
+                                    Swal.fire({
+                                        icon: 'warning',
+                                        title: items,
+                                        showConfirmButton: true,
+                                        //timer: 1500
+                                    })
+
+                                });
+                                //$('#mipres').DataTable().destroy(); 
+                            } else if (data.success == 'ok') {
+
+                                $.each(JSON.parse(data.result), function(i, item) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: "El ID: " + item.Id,
+                                        text: "Fue programado correctamente y quedo con id de programacion: " + item.IdProgramacion,
+                                        showConfirmButton: true,
+                                        //timer: 1500
+                                    })
+                                });
+                                //$('#mipres').DataTable().destroy();
+
+                            }
+
+                        },
+                        complete: function() {
+                            $('.loader').css("visibility", "hidden");
                         }
-                      )
+
+
                     });
-                    //$('#mipres').DataTable().destroy();
-                   
-                } 
-                    
-            },complete: function(){ 
-                $('.loader').css("visibility", "hidden");
-                }
+
+            })
+
+            //    }
+            //    });
+        });
 
 
-          });
-           
-        })
 
-    //    }
-    //    });
     });
 
 
- 
-});
-
-
-var idioma_espanol =
-                 {
-                "sProcessing":     "Procesando...",
-                "sLengthMenu":     "Mostrar _MENU_ registros",
-                "sZeroRecords":    "No se encontraron resultados",
-                "sEmptyTable":     "Ningún dato disponible en esta tabla =(",
-                "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-                "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
-                "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-                "sInfoPostFix":    "",
-                "sSearch":         "Buscar:",
-                "sUrl":            "",
-                "sInfoThousands":  ",",
-                "sLoadingRecords": "Cargando...",
-                "oPaginate": {
-                    "sFirst":    "Primero",
-                    "sLast":     "Último",
-                    "sNext":     "Siguiente",
-                    "sPrevious": "Anterior"
-                },
-                "oAria": {
-                    "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
-                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-                },
-                "buttons": {
-                    "copy": "Copiar",
-                    "colvis": "Visibilidad"
-                }
-                }   
-       
+    var idioma_espanol = {
+        "sProcessing": "Procesando...",
+        "sLengthMenu": "Mostrar _MENU_ registros",
+        "sZeroRecords": "No se encontraron resultados",
+        "sEmptyTable": "Ningún dato disponible en esta tabla =(",
+        "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+        "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+        "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+        "sInfoPostFix": "",
+        "sSearch": "Buscar:",
+        "sUrl": "",
+        "sInfoThousands": ",",
+        "sLoadingRecords": "Cargando...",
+        "oPaginate": {
+            "sFirst": "Primero",
+            "sLast": "Último",
+            "sNext": "Siguiente",
+            "sPrevious": "Anterior"
+        },
+        "oAria": {
+            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+        },
+        "buttons": {
+            "copy": "Copiar",
+            "colvis": "Visibilidad"
+        }
+    }
 </script>
 @endsection

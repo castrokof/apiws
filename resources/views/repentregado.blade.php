@@ -16,17 +16,17 @@
       .loader img { position: relative; top:50%; left:40%;
         width: 180px; height: 180px; }
 
-        .loaderf {
+         .loader2 {
 
-visibility: hidden;
-background-color: rgba(255, 253, 253, 0.952);
-position: absolute;
-z-index: +100 !important;
-width: 100%;
-height:100%;
-}
-  .loaderf img { position: relative; top:50%; left:40%;
-    width: 180px; height: 180px; }
+        visibility: hidden;
+        background-color: rgba(233, 239, 240, 0.948);
+        position: absolute;
+        z-index: +100 !important;
+        width: 100%;
+        height:100%;
+        }
+   .loader2 img { position: relative; top:38%; left:40%;
+    width: 200px; height: 200px; }
   </style>
 @endsection
 @section('content')
@@ -35,7 +35,7 @@ height:100%;
     <div class="row justify-content-center">
         <div class="col-12">
             <div class="card col-l-12">
-                <div class="card-header">{{ __('Reporte de entregados') }}</div>
+                <div class="card-header bg-danger">{{ __('Reporte de lo entregado y form para realizar el reporte de facturación') }}</div>
 
                 <div class="card-body">
                     @if (session('status'))
@@ -139,7 +139,7 @@ height:100%;
     <div class="modal-dialog modal-xl" role="document">
 
             <div class="modal-content bg-primary" role="document">
-            <div class="loaderf"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" />Consultando... </div>
+            <div class="loader2"><img src="{{asset("assets/lte/dist/img/loaderN.gif")}}" class="" /></div>
             <div class="modal-header">
                 <h5 class="modal-title" id="myLargeModalLabel">Reportar factura</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -172,6 +172,8 @@ height:100%;
 @endsection
 @section("scriptsPlugins")
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script src="{{asset("assets/js/jquery.mask.min.js")}}" type="text/javascript"></script>
+
 <script src="{{asset("assets/lte/plugins/datatables/jquery.dataTables.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/lte/plugins/datatables-bs4/js/dataTables.bootstrap4.js")}}" type="text/javascript"></script>
 <script src="https://cdn.datatables.net/plug-ins/1.10.20/api/sum().js"></script>
@@ -181,14 +183,17 @@ height:100%;
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
 
+
 <script>
 
 $(document).ready(function(){
-
+    
+    
     $('#mipres').DataTable({
 
         language: idioma_espanol,
         processing: true,
+        lengthMenu: [ [10, 25, 50, 100, 500, -1 ], [10, 25, 50, 100, 500, "Mostrar Todo"] ],
 
 
 
@@ -261,7 +266,7 @@ $(document).ready(function(){
 
                 var tds = $(this).find("td");
                 itemmipres.checked = tds.find(":checkbox").prop("checked");
-                itemmipres.IDReporteEntrega = parseFloat(tds.filter(":eq(2)").text());
+                itemmipres.IDReporteEntrega = parseFloat(tds.filter(":eq(3)").text());
 
 
                 // Ingreso cada array en la variable itemmipres
@@ -308,27 +313,28 @@ $(document).ready(function(){
                     Swal.fire(
                         {
                           icon: 'warning',
-                          title: items,
+                          title: items.Message,
+                          text: items,
                           showConfirmButton: true,
                           //timer: 1500
                         }
                       )
 
                 });
-            $('#mipres').DataTable().destroy();
+            //$('#mipres').DataTable().destroy();
             }else if(data.success == 'ok'){
 
              $.each(JSON.parse(data.result), function(i, item) {
                     Swal.fire(
                         {
                           icon: 'success',
-                          title: item.Message,
+                          title: item.Mensaje,
                           showConfirmButton: true,
                           //timer: 1500
                         }
                       )
                     });
-                    $('#mipres').DataTable().destroy();
+                    //$('#mipres').DataTable().destroy();
 
                 }
 
@@ -368,7 +374,14 @@ $(document).on('click', '.reportar_fac', function(){
     $('#CUM').val(CUM);
     $('#VALE').val(VALE);
     $('#CANE').val(CANE);
-    $('#VALU').val(parseFloat($('#VALE').val())/parseFloat($('#CANE').val()));
+    
+    //--------- validacion de input solo decimales -------//   
+   
+      
+    $('#VALU1').val(parseFloat($('#VALE').val())/parseFloat($('#CANE').val()));
+    var string = $("#VALU1").val();
+    string = string.replace(".",",")
+    $('#VALU').val(string);
     $("#NoFactura").val('');
     $("#NoIDEPS").val('890303093');
     $("#CodEPS").val('');
@@ -446,7 +459,7 @@ Swal.fire({
 
       $.ajax({
         beforeSend: function(){
-        $('.loaderf').css("visibility", "visible"); },
+        $('.loader2').css("visibility", "visible"); },
        url:"{{route('r-factura')}}",
        method: 'post',
        data:{data:mipref,
@@ -485,7 +498,7 @@ Swal.fire({
             //$('#mipres').DataTable().destroy();
 
         },complete: function(){
-            $('.loaderf').css("visibility", "hidden");
+            $('.loader2').css("visibility", "hidden");
             }
 
 
