@@ -179,6 +179,7 @@ Route::put('medcol3/dispensado/{id}', 'Medcol3\DispensadoApiMedcol4Controller@up
 Route::get('medcol3/dispensado/syncdisapi', 'Medcol3\DispensadoApiMedcol4Controller@createdispensadoapi')->name('medcol3.dispensadosyncapi')->middleware('verified')->middleware('verifyuser');
 Route::get('medcol3/dispensado/anuladosapi', 'Medcol3\DispensadoApiMedcol4Controller@updateanuladosapi')->name('medcol3.anuladosapi')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol3/add_dispensado', 'Medcol3\DispensadoApiMedcol4Controller@adddispensacionarray')->name('add_dispensacion')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol3/update', 'Medcol3\DispensadoApiMedcol4Controller@actualizarDispensacion')->name('dispensado.guardar')->middleware('verified')->middleware('verifyuser');
 
 Route::get('medcol3/informedis', 'Medcol3\DispensadoApiMedcol4Controller@informes')->name('medcol3.informedis')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol3/disanulado', 'Medcol3\DispensadoApiMedcol4Controller@disanulado')->name('medcol3.disanulado')->middleware('verified')->middleware('verifyuser');

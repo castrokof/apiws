@@ -280,6 +280,12 @@ Pendientes Medcol
                         data: 'usuario'
                     },
                     {
+                        data: 'doc_entrega'
+                    },
+                    {
+                        data: 'factura_entrega'
+                    },
+                    {
                         data: 'estado'
                     },
                     {

@@ -1057,8 +1057,6 @@ class PendienteApiMedcol3Controller extends Controller
                 ->selectRaw('SUM(cantord) as cantord')
                 ->groupBy('nombre')
                 ->get();
-
-           
             
              }else{
                  

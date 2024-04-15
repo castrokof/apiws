@@ -1135,7 +1135,7 @@ Dispensado Medcol Limonar
             Swal.fire({
                 title: "¿Estás por sincronizar los anulados?",
                 text: text,
-                type: "info",
+                type: "error",
                 showCancelButton: true,
                 showCloseButton: true,
                 confirmButtonText: 'Aceptar',
@@ -1171,9 +1171,6 @@ Dispensado Medcol Limonar
                 }
             });
         }
-
-
-
 
 
         // Función que envia el id al controlador y cambia el estado del registro
@@ -1233,9 +1230,6 @@ Dispensado Medcol Limonar
                     dispensadotrue1.push(dispensadotrue);
 
                 }
-
-
-
 
             });
 
@@ -1300,9 +1294,6 @@ Dispensado Medcol Limonar
                 }
 
             });
-
-
-
 
         });
 
@@ -1387,6 +1378,28 @@ Dispensado Medcol Limonar
 
         }
 
+        $('#reset2').click(function() {
+            // Selecciona todos los elementos de entrada (inputs) dentro de un contenedor específico y restablece sus valores
+            $('#custom-tabs-one-datos-med-dispensado input').each(function() {
+                $(this).val(''); 
+            });
+
+            // Selecciona todos los elementos con valores de otros tipos de elementos de formulario, como select, textarea, etc.
+            $('#custom-tabs-one-datos-med-dispensado select').each(function() {
+                $(this).val(''); // Restablece el valor del elemento select
+            });
+
+            $('#custom-tabs-one-datos-med-dispensado textarea').each(function() {
+                $(this).val(''); // Restablece el valor del elemento textarea
+            });
+
+            //Función para destruir el DataTables
+            /* if ($.fn.DataTable.isDataTable('#tablaRegistros')) {
+                $('#tablaRegistros').DataTable().destroy(); // Destruye la tabla DataTable si está inicializada
+            } */
+        });
+
+
         $(document).ready(function() {
 
             $('#tablaRegistros').DataTable({
@@ -1399,10 +1412,10 @@ Dispensado Medcol Limonar
                 responsive: true,
                 data: [], // Inicialmente, no hay datos para mostrar
                 columns: [
-                    {
+                    /* {
                         data: 'action',
                         orderable: false
-                    },
+                    }, */
                     {
                         data: 'codigo'
                     },
@@ -1416,6 +1429,9 @@ Dispensado Medcol Limonar
                         data: 'numero_unidades'
                     },
                     {
+                        data: 'cuota_moderadora2'
+                    },
+                    {
                         data: 'autorizacion2'
                     },
                     {
@@ -1427,6 +1443,9 @@ Dispensado Medcol Limonar
                 ]
             });
         });
+
+        //Funcion para realizar la revision de la dispensacion de forma multiple
+        
 
     });
 

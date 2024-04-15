@@ -32,6 +32,8 @@
                             <th>CUMS</th>
                             <th>Cajero</th>
                             <th>Usuario</th>
+                            <th>Documento</th>
+                            <th>No. Entrega</th>
                             <th>Estado</th>
                             <th>Fecha de Entrega</th>
                             <!--<th>Días</th>-->

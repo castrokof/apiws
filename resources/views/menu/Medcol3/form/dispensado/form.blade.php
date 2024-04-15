@@ -11,6 +11,9 @@
                 Buscar
             </button>
         </div>
+        <!-- <div class="col-lg-4">
+            <button type="submit" name="reset2" id="reset2" class="btn btn-warning btn-block">Limpiar</button>
+        </div> -->
     </div>
 
     <div class="row">
@@ -69,7 +72,7 @@
 
 <div class="container-fluid mt-4">
     <fieldset>
-        <legend style="color: #008080; font-weight: bold; font-size: 20px;">Verificar la dispensación de la Fórmula</legend>
+        <legend style="color: #008080; font-weight: bold; font-size: 20px;">Completar la dispensación de la Fórmula</legend>
         <!-- Agrega más contenido relacionado con la dispensación aquí -->
         <div class="row">
             <div class="col-md-2">
@@ -102,26 +105,6 @@
             </div>
         </div>
 
-        <!-- <div class="row">
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="autorizacion">Autorización</label>
-                    <input type="number" class="form-control" id="autorizacion" name="autorizacion" placeholder="Ingrese la autorización">
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="mipres1">MIPRES</label>
-                    <input type="number" class="form-control" id="mipres1" name="mipres1" placeholder="Ingrese el MIPRES">
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="reporte_entrega1">Reporte de Entrega</label>
-                    <input type="number" class="form-control" id="reporte_entrega1" name="reporte_entrega1" placeholder="Ingrese el reporte de entrega">
-                </div>
-            </div>
-        </div> -->
     </fieldset>
 
     <!-- Agrega el contenedor de la tabla DataTable -->
@@ -130,11 +113,12 @@
             <thead>
                 <tr>
                     <!-- <th><input name="selectall" id="selectall" type="checkbox" class="select-all checkbox-large tooltipsC" title="Seleccionar todo" /> Acciones </th> -->
-                    <th>Acciones</th>
+                    <!-- <th>Acciones</th> -->
                     <th>Código</th>
                     <th>Nombre Genérico</th>
                     <th>Tipo de Medicamento</th>
                     <th>Número de Unidades</th>
+                    <th>Cuota Moderadora</th>
                     <th>Autorización</th>
                     <th>MIPRES</th>
                     <th>Reporte de Entrega</th>
@@ -203,6 +187,50 @@
             title: "Oops...",
             text: mensaje,
             confirmButtonText: 'OK'
+        });
+    }
+
+    function guardarDispensacion() {
+        const fechaOrden = $('#fecha_orden').val();
+        const numeroEntrega = $('#numero_entrega1').val();
+        const diagnostico = $('#diagnostico').val();
+        const ips = $('#ips').val();
+
+        // Obtener los datos de la tablaRegistros (suponiendo que se obtienen de DataTable)
+        const registros = $('#tablaRegistros').DataTable().data().toArray();
+
+        // Mapear los datos de los registros para enviarlos al controlador
+        const datosRegistros = registros.map(registro => ({
+            cuota_moderadora: registro[4], // Índice 4: Cuota Moderadora
+            autorizacion: registro[5], // Índice 5: Autorización
+            mipres: registro[6], // Índice 6: MIPRES
+            reporte_entrega: registro[7] // Índice 7: Reporte de Entrega
+        }));
+
+        // Crear objeto con todos los datos a enviar al controlador
+        const datos = {
+            fecha_orden: fechaOrden,
+            numero_entrega: numeroEntrega,
+            diagnostico: diagnostico,
+            ips: ips,
+            registros: datosRegistros
+        };
+
+        // Realizar la solicitud AJAX al controlador para almacenar los datos
+        $.ajax({            
+            url: "{{route('dispensado.guardar')}}",
+            type: 'POST',
+            data: datos,
+            success: function(response) {
+                // Manejar la respuesta del servidor (opcional)
+                console.log(response);
+                alert('Datos guardados correctamente.');
+            },
+            error: function(xhr, status, error) {
+                // Manejar errores de la solicitud AJAX
+                console.error('Error al guardar los datos:', error);
+                alert('Error al guardar los datos. Por favor, inténtalo de nuevo.');
+            }
         });
     }
 </script>

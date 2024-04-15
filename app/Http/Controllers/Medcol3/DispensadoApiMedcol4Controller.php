@@ -14,6 +14,7 @@ use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Cache;
@@ -765,27 +766,41 @@ class DispensadoApiMedcol4Controller extends Controller
 
     public function buscar($factura)
     {
-        // Realizar la búsqueda en la base de datos utilizando el valor de $factura y filtrando por estado = DISPENSADO
-        $resultados = DispensadoApiMedcol4::where('factura', $factura)
+        // Crear una instancia de la consulta principal sin ejecutarla de inmediato
+        $dispensado_api_medcol4 = DispensadoApiMedcol4::query();
+
+        // Agregar una subconsulta para calcular la suma de la cuota moderadora usando selectRaw
+        $dispensado_api_medcol4->selectRaw('*, 
+        (CASE 
+            WHEN ROW_NUMBER() OVER(PARTITION BY factura ORDER BY id) = 1 
+                THEN (SELECT SUM(cuota_moderadora) FROM dispensado_medcol4 AS d2 WHERE d2.factura = dispensado_medcol4.factura) 
+            ELSE 0 
+        END) AS cuota_moderadora_sumada');
+
+        // Aplicar condiciones de búsqueda adicionales
+        $resultados = $dispensado_api_medcol4
+            ->where('factura', $factura)
             ->where('estado', 'DISPENSADO')
+            ->orderBy('fecha_suministro')
             ->get();
 
         // Verificar si se encontraron resultados
         if ($resultados->isNotEmpty()) {
-            // Obtener un array de datos que representa los resultados
+            // Mapear los resultados a un array asociativo para incluir campos adicionales
             $data = $resultados->map(function ($item) {
                 // Convertir el modelo a un array asociativo
                 $dataArray = $item->toArray();
-        
-                // Agregar el campo 'action' al array resultante
-                $dataArray['action'] = '<input class="add_medicamento checkbox-large case tooltipsC" type="checkbox" title="Selecciona Orden" id="' . $item->id . '" value="' . $item->id . '">';
+
+                // Agregar campos HTML personalizados a los datos resultantes
+                /* $dataArray['action'] = '<input class="add_medicamento checkbox-large case tooltipsC" type="checkbox" title="Selecciona Orden" id="' . $item->id . '" value="' . $item->id . '">'; */
                 $dataArray['autorizacion2'] = '<input type="text" name="autorizacion" id="' . $item->id . '" class="show_detail btn btn-xl bg-warning tooltipsC" style="max-width: 100%;" title="autorizacion" value="' . $item->autorizacion . '">';
                 $dataArray['mipres2'] = '<input type="text" name="mipres" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="mipres">';
                 $dataArray['reporte_entrega2'] = '<input type="text" name="reporte" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="Reporte de entrega">';
-        
+                $dataArray['cuota_moderadora2'] = '<input type="text" name="cuota_moderadora" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="cuota_moderadora" value="' . $item->cuota_moderadora_sumada . '">';
+
                 return $dataArray;
             });
-        
+
             // Retornar los datos en formato JSON para DataTable
             return response()->json($data);
         } else {
@@ -795,49 +810,62 @@ class DispensadoApiMedcol4Controller extends Controller
     }
 
 
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function actualizarDispensacion(Request $request)
     {
-        //
-    }
+        // Validar los datos enviados desde la solicitud AJAX
+        $request->validate([
+            'data.*.ID' => 'required|exists:dispensado_medcol4,id', // ID del registro existente
+            'data.*.fecha_orden' => 'required|date', // Campo 'fecha_orden' requerido y formato de fecha
+            'data.*.numero_entrega1' => 'required|string', // Campo 'numero_entrega1' requerido
+            'data.*.diagnostico' => 'required|string', // Campo 'diagnostico' requerido
+            'data.*.ips' => 'required|string', // Campo 'ips' requerido
+            'data.*.autorizacion2' => 'required|string',
+            'data.*.cuota_moderadora2' => 'required|string',
+            'data.*.mipres2' => 'required|string',
+            'data.*.reporte_entrega2' => 'required|string',
+            'data.*.fecha_suministro',
+        ]);
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
+        // Obtener la fecha de suministro del formulario y convertirla a formato Y-m-d
+        $fechaSuministro = Carbon::parse($request->input('fecha_suministro'))->format('Y-m-d');
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
+        // Obtener los datos de la dispensación a actualizar desde la solicitud AJAX
+        $datosDispensacion = $request->input('data');
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        try {
+            foreach ($datosDispensacion as $datos) {
+                // Obtener el ID del registro existente a actualizar
+                $idRegistro = $datos['ID'];
+
+                // Obtener la fecha de orden del registro a actualizar
+                $fechaOrden = Carbon::parse($datos['fecha_orden']);
+
+                // Verificar si la fecha de orden es mayor a la fecha de suministro
+                if ($fechaOrden->gt($fechaSuministro)) {
+                    return response()->json([
+                        'error' => 'La Fecha de Ordenamiento no puede ser superior a la Fecha de Suministro'
+                    ], 422);
+                }
+
+                // Actualizar el registro existente en la base de datos
+                DispensadoApiMedcol4::where('id', $idRegistro)->update([
+                    'autorizacion' => trim($datos['autorizacion1']),
+                    'copago' => trim($datos['copago1']),
+                    'numero_entrega' => trim($datos['numero_entrega1']),
+                    'fecha_ordenamiento' => $fechaOrden, // Actualizar la fecha de ordenamiento
+                    'dx' => trim($datos['diagnostico']),
+                    'ips' => trim($datos['ips']),
+                    'mipres' => trim($datos['mipres1']),
+                    'reporte_entrega_nopbs' => trim($datos['reporte_entrega1']),
+                    'updated_at' => now()
+                ]);
+            }
+
+            // Respuesta exitosa
+            return response()->json(['success' => 'Datos actualizados correctamente'], 200);
+        } catch (\Exception $e) {
+            // Manejar cualquier excepción que ocurra durante la actualización
+            return response()->json(['error' => 'Error al actualizar los datos'], 500);
+        }
     }
 }
