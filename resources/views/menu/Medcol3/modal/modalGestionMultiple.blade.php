@@ -2,7 +2,7 @@
 <div class="modal fade" id="gestion_multiple" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
-        <div class="row">
+            <div class="row">
                 <div class="col-lg-12">
                     @include('includes.form-error')
                     @include('includes.form-mensaje')
@@ -35,7 +35,7 @@
 
                                 <div class="col-lg-3"></div>
                                 <div class="col-lg-6">
-                                    @include('includes.boton-form-crear-empresa-empleado-usuario')
+                                    @include('includes.boton-form-enviar-dispensados')                                    
                                 </div>
                             </div>
                             <!-- /.card-footer -->
@@ -44,5 +44,6 @@
                     </div>
                 </div>
             </div>
+        </div>
     </div>
 </div>

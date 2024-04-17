@@ -7,7 +7,7 @@
             </div>
         </div>
         <div class="col-lg-4">
-            <button type="button" class="btn btn-success btn-block" onclick="buscarFactura()">
+            <button type="button" class="btn btn-success btn-block" id="buscarFactura" >
                 Buscar
             </button>
         </div>
@@ -90,7 +90,7 @@
             <div class="col-md-4">
                 <div class="form-group">
                     <label for="diagnostico">Diagnóstico</label>
-                    <select name="dx" class="diagnos form-control select2bs4" style="width: 100%;" required>
+                    <select name="diagnostico" class="diagnos form-control select2bs4" style="width: 100%;" required>
                         <!-- Agrega opciones de diagnóstico -->
                     </select>
                 </div>
@@ -108,12 +108,12 @@
     </fieldset>
 
     <!-- Agrega el contenedor de la tabla DataTable -->
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-4 modal-body" style="max-height: 400px; overflow-y: auto;">
         <table id="tablaRegistros" class="table table-striped">
             <thead>
                 <tr>
                     <!-- <th><input name="selectall" id="selectall" type="checkbox" class="select-all checkbox-large tooltipsC" title="Seleccionar todo" /> Acciones </th> -->
-                    <!-- <th>Acciones</th> -->
+                    <th>ID</th>
                     <th>Código</th>
                     <th>Nombre Genérico</th>
                     <th>Tipo de Medicamento</th>
@@ -130,107 +130,3 @@
         </table>
     </div>
 </div>
-
-
-<!-- Script para manejar la lógica de búsqueda y DataTable -->
-<script>
-    function buscarFactura() {
-        const numeroFactura = $('#numero_factura').val();
-
-        $.ajax({
-            url: `{{ route('dispensado.buscar', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
-            type: 'GET',
-            success: function(data) {
-                if (data && Array.isArray(data) && data.length > 0) {
-                    const firstRecord = data[0];
-
-                    $('#factura').val(firstRecord.factura);
-                    $('#paciente').val(firstRecord.paciente);
-                    $('#drogueria').val(firstRecord.drogueria);
-                    $('#regimen').val(firstRecord.regimen);
-                    $('#tipodocument').val(firstRecord.tipodocument);
-                    $('#medico1').val(firstRecord.medico);
-
-                    if (firstRecord.fecha_suministro) {
-                        const formattedFechaSuministro = new Date(firstRecord.fecha_suministro).toISOString().split('T')[0];
-                        $('#fecha_suministro').val(formattedFechaSuministro);
-                    } else {
-                        $('#fecha_suministro').val('');
-                    }
-
-                    $('#idusuario').val(firstRecord.idusuario);
-                    $('#cajero').val(firstRecord.cajero);
-
-                    actualizarDataTable(data);
-                } else {
-                    console.error('Error: no se recibieron datos válidos o no se encontraron registros.');
-                    // Mostrar alerta de SweetAlert2 cuando no se encuentran registros
-                    mostrarError('No se encontraron registros para la factura ingresada.');
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error al buscar la factura:', error);
-                mostrarError('Error al buscar la factura. Por favor, inténtalo de nuevo.');
-            }
-        });
-    }
-
-    function actualizarDataTable(data) {
-        const tablaRegistros = $('#tablaRegistros').DataTable();
-        tablaRegistros.clear().rows.add(data).draw();
-    }
-
-    function mostrarError(mensaje) {
-        // Mostrar alerta de SweetAlert2
-        Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text: mensaje,
-            confirmButtonText: 'OK'
-        });
-    }
-
-    function guardarDispensacion() {
-        const fechaOrden = $('#fecha_orden').val();
-        const numeroEntrega = $('#numero_entrega1').val();
-        const diagnostico = $('#diagnostico').val();
-        const ips = $('#ips').val();
-
-        // Obtener los datos de la tablaRegistros (suponiendo que se obtienen de DataTable)
-        const registros = $('#tablaRegistros').DataTable().data().toArray();
-
-        // Mapear los datos de los registros para enviarlos al controlador
-        const datosRegistros = registros.map(registro => ({
-            cuota_moderadora: registro[4], // Índice 4: Cuota Moderadora
-            autorizacion: registro[5], // Índice 5: Autorización
-            mipres: registro[6], // Índice 6: MIPRES
-            reporte_entrega: registro[7] // Índice 7: Reporte de Entrega
-        }));
-
-        // Crear objeto con todos los datos a enviar al controlador
-        const datos = {
-            fecha_orden: fechaOrden,
-            numero_entrega: numeroEntrega,
-            diagnostico: diagnostico,
-            ips: ips,
-            registros: datosRegistros
-        };
-
-        // Realizar la solicitud AJAX al controlador para almacenar los datos
-        $.ajax({            
-            url: "{{route('dispensado.guardar')}}",
-            type: 'POST',
-            data: datos,
-            success: function(response) {
-                // Manejar la respuesta del servidor (opcional)
-                console.log(response);
-                alert('Datos guardados correctamente.');
-            },
-            error: function(xhr, status, error) {
-                // Manejar errores de la solicitud AJAX
-                console.error('Error al guardar los datos:', error);
-                alert('Error al guardar los datos. Por favor, inténtalo de nuevo.');
-            }
-        });
-    }
-</script>

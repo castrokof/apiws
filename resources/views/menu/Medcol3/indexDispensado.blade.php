@@ -1265,7 +1265,8 @@ Dispensado Medcol Limonar
                 if (items.numero_entrega1 == '' || items.fecha_orden == '' || items.diagnostico == '' || items.ips == '') {
 
                     Swal.fire({
-                        icon: 'warning',
+                        //icon: 'warning',
+                        type: "error",
                         title: "Los campos numero de entrega, fecha orden, IPS, diagnostico no pueden estar vacios y La fecha de Orenamiento no puede ser mayor a la de Dispensación",
                         showConfirmButton: true,
                         timer: 1500
@@ -1285,7 +1286,8 @@ Dispensado Medcol Limonar
                 } else {
 
                     Swal.fire({
-                        icon: 'warning',
+                        //icon: 'warning',
+                        type: "warning",
                         title: "Los campos numero de autorización, Mipres y reporte de entrega no pueden estar vacios",
                         showConfirmButton: true,
                         timer: 1500
@@ -1301,7 +1303,8 @@ Dispensado Medcol Limonar
         function enviardatos(dispensadotrue1) {
 
             Swal.fire({
-                    icon: "info",
+                    //icon: "info",
+                    type: 'info',
                     title: 'Espere por favor !',
                     html: 'Realizando la revision..', // add html attribute if you want or remove
                     showConfirmButton: false,
@@ -1378,31 +1381,82 @@ Dispensado Medcol Limonar
 
         }
 
-        $('#reset2').click(function() {
-            // Selecciona todos los elementos de entrada (inputs) dentro de un contenedor específico y restablece sus valores
-            $('#custom-tabs-one-datos-med-dispensado input').each(function() {
-                $(this).val(''); 
+        //Funcion para buscar la factura y traer los datos al formulario y datatalbe
+        $(document).ready(function() {
+            $('#buscarFactura').on('click', function() {
+                // Llamamos a la función guardarDispensacion al hacer clic en el botón "Enviar"
+                buscarFactura();
             });
-
-            // Selecciona todos los elementos con valores de otros tipos de elementos de formulario, como select, textarea, etc.
-            $('#custom-tabs-one-datos-med-dispensado select').each(function() {
-                $(this).val(''); // Restablece el valor del elemento select
-            });
-
-            $('#custom-tabs-one-datos-med-dispensado textarea').each(function() {
-                $(this).val(''); // Restablece el valor del elemento textarea
-            });
-
-            //Función para destruir el DataTables
-            /* if ($.fn.DataTable.isDataTable('#tablaRegistros')) {
-                $('#tablaRegistros').DataTable().destroy(); // Destruye la tabla DataTable si está inicializada
-            } */
         });
+
+        /* Script para manejar la lógica de búsqueda y DataTable */
+        function buscarFactura() {
+            const numeroFactura = $('#numero_factura').val();
+
+            $.ajax({
+                url: `{{ route('dispensado.buscar', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
+                type: 'GET',
+                success: function(data) {
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        const firstRecord = data[0];
+
+                        $('#factura').val(firstRecord.factura);
+                        $('#paciente').val(firstRecord.paciente);
+                        $('#drogueria').val(firstRecord.drogueria);
+                        $('#regimen').val(firstRecord.regimen);
+                        $('#tipodocument').val(firstRecord.tipodocument);
+                        $('#medico1').val(firstRecord.medico);
+
+                        if (firstRecord.fecha_suministro) {
+                            const formattedFechaSuministro = new Date(firstRecord.fecha_suministro).toISOString().split('T')[0];
+                            $('#fecha_suministro').val(formattedFechaSuministro);
+                        } else {
+                            $('#fecha_suministro').val('');
+                        }
+
+                        $('#idusuario').val(firstRecord.idusuario);
+                        $('#cajero').val(firstRecord.cajero);
+
+                        actualizarDataTable(data);
+                    } else {
+                        console.error('Error: no se recibieron datos válidos o no se encontraron registros.');
+                        // Mostrar alerta de SweetAlert2 cuando no se encuentran registros
+                        mostrarError('No se encontraron registros para la factura ingresada.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error al buscar la factura:', error);
+                    mostrarError('Error al buscar la factura. Por favor, inténtalo de nuevo.');
+                }
+            });
+        }
+
+        function actualizarDataTable(data) {
+            const tablaRegistros = $('#tablaRegistros').DataTable();
+            tablaRegistros.clear().rows.add(data).draw();
+        }
+
+        function mostrarError(mensaje) {
+            // Mostrar alerta de SweetAlert2
+            Swal.fire({
+                //icon: "error",
+                type: 'error',
+                title: 'Oops...',
+                text: mensaje,
+                confirmButtonText: 'OK'
+            });
+        }
 
 
         $(document).ready(function() {
 
             $('#tablaRegistros').DataTable({
+                language: idioma_espanol,
+                processing: true,
+                lengthMenu: [
+                    [25, 50, 100, 500, -1],
+                    [25, 50, 100, 500, "Mostrar Todo"]
+                ],
                 paging: true,
                 lengthChange: false,
                 searching: true,
@@ -1411,11 +1465,10 @@ Dispensado Medcol Limonar
                 autoWidth: false,
                 responsive: true,
                 data: [], // Inicialmente, no hay datos para mostrar
-                columns: [
-                    /* {
-                        data: 'action',
+                columns: [{
+                        data: 'id',
                         orderable: false
-                    }, */
+                    },
                     {
                         data: 'codigo'
                     },
@@ -1445,7 +1498,108 @@ Dispensado Medcol Limonar
         });
 
         //Funcion para realizar la revision de la dispensacion de forma multiple
-        
+        $(document).ready(function() {
+            $('#enviarDispensado').on('click', function() {
+                // Llamamos a la función guardarDispensacion al hacer clic en el botón "Enviar"
+                guardarDispensacion();
+            });
+        });
+
+        async function guardarDispensacion() {
+            try {
+                // Capturar los valores de los campos
+                const fechaDisp = $('#fecha_suministro').val();
+                const fechaOrden = $('#fecha_orden').val();
+                const numeroEntrega = $('#numero_entrega1').val();
+
+                // Capturar el diagnóstico seleccionado usando select2
+                const diagnosticoElement = $('.diagnos');
+                const diagnostico = diagnosticoElement.val();
+
+                // Capturar la IPS seleccionada usando select2
+                const ipsElement = $('.ipsss');
+                const ips = ipsElement.val();
+
+                const userId = "{{ Auth::user()->id }}";
+
+                // Validar campos requeridos
+                const camposFaltantes = [];
+                if (!fechaOrden) camposFaltantes.push('Fecha de Ordenamiento');
+                if (!numeroEntrega) camposFaltantes.push('Número de Entrega');
+                if (!ips) camposFaltantes.push('IPS');
+                if (!diagnostico) camposFaltantes.push('Diagnóstico');
+
+                // Validar que la fecha de ordenamiento no sea mayor a la fecha de dispensación
+                if (fechaOrden && fechaDisp && new Date(fechaOrden) > new Date(fechaDisp)) {
+                    camposFaltantes.push('La Fecha de Ordenamiento no puede ser superior a la Fecha de Suministro');
+                }
+
+                if (camposFaltantes.length > 0) {
+                    const mensaje = `Los siguientes campos son obligatorios:<br><br>${camposFaltantes.map(campo => `<span style="font-weight: bold;">- ${campo}</span><br>`).join('')}`;
+                    await Swal.fire({
+                        type: "warning",
+                        title: '<span style="color: #ff6347;">Oops...</span>',
+                        html: `<div style="color: #333333; font-size: 16px; line-height: 1.5em;">${mensaje}</div>`,
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#DD6B55'
+                    });
+                    return;
+                }
+
+                // Obtener los datos de la tablaRegistros (suponiendo que se obtienen de DataTable)
+                const registros = $('#tablaRegistros').DataTable().rows().data().toArray();
+
+                // Mapear los datos de los registros para enviarlos al controlador
+                const datosRegistros = registros.map(registro => ({
+                    id: registro.id,
+                    cuota_moderadora: $(registro).find('.cuota_moderadora2 input').val(),
+                    autorizacion: $(registro).find('.autorizacion2 input').val(),
+                    mipres: $(registro).find('.mipres2 input').val(),
+                    reporte_entrega: $(registro).find('.reporte_entrega2 input').val(),
+                    fecha_suministro: fechaDisp,
+                    fecha_orden: fechaOrden,
+                    numero_entrega: numeroEntrega,
+                    diagnostico: diagnostico,
+                    ips: ips,
+                    user_id: userId
+                }));
+
+                // Crear objeto con todos los datos a enviar al controlador
+                const datos = {
+                    registros: datosRegistros
+                };
+
+                // Realizar la solicitud AJAX al controlador para almacenar los datos
+                const response = await $.ajax({
+                    url: "{{ route('dispensado.guardar') }}",
+                    type: 'POST',
+                    data: {
+                        data: datos,
+                        "_token": $("meta[name='csrf-token']").attr("content")
+                    }
+                });
+
+                // Manejar la respuesta del servidor
+                console.log(response);
+                await Swal.fire({
+                    type: 'success',
+                    title: 'Éxito',
+                    text: 'Datos guardados correctamente.',
+                    confirmButtonText: 'OK'
+                });
+            } catch (error) {
+                // Manejar errores de la solicitud AJAX
+                console.error('Error al guardar los datos:', error);
+                await Swal.fire({
+                    type: 'error',
+                    title: 'Error',
+                    text: 'Error al guardar los datos. Por favor, inténtalo de nuevo.',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+
+
 
     });
 

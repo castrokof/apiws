@@ -810,61 +810,59 @@ class DispensadoApiMedcol4Controller extends Controller
     }
 
 
+
+    //funcion para actualizar los datos de la factura haciendo la insercion de los datos que se validan en el front
     public function actualizarDispensacion(Request $request)
     {
-        // Validar los datos enviados desde la solicitud AJAX
+        //dd($request);
         $request->validate([
-            'data.*.ID' => 'required|exists:dispensado_medcol4,id', // ID del registro existente
-            'data.*.fecha_orden' => 'required|date', // Campo 'fecha_orden' requerido y formato de fecha
-            'data.*.numero_entrega1' => 'required|string', // Campo 'numero_entrega1' requerido
-            'data.*.diagnostico' => 'required|string', // Campo 'diagnostico' requerido
-            'data.*.ips' => 'required|string', // Campo 'ips' requerido
-            'data.*.autorizacion2' => 'required|string',
-            'data.*.cuota_moderadora2' => 'required|string',
-            'data.*.mipres2' => 'required|string',
-            'data.*.reporte_entrega2' => 'required|string',
+            'data.*.id', // Campo 'id' requerido
+            'data.*.fecha_orden',
+            'data.*.numero_entrega1',
+            'data.*.diagnostico',
+            'data.*.ips',
             'data.*.fecha_suministro',
         ]);
 
-        // Obtener la fecha de suministro del formulario y convertirla a formato Y-m-d
+        //$datosDispensacion = $request->data;
         $fechaSuministro = Carbon::parse($request->input('fecha_suministro'))->format('Y-m-d');
 
-        // Obtener los datos de la dispensación a actualizar desde la solicitud AJAX
-        $datosDispensacion = $request->input('data');
-
         try {
-            foreach ($datosDispensacion as $datos) {
-                // Obtener el ID del registro existente a actualizar
-                $idRegistro = $datos['ID'];
 
-                // Obtener la fecha de orden del registro a actualizar
-                $fechaOrden = Carbon::parse($datos['fecha_orden']);
+            $datos = $request->input('data.registros');
 
-                // Verificar si la fecha de orden es mayor a la fecha de suministro
+            /* foreach ($registros as $datos) { */
+                //dd($datos);
+                //$idRegistro = $datos['id'];
+                foreach ($datos as $idd){
+                
+                dd($idd);
+
+                $fechaOrden = Carbon::parse($idd['fecha_orden']);
                 if ($fechaOrden->gt($fechaSuministro)) {
                     return response()->json([
                         'error' => 'La Fecha de Ordenamiento no puede ser superior a la Fecha de Suministro'
                     ], 422);
                 }
 
-                // Actualizar el registro existente en la base de datos
-                DispensadoApiMedcol4::where('id', $idRegistro)->update([
-                    'autorizacion' => trim($datos['autorizacion1']),
-                    'copago' => trim($datos['copago1']),
-                    'numero_entrega' => trim($datos['numero_entrega1']),
-                    'fecha_ordenamiento' => $fechaOrden, // Actualizar la fecha de ordenamiento
-                    'dx' => trim($datos['diagnostico']),
-                    'ips' => trim($datos['ips']),
-                    'mipres' => trim($datos['mipres1']),
-                    'reporte_entrega_nopbs' => trim($datos['reporte_entrega1']),
-                    'updated_at' => now()
-                ]);
+                DispensadoApiMedcol4::where('id', $idd['id'])
+                    ->update([
+                        'autorizacion' => trim($idd['autorizacion']),
+                        'mipres' => trim($idd['mipres']),
+                        'reporte_entrega_nopbs' => trim($idd['reporte_entrega']),
+                        'numero_entrega' => trim($idd['numero_entrega']),
+                        'fecha_ordenamiento' => trim($idd['fecha_orden']),
+                        'dx' => trim($idd['diagnostico']),
+                        'ips' => trim($idd['ips']),
+                        'estado' => 'REVISADO',
+                        'user_id' => Auth::id(),
+                        'updated_at' => now()
+                    ]);
             }
+        /* } */
 
-            // Respuesta exitosa
             return response()->json(['success' => 'Datos actualizados correctamente'], 200);
         } catch (\Exception $e) {
-            // Manejar cualquier excepción que ocurra durante la actualización
             return response()->json(['error' => 'Error al actualizar los datos'], 500);
         }
     }
