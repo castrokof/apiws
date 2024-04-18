@@ -90,7 +90,7 @@
             <div class="col-md-4">
                 <div class="form-group">
                     <label for="diagnostico">Diagnóstico</label>
-                    <select name="diagnostico" class="diagnos form-control select2bs4" style="width: 100%;" required>
+                    <select name="diagnostico" class="dxcie10 form-control select2bs4" style="width: 100%;" required>
                         <!-- Agrega opciones de diagnóstico -->
                     </select>
                 </div>
@@ -98,7 +98,7 @@
             <div class="col-md-4">
                 <div class="form-group">
                     <label for="ips">IPS Formulación</label>
-                    <select name="ips" class="ipsss form-control select2bs4" style="width: 100%;" required>
+                    <select name="ips" class="ipsmul form-control select2bs4" style="width: 100%;" required>
                         <!-- Agrega opciones de IPS -->
                     </select>
                 </div>
@@ -112,8 +112,8 @@
         <table id="tablaRegistros" class="table table-striped">
             <thead>
                 <tr>
-                    <!-- <th><input name="selectall" id="selectall" type="checkbox" class="select-all checkbox-large tooltipsC" title="Seleccionar todo" /> Acciones </th> -->
-                    <th>ID</th>
+                    <th><input name="selector" id="selector" type="checkbox" class="select-all checkbox-large tooltipsC" title="Seleccionar todo" /> Acciones </th>
+                    <!-- <th>ID</th> -->
                     <th>Código</th>
                     <th>Nombre Genérico</th>
                     <th>Tipo de Medicamento</th>
@@ -125,8 +125,11 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Aquí se agregarán las filas de la tabla dinámicamente -->
+                <tr>
+                    <!-- Aquí se agregarán las filas de la tabla dinámicamente -->
+                </tr>
             </tbody>
         </table>
     </div>
 </div>
+

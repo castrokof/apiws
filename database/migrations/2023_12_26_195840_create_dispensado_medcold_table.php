@@ -43,8 +43,8 @@ class CreateDispensadoMedcoldTable extends Migration
             $table->string('cuota_moderadora');
             $table->string('copago');
             $table->string('numero_entrega');
-            $table->date('fecha_ordenamiento')->nullable();
-            $table->date('fecha_suministro');
+            $table->dateTime('fecha_ordenamiento')->nullable();
+            $table->dateTime('fecha_suministro');
             $table->string('dx');
             $table->string('ips')->nullable();
             $table->string('id_medico');

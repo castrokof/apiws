@@ -1381,6 +1381,77 @@ Dispensado Medcol Limonar
 
         }
 
+        $('.dxcie10').select2({
+            language: "es",
+            theme: "bootstrap4",
+            placeholder: 'Buscar cie10....',
+            allowClear: true,
+            ajax: {
+                url: "{{ route('selectcie10') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        q: params.term,
+
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: $.map(data.array[0], function(datas) {
+
+                            return {
+
+                                text: datas.codigo + "=>" + datas.descripcion,
+                                id: datas.codigo
+
+                            }
+                        })
+                    };
+                },
+                cache: true
+            }
+        }).trigger('change');
+
+        $('.ipsmul').select2({
+            language: "es",
+            theme: "bootstrap4",
+            placeholder: 'Buscar Ips....',
+            allowClear: true,
+            ajax: {
+                url: "{{ route('selectlist') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        q: params.term,
+                        id: 1
+
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: $.map(data.array[0], function(datas) {
+
+                            return {
+
+                                text: datas.slug + "=>" + datas.descripcion,
+                                id: datas.id
+
+                            }
+                        })
+                    };
+                },
+                cache: true
+            }
+        }).trigger('change');
+
+        $("#selector").on('click', function() {
+            $(".case").prop("checked", this.checked);
+        });
+
+
+
         //Funcion para buscar la factura y traer los datos al formulario y datatalbe
         $(document).ready(function() {
             $('#buscarFactura').on('click', function() {
@@ -1466,9 +1537,13 @@ Dispensado Medcol Limonar
                 responsive: true,
                 data: [], // Inicialmente, no hay datos para mostrar
                 columns: [{
-                        data: 'id',
+                        data: 'action',
                         orderable: false
                     },
+                    /* {
+                                           data: 'id',
+                                           orderable: false
+                                       }, */
                     {
                         data: 'codigo'
                     },
@@ -1513,11 +1588,11 @@ Dispensado Medcol Limonar
                 const numeroEntrega = $('#numero_entrega1').val();
 
                 // Capturar el diagnóstico seleccionado usando select2
-                const diagnosticoElement = $('.diagnos');
+                const diagnosticoElement = $('.dxcie10');
                 const diagnostico = diagnosticoElement.val();
 
                 // Capturar la IPS seleccionada usando select2
-                const ipsElement = $('.ipsss');
+                const ipsElement = $('.ipsmul');
                 const ips = ipsElement.val();
 
                 const userId = "{{ Auth::user()->id }}";
@@ -1546,28 +1621,66 @@ Dispensado Medcol Limonar
                     return;
                 }
 
-                // Obtener los datos de la tablaRegistros (suponiendo que se obtienen de DataTable)
-                const registros = $('#tablaRegistros').DataTable().rows().data().toArray();
+                const dispensado = [];
+                const dispensadotrue1 = [];
 
-                // Mapear los datos de los registros para enviarlos al controlador
-                const datosRegistros = registros.map(registro => ({
-                    id: registro.id,
-                    cuota_moderadora: $(registro).find('.cuota_moderadora2 input').val(),
-                    autorizacion: $(registro).find('.autorizacion2 input').val(),
-                    mipres: $(registro).find('.mipres2 input').val(),
-                    reporte_entrega: $(registro).find('.reporte_entrega2 input').val(),
-                    fecha_suministro: fechaDisp,
-                    fecha_orden: fechaOrden,
-                    numero_entrega: numeroEntrega,
-                    diagnostico: diagnostico,
-                    ips: ips,
-                    user_id: userId
-                }));
+                // Iterar sobre cada fila de la tabla
+                $("#tablaRegistros tbody tr").each(function() {
+                    const tds = $(this).find("td");
 
-                // Crear objeto con todos los datos a enviar al controlador
+                    // Verificar si la fila contiene datos válidos
+                    if (tds.eq(0).text() !== 'Ningún dato disponible en esta tabla =(') {
+                        const itemdispensado = {
+                            checked: tds.find(":checkbox").prop("checked"),
+                            id: tds.find(":checkbox:checked").attr('id'),
+                            cuota_moderadora: tds.eq(5).find('input').val(),
+                            autorizacion: tds.eq(6).find('input').val(),
+                            mipres: tds.eq(7).find('input').val(),
+                            reporte_entrega: tds.eq(8).find('input').val(),
+                            user_id: userId,
+                            fecha_suministro: fechaDisp,
+                            fecha_orden: fechaOrden,
+                            numero_entrega: numeroEntrega,
+                            diagnostico: diagnostico,
+                            estado: "REVISADO",
+                            ips: ips
+                        };
+
+                        dispensado.push(itemdispensado);
+                    }
+                });
+
+                $.each(dispensado, function(i, items) {
+                    var dispensadotrue = {};
+
+                    if (items.checked == true) {
+
+                        console.log("entra acá");
+                        dispensadotrue.ID = items.id;
+                        dispensadotrue.cuota_moderadora = items.cuota_moderadora;
+                        dispensadotrue.autorizacion = items.autorizacion;
+                        dispensadotrue.mipres = items.mipres;
+                        dispensadotrue.reporte_entrega = items.reporte_entrega;
+                        dispensadotrue.user_id = items.user_id;
+                        dispensadotrue.fecha_suministro = items.fecha_suministro;
+                        dispensadotrue.fecha_orden = items.fecha_orden;
+                        dispensadotrue.numero_entrega = items.numero_entrega;
+                        dispensadotrue.diagnostico = items.diagnostico;
+                        dispensadotrue.estado = items.estado;
+                        dispensadotrue.ips = items.ips;
+
+                        dispensadotrue1.push(dispensadotrue);
+
+                    }
+
+                });
+
                 const datos = {
-                    registros: datosRegistros
+                    registros: dispensadotrue1
                 };
+
+                // Imprimir los datos capturados
+                console.log('Datos a enviar al controlador:', dispensadotrue1);
 
                 // Realizar la solicitud AJAX al controlador para almacenar los datos
                 const response = await $.ajax({
@@ -1580,7 +1693,6 @@ Dispensado Medcol Limonar
                 });
 
                 // Manejar la respuesta del servidor
-                console.log(response);
                 await Swal.fire({
                     type: 'success',
                     title: 'Éxito',
@@ -1597,7 +1709,9 @@ Dispensado Medcol Limonar
                     confirmButtonText: 'OK'
                 });
             }
+
         }
+
 
 
 

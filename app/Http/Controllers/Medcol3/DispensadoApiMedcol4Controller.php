@@ -564,6 +564,7 @@ class DispensadoApiMedcol4Controller extends Controller
 
 
         foreach ($add_factura as $add) {
+            dd($add);
             $fecha_orden = Carbon::parse($add['fecha_orden']);
 
             // Verificar si la fecha_orden es mayor a la fecha_suministro
@@ -792,7 +793,7 @@ class DispensadoApiMedcol4Controller extends Controller
                 $dataArray = $item->toArray();
 
                 // Agregar campos HTML personalizados a los datos resultantes
-                /* $dataArray['action'] = '<input class="add_medicamento checkbox-large case tooltipsC" type="checkbox" title="Selecciona Orden" id="' . $item->id . '" value="' . $item->id . '">'; */
+                $dataArray['action'] = '<input class="add_medicamento checkbox-large case tooltipsC" type="checkbox" title="Seleccionar" id="' . $item->id . '" value="' . $item->id . '">';
                 $dataArray['autorizacion2'] = '<input type="text" name="autorizacion" id="' . $item->id . '" class="show_detail btn btn-xl bg-warning tooltipsC" style="max-width: 100%;" title="autorizacion" value="' . $item->autorizacion . '">';
                 $dataArray['mipres2'] = '<input type="text" name="mipres" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="mipres">';
                 $dataArray['reporte_entrega2'] = '<input type="text" name="reporte" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="Reporte de entrega">';
@@ -814,7 +815,7 @@ class DispensadoApiMedcol4Controller extends Controller
     //funcion para actualizar los datos de la factura haciendo la insercion de los datos que se validan en el front
     public function actualizarDispensacion(Request $request)
     {
-        //dd($request);
+        // Validar los campos requeridos
         $request->validate([
             'data.*.id', // Campo 'id' requerido
             'data.*.fecha_orden',
@@ -824,45 +825,49 @@ class DispensadoApiMedcol4Controller extends Controller
             'data.*.fecha_suministro',
         ]);
 
-        //$datosDispensacion = $request->data;
+        // Obtener la fecha de suministro y formatearla como objeto Carbon
         $fechaSuministro = Carbon::parse($request->input('fecha_suministro'))->format('Y-m-d');
+        
 
         try {
-
+            // Obtener los registros de datos
             $datos = $request->input('data.registros');
 
-            /* foreach ($registros as $datos) { */
-                //dd($datos);
-                //$idRegistro = $datos['id'];
-                foreach ($datos as $idd){
-                
-                dd($idd);
+            // Iterar sobre cada registro
+            foreach ($datos as $idd) {
+                // Obtener la fecha de ordenamiento y formatearla como objeto Carbon
+                $fechaOrden = Carbon::parse($idd['fecha_orden'])->format('Y-m-d');
 
-                $fechaOrden = Carbon::parse($idd['fecha_orden']);
-                if ($fechaOrden->gt($fechaSuministro)) {
+                // Verificar si la fecha de ordenamiento es menor o igual a la fecha de suministro
+                if (strtotime($fechaOrden) <= strtotime($fechaSuministro)) {
+                    // Actualizar los datos en la base de datos
+                    DispensadoApiMedcol4::where('id', $idd['ID'])
+                        ->update([
+                            'autorizacion' => trim($idd['autorizacion']),
+                            'cuota_moderadora' => trim($idd['cuota_moderadora']),
+                            'copago' => trim($idd['cuota_moderadora']),
+                            'mipres' => trim($idd['mipres']),
+                            'reporte_entrega_nopbs' => trim($idd['reporte_entrega']),
+                            'numero_entrega' => trim($idd['numero_entrega']),
+                            'fecha_ordenamiento' => trim($idd['fecha_orden']),
+                            'dx' => trim($idd['diagnostico']),
+                            'ips' => trim($idd['ips']),
+                            'estado' => trim($idd['estado']),
+                            'user_id' => trim($idd['user_id']),
+                            'updated_at' => now()
+                        ]);
+                } else {
+                    // Mostrar mensaje de error si la fecha de ordenamiento es mayor a la fecha de suministro
                     return response()->json([
                         'error' => 'La Fecha de Ordenamiento no puede ser superior a la Fecha de Suministro'
                     ], 422);
                 }
-
-                DispensadoApiMedcol4::where('id', $idd['id'])
-                    ->update([
-                        'autorizacion' => trim($idd['autorizacion']),
-                        'mipres' => trim($idd['mipres']),
-                        'reporte_entrega_nopbs' => trim($idd['reporte_entrega']),
-                        'numero_entrega' => trim($idd['numero_entrega']),
-                        'fecha_ordenamiento' => trim($idd['fecha_orden']),
-                        'dx' => trim($idd['diagnostico']),
-                        'ips' => trim($idd['ips']),
-                        'estado' => 'REVISADO',
-                        'user_id' => Auth::id(),
-                        'updated_at' => now()
-                    ]);
             }
-        /* } */
 
+            // Si se completó correctamente, devolver una respuesta JSON de éxito
             return response()->json(['success' => 'Datos actualizados correctamente'], 200);
         } catch (\Exception $e) {
+            // Capturar excepciones y devolver un mensaje de error
             return response()->json(['error' => 'Error al actualizar los datos'], 500);
         }
     }
