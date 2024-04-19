@@ -1698,6 +1698,17 @@ Dispensado Medcol Limonar
                     text: 'Datos guardados correctamente.',
                     confirmButtonText: 'OK'
                 });
+                // Limpiar el contenido del modal 'gestion_multiple'
+                //$('#gestion_multiple').empty();
+                $('#gestion_multiple').find('input, textarea').val('');
+                $('#gestion_multiple').find('select').val('');
+                //$('#gestion_multiple').find('select').prop('selectedIndex', 0);
+
+                // Limpiar y recargar la DataTable '#tablaRegistros'
+                $('#tablaRegistros').DataTable().clear().draw();
+                // Opcional: Recargar la DataTable desde el origen de datos
+                // $('#tablaRegistros').DataTable().ajax.reload();
+
             } catch (error) {
                 console.error('Error al guardar los datos:', error);
                 await Swal.fire({
@@ -1708,8 +1719,6 @@ Dispensado Medcol Limonar
                 });
             }
         }
-
-
 
 
 
