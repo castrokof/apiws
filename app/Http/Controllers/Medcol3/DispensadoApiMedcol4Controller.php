@@ -837,6 +837,7 @@ class DispensadoApiMedcol4Controller extends Controller
             foreach ($datos as $idd) {
                 // Obtener la fecha de ordenamiento y formatearla como objeto Carbon
                 $fechaOrden = Carbon::parse($idd['fecha_orden'])->format('Y-m-d');
+                //dd($idd);
 
                 // Verificar si la fecha de ordenamiento es menor o igual a la fecha de suministro
                 if (strtotime($fechaOrden) <= strtotime($fechaSuministro)) {

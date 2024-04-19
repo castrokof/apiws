@@ -1582,29 +1582,24 @@ Dispensado Medcol Limonar
 
         async function guardarDispensacion() {
             try {
-                // Capturar los valores de los campos
                 const fechaDisp = $('#fecha_suministro').val();
                 const fechaOrden = $('#fecha_orden').val();
                 const numeroEntrega = $('#numero_entrega1').val();
 
-                // Capturar el diagnóstico seleccionado usando select2
                 const diagnosticoElement = $('.dxcie10');
                 const diagnostico = diagnosticoElement.val();
 
-                // Capturar la IPS seleccionada usando select2
                 const ipsElement = $('.ipsmul');
                 const ips = ipsElement.val();
 
                 const userId = "{{ Auth::user()->id }}";
 
-                // Validar campos requeridos
                 const camposFaltantes = [];
                 if (!fechaOrden) camposFaltantes.push('Fecha de Ordenamiento');
                 if (!numeroEntrega) camposFaltantes.push('Número de Entrega');
                 if (!ips) camposFaltantes.push('IPS');
                 if (!diagnostico) camposFaltantes.push('Diagnóstico');
 
-                // Validar que la fecha de ordenamiento no sea mayor a la fecha de dispensación
                 if (fechaOrden && fechaDisp && new Date(fechaOrden) > new Date(fechaDisp)) {
                     camposFaltantes.push('La Fecha de Ordenamiento no puede ser superior a la Fecha de Suministro');
                 }
@@ -1624,11 +1619,8 @@ Dispensado Medcol Limonar
                 const dispensado = [];
                 const dispensadotrue1 = [];
 
-                // Iterar sobre cada fila de la tabla
                 $("#tablaRegistros tbody tr").each(function() {
                     const tds = $(this).find("td");
-
-                    // Verificar si la fila contiene datos válidos
                     if (tds.eq(0).text() !== 'Ningún dato disponible en esta tabla =(') {
                         const itemdispensado = {
                             checked: tds.find(":checkbox").prop("checked"),
@@ -1650,39 +1642,47 @@ Dispensado Medcol Limonar
                     }
                 });
 
-                $.each(dispensado, function(i, items) {
-                    var dispensadotrue = {};
+                for (const items of dispensado) {
+                    if (items.checked) {
+                        const dispensadotrue = {
+                            ID: items.id,
+                            cuota_moderadora: items.cuota_moderadora,
+                            autorizacion: items.autorizacion,
+                            mipres: items.mipres,
+                            reporte_entrega: items.reporte_entrega,
+                            user_id: items.user_id,
+                            fecha_suministro: items.fecha_suministro,
+                            fecha_orden: items.fecha_orden,
+                            numero_entrega: items.numero_entrega,
+                            diagnostico: items.diagnostico,
+                            estado: items.estado,
+                            ips: items.ips
+                        };
 
-                    if (items.checked == true) {
-
-                        console.log("entra acá");
-                        dispensadotrue.ID = items.id;
-                        dispensadotrue.cuota_moderadora = items.cuota_moderadora;
-                        dispensadotrue.autorizacion = items.autorizacion;
-                        dispensadotrue.mipres = items.mipres;
-                        dispensadotrue.reporte_entrega = items.reporte_entrega;
-                        dispensadotrue.user_id = items.user_id;
-                        dispensadotrue.fecha_suministro = items.fecha_suministro;
-                        dispensadotrue.fecha_orden = items.fecha_orden;
-                        dispensadotrue.numero_entrega = items.numero_entrega;
-                        dispensadotrue.diagnostico = items.diagnostico;
-                        dispensadotrue.estado = items.estado;
-                        dispensadotrue.ips = items.ips;
-
-                        dispensadotrue1.push(dispensadotrue);
-
+                        if (!dispensadotrue.autorizacion) {
+                            dispensadotrue1.push(dispensadotrue);
+                        } else {
+                            if (dispensadotrue.mipres && dispensadotrue.reporte_entrega) {
+                                dispensadotrue1.push(dispensadotrue);
+                            } else {
+                                await Swal.fire({
+                                    type: "error",
+                                    title: "Error",
+                                    text: "Los campos MIPRES y Reporte de Entrega deben completarse",
+                                    confirmButtonText: 'OK'
+                                });
+                                return;
+                            }
+                        }
                     }
-
-                });
+                }
 
                 const datos = {
                     registros: dispensadotrue1
                 };
 
-                // Imprimir los datos capturados
                 console.log('Datos a enviar al controlador:', dispensadotrue1);
 
-                // Realizar la solicitud AJAX al controlador para almacenar los datos
                 const response = await $.ajax({
                     url: "{{ route('dispensado.guardar') }}",
                     type: 'POST',
@@ -1692,7 +1692,6 @@ Dispensado Medcol Limonar
                     }
                 });
 
-                // Manejar la respuesta del servidor
                 await Swal.fire({
                     type: 'success',
                     title: 'Éxito',
@@ -1700,7 +1699,6 @@ Dispensado Medcol Limonar
                     confirmButtonText: 'OK'
                 });
             } catch (error) {
-                // Manejar errores de la solicitud AJAX
                 console.error('Error al guardar los datos:', error);
                 await Swal.fire({
                     type: 'error',
@@ -1709,8 +1707,8 @@ Dispensado Medcol Limonar
                     confirmButtonText: 'OK'
                 });
             }
-
         }
+
 
 
 
