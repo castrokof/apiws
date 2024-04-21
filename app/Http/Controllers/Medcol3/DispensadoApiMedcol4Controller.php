@@ -793,7 +793,7 @@ class DispensadoApiMedcol4Controller extends Controller
                 $dataArray = $item->toArray();
 
                 // Agregar campos HTML personalizados a los datos resultantes
-                $dataArray['action'] = '<input class="add_medicamento checkbox-large case tooltipsC" type="checkbox" title="Seleccionar" id="' . $item->id . '" value="' . $item->id . '">';
+                $dataArray['action'] = '<input class="add_medicamento checkbox-large checkbox2 tooltipsC" type="checkbox" title="Seleccionar" id="' . $item->id . '" value="' . $item->id . '">';
                 $dataArray['autorizacion2'] = '<input type="text" name="autorizacion" id="' . $item->id . '" class="show_detail btn btn-xl bg-warning tooltipsC" style="max-width: 100%;" title="autorizacion" value="' . $item->autorizacion . '">';
                 $dataArray['mipres2'] = '<input type="text" name="mipres" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="mipres">';
                 $dataArray['reporte_entrega2'] = '<input type="text" name="reporte" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="Reporte de entrega">';

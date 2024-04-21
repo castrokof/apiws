@@ -139,6 +139,9 @@ Route::post('medcol2/add_dispensado', 'Medcol2\DispensadoApiMedcol2Controller@ad
 Route::get('medcol2/informedis', 'Medcol2\DispensadoApiMedcol2Controller@informes')->name('medcol2.informedis')->middleware('verified')->middleware('verifyuser');
 
 Route::post('medcol2/disanulado', 'Medcol2\DispensadoApiMedcol2Controller@disanulado')->name('medcol2.disanulado')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol2/update', 'Medcol2\DispensadoApiMedcol2Controller@actualizarDispensacion')->name('dispensado2.guardar')->middleware('verified')->middleware('verifyuser');
+
+Route::get('buscar/{factura}', 'Medcol2\DispensadoApiMedcol2Controller@buscar')->name('dispensado2.buscar')->middleware('verified')->middleware('verifyuser');
 
 /*
 **
@@ -217,6 +220,7 @@ Route::get('medcold/informe', 'Medcold\PendienteApiMedcoldController@informes')-
 Route::get('informepedientesd', 'Medcold\PendienteApiMedcoldController@informepedientes')->name('informepedientesd')->middleware('verified')->middleware('verifyuser');
 
 
+
 //Rutas de tablas de Dispensado MEDCOL DOLOR
 
 Route::get('medcold/dispensado', 'Medcold\DispensadoApiMedcoldController@index')->name('medcold.dispensado')->middleware('verified')->middleware('verifyuser');
@@ -230,7 +234,9 @@ Route::post('medcold/add_dispensado', 'Medcold\DispensadoApiMedcoldController@ad
 
 Route::get('medcold/informedis', 'Medcold\DispensadoApiMedcoldController@informes')->name('medcold.informedis')->middleware('verified')->middleware('verifyuser');
 Route::post('medcold/disanulado', 'Medcold\DispensadoApiMedcoldController@disanulado')->name('medcold.disanulado')->middleware('verified')->middleware('verifyuser');
+Route::post('medcold/update', 'Medcold\DispensadoApiMedcoldController@actualizarDispensacion')->name('dispensadod.guardar')->middleware('verified')->middleware('verifyuser');
 
+Route::get('buscar/{factura}', 'Medcold\DispensadoApiMedcoldController@buscar')->name('dispensadod.buscar')->middleware('verified')->middleware('verifyuser');
 
 //Rutas de views de pendientes MEDCOL CLIENTES
 

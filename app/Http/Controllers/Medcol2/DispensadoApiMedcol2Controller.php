@@ -482,7 +482,7 @@ class DispensadoApiMedcol2Controller extends Controller
 
             if (Auth::user()->drogueria == '1') {
 
-                $dispensado_api_medcol4 = DispensadoApiMedcol2::where([['estado', 'REVISADO']])
+                $dispensado_api_medcol2 = DispensadoApiMedcol2::where([['estado', 'REVISADO']])
                     ->orWhere('estado', NULL)
                     ->orderBy('id')
                     ->get()
@@ -493,7 +493,7 @@ class DispensadoApiMedcol2Controller extends Controller
                         return $item;
                     });
             } else {
-                $dispensado_api_medcol4 = DispensadoApiMedcol2::where([['estado', 'REVISADO'], ['centroprod', $drogueria]])
+                $dispensado_api_medcol2 = DispensadoApiMedcol2::where([['estado', 'REVISADO'], ['centroprod', $drogueria]])
                     ->orWhere('estado', NULL)
                     ->orderBy('id')
                     ->get()
@@ -504,7 +504,7 @@ class DispensadoApiMedcol2Controller extends Controller
                         return $item;
                     });
             }
-            return DataTables()->of($dispensado_api_medcol4)
+            return DataTables()->of($dispensado_api_medcol2)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
                     " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
@@ -703,7 +703,7 @@ class DispensadoApiMedcol2Controller extends Controller
 
             if (Auth::user()->drogueria == '1') {
 
-                $dispensado_api_medcol4 = DispensadoApiMedcol2::where([['estado', 'ANULADA']])
+                $dispensado_api_medcol2 = DispensadoApiMedcol2::where([['estado', 'ANULADA']])
                     ->orWhere('estado', NULL)
                     ->orderBy('id')
                     ->get()
@@ -714,7 +714,7 @@ class DispensadoApiMedcol2Controller extends Controller
                         return $item;
                     });
             } else {
-                $dispensado_api_medcol4 = DispensadoApiMedcol2::where([['estado', 'ANULADA'], ['centroprod', $drogueria]])
+                $dispensado_api_medcol2 = DispensadoApiMedcol2::where([['estado', 'ANULADA'], ['centroprod', $drogueria]])
                     ->orWhere('estado', NULL)
                     ->orderBy('id')
                     ->get()
@@ -725,7 +725,7 @@ class DispensadoApiMedcol2Controller extends Controller
                         return $item;
                     });
             }
-            return DataTables()->of($dispensado_api_medcol4)
+            return DataTables()->of($dispensado_api_medcol2)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
                     " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
@@ -748,4 +748,114 @@ class DispensadoApiMedcol2Controller extends Controller
 
         return view('menu.Medcol2.indexAnalista');
     }
+
+    public function buscar($factura)
+    {
+        // Crear una instancia de la consulta principal sin ejecutarla de inmediato
+        $dispensado_api_medcol2 = DispensadoApiMedcol2::query();
+
+        // Agregar una subconsulta para calcular la suma de la cuota moderadora usando selectRaw
+        $dispensado_api_medcol2->selectRaw('*, 
+        (CASE 
+            WHEN ROW_NUMBER() OVER(PARTITION BY factura ORDER BY id) = 1 
+                THEN (SELECT SUM(cuota_moderadora) FROM dispensado_medcol2 AS d2 WHERE d2.factura = dispensado_medcol2.factura) 
+            ELSE 0 
+        END) AS cuota_moderadora_sumada');
+
+        // Aplicar condiciones de búsqueda adicionales
+        $resultados = $dispensado_api_medcol2
+            ->where('factura', $factura)
+            ->where('estado', 'DISPENSADO')
+            ->orderBy('fecha_suministro')
+            ->get();
+
+        // Verificar si se encontraron resultados
+        if ($resultados->isNotEmpty()) {
+            // Mapear los resultados a un array asociativo para incluir campos adicionales
+            $data = $resultados->map(function ($item) {
+                // Convertir el modelo a un array asociativo
+                $dataArray = $item->toArray();
+
+                // Agregar campos HTML personalizados a los datos resultantes
+                $dataArray['action'] = '<input class="add_medicamento checkbox-large checkbox2 tooltipsC" type="checkbox" title="Seleccionar" id="' . $item->id . '" value="' . $item->id . '">';
+                $dataArray['autorizacion2'] = '<input type="text" name="autorizacion" id="' . $item->id . '" class="show_detail btn btn-xl bg-warning tooltipsC" style="max-width: 100%;" title="autorizacion" value="' . $item->autorizacion . '">';
+                $dataArray['mipres2'] = '<input type="text" name="mipres" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="mipres">';
+                $dataArray['reporte_entrega2'] = '<input type="text" name="reporte" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="Reporte de entrega">';
+                $dataArray['cuota_moderadora2'] = '<input type="text" name="cuota_moderadora" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="cuota_moderadora" value="' . $item->cuota_moderadora_sumada . '">';
+
+                return $dataArray;
+            });
+
+            // Retornar los datos en formato JSON para DataTable
+            return response()->json($data);
+        } else {
+            // Retornar un error si no se encontraron resultados
+            return response()->json(['error' => 'Factura no encontrada o no tiene estado DISPENSADO'], 404);
+        }
+    }
+
+
+
+    //funcion para actualizar los datos de la factura haciendo la insercion de los datos que se validan en el front
+    public function actualizarDispensacion(Request $request)
+    {
+        // Validar los campos requeridos
+        $request->validate([
+            'data.*.id', // Campo 'id' requerido
+            'data.*.fecha_orden',
+            'data.*.numero_entrega1',
+            'data.*.diagnostico',
+            'data.*.ips',
+            'data.*.fecha_suministro',
+        ]);
+
+        // Obtener la fecha de suministro y formatearla como objeto Carbon
+        $fechaSuministro = Carbon::parse($request->input('fecha_suministro'))->format('Y-m-d');
+        
+
+        try {
+            // Obtener los registros de datos
+            $datos = $request->input('data.registros');
+
+            // Iterar sobre cada registro
+            foreach ($datos as $idd) {
+                // Obtener la fecha de ordenamiento y formatearla como objeto Carbon
+                $fechaOrden = Carbon::parse($idd['fecha_orden'])->format('Y-m-d');
+                //dd($idd);
+
+                // Verificar si la fecha de ordenamiento es menor o igual a la fecha de suministro
+                if (strtotime($fechaOrden) <= strtotime($fechaSuministro)) {
+                    // Actualizar los datos en la base de datos
+                    DispensadoApiMedcol2::where('id', $idd['ID'])
+                        ->update([
+                            'autorizacion' => trim($idd['autorizacion']),
+                            'cuota_moderadora' => trim($idd['cuota_moderadora']),
+                            'copago' => trim($idd['cuota_moderadora']),
+                            'mipres' => trim($idd['mipres']),
+                            'reporte_entrega_nopbs' => trim($idd['reporte_entrega']),
+                            'numero_entrega' => trim($idd['numero_entrega']),
+                            'fecha_ordenamiento' => trim($idd['fecha_orden']),
+                            'dx' => trim($idd['diagnostico']),
+                            'ips' => trim($idd['ips']),
+                            'estado' => trim($idd['estado']),
+                            'user_id' => trim($idd['user_id']),
+                            'updated_at' => now()
+                        ]);
+                } else {
+                    // Mostrar mensaje de error si la fecha de ordenamiento es mayor a la fecha de suministro
+                    return response()->json([
+                        'error' => 'La Fecha de Ordenamiento no puede ser superior a la Fecha de Suministro'
+                    ], 422);
+                }
+            }
+
+            // Si se completó correctamente, devolver una respuesta JSON de éxito
+            return response()->json(['success' => 'Datos actualizados correctamente'], 200);
+        } catch (\Exception $e) {
+            // Capturar excepciones y devolver un mensaje de error
+            return response()->json(['error' => 'Error al actualizar los datos'], 500);
+        }
+    }
+
+
 }

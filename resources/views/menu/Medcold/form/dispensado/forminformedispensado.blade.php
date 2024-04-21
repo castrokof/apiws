@@ -35,6 +35,11 @@
                             <div class="col-md-6">
                                 <button type="submit" name="buscar" id="buscar" class="btn btn-success btn-block">Buscar</button>
                             </div>
+                            <div class="col-md-12 mt-3">
+                                <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#gestion_multiple">
+                                    Gestion Multiple
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

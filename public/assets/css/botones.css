@@ -1,12 +1,8 @@
-/* Estilos para los botonoes y las tarjetas que muestran los totales de los dinspensados, anulados y revisados */
-
-/*btn flotante*/
+/* Estilos para botones flotantes */
 .checkbox-large {
-    transform: scale(1.5);
-    /* ajusta el tamaño como desees */
+    transform: scale(1.5); /* Ajusta el tamaño según sea necesario */
 }
 
-/*btn flotante para dispensados y anulados*/
 .btn-flotante-container {
     position: fixed;
     top: 146px;
@@ -14,191 +10,132 @@
     z-index: 99;
 }
 
-.btn-flotante {
+.btn-flotante,
+.btn-flotante-second,
+.btn-flotante1 {
     font-size: 16px;
     text-transform: uppercase;
     font-weight: 700;
     color: #ffffff;
     border-radius: 30px;
     letter-spacing: 1px;
-    background: linear-gradient(to right, #6c5ce7, #a29bfe) !important;
     padding: 12px 25px;
     transition: all 300ms ease;
     box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.3);
     display: inline-block;
-  }
-  
-  .btn-flotante:hover {
-    background: linear-gradient(to right, #4a4a4a, #767676);
-    box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2);
-    transform: translateY(-3px);
-  }
-
-.btn-flotante-second {
-    font-size: 16px;
-    text-transform: uppercase;
-    font-weight: 700;
-    color: #ffffff;
-    border-radius: 30px;
-    letter-spacing: 1px;
-    background: linear-gradient(to right, #e84393, #ff6b6b) !important;
-    padding: 12px 25px;
-    transition: all 300ms ease;
-    box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.3);
-    margin-left: 15px;
-    display: inline-block;
-  }
-  
-  .btn-flotante-second:hover {
-    background: linear-gradient(to right, #4a4a4a, #767676);
-    box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2);
-    transform: translateY(-3px);
-  }
-
-
-
-@media only screen and (max-width: 300px) {
-
-    .btn-flotante,
-    .btn-flotante-second {
-        font-size: 14px;
-        padding: 12px 20px 0 0;
-        bottom: 20px;
-        right: 20px;
-    }
 }
 
+.btn-flotante-second {
+    margin-left: 15px;
+}
 
-
-/*btn flotante*/
 .btn-flotante1 {
     font-size: 18px;
-    text-transform: uppercase;
-    font-weight: 700;
-    color: #ffffff;
     border-radius: 40px;
-    letter-spacing: 1px;
-    background: linear-gradient(to right, #1abc9c, #16a085) !important;
     padding: 16px 35px;
     position: fixed;
     bottom: 30px;
     right: 30px;
-    transition: all 300ms ease;
-    box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.3);
     z-index: 99;
     border: none;
     outline: none;
-  }
-  
-  .btn-flotante1:hover {
-    background: linear-gradient(to right, #2980b9, #3498db);
-    box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2);
-    transform: translateY(-5px);
-  }
-
-@media only screen and (max-width: 600px) {
-    .btn-flotante1 {
-        font-size: 14px;
-        padding: 12px 20px;
-        bottom: 20px;
-        right: 20px;
-    }
 }
 
-.loaders {
+/* Estilos para botones flotantes al hacer hover */
+.btn-flotante:hover,
+.btn-flotante-second:hover,
+.btn-flotante1:hover {
+    box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px);
+}
 
+/* Estilos para diferentes botones flotantes */
+.btn-flotante {
+    background: linear-gradient(to right, #6c5ce7, #a29bfe) !important;
+}
+
+.btn-flotante-second {
+    background: linear-gradient(to right, #e84393, #ff6b6b) !important;
+}
+
+.btn-flotante1 {
+    background: linear-gradient(to right, #1abc9c, #16a085) !important;
+}
+
+/* Estilos para loader */
+.loaders {
     visibility: hidden;
     background-color: rgba(255, 253, 253, 0.952);
     position: absolute;
-    z-index: +100 !important;
+    z-index: 100;
     width: 100%;
     height: 100%;
 }
 
 .loaders img {
-    position: relative;
+    position: absolute;
     top: 50%;
-    left: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 180px;
     height: 180px;
 }
 
-/* // Colores para las tarjetas widget */
+/* Estilos para tarjetas */
 .card {
     background-color: #fff;
     border-radius: 10px;
     border: none;
     position: relative;
     margin-bottom: 30px;
-    box-shadow: 0 0.46875rem 2.1875rem rgba(90, 97, 105, 0.1), 0 0.9375rem 1.40625rem rgba(90, 97, 105, 0.1), 0 0.25rem 0.53125rem rgba(90, 97, 105, 0.12), 0 0.125rem 0.1875rem rgba(90, 97, 105, 0.1);
+    box-shadow: 0 0.46875rem 2.1875rem rgba(90, 97, 105, 0.1), 
+                0 0.9375rem 1.40625rem rgba(90, 97, 105, 0.1), 
+                0 0.25rem 0.53125rem rgba(90, 97, 105, 0.12), 
+                0 0.125rem 0.1875rem rgba(90, 97, 105, 0.1);
 }
 
+/* Estilos para tarjetas con diferentes colores de fondo */
 .l-bg-blue-dark-card {
-    background-color: linear-gradient(to right, #b7c7ec, #4286f4) !important;
+    background: linear-gradient(to right, #b7c7ec, #4286f4);
     color: #fff;
 }
 
-
-
 .l-bg-cherry {
-    background: linear-gradient(to right, #493240, #f09) !important;
+    background: linear-gradient(to right, #493240, #f09);
     color: #fff;
 }
 
 .l-bg-blue-dark {
-    background: linear-gradient(to right, #06b6cd, #319acb) !important;
+    background: linear-gradient(to right, #06b6cd, #319acb);
     color: #fff;
 }
 
 .l-bg-green-dark {
-    background: linear-gradient(to right, #0a504a, #3866ef) !important;
+    background: linear-gradient(to right, #0a504a, #3866ef);
     color: #fff;
 }
 
 .l-bg-orange-dark {
-    background: linear-gradient(to right, #a86008, #ffba56) !important;
+    background: linear-gradient(to right, #a86008, #ffba56);
     color: #fff;
 }
 
 .l-bg-red-dark {
-    background: linear-gradient(to right, #a80d08, #ff6756) !important;
+    background: linear-gradient(to right, #a80d08, #ff6756);
     color: #fff;
 }
 
-.card .card-statistic-3 .card-icon-large .fas,
-.card .card-statistic-3 .card-icon-large .far,
-.card .card-statistic-3 .card-icon-large .fab,
-.card .card-statistic-3 .card-icon-large .fal {
-    font-size: 110px;
-}
-
-.card .card-statistic-3 .card-icon {
-    text-align: center;
-    line-height: 50px;
-    margin-left: 15px;
-    color: #000;
-    position: absolute;
-    right: -5px;
-    top: 20px;
-    opacity: 0.1;
-}
-
 .l-bg-cyan {
-    background: linear-gradient(135deg, #289cf5, #84c0ec) !important;
+    background: linear-gradient(135deg, #289cf5, #84c0ec);
     color: #fff;
 }
 
 .l-bg-green {
-    background: linear-gradient(135deg, #23bdb8 0%, #43e794 100%) !important;
+    background: linear-gradient(135deg, #23bdb8 0%, #43e794 100%);
     color: #fff;
 }
 
 .l-bg-orange {
-    background: linear-gradient(to right, #f9900e, #ffba56) !important;
-    color: #fff;
-}
-
-.l-bg-cyan {
-    background: linear-gradient(135deg, #289cf5, #84c0ec) !important;
+    background: linear-gradient(to right, #f9900e, #ffba56);
     color: #fff;
 }

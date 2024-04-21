@@ -1446,11 +1446,10 @@ Dispensado Medcol Limonar
             }
         }).trigger('change');
 
+        
         $("#selector").on('click', function() {
-            $(".case").prop("checked", this.checked);
+            $(".checkbox2").prop("checked", this.checked);
         });
-
-
 
         //Funcion para buscar la factura y traer los datos al formulario y datatalbe
         $(document).ready(function() {
@@ -1550,11 +1549,17 @@ Dispensado Medcol Limonar
                     {
                         data: 'nombre_generico'
                     },
-                    {
+                    /* {
                         data: 'tipo'
-                    },
+                    }, */
                     {
                         data: 'numero_unidades'
+                    },
+                    {
+                        data: 'precio_unitario'
+                    },
+                    {
+                        data: 'valor_total'
                     },
                     {
                         data: 'cuota_moderadora2'
@@ -1571,6 +1576,7 @@ Dispensado Medcol Limonar
                 ]
             });
         });
+
 
         //Funcion para realizar la revision de la dispensacion de forma multiple
         $(document).ready(function() {
@@ -1593,7 +1599,7 @@ Dispensado Medcol Limonar
                 const ips = ipsElement.val();
 
                 const userId = "{{ Auth::user()->id }}";
-
+                
                 const camposFaltantes = [];
                 if (!fechaOrden) camposFaltantes.push('Fecha de Ordenamiento');
                 if (!numeroEntrega) camposFaltantes.push('Número de Entrega');
@@ -1625,10 +1631,10 @@ Dispensado Medcol Limonar
                         const itemdispensado = {
                             checked: tds.find(":checkbox").prop("checked"),
                             id: tds.find(":checkbox:checked").attr('id'),
-                            cuota_moderadora: tds.eq(5).find('input').val(),
-                            autorizacion: tds.eq(6).find('input').val(),
-                            mipres: tds.eq(7).find('input').val(),
-                            reporte_entrega: tds.eq(8).find('input').val(),
+                            cuota_moderadora: tds.eq(6).find('input').val(),
+                            autorizacion: tds.eq(7).find('input').val(),
+                            mipres: tds.eq(8).find('input').val(),
+                            reporte_entrega: tds.eq(9).find('input').val(),
                             user_id: userId,
                             fecha_suministro: fechaDisp,
                             fecha_orden: fechaOrden,
@@ -1700,9 +1706,9 @@ Dispensado Medcol Limonar
                 });
                 // Limpiar el contenido del modal 'gestion_multiple'
                 //$('#gestion_multiple').empty();
+                //$('#gestion_multiple').find('select').prop('selectedIndex', 0);
                 $('#gestion_multiple').find('input, textarea').val('');
                 $('#gestion_multiple').find('select').val('');
-                //$('#gestion_multiple').find('select').prop('selectedIndex', 0);
 
                 // Limpiar y recargar la DataTable '#tablaRegistros'
                 $('#tablaRegistros').DataTable().clear().draw();
