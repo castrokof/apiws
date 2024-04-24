@@ -746,7 +746,7 @@ class DispensadoApiMedcol2Controller extends Controller
                 ->make(true);
         }
 
-        return view('menu.Medcol2.indexAnalista');
+        return view('menu.Medcol2.indexDispensado');
     }
 
     public function buscar($factura)

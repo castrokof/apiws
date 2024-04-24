@@ -1464,7 +1464,7 @@ Dispensado Medcol Limonar
             const numeroFactura = $('#numero_factura').val();
 
             $.ajax({
-                url: `{{ route('dispensado.buscar', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
+                url: `{{ route('dispensado.medcol3', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
                 type: 'GET',
                 success: function(data) {
                     if (data && Array.isArray(data) && data.length > 0) {
@@ -1704,15 +1704,16 @@ Dispensado Medcol Limonar
                     text: 'Datos guardados correctamente.',
                     confirmButtonText: 'OK'
                 });
-                // Limpiar el contenido del modal 'gestion_multiple'
+                /* Limpiar el contenido del modal 'gestion_multiple' */
                 //$('#gestion_multiple').empty();
                 //$('#gestion_multiple').find('select').prop('selectedIndex', 0);
                 $('#gestion_multiple').find('input, textarea').val('');
                 $('#gestion_multiple').find('select').val('');
 
-                // Limpiar y recargar la DataTable '#tablaRegistros'
+                /* Limpiar y recargar la DataTable '#tablaRegistros' */
                 $('#tablaRegistros').DataTable().clear().draw();
-                // Opcional: Recargar la DataTable desde el origen de datos
+                /* Opcional: Recargar la DataTable desde el origen de datos */
+                $('#dispensados').DataTable().ajax.reload();
                 // $('#tablaRegistros').DataTable().ajax.reload();
 
             } catch (error) {

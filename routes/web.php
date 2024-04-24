@@ -141,7 +141,7 @@ Route::get('medcol2/informedis', 'Medcol2\DispensadoApiMedcol2Controller@informe
 Route::post('medcol2/disanulado', 'Medcol2\DispensadoApiMedcol2Controller@disanulado')->name('medcol2.disanulado')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol2/update', 'Medcol2\DispensadoApiMedcol2Controller@actualizarDispensacion')->name('dispensado2.guardar')->middleware('verified')->middleware('verifyuser');
 
-Route::get('buscar/{factura}', 'Medcol2\DispensadoApiMedcol2Controller@buscar')->name('dispensado2.buscar')->middleware('verified')->middleware('verifyuser');
+Route::get('buscar-medcol2/{factura}', 'Medcol2\DispensadoApiMedcol2Controller@buscar')->name('dispensado.medcol2')->middleware('verified')->middleware('verifyuser');
 
 /*
 **
@@ -187,7 +187,7 @@ Route::post('medcol3/update', 'Medcol3\DispensadoApiMedcol4Controller@actualizar
 Route::get('medcol3/informedis', 'Medcol3\DispensadoApiMedcol4Controller@informes')->name('medcol3.informedis')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol3/disanulado', 'Medcol3\DispensadoApiMedcol4Controller@disanulado')->name('medcol3.disanulado')->middleware('verified')->middleware('verifyuser');
 
-Route::get('buscar/{factura}', 'Medcol3\DispensadoApiMedcol4Controller@buscar')->name('dispensado.buscar')->middleware('verified')->middleware('verifyuser');
+Route::get('buscar-medcol3/{factura}', 'Medcol3\DispensadoApiMedcol4Controller@buscar')->name('dispensado.medcol3')->middleware('verified')->middleware('verifyuser');
 
 
 
@@ -236,7 +236,7 @@ Route::get('medcold/informedis', 'Medcold\DispensadoApiMedcoldController@informe
 Route::post('medcold/disanulado', 'Medcold\DispensadoApiMedcoldController@disanulado')->name('medcold.disanulado')->middleware('verified')->middleware('verifyuser');
 Route::post('medcold/update', 'Medcold\DispensadoApiMedcoldController@actualizarDispensacion')->name('dispensadod.guardar')->middleware('verified')->middleware('verifyuser');
 
-Route::get('buscar/{factura}', 'Medcold\DispensadoApiMedcoldController@buscar')->name('dispensadod.buscar')->middleware('verified')->middleware('verifyuser');
+Route::get('buscar-medcold/{factura}', 'Medcold\DispensadoApiMedcoldController@buscar')->name('dispensado.medcold')->middleware('verified')->middleware('verifyuser');
 
 //Rutas de views de pendientes MEDCOL CLIENTES
 

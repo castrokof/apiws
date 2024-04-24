@@ -1432,7 +1432,7 @@ Dispensado Medcol Dolor
             const numeroFactura = $('#numero_factura').val();
 
             $.ajax({
-                url: `{{ route('dispensadod.buscar', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
+                url: `{{ route('dispensado.medcold', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
                 type: 'GET',
                 success: function(data) {
                     if (data && Array.isArray(data) && data.length > 0) {
@@ -1684,6 +1684,7 @@ Dispensado Medcol Dolor
                 // Limpiar y recargar la DataTable '#tablaRegistros'
                 $('#tablaRegistros').DataTable().clear().draw();
                 // Opcional: Recargar la DataTable desde el origen de datos
+                $('#dispensados').DataTable().ajax.reload();
                 // $('#tablaRegistros').DataTable().ajax.reload();
 
             } catch (error) {

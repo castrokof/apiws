@@ -774,13 +774,13 @@ class DispensadoApiMedcoldController extends Controller
     public function buscar($factura)
     {
         // Crear una instancia de la consulta principal sin ejecutarla de inmediato
-        $dispensado_api_medcol4 = DispensadoApiMedcol4::query();
+        $dispensado_api_medcol4 = DispensadoApiMedcold::query();
 
         // Agregar una subconsulta para calcular la suma de la cuota moderadora usando selectRaw
         $dispensado_api_medcol4->selectRaw('*, 
         (CASE 
             WHEN ROW_NUMBER() OVER(PARTITION BY factura ORDER BY id) = 1 
-                THEN (SELECT SUM(cuota_moderadora) FROM dispensado_medcol4 AS d2 WHERE d2.factura = dispensado_medcol4.factura) 
+                THEN (SELECT SUM(cuota_moderadora) FROM dispensado_medcold AS d2 WHERE d2.factura = dispensado_medcold.factura) 
             ELSE 0 
         END) AS cuota_moderadora_sumada');
 
@@ -848,7 +848,7 @@ class DispensadoApiMedcoldController extends Controller
                 // Verificar si la fecha de ordenamiento es menor o igual a la fecha de suministro
                 if (strtotime($fechaOrden) <= strtotime($fechaSuministro)) {
                     // Actualizar los datos en la base de datos
-                    DispensadoApiMedcol4::where('id', $idd['ID'])
+                    DispensadoApiMedcold::where('id', $idd['ID'])
                         ->update([
                             'autorizacion' => trim($idd['autorizacion']),
                             'cuota_moderadora' => trim($idd['cuota_moderadora']),

@@ -36,6 +36,7 @@ Dispensado Medcol Salud Mental
 
 @include('menu.usuario.form.dispensado.forminformedispensado')
 @include('menu.usuario.tabs.tabsIndexDispensado')
+@include('menu.usuario.modal.modalGestionMultiple')
 
 @endsection
 
@@ -1349,6 +1350,357 @@ Dispensado Medcol Salud Mental
                     }
                 });
         }
+
+        $('.dxcie10').select2({
+            language: "es",
+            theme: "bootstrap4",
+            placeholder: 'Buscar cie10....',
+            allowClear: true,
+            ajax: {
+                url: "{{ route('selectcie10') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        q: params.term,
+
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: $.map(data.array[0], function(datas) {
+
+                            return {
+
+                                text: datas.codigo + "=>" + datas.descripcion,
+                                id: datas.codigo
+
+                            }
+                        })
+                    };
+                },
+                cache: true
+            }
+        }).trigger('change');
+
+        $('.ipsmul').select2({
+            language: "es",
+            theme: "bootstrap4",
+            placeholder: 'Buscar Ips....',
+            allowClear: true,
+            ajax: {
+                url: "{{ route('selectlist') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        q: params.term,
+                        id: 1
+
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: $.map(data.array[0], function(datas) {
+
+                            return {
+
+                                text: datas.slug + "=>" + datas.descripcion,
+                                id: datas.id
+
+                            }
+                        })
+                    };
+                },
+                cache: true
+            }
+        }).trigger('change');
+
+        
+        $("#selector").on('click', function() {
+            $(".checkbox2").prop("checked", this.checked);
+        });
+
+        //Funcion para buscar la factura y traer los datos al formulario y datatalbe
+        $(document).ready(function() {
+            $('#buscarFactura').on('click', function() {
+                // Llamamos a la función guardarDispensacion al hacer clic en el botón "Enviar"
+                buscarFactura();
+            });
+        });
+
+        /* Script para manejar la lógica de búsqueda y DataTable */
+        function buscarFactura() {
+            const numeroFactura = $('#numero_factura').val();
+
+            $.ajax({
+                url: `{{ route('dispensado.medcol2', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
+                type: 'GET',
+                success: function(data) {
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        const firstRecord = data[0];
+
+                        $('#factura').val(firstRecord.factura);
+                        $('#paciente').val(firstRecord.paciente);
+                        $('#drogueria').val(firstRecord.drogueria);
+                        $('#regimen').val(firstRecord.regimen);
+                        $('#tipodocument').val(firstRecord.tipodocument);
+                        $('#medico1').val(firstRecord.medico);
+
+                        if (firstRecord.fecha_suministro) {
+                            const formattedFechaSuministro = new Date(firstRecord.fecha_suministro).toISOString().split('T')[0];
+                            $('#fecha_suministro').val(formattedFechaSuministro);
+                        } else {
+                            $('#fecha_suministro').val('');
+                        }
+
+                        $('#idusuario').val(firstRecord.idusuario);
+                        $('#cajero').val(firstRecord.cajero);
+
+                        actualizarDataTable(data);
+                    } else {
+                        console.error('Error: no se recibieron datos válidos o no se encontraron registros.');
+                        // Mostrar alerta de SweetAlert2 cuando no se encuentran registros
+                        mostrarError('No se encontraron registros para la factura ingresada.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error al buscar la factura:', error);
+                    mostrarError('Error al buscar la factura. Por favor, inténtalo de nuevo.');
+                }
+            });
+        }
+
+        function actualizarDataTable(data) {
+            const tablaRegistros = $('#tablaRegistros').DataTable();
+            tablaRegistros.clear().rows.add(data).draw();
+        }
+
+        function mostrarError(mensaje) {
+            // Mostrar alerta de SweetAlert2
+            Swal.fire({
+                icon: "error",
+                type: 'error',
+                title: 'Oops...',
+                text: mensaje,
+                confirmButtonText: 'OK'
+            });
+        }
+
+
+        $(document).ready(function() {
+
+            $('#tablaRegistros').DataTable({
+                language: idioma_espanol,
+                processing: true,
+                lengthMenu: [
+                    [25, 50, 100, 500, -1],
+                    [25, 50, 100, 500, "Mostrar Todo"]
+                ],
+                paging: true,
+                lengthChange: false,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true,
+                data: [], // Inicialmente, no hay datos para mostrar
+                columns: [{
+                        data: 'action',
+                        orderable: false
+                    },
+                    /* {
+                                           data: 'id',
+                                           orderable: false
+                                       }, */
+                    {
+                        data: 'codigo'
+                    },
+                    {
+                        data: 'nombre_generico'
+                    },
+                    /* {
+                        data: 'tipo'
+                    }, */
+                    {
+                        data: 'numero_unidades'
+                    },
+                    {
+                        data: 'precio_unitario'
+                    },
+                    {
+                        data: 'valor_total'
+                    },
+                    {
+                        data: 'cuota_moderadora2'
+                    },
+                    {
+                        data: 'autorizacion2'
+                    },
+                    {
+                        data: 'mipres2'
+                    },
+                    {
+                        data: 'reporte_entrega2'
+                    }
+                ]
+            });
+        });
+
+
+        //Funcion para realizar la revision de la dispensacion de forma multiple
+        $(document).ready(function() {
+            $('#enviarDispensado').on('click', function() {
+                // Llamamos a la función guardarDispensacion al hacer clic en el botón "Enviar"
+                guardarDispensacion();
+            });
+        });
+
+        async function guardarDispensacion() {
+            try {
+                const fechaDisp = $('#fecha_suministro').val();
+                const fechaOrden = $('#fecha_orden').val();
+                const numeroEntrega = $('#numero_entrega1').val();
+
+                const diagnosticoElement = $('.dxcie10');
+                const diagnostico = diagnosticoElement.val();
+
+                const ipsElement = $('.ipsmul');
+                const ips = ipsElement.val();
+
+                const userId = "{{ Auth::user()->id }}";
+                
+                const camposFaltantes = [];
+                if (!fechaOrden) camposFaltantes.push('Fecha de Ordenamiento');
+                if (!numeroEntrega) camposFaltantes.push('Número de Entrega');
+                if (!ips) camposFaltantes.push('IPS');
+                if (!diagnostico) camposFaltantes.push('Diagnóstico');
+
+                if (fechaOrden && fechaDisp && new Date(fechaOrden) > new Date(fechaDisp)) {
+                    camposFaltantes.push('La Fecha de Ordenamiento no puede ser superior a la Fecha de Suministro');
+                }
+
+                if (camposFaltantes.length > 0) {
+                    const mensaje = `Los siguientes campos son obligatorios:<br><br>${camposFaltantes.map(campo => `<span style="font-weight: bold;">- ${campo}</span><br>`).join('')}`;
+                    await Swal.fire({
+                        type: "warning",
+                        title: '<span style="color: #ff6347;">Oops...</span>',
+                        html: `<div style="color: #333333; font-size: 16px; line-height: 1.5em;">${mensaje}</div>`,
+                        confirmButtonText: 'Revisar',
+                        confirmButtonColor: '#DD6B55'
+                    });
+                    return;
+                }
+
+                const dispensado = [];
+                const dispensadotrue1 = [];
+
+                $("#tablaRegistros tbody tr").each(function() {
+                    const tds = $(this).find("td");
+                    if (tds.eq(0).text() !== 'Ningún dato disponible en esta tabla =(') {
+                        const itemdispensado = {
+                            checked: tds.find(":checkbox").prop("checked"),
+                            id: tds.find(":checkbox:checked").attr('id'),
+                            cuota_moderadora: tds.eq(6).find('input').val(),
+                            autorizacion: tds.eq(7).find('input').val(),
+                            mipres: tds.eq(8).find('input').val(),
+                            reporte_entrega: tds.eq(9).find('input').val(),
+                            user_id: userId,
+                            fecha_suministro: fechaDisp,
+                            fecha_orden: fechaOrden,
+                            numero_entrega: numeroEntrega,
+                            diagnostico: diagnostico,
+                            estado: "REVISADO",
+                            ips: ips
+                        };
+
+                        dispensado.push(itemdispensado);
+                    }
+                });
+
+                for (const items of dispensado) {
+                    if (items.checked) {
+                        const dispensadotrue = {
+                            ID: items.id,
+                            cuota_moderadora: items.cuota_moderadora,
+                            autorizacion: items.autorizacion,
+                            mipres: items.mipres,
+                            reporte_entrega: items.reporte_entrega,
+                            user_id: items.user_id,
+                            fecha_suministro: items.fecha_suministro,
+                            fecha_orden: items.fecha_orden,
+                            numero_entrega: items.numero_entrega,
+                            diagnostico: items.diagnostico,
+                            estado: items.estado,
+                            ips: items.ips
+                        };
+
+                        if (!dispensadotrue.autorizacion) {
+                            dispensadotrue1.push(dispensadotrue);
+                        } else {
+                            if (dispensadotrue.mipres && dispensadotrue.reporte_entrega) {
+                                dispensadotrue1.push(dispensadotrue);
+                            } else {
+                                await Swal.fire({
+                                    icon: "error",
+                                    type: "error",
+                                    title: "Error",
+                                    text: "Los campos MIPRES y Reporte de Entrega deben completarse",
+                                    confirmButtonText: 'OK'
+                                });
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                const datos = {
+                    registros: dispensadotrue1
+                };
+
+                console.log('Datos a enviar al controlador:', dispensadotrue1);
+
+                const response = await $.ajax({
+                    url: "{{ route('dispensado2.guardar') }}",
+                    type: 'POST',
+                    data: {
+                        data: datos,
+                        "_token": $("meta[name='csrf-token']").attr("content")
+                    }
+                });
+
+                await Swal.fire({
+                    icon: 'success',
+                    type: 'success',
+                    title: 'Éxito',
+                    text: 'Datos guardados correctamente.',
+                    confirmButtonText: 'OK'
+                });
+                // Limpiar el contenido del modal 'gestion_multiple'
+                //$('#gestion_multiple').empty();
+                //$('#gestion_multiple').find('select').prop('selectedIndex', 0);
+                $('#gestion_multiple').find('input, textarea').val('');
+                $('#gestion_multiple').find('select').val('');
+
+                // Limpiar y recargar la DataTable '#tablaRegistros'
+                $('#tablaRegistros').DataTable().clear().draw();
+                // Opcional: Recargar la DataTable desde el origen de datos
+                $('#dispensados').DataTable().ajax.reload();
+                // $('#tablaRegistros').DataTable().ajax.reload();
+
+            } catch (error) {
+                console.error('Error al guardar los datos:', error);
+                await Swal.fire({
+                    icon: 'error',
+                    type: 'error',
+                    title: 'Error',
+                    text: 'Error al guardar los datos. Por favor, inténtalo de nuevo.',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+
+
     });
 
     var idioma_espanol = {
