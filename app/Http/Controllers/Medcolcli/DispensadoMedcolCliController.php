@@ -25,54 +25,50 @@ class DispensadoMedcolCliController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-   public function index()
+    public function index()
     {
 
         return view('menu.Medcolcli.indexInformed');
     }
-    
-       public function index1(Request $request)
+
+    public function index1(Request $request)
     {
-        
-            $fechaAi=now()->toDateString()." 00:00:01";
-            $fechaAf=now()->toDateString()." 23:59:59";
-            
-           
+
+        $fechaAi = now()->toDateString() . " 00:00:01";
+        $fechaAf = now()->toDateString() . " 23:59:59";
 
         if ($request->ajax()) {
-            
-          if($request->fechaini != '' && $request->fechafin != '' ){  
-            
-            $fechaini = new Carbon($request->fechaini);
-            $fechaini = $fechaini->toDateString();
 
-            $fechafin = new Carbon($request->fechafin);
-            $fechafin = $fechafin->toDateString();
-            
-            $dispensadoapi = DispensadoCliMedcol::whereBetween('fecha_suministro', [$fechaini.' 00:00:00',$fechafin.' 23:59:59']);
-               
-        
-            $dispensadoapi->where('fecha_suministro', '>', '2023-11-01 00:00:00')->get();  
-            
-                      
+            if ($request->fechaini != '' && $request->fechafin != '') {
 
-           return DataTables()->of($dispensadoapi)
-            ->make(true);
-          }else{
-              
-              $dispensadoapitoday = DispensadoCliMedcol::whereBetween('fecha_suministro', [$fechaAi,$fechaAf]);
-              $dispensadoapitoday->where([
-                ['fecha_suministro', '>=', '2023-11-01'.' 00:00:00']
-                 ])->get();
-           
-            
-           return DataTables()->of($dispensadoapitoday)
-            ->make(true);
-          }
-              
-          }
+                $fechaini = new Carbon($request->fechaini);
+                $fechaini = $fechaini->toDateString();
+
+                $fechafin = new Carbon($request->fechafin);
+                $fechafin = $fechafin->toDateString();
+
+                $dispensadoapi = DispensadoCliMedcol::whereBetween('fecha_suministro', [$fechaini . ' 00:00:00', $fechafin . ' 23:59:59']);
+                $dispensadoapi->whereIn('estado', ['DISPENSADO', 'REVISADO']);
+
+                $dispensadoapi->where('fecha_suministro', '>', '2023-11-01 00:00:00')->get();
+
+                return DataTables()->of($dispensadoapi)
+                    ->make(true);
+            } else {
+
+                $dispensadoapitoday = DispensadoCliMedcol::whereBetween('fecha_suministro', [$fechaAi, $fechaAf]);
+                $dispensadoapi->whereIn('estado', ['REVISADO', 'DISPENSADO']);
+                $dispensadoapitoday->where([
+                    ['fecha_suministro', '>=', '2023-11-01' . ' 00:00:00']
+                ])->get();
+
+
+                return DataTables()->of($dispensadoapitoday)
+                    ->make(true);
+            }
         }
-    
+    }
+
 
     /**
      * Store a newly created resource in storage.
