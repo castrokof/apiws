@@ -54,9 +54,28 @@
             width: 100%;
             height: 100%;
             z-index: 9999;
-            background: url(/public/assets/lte/dist/img/loader.gif) 50% 50% no-repeat rgb(249, 249, 249);
+            background: url(/public_apiws/assets/lte/dist/img/loader.gif) 50% 50% no-repeat rgb(249, 249, 249);
 
             opacity: 8;
+        }
+
+        < !-- Añadir el CSS para soportar submenús -->.dropdown-submenu {
+            position: relative;
+        }
+
+        .dropdown-submenu .dropdown-menu {
+            top: 0;
+            left: 100%;
+            margin-top: -6px;
+            margin-left: 0;
+            display: none;
+            /* Ocultar por defecto */
+        }
+
+        .dropdown-submenu:hover .dropdown-menu,
+        .dropdown-submenu.show .dropdown-menu {
+            display: block;
+            /* Mostrar al hacer hover o cuando tenga la clase 'show' */
         }
     </style>
 </head>
@@ -67,7 +86,7 @@
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
                 <a class="navbar-logo" href="{{ url('/') }}">
-                    <img src="{{asset("assets/lte/dist/img/logo_2.png")}}" alt="medcol_logo_header" style="top: 12px">
+                    <img src="{{asset("assets/lte/dist/img/iconmedcol.png")}}" alt="medcol_logo_header" style="top: 12px">
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
@@ -130,6 +149,7 @@
                                                      document.getElementById('logout-form').submit();">
                                     {{ __('Logout') }}
                                 </a>
+
                                 <a class="dropdown-item" href="{{ route('tokenhercules') }}">
                                     {{ __('Mipres 2.0') }}
                                 </a>
@@ -148,6 +168,21 @@
                                 <a class="dropdown-item" href="{{ route('listasIndex') }}">
                                     {{ __('Crear listas') }}
                                 </a>
+                                <a class="dropdown-item" href="{{ route('documentos') }}">
+                                    {{ __('Crear documento') }}
+                                </a>
+
+
+                                <div class="dropdown-divider"></div>
+
+                                <!-- Submenú -->
+                                <div class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Compras') }}</a>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item text-dark" href="{{ route('menucotizaciones') }}">{{ __('Cotizaciones') }}</a>
+                                        <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
+                                    </div>
+                                </div>
 
                                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                     @csrf
@@ -185,15 +220,27 @@
                                                      document.getElementById('logout-form').submit();">
                                     {{ __('Logout') }}
                                 </a>
+                                <a class="dropdown-item" href="{{ route('comprmenu') }}">{{ __('Compras') }}</a>
                                 <a class="dropdown-item" href="{{ route('tokenhercules') }}">
                                     {{ __('Mipres 2.0') }}
                                 </a>
                                 <a class="dropdown-item" href="{{ route('submenu') }}">
-                                    {{ __('Sub Menu') }}
+                                    {{ __('Pendientes') }}
                                 </a>
                                 <a class="dropdown-item" href="{{ route('dismenu') }}">
                                     {{ __('Dispensado') }}
                                 </a>
+
+                                <div class="dropdown-divider"></div>
+
+                                <!-- Submenú -->
+                                <div class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Compras') }}</a>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Cotizaciones') }}</a>
+                                        <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
+                                    </div>
+                                </div>
                                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                     @csrf
                                 </form>
@@ -216,7 +263,7 @@
                                 </a>
 
                                 <a class="dropdown-item" href="{{ route('submenu') }}">
-                                    {{ __('Menú') }}
+                                    {{ __('Pendientes') }}
                                 </a>
 
                                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
@@ -297,6 +344,41 @@
     <script type="text/javascript">
         $(window).on("load", function() {
             $(".loader1").fadeOut("slow");
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Seleccionar todos los elementos con la clase dropdown-submenu
+            var dropdowns = document.querySelectorAll('.dropdown-submenu .dropdown-toggle');
+
+            dropdowns.forEach(function(dropdown) {
+                dropdown.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Prevenir la propagación del evento
+
+                    // Cerrar otros submenús abiertos
+                    dropdowns.forEach(function(item) {
+                        if (item !== dropdown) {
+                            item.nextElementSibling.classList.remove('show');
+                        }
+                    });
+
+                    // Alternar el submenú actual
+                    var subMenu = this.nextElementSibling;
+                    if (subMenu) {
+                        subMenu.classList.toggle('show');
+                    }
+                });
+            });
+
+            // Cerrar el submenú si se hace clic en cualquier lugar fuera del submenú
+            document.addEventListener('click', function(e) {
+                dropdowns.forEach(function(dropdown) {
+                    var subMenu = dropdown.nextElementSibling;
+                    if (subMenu && !dropdown.contains(e.target)) {
+                        subMenu.classList.remove('show');
+                    }
+                });
+            });
         });
     </script>
     {{-- <script src="https://code.jquery.com/jquery-3.5.1.js"></script>

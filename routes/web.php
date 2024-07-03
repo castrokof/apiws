@@ -32,6 +32,9 @@ Route::post('logout', 'Auth\LoginController@logout')->name('logout');
 Route::get('registrar', 'Auth\RegisterController@showRegistrationForm')->name('register')->middleware('verified')->middleware('verifyuser');
 Route::post('registrar', 'Auth\RegisterController@register')->middleware('verified')->middleware('verifyuser');
 Route::get('usuariosapiws', 'Auth\RegisterController@usuariosApiws')->name('usuariosapiws')->middleware('verified')->middleware('verifyuser');
+Route::get('usuario/{id}/editar', 'Auth\RegisterController@editar')->name('usuarioeditar')->middleware('verified')->middleware('verifyuser');
+Route::put('usuarioupdate/{id}', 'Auth\RegisterController@actualizar')->name('usuarioupdate')->middleware('verified')->middleware('verifyuser');
+
 
 // Password Reset Routes...
 Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
@@ -99,6 +102,8 @@ Route::post('/a-facturado', 'HomeController@Anularfactura')->name('a-facturado')
 
 Route::get('/submenu', 'MenuContoller@index')->name('submenu')->middleware('verified');
 Route::get('/menudispensado', 'MenuContoller@index1')->name('dismenu')->middleware('verified');
+Route::get('/menucompras', 'MenuContoller@index2')->name('comprmenu')->middleware('verified');
+Route::get('/menucotizaciones', 'MenuContoller@index3')->name('menucotizaciones')->middleware('verified');
 Route::get('/usuariosapi', 'UsuarioApiContoller@index')->name('usuariosapi')->middleware('verified')->middleware('verifyuser');
 Route::get('/guardar_usuario', 'UsuarioApiContoller@createuserapi')->name('guardar_usuario')->middleware('verified')->middleware('verifyuser');
 
@@ -126,7 +131,7 @@ Route::get('informe', 'PendienteApiController@informes')->name('informe')->middl
 Route::get('informepedientes', 'PendienteApiController@informepedientes')->name('informepedientes')->middleware('verified')->middleware('verifyuser');
 
 
-//Rutas de tablas de Dispensado MEDCOL 2
+    //Rutas de tablas de Dispensado MEDCOL 2
 
 Route::get('medcol2/dispensado', 'Medcol2\DispensadoApiMedcol2Controller@index')->name('medcol2.dispensado')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol2/dispensado1', 'Medcol2\DispensadoApiMedcol2Controller@index1')->name('medcol2.dispensado1')->middleware('verified')->middleware('verifyuser');
@@ -141,7 +146,8 @@ Route::get('medcol2/informedis', 'Medcol2\DispensadoApiMedcol2Controller@informe
 Route::post('medcol2/disanulado', 'Medcol2\DispensadoApiMedcol2Controller@disanulado')->name('medcol2.disanulado')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol2/update', 'Medcol2\DispensadoApiMedcol2Controller@actualizarDispensacion')->name('dispensado2.guardar')->middleware('verified')->middleware('verifyuser');
 
-Route::get('buscar-medcol2/{factura}', 'Medcol2\DispensadoApiMedcol2Controller@buscar')->name('dispensado.medcol2')->middleware('verified')->middleware('verifyuser');
+
+Route::get('buscar-medcol2/{factura}', 'Medcol2\\DispensadoApiMedcol2Controller@buscar')->name('dispensado.medcol2')->middleware('verified')->middleware('verifyuser');
 
 /*
 **
@@ -187,7 +193,7 @@ Route::post('medcol3/update', 'Medcol3\DispensadoApiMedcol4Controller@actualizar
 Route::get('medcol3/informedis', 'Medcol3\DispensadoApiMedcol4Controller@informes')->name('medcol3.informedis')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol3/disanulado', 'Medcol3\DispensadoApiMedcol4Controller@disanulado')->name('medcol3.disanulado')->middleware('verified')->middleware('verifyuser');
 
-Route::get('buscar-medcol3/{factura}', 'Medcol3\DispensadoApiMedcol4Controller@buscar')->name('dispensado.medcol3')->middleware('verified')->middleware('verifyuser');
+Route::get('buscar-medcol3/{factura}', 'Medcol3\\DispensadoApiMedcol4Controller@buscar')->name('dispensado.medcol3')->middleware('verified')->middleware('verifyuser');
 
 
 
@@ -196,83 +202,167 @@ Route::get('buscar-medcol3/{factura}', 'Medcol3\DispensadoApiMedcol4Controller@b
 **
 */
 
-//Rutas de tablas de pendientes MEDCOL DOLOR
+    //Rutas de tablas de pendientes MEDCOL DOLOR
 
-Route::get('medcold/pendientes', 'Medcold\PendienteApiMedcoldController@index')->name('medcold.pendientes')->middleware('verified')->middleware('verifyuser');
-Route::post('medcold/pendientes1', 'Medcold\PendienteApiMedcoldController@index1')->name('medcold.pendientes1')->middleware('verified')->middleware('verifyuser');
-Route::post('medcold/porentregar', 'Medcold\PendienteApiMedcoldController@porentregar')->name('medcold.porentregar')->middleware('verified')->middleware('verifyuser');
-Route::post('medcold/entregados', 'Medcold\PendienteApiMedcoldController@entregados')->name('medcold.entregados')->middleware('verified')->middleware('verifyuser');
-Route::post('medcold/desabastecidos', 'Medcold\PendienteApiMedcoldController@getDesabastecidos')->name('medcold.desabastecidos')->middleware('verified')->middleware('verifyuser');
-Route::post('medcold/anulados', 'Medcold\PendienteApiMedcoldController@getAnulados')->name('medcold.anulados')->middleware('verified')->middleware('verifyuser');
-Route::get('medcold/guardar_observacion', 'Medcold\PendienteApiMedcoldController@guardar')->name('medcold.guardar_observacion')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcold/pendientes', 'Medcold\PendienteApiMedcoldController@index')->name('medcold.pendientes')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/pendientes1', 'Medcold\PendienteApiMedcoldController@index1')->name('medcold.pendientes1')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/porentregar', 'Medcold\PendienteApiMedcoldController@porentregar')->name('medcold.porentregar')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/entregados', 'Medcold\PendienteApiMedcoldController@entregados')->name('medcold.entregados')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/desabastecidos', 'Medcold\PendienteApiMedcoldController@getDesabastecidos')->name('medcold.desabastecidos')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/anulados', 'Medcold\PendienteApiMedcoldController@getAnulados')->name('medcold.anulados')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcold/guardar_observacion', 'Medcold\PendienteApiMedcoldController@guardar')->name('medcold.guardar_observacion')->middleware('verified')->middleware('verifyuser');
+    
+    Route::get('medcold/editpendientes/{id}', 'Medcold\PendienteApiMedcoldController@edit')->name('medcold.pendientes-edit')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcold/showpendientes/{id}', 'Medcold\PendienteApiMedcoldController@show')->name('medcold.pendientes-show')->middleware('verified');
+    Route::put('medcold/pendientes/{id}', 'Medcold\PendienteApiMedcoldController@update')->name('medcold.actualizar_pendientes')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/pendientes', 'Medcold\PendienteApiMedcoldController@saveObs')->name('medcold.crear_observacion')->middleware('verified')->middleware('verifyuser');
+    
+    Route::get('medcold/observaciones', 'Medcold\PendienteApiMedcoldController@getObservaciones')->name('medcold.observaciones')->middleware('verified')->middleware('verifyuser');
+    
+    Route::get('medcold/syncapi', 'Medcold\PendienteApiMedcoldController@createapendientespi')->name('medcold.syncapi')->middleware('verified')->middleware('verifyuser');
+    
+    Route::get('medcold/informe', 'Medcold\PendienteApiMedcoldController@informes')->name('medcold.informe')->middleware('verified')->middleware('verifyuser');
+    
+    Route::get('informepedientesd', 'Medcold\PendienteApiMedcoldController@informepedientes')->name('informepedientesd')->middleware('verified')->middleware('verifyuser');
+    
+    
+    //Rutas de tablas de Dispensado MEDCOL DOLOR
 
-Route::get('medcold/editpendientes/{id}', 'Medcold\PendienteApiMedcoldController@edit')->name('medcold.pendientes-edit')->middleware('verified')->middleware('verifyuser');
-Route::get('medcold/showpendientes/{id}', 'Medcold\PendienteApiMedcoldController@show')->name('medcold.pendientes-show')->middleware('verified');
-Route::put('medcold/pendientes/{id}', 'Medcold\PendienteApiMedcoldController@update')->name('medcold.actualizar_pendientes')->middleware('verified')->middleware('verifyuser');
-Route::post('medcold/pendientes', 'Medcold\PendienteApiMedcoldController@saveObs')->name('medcold.crear_observacion')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcold/dispensado', 'Medcold\DispensadoApiMedcoldController@index')->name('medcold.dispensado')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/dispensado1', 'Medcold\DispensadoApiMedcoldController@index1')->name('medcold.dispensado1')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/disrevisado', 'Medcold\DispensadoApiMedcoldController@disrevisado')->name('medcold.disrevisado')->middleware('verified')->middleware('verifyuser');
+    
+    Route::put('medcold/dispensado/{id}', 'Medcold\DispensadoApiMedcoldController@update')->name('medcold.actualizar_dispensado')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcold/dispensado/syncdisapi', 'Medcold\DispensadoApiMedcoldController@createdispensadoapi')->name('medcold.dispensadosyncapi')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcold/dispensado/anuladosapi', 'Medcold\DispensadoApiMedcoldController@updateanuladosapi')->name('medcold.anuladosapi')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/add_dispensado', 'Medcold\DispensadoApiMedcoldController@adddispensacionarray')->name('add_dispensaciond')->middleware('verified')->middleware('verifyuser');
+    
+    Route::get('medcold/informedis', 'Medcold\DispensadoApiMedcoldController@informes')->name('medcold.informedis')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/disanulado', 'Medcold\DispensadoApiMedcoldController@disanulado')->name('medcold.disanulado')->middleware('verified')->middleware('verifyuser');
+    Route::post('medcold/update', 'Medcold\DispensadoApiMedcoldController@actualizarDispensacion')->name('dispensadod.guardar')->middleware('verified')->middleware('verifyuser');
+    
+    Route::get('buscar-medcold/{factura}', 'Medcold\\DispensadoApiMedcoldController@buscar')->name('dispensado.medcold')->middleware('verified')->middleware('verifyuser');
+    
+    
+    // ruta de terceros y medicamentos MEDCOL 3
+    
+    Route::get('medcol3/medicamentos/syncmedicamentosapi', 'Compras\Medcol3\ControllerMedcol3@createmedicamentosapi')->name('medcol3.syncmedicamentosapi')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcol3/terceros/synctercerosapi', 'Compras\Medcol3\ControllerMedcol3@createterceroapi')->name('medcol3.synctercerosapi')->middleware('verified')->middleware('verifyuser');
+    
+    
+    
+    //Rutas de tablas de compras MEDCOL 2
+    Route::get('medcol2/compras', 'Compras\Medcol2\ControllerMedcol2@index')->name('compras.medcol2')->middleware('verified')->middleware('verifyuser');
+    
+    Route::get('selectarticulo2', 'Compras\Medcol2\ControllerMedcol2@articulos')->name('selectarticulo2')->middleware('verified');
+    Route::get('proveedoreslist2', 'Compras\Medcol2\ControllerMedcol2@proveedores')->name('proveedoreslist2')->middleware('verified');
+    Route::get('documentoslist2', 'Compras\Medcol2\ControllerMedcol2@documentos')->name('documentoslist2')->middleware('verified');
+    Route::get('/detalledocumento2/{id}', 'Compras\Medcol2\ControllerMedcol2@consecutivo')->name('detalledocumento2')->middleware('verified');
+    Route::get('comprasli2', 'Compras\Medcol2\ControllerMedcol2@Ordcompras')->name('comprasli2')->middleware('verified');
+    Route::get('compras_store2', 'Compras\Medcol2\ControllerMedcol2@Ordcompras')->name('compras_store2')->middleware('verified');
+    Route::get('proveedores_store2', 'Compras\Medcol2\ControllerMedcol2@Ordcompras')->name('proveedores_store2')->middleware('verified');
+    Route::get('detalleproveedores2/{id}', 'Compras\Medcol2\ControllerMedcol2@showproveedor')->name('proveedor2')->middleware('verified')->middleware('verifyuser');
+    
+    
+    //Rutas de tablas de compras MEDCOL 3
+    Route::get('medcol3/compras', 'Compras\Medcol3\ControllerMedcol3@index')->name('compras.medcol3')->middleware('verified')->middleware('verifyuser');
+    
+    Route::get('selectarticulo3', 'Compras\Medcol3\ControllerMedcol3@articulos')->name('selectarticulo3')->middleware('verified');
+    Route::get('detallearticulos3/{id}', 'Compras\Medcol3\ControllerMedcol3@showarticulos')->name('detallearticulos3')->middleware('verified')->middleware('verifyuser');
+    Route::get('proveedoreslist3', 'Compras\Medcol3\ControllerMedcol3@proveedores')->name('proveedoreslist3')->middleware('verified');
+    Route::get('documentoslist3', 'Compras\Medcol3\ControllerMedcol3@documentos')->name('documentoslist3')->middleware('verified');
+    Route::get('/detalledocumento3/{id}', 'Compras\Medcol3\ControllerMedcol3@consecutivo')->name('detalledocumento3')->middleware('verified');
+    Route::post('entradasstore3', 'Compras\Medcol3\ControllerMedcol3@guardarDetalles')->name('entradasstore3')->middleware('verified');
+    
+    
+    Route::get('comprasli3', 'Compras\Medcol3\ControllerMedcol3@Ordcompras')->name('comprasli3')->middleware('verified');
+    Route::get('compras_store3', 'Compras\Medcol3\ControllerMedcol3@Ordcompras')->name('compras_store3')->middleware('verified');
+    Route::get('proveedores_store3', 'Compras\Medcol3\ControllerMedcol3@Ordcompras')->name('proveedores_store3')->middleware('verified');
+    Route::get('detalleproveedores3/{id}', 'Compras\Medcol3\ControllerMedcol3@showproveedor')->name('proveedor3')->middleware('verified')->middleware('verifyuser');
+    
+    
+    //Rutas de tablas de compras MEDCOL 4
+    Route::get('medcol4/compras', 'Compras\Medcol4\ControllerMedcol4@index')->name('compras.medcol4')->middleware('verified')->middleware('verifyuser');
+    
+    Route::get('selectarticulo4', 'Compras\Medcol4\ControllerMedcol4@articulos')->name('selectarticulo4')->middleware('verified');
+    Route::get('proveedoreslist4', 'Compras\Medcol4\ControllerMedcol4@proveedores')->name('proveedoreslist4')->middleware('verified');
+    Route::get('documentoslist4', 'Compras\Medcol4\ControllerMedcol4@documentos')->name('documentoslist4')->middleware('verified');
+    Route::get('/detalledocumento4/{id}', 'Compras\Medcol4\ControllerMedcol4@consecutivo')->name('detalledocumento4')->middleware('verified');
+    Route::get('comprasli4', 'Compras\Medcol4\ControllerMedcol4@Ordcompras')->name('comprasli4')->middleware('verified');
+    Route::get('compras_store4', 'Compras\Medcol4\ControllerMedcol4@Ordcompras')->name('compras_store4')->middleware('verified');
+    Route::get('proveedores_store4', 'Compras\Medcol4\ControllerMedcol4@Ordcompras')->name('proveedores_store4')->middleware('verified');
+    Route::get('detalleproveedores4/{id}', 'Compras\Medcol4\ControllerMedcol4@showproveedor')->name('proveedor4')->middleware('verified')->middleware('verifyuser');
+    
+    //Rutas de tablas de cotizaciones MEDCOL 2
+    Route::get('medcol2/cotizaciones', 'Compras\Medcol2\ControllerMedcolCotizaciones2@indexCotizaciones')->name('medcol2.listascotizaciones')->middleware('verified')->middleware('verifyuser');
+    Route::post('subir_archivo2', 'Compras\Medcol2\ControllerMedcolCotizaciones2@import')->name('subirarchivo2')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcol2/detallecotizaciones', 'Compras\Medcol2\ControllerMedcolCotizaciones2@indexDetalleCotizaciones')->name('medcol2.indexDetalleCotizaciones')->middleware('verified')->middleware('verifyuser');
+    
+    
+    //Rutas de tablas de cotizaciones MEDCOL 3
+    Route::get('medcol3/cotizaciones', 'Compras\Medcol3\ControllerMedcolCotizaciones3@indexCotizaciones')->name('medcol3.listascotizaciones')->middleware('verified')->middleware('verifyuser');
+    Route::post('subir_archivo3', 'Compras\Medcol3\ControllerMedcolCotizaciones3@import')->name('subirarchivo3')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcol3/detallecotizaciones', 'Compras\Medcol3\ControllerMedcolCotizaciones3@indexDetalleCotizaciones')->name('medcol3.indexDetalleCotizaciones')->middleware('verified')->middleware('verifyuser');
+    
+    
+    //Rutas de tablas de cotizaciones MEDCOL 4
+    Route::get('medcol4/cotizaciones', 'Compras\Medcol4\ControllerMedcolCotizaciones4@indexCotizaciones')->name('medcol4.listascotizaciones')->middleware('verified')->middleware('verifyuser');
+    Route::post('subir_archivo4', 'Compras\Medcol4\ControllerMedcolCotizaciones2@import')->name('subirarchivo4')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcol4/detallecotizaciones', 'Compras\Medcol4\ControllerMedcolCotizaciones4@indexDetalleCotizaciones')->name('medcol4.indexDetalleCotizaciones')->middleware('verified')->middleware('verifyuser');
 
-Route::get('medcold/observaciones', 'Medcold\PendienteApiMedcoldController@getObservaciones')->name('medcold.observaciones')->middleware('verified')->middleware('verifyuser');
+    
+    
+     //Rutas de views de pendientes MEDCOL CLIENTES
 
-Route::get('medcold/syncapi', 'Medcold\PendienteApiMedcoldController@createapendientespi')->name('medcold.syncapi')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcolcli/pendientes', 'Medcolcli\PendienteMedcolCliController@index')->name('medcolCli.pendientes')->middleware('verified');
+    Route::post('medcolcli/pendientes1', 'Medcolcli\PendienteMedcolCliController@index1')->name('medcolCli.pendientes1')->middleware('verified');
+    
+    Route::get('medcolcli/dispensado', 'Medcolcli\DispensadoMedcolCliController@index')->name('medcolCli.dispensado')->middleware('verified');
+    Route::post('medcolcli/dispensado1', 'Medcolcli\DispensadoMedcolCliController@index1')->name('medcolCli.dispensado1')->middleware('verified');
+    
+    Route::get('selectcie10', 'DiagnosticosCie10Controller@selectcie10')->name('selectcie10')->middleware('verified');
+    
+    
+    
+    //RUTA PARA LISTAS 
 
-Route::get('medcold/informe', 'Medcold\PendienteApiMedcoldController@informes')->name('medcold.informe')->middleware('verified')->middleware('verifyuser');
+    Route::get('/listas-index', 'Listas\ListasController@index')->name('listasIndex')->middleware('verified')->middleware('verifyuser');
+    Route::post('/crear-listas', 'Listas\ListasController@store')->name('crearlistas')->middleware('verified')->middleware('verifyuser');
+    Route::get('/editar-listas/{id}', 'Listas\ListasController@show')->name('editar-listas')->middleware('verified')->middleware('verifyuser');
+    Route::put('/actualizar-listas/{id}', 'Listas\ListasController@update')->name('actualizar-listas')->middleware('verified')->middleware('verifyuser');
+    Route::delete('/borrar-listas/{id}', 'Listas\ListasController@destroy')->name('borrar-listas')->middleware('verified')->middleware('verifyuser');
 
-Route::get('informepedientesd', 'Medcold\PendienteApiMedcoldController@informepedientes')->name('informepedientesd')->middleware('verified')->middleware('verifyuser');
+    Route::post('/listas-estado', 'Listas\ListasController@updateestado')->name('lisestado')->middleware('verified')->middleware('verifyuser');
 
+    //RUTA PARA LISTAS DETALLE 
 
+    Route::get('/detallelistas', 'Listas\ListasDetalleController@indexDetalle')->name('listasdetalledetalle')->middleware('verified')->middleware('verifyuser');
+    Route::post('/detallecrear-listas', 'Listas\ListasDetalleController@store')->name('crearlistasdetalle')->middleware('verified')->middleware('verifyuser');
+    Route::get('/detalleeditar-listas/{id}', 'Listas\ListasDetalleController@show')->name('editar-listasdetalle')->middleware('verified')->middleware('verifyuser');
+    Route::put('/detalleactualizar-listas/{id}', 'Listas\ListasDetalleController@update')->name('actualizar-listasdetalle')->middleware('verified')->middleware('verifyuser');
+    Route::delete('/detalleborrar-listas/{id}', 'Listas\ListasDetalleController@destroy')->name('borrar-listasdetalle')->middleware('verified')->middleware('verifyuser');
 
-//Rutas de tablas de Dispensado MEDCOL DOLOR
+    Route::post('/detalle-estado', 'Listas\ListasDetalleController@updateestado')->name('detestado')->middleware('verified')->middleware('verifyuser');
+    
 
-Route::get('medcold/dispensado', 'Medcold\DispensadoApiMedcoldController@index')->name('medcold.dispensado')->middleware('verified')->middleware('verifyuser');
-Route::post('medcold/dispensado1', 'Medcold\DispensadoApiMedcoldController@index1')->name('medcold.dispensado1')->middleware('verified')->middleware('verifyuser');
-Route::post('medcold/disrevisado', 'Medcold\DispensadoApiMedcoldController@disrevisado')->name('medcold.disrevisado')->middleware('verified')->middleware('verifyuser');
+    //SELECT DE LISTAS
 
-Route::put('medcold/dispensado/{id}', 'Medcold\DispensadoApiMedcoldController@update')->name('medcold.actualizar_dispensado')->middleware('verified')->middleware('verifyuser');
-Route::get('medcold/dispensado/syncdisapi', 'Medcold\DispensadoApiMedcoldController@createdispensadoapi')->name('medcold.dispensadosyncapi')->middleware('verified')->middleware('verifyuser');
-Route::get('medcold/dispensado/anuladosapi', 'Medcold\DispensadoApiMedcoldController@updateanuladosapi')->name('medcold.anuladosapi')->middleware('verified')->middleware('verifyuser');
-Route::post('medcold/add_dispensado', 'Medcold\DispensadoApiMedcoldController@adddispensacionarray')->name('add_dispensaciond')->middleware('verified')->middleware('verifyuser');
+    route::get('selectlist', 'Listas\ListasDetalleController@select')->name('selectlist')->middleware('verified')->middleware('verifyuser');
+    route::get('selectcont', 'Listas\ListasDetalleController@selectCont')->name('selectcont')->middleware('verified')->middleware('verifyuser');
+    
+    //DOCUMENTOS CONSECUTIVOS
+    
+    Route::get('/documentos', 'Compras\ControllerDocumentos@index')->name('documentos')->middleware('verifyuser');
+    //Route::post('/documentos1', 'Compras\ControllerDocumentos@index')->name('documentos')->middleware('verifyuser');
+    Route::post('/crear-documentos', 'Compras\ControllerDocumentos@store')->name('creardocumento')->middleware('verifyuser');
+    Route::get('/editar-documentos/{id}', 'Compras\ControllerDocumentos@show')->name('editar-documentos')->middleware('verifyuser');
+    Route::put('/actualizar-documentos/{id}', 'Compras\ControllerDocumentos@update')->name('actualizar-documentos')->middleware('verifyuser');
+    Route::delete('/borrar-documentos/{id}', 'Compras\ControllerDocumentos@destroy')->name('borrar-documentos')->middleware('verifyuser');
+    
+    Route::get('/documentoslist','Compras\ControllerDocumentos@select')->name('documentoslist')->middleware('verifyuser');
+    Route::get('/detalledocumento/{id}', 'Compras\ControllerDocumentos@consecutivo')->name('detalledocumento')->middleware('verifyuser');
+    
+    
 
-Route::get('medcold/informedis', 'Medcold\DispensadoApiMedcoldController@informes')->name('medcold.informedis')->middleware('verified')->middleware('verifyuser');
-Route::post('medcold/disanulado', 'Medcold\DispensadoApiMedcoldController@disanulado')->name('medcold.disanulado')->middleware('verified')->middleware('verifyuser');
-Route::post('medcold/update', 'Medcold\DispensadoApiMedcoldController@actualizarDispensacion')->name('dispensadod.guardar')->middleware('verified')->middleware('verifyuser');
+    
 
-Route::get('buscar-medcold/{factura}', 'Medcold\DispensadoApiMedcoldController@buscar')->name('dispensado.medcold')->middleware('verified')->middleware('verifyuser');
-
-//Rutas de views de pendientes MEDCOL CLIENTES
-
-Route::get('medcolcli/pendientes', 'Medcolcli\PendienteMedcolCliController@index')->name('medcolCli.pendientes')->middleware('verified');
-Route::post('medcolcli/pendientes1', 'Medcolcli\PendienteMedcolCliController@index1')->name('medcolCli.pendientes1')->middleware('verified');
-
-Route::get('medcolcli/dispensado', 'Medcolcli\DispensadoMedcolCliController@index')->name('medcolCli.dispensado')->middleware('verified');
-Route::post('medcolcli/dispensado1', 'Medcolcli\DispensadoMedcolCliController@index1')->name('medcolCli.dispensado1')->middleware('verified');
-
-Route::get('selectcie10', 'DiagnosticosCie10Controller@selectcie10')->name('selectcie10')->middleware('verified');
-
-
-
-//RUTA PARA LISTAS 
-
-Route::get('/listas-index', 'Listas\ListasController@index')->name('listasIndex')->middleware('verified')->middleware('verifyuser');
-Route::post('/crear-listas', 'Listas\ListasController@store')->name('crearlistas')->middleware('verified')->middleware('verifyuser');
-Route::get('/editar-listas/{id}', 'Listas\ListasController@show')->name('editar-listas')->middleware('verified')->middleware('verifyuser');
-Route::put('/actualizar-listas/{id}', 'Listas\ListasController@update')->name('actualizar-listas')->middleware('verified')->middleware('verifyuser');
-Route::delete('/borrar-listas/{id}', 'Listas\ListasController@destroy')->name('borrar-listas')->middleware('verified')->middleware('verifyuser');
-
-Route::post('/listas-estado', 'Listas\ListasController@updateestado')->name('lisestado')->middleware('verified')->middleware('verifyuser');
-
-//RUTA PARA LISTAS DETALLE 
-
-Route::get('/detallelistas', 'Listas\ListasDetalleController@indexDetalle')->name('listasdetalledetalle')->middleware('verified')->middleware('verifyuser');
-Route::post('/detallecrear-listas', 'Listas\ListasDetalleController@store')->name('crearlistasdetalle')->middleware('verified')->middleware('verifyuser');
-Route::get('/detalleeditar-listas/{id}', 'Listas\ListasDetalleController@show')->name('editar-listasdetalle')->middleware('verified')->middleware('verifyuser');
-Route::put('/detalleactualizar-listas/{id}', 'Listas\ListasDetalleController@update')->name('actualizar-listasdetalle')->middleware('verified')->middleware('verifyuser');
-Route::delete('/detalleborrar-listas/{id}', 'Listas\ListasDetalleController@destroy')->name('borrar-listasdetalle')->middleware('verified')->middleware('verifyuser');
-
-Route::post('/detalle-estado', 'Listas\ListasDetalleController@updateestado')->name('detestado')->middleware('verified')->middleware('verifyuser');
-
-
-
-
-//SELECT DE LISTAS
-
-route::get('selectlist', 'Listas\ListasDetalleController@select')->name('selectlist')->middleware('verified')->middleware('verifyuser');

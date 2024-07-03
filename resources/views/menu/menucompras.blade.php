@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>MEDCOL SW</title>
+    <title>MEDCOL COMPRAS</title>
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;600&display=swap" rel="stylesheet">
@@ -63,8 +63,6 @@
         .dropdown-submenu.show .dropdown-menu {
             display: block; /* Mostrar al hacer hover o cuando tenga la clase 'show' */
         }
- 
-
     </style>
 
 </head>
@@ -93,11 +91,10 @@
                         <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
                     </li>
 
-
                     @else
 
                     @if(Auth::user()->rol == '1')
-                    <nav class="navbar navbar-expand-lg navbar-dark bg-info rounded-lg">
+                    <nav class="navbar navbar-expand-lg navbar-dark bg-danger rounded-lg">
                         <!-- <a class="navbar-brand" href="#">Aplicación</a> -->
                         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
@@ -123,16 +120,14 @@
                                         <a class="dropdown-item text-dark" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                             {{ __('Logout') }}
                                         </a>
-                                       
-                                       
+                                    
                                         <a class="dropdown-item text-dark" href="{{ route('tokenhercules') }}">{{ __('Mipres 2.0') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('submenu') }}">{{ __('Pendientes') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('dismenu') }}">{{ __('Dispensado') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('register') }}">{{ __('Crear Usuario') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('listasIndex') }}">{{ __('Crear listas') }}</a>
-                                         <a class="dropdown-item text-dark" href="{{ route('documentos') }}">{{ __('Crear documento') }}</a>
-                                        
-                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item text-dark" href="{{ route('documentos') }}">{{ __('Crear documento') }}</a>
+                                             <div class="dropdown-divider"></div>
 
                                             <!-- Submenú -->
                                             <div class="dropdown-submenu">
@@ -146,14 +141,12 @@
                                             @csrf
                                         </form>
                                     </div>
-                                       
-                                  
                                 </li>
                             </ul>
                         </div>
                     </nav>
                     @elseif(Auth::user()->rol == '2' )
-                    <nav class="navbar navbar-expand-lg navbar-dark bg-info rounded-lg">
+                    <nav class="navbar navbar-expand-lg navbar-dark bg-danger rounded-lg">
                         <!-- <a class="navbar-brand" href="#">Aplicación</a> -->
                         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
@@ -183,16 +176,6 @@
                                         <a class="dropdown-item text-dark" href="{{ route('tokenhercules') }}">{{ __('Mipres 2.0') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('submenu') }}">{{ __('Pendientes') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('dismenu') }}">{{ __('Dispensado') }}</a>
-                                             <div class="dropdown-divider"></div>
-
-                                            <!-- Submenú -->
-                                            <div class="dropdown-submenu">
-                                                <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Compras') }}</a>
-                                                <div class="dropdown-menu">
-                                                    <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Cotizaciones') }}</a>
-                                                    <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
-                                                </div>
-                                            </div>
                                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                             @csrf
                                         </form>
@@ -202,7 +185,7 @@
                         </div>
                     </nav>
                     @elseif(Auth::user()->email == 'luzcve@hotmail.com')
-                    <nav class="navbar navbar-expand-lg navbar-dark bg-info rounded-lg">
+                    <nav class="navbar navbar-expand-lg navbar-dark bg-danger rounded-lg">
                         <!-- <a class="navbar-brand" href="#">Aplicación</a> -->
                         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
@@ -241,7 +224,7 @@
                         </div>
                     </nav>
                     @elseif(Auth::user()->rol == '3' )
-                    <nav class="navbar navbar-expand-lg navbar-dark bg-info rounded-lg">
+                    <nav class="navbar navbar-expand-lg navbar-dark bg-danger rounded-lg">
                         <!-- <a class="navbar-brand" href="#">Aplicación</a> -->
                         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
@@ -267,7 +250,7 @@
                                         <a class="dropdown-item text-dark" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                             {{ __('Logout') }}
                                         </a>
-                                        
+
                                         <a class="dropdown-item text-dark" href="{{ route('submenu') }}">{{ __('Pendientes') }}</a>
                                         <!-- <a class="dropdown-item text-dark" href="{{ route('dismenu') }}">{{ __('Dispensado') }}</a> -->
                                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
@@ -278,7 +261,6 @@
                             </ul>
                         </div>
                     </nav>
-
                     @endif
                     @endguest
                 </ul>
@@ -306,12 +288,12 @@
 
             <div class="card bg-light">
                 <div class="card-body text-center">
-                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol San Fernando</div>
+                    <div class="card-header"> <i class="fas fa-shopping-cart"></i> MedCol San Fernando</div>
                     <div class="list-group">
 
 
-                        <a href="{{ route('pendientes') }}" class="list-group-item list-group-item-action">
-                            <i class="fas fa-share-square"></i> Gestionar Pendientes San Fernando <span class="badge badge-pill badge-primary pull-right">Salud Mental</span>
+                        <a href="{{ route('compras.medcol2') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-share-square"></i> Ordenes de Compra San Fernando <span class="badge badge-pill badge-primary pull-right">Salud Mental</span>
                         </a>
 
                     </div>
@@ -319,10 +301,10 @@
             </div>
             <div class="card bg-warning">
                 <div class="card-body text-center">
-                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Dolor y Paliativos</div>
+                    <div class="card-header"> <i class="fas fa-shopping-cart"></i> MedCol Dolor y Paliativos</div>
                     <div class="list-group">
-                        <a href="{{ route('medcold.pendientes') }}" class="list-group-item list-group-item-action">
-                            <i class="far fa-share-square"></i> Gestionar Pendientes Dolor y Paliativos <span class="badge badge-pill badge-primary pull-right">Dolor y Paliativos</span>
+                        <a href="{{ route('compras.medcol3') }}" class="list-group-item list-group-item-action">
+                            <i class="far fa-share-square"></i> Ordenes de Compra Dolor y Paliativos <span class="badge badge-pill badge-primary pull-right">Dolor y Paliativos</span>
                         </a>
                     </div>
                 </div>
@@ -330,10 +312,10 @@
 
             <div class="card bg-info">
                 <div class="card-body text-center">
-                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol PCE-Huerfanas-Biologicos</div>
+                    <div class="card-header"> <i class="fas fa-shopping-cart"></i> MedCol PCE-Huerfanas-Biologicos</div>
                     <div class="list-group">
-                        <a href="{{ route('medcol3.pendientes') }}" class="list-group-item list-group-item-action">
-                            <i class="far fa-share-square"></i> Gestionar Pendientes PCE-Huerfanas-Biologicos <span class="badge badge-pill badge-primary pull-right">PCE-HUE-BIO</span>
+                        <a href="{{ route('compras.medcol4') }}" class="list-group-item list-group-item-action">
+                            <i class="far fa-share-square"></i> Ordenes de Compra PCE-Huerfanas-Biologicos <span class="badge badge-pill badge-primary pull-right">PCE-HUE-BIO</span>
                         </a>
                     </div>
                 </div>
@@ -342,25 +324,12 @@
             @elseif(Auth::user()->rol == '3')
             <div class="card bg-light">
                 <div class="card-body text-center">
-                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Consolidado de pendientes</div>
+                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Consolidado de Ordenes de Compra</div>
                     <div class="list-group">
 
 
-                        <a href="{{ route('medcolCli.pendientes') }}" class="list-group-item list-group-item-action">
-                            <i class="fas fa-share-square"></i> Consultar Pendientes Medcol <span class="badge badge-pill badge-primary pull-right">consolidado Medcol</span>
-                        </a>
-
-                    </div>
-                </div>
-            </div>
-            <div class="card bg-primary">
-                <div class="card-body text-center">
-                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Consolidado Dispensado</div>
-                    <div class="list-group">
-
-
-                        <a href="{{ route('medcolCli.dispensado') }}" class="list-group-item list-group-item-action">
-                            <i class="fas fa-share-square"></i> Consultar Dispensaado Medcol <span class="badge badge-pill badge-secondary pull-right">consolidado Medcol</span>
+                        <a href="{{ route('medcol3.dispensado') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-share-square"></i> Consultar Ordenes de Compra Medcol <span class="badge badge-pill badge-primary pull-right">Consolidado Medcol</span>
                         </a>
 
                     </div>
@@ -433,7 +402,6 @@
             $(".loader1").fadeOut("slow");
         });
     </script>
-
 </body>
 
 </html>

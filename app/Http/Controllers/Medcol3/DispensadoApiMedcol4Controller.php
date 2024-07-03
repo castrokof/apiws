@@ -299,7 +299,9 @@ class DispensadoApiMedcol4Controller extends Controller
                                 'estado'  => trim($factura['estado']),
                                 'centroprod'  => trim($factura['centroprod']),
                                 'drogueria'  => trim($factura['drogueria']),
-                                'cajero'  => trim($factura['cajero'])
+                                'cajero'  => trim($factura['cajero']),
+                                'documento_origen'  => trim($factura['documento_origen']),
+                                'factura_origen'  => trim($factura['factura_origen'])
                             ];
 
                             if (!empty($dispensados)) {
@@ -413,7 +415,9 @@ class DispensadoApiMedcol4Controller extends Controller
                                     'estado'  => trim($factura['estado']),
                                     'centroprod'  => trim($factura['centroprod']),
                                     'drogueria'  => trim($factura['drogueria']),
-                                    'cajero'  => trim($factura['cajero'])
+                                    'cajero'  => trim($factura['cajero']),
+                                    'documento_origen'  => trim($factura['documento_origen']),
+                                    'factura_origen'  => trim($factura['factura_origen'])
                                 ];
 
                                 if (!empty($dispensados)) {
@@ -609,63 +613,66 @@ class DispensadoApiMedcol4Controller extends Controller
         $email = 'castrokofdev@gmail.com'; // Auth::user()->email
         $password = 'colMed2023**';
         $usuario = Auth::user()->email;
-
+    
         try {
             $response = Http::post("http://hcp080m81s7.sn.mynetname.net:8001/api/acceso", [
                 'email' => $email,
                 'password' => $password,
             ]);
-
-            $token = $response->json()["token"];
-
+    
+            $token = $response->json()["token"] ?? null;
+    
             if ($token) {
                 try {
-                    $response = Http::post("http://hcp080m81s7.sn.mynetname.net:8001/api/acceso", [
-                        'email' => $email,
-                        'password' => $password,
-                    ]);
-
-                    $token = $response->json()["token"];
-
                     $responsefacturas = Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/anuladosapi");
-                    $facturassapi = $responsefacturas->json()['data'];
-
+                    $facturassapi = $responsefacturas->json()['data'] ?? [];
+    
                     $contadorActualizados = 0;
-
+                    
+                    //dd($facturassapi);
+    
                     foreach ($facturassapi as $factura) {
-                        $actualizados = DispensadoApiMedcol4::where('factura', $factura['factura'])
+                        if (isset($factura['factura'])) {
+                            $actualizados = DispensadoApiMedcol4::where('factura', $factura['factura'])
+                                ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
+                                ->update([
+                                    'estado' => 'ANULADA',
+                                    'updated_at' => now()
+                                ]);
+                        } elseif (isset($factura['factura_electronica'])) {
+                            $actualizados = DispensadoApiMedcol4::whereRaw("CONCAT(documento_origen, factura_origen) = ?", [$factura['factura_electronica']])
                             ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
                             ->update([
                                 'estado' => 'ANULADA',
                                 'updated_at' => now()
                             ]);
-
+                        }
+    
                         if ($actualizados) {
-
                             $contadorActualizados++;
                         }
                     }
-
+                    
+                    
+    
                     Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/closeallacceso");
-
+    
                     Log::info('Desde la web syncapi autopista anulados', [
                         'lineas_actualizadas' => $contadorActualizados,
-                        'Usuario' => $usuario
+                        'usuario' => $usuario
                     ]);
-
-                    return response()->json(
+    
+                    return response()->json([
                         [
-                            [
-                                'respuesta' => $contadorActualizados . " Facturas anuladas",
-                                'titulo' => 'Lineas Actualizadas',
-                                'icon' => 'success',
-                                'position' => 'bottom-left'
-                            ]
+                            'respuesta' => $contadorActualizados . " Facturas anuladas",
+                            'titulo' => 'Lineas Actualizadas',
+                            'icon' => 'success',
+                            'position' => 'bottom-left'
                         ]
-                    );
+                    ]);
                 } catch (\Exception $e) {
                     Log::error($e->getMessage());
-
+    
                     return response()->json([
                         'respuesta' => 'Error: ' . $e->getMessage(),
                         'titulo' => 'Error',
@@ -673,10 +680,17 @@ class DispensadoApiMedcol4Controller extends Controller
                         'position' => 'bottom-left'
                     ]);
                 }
+            } else {
+                return response()->json([
+                    'respuesta' => 'Error: No se pudo obtener el token',
+                    'titulo' => 'Error',
+                    'icon' => 'error',
+                    'position' => 'bottom-left'
+                ]);
             }
         } catch (\Exception $e) {
             Log::error($e->getMessage());
-
+    
             return response()->json([
                 'respuesta' => 'Error: ' . $e->getMessage(),
                 'titulo' => 'Error',
@@ -827,7 +841,7 @@ class DispensadoApiMedcol4Controller extends Controller
 
         // Obtener la fecha de suministro y formatearla como objeto Carbon
         $fechaSuministro = Carbon::parse($request->input('fecha_suministro'))->format('Y-m-d');
-        
+
 
         try {
             // Obtener los registros de datos
