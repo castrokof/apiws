@@ -1,6 +1,6 @@
 
 
-        <div class="form-group row">
+<div class="form-group row">
             <div class="col-lg-2">
                 <label for="documento" class="col-xs-4 control-label requerido"><i class="fas fa-date"> Documento </i></label>
                 <select name="documento" id="documento" class="form-control select2bs4" style="width: 100%;" required>
@@ -33,17 +33,17 @@
                 <select name="contrato" id="contrato" class="form-control select2bs4" style="width: 100%;" required>
                 </select>
             </div>
-            <!-- <div class="col-lg-2">
-                <label for="codigo" class="col-xs-4 control-label requerido"><i class="fas fa-date"> Cons. Factura</i></label>
-                <input type="number" name="codigof" id="codigof" class="form-control" value="{{ old('nombrep') }}" required>
-            </div> -->
             <div class="col-lg-2">
                 <label for="fecha_facturae" class="col-xs-4 control-label requerido"><i class="fas fa-date"> Fecha Orden</i></label>
                 <input type="date" name="fecha_facturae" id="fecha_facturae" class="form-control" value="{{ old('fecha_facturae') }}"
                     required>
             </div>
+            <div class="col-lg-8">
+                <label for="descripcion1" class="col-xs-4 control-label requerido"><i class="fas fa fa-file"> Observaciones</i></label>
+                <textarea type="text" name="descripcion1" id="descripcion1" class="form-control" > </textarea>
+            </div>
             
-            <div class="col-lg-2">
+            <!--<div class="col-lg-2">
                 <label for="precio_compra_subtotal" class="col-xs-4 control-label requerido"><i class="fas fa-comment-dollar"> Sub total</i></label>
                 <input type="text" name="precio_compra_subtotalf" id="precio_compra_subtotalf" class="form-control validanumericos" value="{{ old('precio_compra_subtotal') }}"
                 required>
@@ -57,10 +57,10 @@
                 <label for="precio_compra_total" class="col-xs-4 control-label requerido"><i class="fas fa-comment-dollar"> Total</i></label>
                 <input type="text" name="precio_compra_totalf" id="precio_compra_totalf" class="form-control validanumericos" value="{{ old('precio_compra_total') }}"
                readonly required>
-            </div>
+            </div>-->
             
         </div>
-        <input type="hidden" name="user_id" id="user_ids" class="form-control" value="{{ Auth::user()->id ?? '' }}" >
+        <input type="hidden" name="user_id" id="user_ids" for="user_ids" class="form-control" value="{{ Auth::user()->id ?? '' }}" >
         
         @include('menu.Compras.Medcol3.tablas.tablaIndexDetalleEntrada')
 
@@ -72,17 +72,17 @@
             </div>
            
             <div class="col-lg-2">
-                <label for="totalSubtotal" class="col-xs-4 control-label"><i class="fas fa-comment-dollar"><strong>Total Subtotal:</strong></i></label>
+                <label for="totalSubtotal" class="col-xs-4 control-label"><i class="fas fa-comment-dollar"><strong> Total Subtotal:</strong></i></label>
                 <input type="text" name="totalSubtotal" id="totalSubtotal" class="form-control " value="{{ old('totalSubtotal') }}"
                 readonly>
             </div>
             <div class="col-lg-2">
-                <label for="totalIva" class="col-xs-4 control-label requerido"><i class="fas fa-comment-dollar"><strong>Total IVA:</strong></i></label>
+                <label for="totalIva" class="col-xs-4 control-label requerido"><i class="fas fa-comment-dollar"><strong> Total IVA:</strong></i></label>
                 <input type="text" name="totalIva" id="totalIva" class="form-control " value="{{ old('totalIva') }}"
                 readonly>
             </div>
             <div class="col-lg-2">
-                <label for="totalTotal" class="col-xs-4 control-label requerido"><i class="fas fa-comment-dollar"><strong>Total Total:</strong> </i></label>
+                <label for="totalTotal" class="col-xs-4 control-label requerido"><i class="fas fa-comment-dollar"><strong> Total Total:</strong> </i></label>
                 <input type="text" name="totalTotal" id="totalTotal" class="form-control " value="{{ old('totalTotal') }}"
                readonly>
             </div>

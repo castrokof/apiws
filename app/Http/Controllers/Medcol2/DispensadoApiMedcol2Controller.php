@@ -480,31 +480,75 @@ class DispensadoApiMedcol2Controller extends Controller
 
         if ($request->ajax()) {
 
-            if (Auth::user()->drogueria == '1') {
+            $fechaAi = now()->toDateString() . " 00:00:00";
+            $fechaAf = now()->toDateString() . " 23:59:59";
 
-                $dispensado_api_medcol2 = DispensadoApiMedcol2::where([['estado', 'REVISADO']])
-                    ->orWhere('estado', NULL)
-                    ->orderBy('id')
-                    ->get()
-                    ->map(function ($item) {
-                        $ipsId = $item->ips;
-                        $lista = ListasDetalle::where('id', $ipsId)->first();
-                        $item->ips_nombre = $lista ? $lista->nombre : '';
-                        return $item;
-                    });
+            $fechaini = new Carbon($request->fechaini);
+            $fechaini = $fechaini->toDateString();
+
+            $fechafin = new Carbon($request->fechafin);
+            $fechafin = $fechafin->toDateString();
+
+            if (Auth::user()->drogueria == '1') 
+            {
+                if (!empty($request->fechaini) && !empty($request->fechafin)) 
+                {
+
+                    $dispensado_api_medcol4 = DispensadoApiMedcol2::where([['estado', 'REVISADO']])
+                        ->whereBetween('fecha_suministro', [$fechaini . ' 00:00:00', $fechafin . ' 23:59:59'])
+                        ->orWhere('estado', NULL)
+                        ->orderBy('id')
+                        ->get()
+                        ->map(function ($item) {
+                            $ipsId = $item->ips;
+                            $lista = ListasDetalle::where('id', $ipsId)->first();
+                            $item->ips_nombre = $lista ? $lista->nombre : '';
+                            return $item;
+                        });
+                } else {
+                    $dispensado_api_medcol4 = DispensadoApiMedcol2::where([['estado', 'REVISADO']])
+                        ->whereBetween('fecha_suministro', [$fechaAi, $fechaAf])
+                        ->orWhere('estado', NULL)
+                        ->orderBy('id')
+                        ->get()
+                        ->map(function ($item) {
+                            $ipsId = $item->ips;
+                            $lista = ListasDetalle::where('id', $ipsId)->first();
+                            $item->ips_nombre = $lista ? $lista->nombre : '';
+                            return $item;
+                        });
+                }
             } else {
-                $dispensado_api_medcol2 = DispensadoApiMedcol2::where([['estado', 'REVISADO'], ['centroprod', $drogueria]])
-                    ->orWhere('estado', NULL)
-                    ->orderBy('id')
-                    ->get()
-                    ->map(function ($item) {
-                        $ipsId = $item->ips;
-                        $lista = ListasDetalle::where('id', $ipsId)->first();
-                        $item->ips_nombre = $lista ? $lista->nombre : '';
-                        return $item;
-                    });
+
+
+                if (!empty($request->fechaini) && !empty($request->fechafin)) {
+                    $dispensado_api_medcol4 = DispensadoApiMedcol2::where([['estado', 'REVISADO'], ['centroprod', $drogueria]])
+                        ->whereBetween('fecha_suministro', [$fechaini . ' 00:00:00', $fechafin . ' 23:59:59'])
+                        ->orWhere('estado', NULL)
+                        ->orderBy('id')
+                        ->get()
+                        ->map(function ($item) {
+                            $ipsId = $item->ips;
+                            $lista = ListasDetalle::where('id', $ipsId)->first();
+                            $item->ips_nombre = $lista ? $lista->nombre : '';
+                            return $item;
+                        });
+                } else {
+
+                    $dispensado_api_medcol4 = DispensadoApiMedcol2::where([['estado', 'REVISADO'], ['centroprod', $drogueria]])
+                        ->whereBetween('fecha_suministro', [$fechaAi, $fechaAf])
+                        ->orWhere('estado', NULL)
+                        ->orderBy('id')
+                        ->get()
+                        ->map(function ($item) {
+                            $ipsId = $item->ips;
+                            $lista = ListasDetalle::where('id', $ipsId)->first();
+                            $item->ips_nombre = $lista ? $lista->nombre : '';
+                            return $item;
+                        });
+                }
             }
-            return DataTables()->of($dispensado_api_medcol2)
+            return DataTables()->of($dispensado_api_medcol4)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
                     " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
@@ -811,7 +855,7 @@ class DispensadoApiMedcol2Controller extends Controller
 
         // Obtener la fecha de suministro y formatearla como objeto Carbon
         $fechaSuministro = Carbon::parse($request->input('fecha_suministro'))->format('Y-m-d');
-        
+
 
         try {
             // Obtener los registros de datos
@@ -856,6 +900,4 @@ class DispensadoApiMedcol2Controller extends Controller
             return response()->json(['error' => 'Error al actualizar los datos'], 500);
         }
     }
-
-
 }

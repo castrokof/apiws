@@ -19,6 +19,7 @@ $id= Session()->get('usuario_id');
                             <th>Acciones</th>
                             <th>Codigo Articulo</th>
                             <th>Articulo/Producto</th>
+                            <th>Marca</th>
                             <th>Cums</th>
                             <th>Vlr Unitario</th>
                             <th>Iva%</th>

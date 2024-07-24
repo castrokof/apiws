@@ -3,7 +3,7 @@
     <label for="codigo" class="col-xs-4 control-label ">Codigo de Articulo</label>
     <select name="codigo" id="codigo" class="form-control select2bs4" style="width: 100%;" required>
     </select>
-    <small id="codigo" class="text-muted">Codigo de Articulo</small>
+    <small for="molecula" class="text-muted">Codigo de Articulo</small>
     <input type="hidden" name="molecula" id="molecula" class="form-control" >
   </div>
   <div class="col-lg-2">

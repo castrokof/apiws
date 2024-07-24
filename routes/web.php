@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('menu.submenu');
 });
-
 /*Route::prefix('usuarios')->group(function() {
   Auth::routes();
 });*/
@@ -269,10 +268,10 @@ Route::get('buscar-medcol3/{factura}', 'Medcol3\\DispensadoApiMedcol4Controller@
     
     Route::get('selectarticulo3', 'Compras\Medcol3\ControllerMedcol3@articulos')->name('selectarticulo3')->middleware('verified');
     Route::get('detallearticulos3/{id}', 'Compras\Medcol3\ControllerMedcol3@showarticulos')->name('detallearticulos3')->middleware('verified')->middleware('verifyuser');
-    Route::get('proveedoreslist3', 'Compras\Medcol3\ControllerMedcol3@proveedores')->name('proveedoreslist3')->middleware('verified');
-    Route::get('documentoslist3', 'Compras\Medcol3\ControllerMedcol3@documentos')->name('documentoslist3')->middleware('verified');
-    Route::get('/detalledocumento3/{id}', 'Compras\Medcol3\ControllerMedcol3@consecutivo')->name('detalledocumento3')->middleware('verified');
-    Route::post('entradasstore3', 'Compras\Medcol3\ControllerMedcol3@guardarDetalles')->name('entradasstore3')->middleware('verified');
+    Route::get('proveedoreslist3', 'Compras\Medcol3\ControllerMedcol3@proveedores')->name('proveedoreslist3')->middleware('verified')->middleware('verifyuser');
+    Route::get('documentoslist3', 'Compras\Medcol3\ControllerMedcol3@documentos')->name('documentoslist3')->middleware('verified')->middleware('verifyuser');
+    Route::get('/detalledocumento3/{id}', 'Compras\Medcol3\ControllerMedcol3@consecutivo')->name('detalledocumento3')->middleware('verified')->middleware('verifyuser');
+    Route::post('entradasstore3', 'Compras\Medcol3\ControllerMedcol3@guardarDetalles')->name('entradasstore_3')->middleware('verified')->middleware('verifyuser');
     
     
     Route::get('comprasli3', 'Compras\Medcol3\ControllerMedcol3@Ordcompras')->name('comprasli3')->middleware('verified');
@@ -302,7 +301,9 @@ Route::get('buscar-medcol3/{factura}', 'Medcol3\\DispensadoApiMedcol4Controller@
     //Rutas de tablas de cotizaciones MEDCOL 3
     Route::get('medcol3/cotizaciones', 'Compras\Medcol3\ControllerMedcolCotizaciones3@indexCotizaciones')->name('medcol3.listascotizaciones')->middleware('verified')->middleware('verifyuser');
     Route::post('subir_archivo3', 'Compras\Medcol3\ControllerMedcolCotizaciones3@import')->name('subirarchivo3')->middleware('verified')->middleware('verifyuser');
-    Route::get('medcol3/detallecotizaciones', 'Compras\Medcol3\ControllerMedcolCotizaciones3@indexDetalleCotizaciones')->name('medcol3.indexDetalleCotizaciones')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcol3/detallecotizaciones1', 'Compras\Medcol3\ControllerMedcolCotizaciones3@indexDetalleCotizaciones')->name('medcol3.indexDetalleCotizaciones1')->middleware('verified')->middleware('verifyuser');
+    Route::get('detallecotizaciones3/{id}', 'Compras\Medcol3\ControllerMedcolCotizaciones3@show')->name('indexDetalleCotizaciones3')->middleware('verified')->middleware('verifyuser');
+  
     
     
     //Rutas de tablas de cotizaciones MEDCOL 4

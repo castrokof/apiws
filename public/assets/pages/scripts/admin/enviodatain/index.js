@@ -4,10 +4,10 @@ $(() => {
     $(function() {
 
 
-        $('#guardar_entrada').click(function() {
+        $('#guardar_orden').click(function() {
 
 
-            var url = "entradasstore";
+            var url = "entradasstore3";
 
             var entrada = [];
 

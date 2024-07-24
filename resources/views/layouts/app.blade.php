@@ -59,7 +59,8 @@
             opacity: 8;
         }
 
-        < !-- Añadir el CSS para soportar submenús -->.dropdown-submenu {
+        /* < !-- Añadir el CSS para soportar submenús --> */
+        .dropdown-submenu {
             position: relative;
         }
 

@@ -113,6 +113,7 @@ class ListasDetalleController extends Controller
             return response()->json(['success' => 'ok']);
         }
     }
+    
     public function select(Request $request)
     {
 
@@ -124,6 +125,33 @@ class ListasDetalleController extends Controller
         {
             $term = $request->get('q');
 
+            array_push($array, ListasDetalle::orderBy('slug')->where([
+             ['activo', 'SI'],['listas_id',$request->get('id')]])->where('nombre', 'LIKE', '%' . $term . '%')
+            ->get());
+
+            return response()->json(['array'=>$array]);
+        }else {
+
+                array_push($array, ListasDetalle::orderBy('slug')->where([
+                ['listas_id',$request->get('id')],
+                ['activo', 'SI'],])
+                ->get());
+
+                return response()->json(['array'=>$array]);
+
+        }
+    }
+    
+    public function selectcont(Request $request)
+    {
+
+
+        $array=[];
+
+
+        if($request->has('q'))
+        {
+            $term = $request->get('q');
 
             array_push($array, ListasDetalle::orderBy('slug')->where([
              ['activo', 'SI'],['listas_id',$request->get('id')]])->where('nombre', 'LIKE', '%' . $term . '%')
@@ -132,20 +160,16 @@ class ListasDetalleController extends Controller
             return response()->json(['array'=>$array]);
         }else {
 
-
-
                 array_push($array, ListasDetalle::orderBy('slug')->where([
                 ['listas_id',$request->get('id')],
                 ['activo', 'SI'],])
                 ->get());
 
-
                 return response()->json(['array'=>$array]);
-
-
 
         }
     }
+
 
     /**
      * Show the form for editing the specified resource.

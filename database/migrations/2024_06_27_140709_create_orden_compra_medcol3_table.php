@@ -27,6 +27,8 @@ class CreateOrdenCompraMedcol3Table extends Migration
             $table->decimal('iva', 10, 2);
             $table->unsignedBigInteger('proveedor_id');
             $table->foreign('proveedor_id', 'fk_proveedor3')->references('id')->on('terceros_api_medcol3')->onDelete('restrict')->onUpdate('restrict');
+            $table->unsignedBigInteger('usuario_id');
+            $table->foreign('usuario_id', 'fk_usuario3')->references('id')->on('users')->onDelete('restrict')->onUpdate('restrict');
             $table->string('contrato',50);
             $table->timestamps();
         });

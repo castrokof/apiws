@@ -1,6 +1,6 @@
 
 
-        <div class="form-group row">
+<div class="form-group row">
             <div class="col-lg-3">
                 <label for="nombrecuenta" class="col-xs-4 control-label requerido">Nombre Cuenta</label>
                 <input type="text" name="nombrecuenta" id="nombrecuenta" class="form-control" value="{{ old('nombrecuenta') }}" required>
