@@ -79,3 +79,4 @@
 <div class="col-lg-3">
   <input type="hidden" name="usuario_id" id="usuario_id" class="form-control" value="{{ Auth::user()->name ?? '' }}" readonly>
 </div>
+

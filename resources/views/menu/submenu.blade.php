@@ -45,7 +45,7 @@
             opacity: 8;
         }
         
-               <!-- Añadir el CSS para soportar submenús -->
+               /* <!-- Añadir el CSS para soportar submenús --> */
 
       .dropdown-submenu {
             position: relative;
@@ -308,8 +308,6 @@
                 <div class="card-body text-center">
                     <div class="card-header"> <i class="fas fa-capsules"></i>MedCol San Fernando</div>
                     <div class="list-group">
-
-
                         <a href="{{ route('pendientes') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-share-square"></i> Gestionar Pendientes San Fernando <span class="badge badge-pill badge-primary pull-right">Salud Mental</span>
                         </a>
@@ -334,6 +332,17 @@
                     <div class="list-group">
                         <a href="{{ route('medcol3.pendientes') }}" class="list-group-item list-group-item-action">
                             <i class="far fa-share-square"></i> Gestionar Pendientes PCE-Huerfanas-Biologicos <span class="badge badge-pill badge-primary pull-right">PCE-HUE-BIO</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-success">
+                <div class="card-body text-center">
+                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol EMCALI</div>
+                    <div class="list-group">
+                        <a href="{{ route('medcol5.pendientes') }}" class="list-group-item list-group-item-action">
+                            <i class="far fa-share-square"></i> Gestionar Pendientes Farmacia Emcali <span class="badge badge-pill badge-primary pull-right">EMCALI</span>
                         </a>
                     </div>
                 </div>
@@ -402,10 +411,6 @@
                 @endauth
             </div>
             @endif
-
-
-
-
 
         </div>
 

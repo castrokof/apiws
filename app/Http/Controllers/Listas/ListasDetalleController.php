@@ -145,24 +145,21 @@ class ListasDetalleController extends Controller
     public function selectcont(Request $request)
     {
 
-
         $array=[];
-
 
         if($request->has('q'))
         {
             $term = $request->get('q');
 
             array_push($array, ListasDetalle::orderBy('slug')->where([
-             ['activo', 'SI'],['listas_id',$request->get('id')]])->where('nombre', 'LIKE', '%' . $term . '%')
+             ['activo', 'SI']])->where([['nombre', 'LIKE', '%' . $term . '%']])->whereIn('id',[$request->get('id'),$request->get('id2'),$request->get('id3'),$request->get('id4')])
             ->get());
 
             return response()->json(['array'=>$array]);
         }else {
 
-                array_push($array, ListasDetalle::orderBy('slug')->where([
-                ['listas_id',$request->get('id')],
-                ['activo', 'SI'],])
+                array_push($array, ListasDetalle::orderBy('slug')->where([['activo', 'SI'],])
+                ->whereIn('id',[$request->get('id'),$request->get('id2'),$request->get('id3'),$request->get('id4')])
                 ->get());
 
                 return response()->json(['array'=>$array]);

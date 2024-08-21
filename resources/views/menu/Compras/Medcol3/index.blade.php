@@ -667,7 +667,7 @@ Ordenes de Compra
                 data: function(params) {
                     return {
                         q: params.term,
-                        id: 2
+                        id: 37 //,id2:38, id3:39, id4:40
 
                     };
                 },
@@ -1395,8 +1395,8 @@ Ordenes de Compra
                                 title: "Orden realizada correctamente",
                                 text: `Documento: ${data.documento}, Número de Orden: ${data.numeroOrden}`,
                                 showConfirmButton: true
-                            }).then(() => { 
-                                
+                            }).then(() => {
+
                                 location.reload(); // Refrescar la página completa
 
                             });
@@ -1409,6 +1409,86 @@ Ordenes de Compra
                 });
             }
         });
+    });
+
+
+    // Función que envía los datos de listas al controlador ademas controla los input con sweat alert2
+    $('#subir').click(function() {
+
+        var formData = new FormData(document.getElementById("Form"));
+
+        console.log(formData);
+        $.ajax({
+            beforeSend: function() {
+                $('.loader').css("visibility", "visible");
+            },
+            url: "{{ route('subirarchivo3') }}",
+            method: 'post',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+
+                if (response.mensaje == 'ok') {
+                    $('#modal-listas').modal('hide');
+                    Apiws.notificaciones('Archivo cargado exitosamente',
+                        'Compras Medcol', 'success');
+                    $('#tarchivos').DataTable().ajax.reload();
+                } else if (response.mensaje == 'vacio') {
+
+                    Apiws.notificaciones('No seleccionaste ningun arhivo',
+                        'Compras Medcol', 'info');
+                } else if (response.mensaje == 'ng') {
+                    $('#modal-listas').modal('hide');
+                    Apiws.notificaciones('Registros duplicados en base de datos',
+                        'Compras Medcol', 'warning');
+                    $('#tarchivos').DataTable().ajax.reload();
+
+                }
+            },
+
+            complete: function() {
+                $('.loader').css("visibility", "hidden");
+            }
+
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+
+            if (jqXHR.status === 0) {
+
+                alert('Not connect: Verify Network.');
+
+            } else if (jqXHR.status == 404) {
+
+                alert('Requested page not found [404]');
+
+            } else if (jqXHR.status == 500) {
+
+                Manteliviano.notificaciones('El archivo no tienen la estructura adecuada',
+                    'Compras Medcol', 'warning');
+                // $('#tarchivos').DataTable().ajax.reload();
+
+            } else if (textStatus === 'parsererror') {
+
+                alert('Requested JSON parse failed.');
+
+            } else if (textStatus === 'timeout') {
+
+                alert('Time out error.');
+
+            } else if (textStatus === 'abort') {
+
+                alert('Ajax request aborted.');
+
+            } else {
+
+                Apiws.notificaciones(
+                    'El campo file debe ser un archivo de tipo: xls, xlsx',
+                    'Compras Medcol', 'warning');
+                // $('#tarchivos').DataTable().ajax.reload();
+            }
+
+        });
+
     });
 
 

@@ -615,32 +615,74 @@ class DispensadoApiMedcoldController extends Controller
 
             if ($token) {
                 try {
-                    $response = Http::post("http://190.85.46.246:8000/api/acceso", [
-                        'email' => $email,
-                        'password' => $password,
-                    ]);
-
-                    $token = $response->json()["token"];
-
                     $responsefacturas = Http::withToken($token)->get("http://190.85.46.246:8000/api/anuladosapi");
                     $facturassapi = $responsefacturas->json()['data'];
 
                     $contadorActualizados = 0;
 
                     foreach ($facturassapi as $factura) {
-                        $actualizados = DispensadoApiMedcold::where('factura', $factura['factura'])
-                            ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
-                            ->update([
-                                'estado' => 'ANULADA',
-                                'updated_at' => now()
-                            ]);
+                        if (isset($factura['factura'])) {
+                            $actualizados = DispensadoApiMedcold::where('factura', $factura['factura'])
+                                ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
+                                ->update([
+                                    'estado' => 'ANULADA',
+                                    'updated_at' => now()
+                                ]);
+                        } elseif (isset($factura['factura_electronica'])) {
+                            $actualizados = DispensadoApiMedcold::where(DB::raw("CONCAT(documento_origen, factura_origen)"), $factura['factura_electronica'])
+                                ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
+                                ->update([
+                                    'estado' => 'ANULADA',
+                                    'updated_at' => now()
+                                ]);
+                        }
 
                         if ($actualizados) {
                             $contadorActualizados++;
                         }
                     }
 
+                    // Close the acceso API
                     Http::withToken($token)->get("http://190.85.46.246:8000/api/closeallacceso");
+
+                    // Consuming the other APIs
+                    $accesoResponse = Http::post("http://192.168.50.98:8000/api/acceso", [
+                        'email' => $email,
+                        'password' => $password,
+                    ]);
+
+                    $accesoToken = $accesoResponse->json()["token"];
+
+                    if ($accesoToken) {
+                        $dispensadoResponse = Http::withToken($accesoToken)->get("http://192.168.50.98:8000/api/anuladosapi");
+                        $dispensadoData = $dispensadoResponse->json()['data'];
+                        $contadorActualizados = 0;
+
+                        foreach ($dispensadoData as $factura) {
+                            if (isset($factura['factura'])) {
+                                $actualizados = DispensadoApiMedcold::where('factura', $factura['factura'])
+                                    ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
+                                    ->update([
+                                        'estado' => 'ANULADA',
+                                        'updated_at' => now()
+                                    ]);
+                            } elseif (isset($factura['factura_electronica'])) {
+                                $actualizados = DispensadoApiMedcold::where(DB::raw("CONCAT(documento_origen, factura_origen)"), $factura['factura_electronica'])
+                                    ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
+                                    ->update([
+                                        'estado' => 'ANULADA',
+                                        'updated_at' => now()
+                                    ]);
+                            }
+
+                            if ($actualizados) {
+                                $contadorActualizados++;
+                            }
+                        }
+
+                        // Close the acceso API
+                        Http::withToken($accesoToken)->get("http://192.168.50.98/api/closeallacceso");
+                    }
 
                     Log::info('Desde la web syncapi autopista anulados', [
                         'lineas_actualizadas' => $contadorActualizados,
@@ -679,6 +721,8 @@ class DispensadoApiMedcoldController extends Controller
             ]);
         }
     }
+
+
 
 
 
