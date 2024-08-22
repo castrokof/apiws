@@ -42,12 +42,11 @@
                                                 <div class="card-body">
                                                     <form id="form-general-show" class="form-horizontal">
                                                         @csrf
-                                                        @include('menu.Medcol3.form.formDetalle')
+                                                        @include('menu.Medcol5.form.formDetalle')
                                                         @include('includes.boton-form-consultar-pendientes')
                                                     </form>
                                                 </div>
                                             </div>
-
 
                                         </div>
                                     </div>

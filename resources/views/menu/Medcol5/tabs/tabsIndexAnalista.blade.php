@@ -29,32 +29,32 @@
                 <div class="tab-content" id="custom-tabs-one-tabContent">
                     <div class="tab-pane fade active show" id="custom-tabs-one-datos-del-paciente" role="tabpanel" aria-labelledby="custom-tabs-one-datos-del-paciente-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.tablaIndexPendientes')
+                            @include('menu.Medcol5.tablas.tablaIndexPendientes')
                         </div>
                     </div>
 
                     <div class="tab-pane fade " id="custom-tabs-one-datos-agendados" role="tabpanel" aria-labelledby="custom-tabs-one-datos-agendados-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.tablaIndexTransito')
+                            @include('menu.Medcol5.tablas.tablaIndexTransito')
                         </div>
 
                     </div>
 
                     <div class="tab-pane fade " id="custom-tabs-one-datos-seguimiento" role="tabpanel" aria-labelledby="custom-tabs-one-datos-seguimiento-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.tablaIndexEntragados')
+                            @include('menu.Medcol5.tablas.tablaIndexEntragados')
                         </div>
 
                     </div>
                     <div class="tab-pane fade " id="custom-tabs-one-datos-desabastecido" role="tabpanel" aria-labelledby="custom-tabs-one-datos-desabastecido-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.tablaIndexDesabastecido')
+                            @include('menu.Medcol5.tablas.tablaIndexDesabastecido')
                         </div>
 
                     </div>
                     <div class="tab-pane fade " id="custom-tabs-one-datos-anulado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-anulado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.tablaIndexAnulado')
+                            @include('menu.Medcol5.tablas.tablaIndexAnulado')
                         </div>
 
                     </div>

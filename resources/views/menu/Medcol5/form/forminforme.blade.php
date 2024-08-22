@@ -1,29 +1,32 @@
+
 <div class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                @if(Auth::user()->drogueria == '1')
-                <h1 class="m-0">Pendientes Medcol PCE, HUE Y BIO</h1>
-                @elseif(Auth::user()->drogueria == '4')
-                <h1 class="m-0">Pendientes Medcol PCE</h1>
-                @elseif(Auth::user()->drogueria == '5')
-                <h1 class="m-0">Pendientes Medcol Huerfanas</h1>
-                @elseif(Auth::user()->drogueria == '6')
-                <h1 class="m-0">Pendientes Medcol BIOLOGICOS</h1>
-                @endif
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                   @if(Auth::user()->drogueria == '1')
+                    <h1 class="m-0">Pendientes Medcol EMCALI</h1>
+                   @elseif(Auth::user()->drogueria == '4')  
+                   <h1 class="m-0">Pendientes Medcol PCE</h1>
+                   @elseif(Auth::user()->drogueria == '5')
+                   <h1 class="m-0">Pendientes Medcol Huerfanas</h1>
+                   @elseif(Auth::user()->drogueria == '6') 
+                   <h1 class="m-0">Pendientes Medcol BIOLOGICOS</h1>
+                   @elseif(Auth::user()->drogueria == '8') 
+                   <h1 class="m-0">Pendientes Medcol EMCALI</h1>
+                   @endif
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Pendientes v1</li>
+                    </ol>
+                </div>
             </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="#">Home</a></li>
-                    <li class="breadcrumb-item active">Pendientes v1</li>
-                </ol>
-            </div>
+            @csrf
+            
+
         </div>
-        @csrf
-
-
     </div>
-</div>
 <section class="content">
     <div class="container-fluid">
 
@@ -48,3 +51,6 @@
 
     </div>
 </section>
+
+
+

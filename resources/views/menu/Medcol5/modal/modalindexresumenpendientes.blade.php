@@ -14,7 +14,7 @@
         <div class="modal-body">
 
         
-                @include('menu.Medcol3.form.formResumenPendientes')
+                @include('menu.Medcol5.form.formResumenPendientes')
 
 
         

@@ -23,30 +23,30 @@
                 <div class="tab-content" id="custom-tabs-one-tabContent">
                     <div class="tab-pane fade active show" id="custom-tabs-one-datos-de-dispensado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-de-dispensado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.dispensados.tablaIndexDispensados')
+                            @include('menu.Medcol5.tablas.dispensados.tablaIndexDispensados')
                         </div>
                     </div>
 
                     <div class="tab-pane fade " id="custom-tabs-one-datos-disrevisado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-disrevisado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.dispensados.tablaIndexRevisados')
+                            @include('menu.Medcol5.tablas.dispensados.tablaIndexRevisados')
                         </div>
 
                     </div>
                     <div class="tab-pane fade " id="custom-tabs-one-datos-disanulado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-disanulado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.dispensados.tablaIndexAnulados')
+                            @include('menu.Medcol5.tablas.dispensados.tablaIndexAnulados')
                         </div>
                     </div>
                     <!--<div class="tab-pane fade " id="custom-tabs-one-datos-desabastecido" role="tabpanel" aria-labelledby="custom-tabs-one-datos-desabastecido-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.tablaIndexDesabastecido')
+                            @include('menu.Medcol5.tablas.tablaIndexDesabastecido')
                         </div>
 
                     </div>
                     <div class="tab-pane fade " id="custom-tabs-one-datos-anulado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-anulado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.tablaIndexAnulado')
+                            @include('menu.Medcol5.tablas.tablaIndexAnulado')
                         </div>
 
                     </div>-->

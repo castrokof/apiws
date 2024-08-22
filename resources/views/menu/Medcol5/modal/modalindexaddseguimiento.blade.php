@@ -15,7 +15,7 @@
 
         <form id="form-generaladd" name="form-general" class="form-horizontal">
                 @csrf
-                @include('menu.Medcol3.form.formAnalistaAddSeguimiento')
+                @include('menu.Medcol5.form.formAnalistaAddSeguimiento')
         </form>
         </div>
 

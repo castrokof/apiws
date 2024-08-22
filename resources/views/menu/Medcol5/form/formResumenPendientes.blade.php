@@ -8,6 +8,8 @@
                    <h1 class="m-0">Pendientes Medcol Huerfanas</h1>
                    @elseif(Auth::user()->drogueria == '6') 
                    <h1 class="m-0">Pendientes Medcol BIOLOGICOS</h1>
+                   @elseif(Auth::user()->drogueria == '8') 
+                   <h1 class="m-0">Pendientes Medcol EMCALI</h1>
                    @endif
                 
             </div>
@@ -18,7 +20,7 @@
             </div>
         </div>
         @csrf
-        @include('menu.Medcol3.tablas.tablaIndexInformemedicamentos')
+        @include('menu.Medcol5.tablas.tablaIndexInformemedicamentos')
 
     </div>
 </div>
