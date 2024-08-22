@@ -227,7 +227,7 @@ class DispensadoApiMedcol5Controller extends Controller
          try {
         
                 
-            $response = Http::post("http://hcp080m81s7.sn.mynetname.net:8001/api/acceso", [
+            $response = Http::post("http://hgc09j5frwr.sn.mynetname.net:8000/api/acceso", [
             'email' =>  $email,
             'password' => $password,
             ]);
@@ -239,7 +239,7 @@ class DispensadoApiMedcol5Controller extends Controller
 
         try {
 
-            $response = Http::post("http://hcp080m81s7.sn.mynetname.net:8001/api/acceso", [
+            $response = Http::post("http://hgc09j5frwr.sn.mynetname.net:8000/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
             ]);
@@ -248,7 +248,7 @@ class DispensadoApiMedcol5Controller extends Controller
             $token = $response->json()["token"];
 
 
-            $responsefacturas = Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/dispensadoapi");
+            $responsefacturas = Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/dispensadoapi");
 
             $facturassapi = $responsefacturas->json()['data'];
     
@@ -321,7 +321,7 @@ class DispensadoApiMedcol5Controller extends Controller
                     } 
             
            
-            Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/closeallacceso");
+            Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/closeallacceso");
             
             Log::info('Desde la web syncapi autopista'.$contador . ' Lineas dispensadas'. ' Usuario: '.$usuario);
             
@@ -351,7 +351,7 @@ class DispensadoApiMedcol5Controller extends Controller
               try {
         
                 
-             $response = Http::post("http://192.168.10.27:8001/api/acceso", [
+             $response = Http::post("http://192.168.6.8:8000/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
             ]);
@@ -363,14 +363,14 @@ class DispensadoApiMedcol5Controller extends Controller
             try {
              
              
-            $response = Http::post("http://192.168.10.27:8001/api/acceso", [
+            $response = Http::post("http://192.168.6.8:8000/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
             ]);
 
             $token = $response->json()["token"];
 
-            $responsefacturas = Http::withToken($token)->get("http://192.168.10.27:8001/api/dispensadoapi");
+            $responsefacturas = Http::withToken($token)->get("http://192.168.6.8:8000/api/dispensadoapi");
 
             $facturassapi = $responsefacturas->json()['data'];
 
@@ -441,7 +441,7 @@ class DispensadoApiMedcol5Controller extends Controller
                 }
             }
 
-            Http::withToken($token)->get("http://192.168.10.27/api/closeallacceso");
+            Http::withToken($token)->get("http://192.168.6.8:8000/api/closeallacceso");
 
            
             Log::info('Desde la web syncapi autopista local'.$contador . ' Lineas dispensadas'. ' Usuario: '.$usuario);
@@ -636,7 +636,7 @@ class DispensadoApiMedcol5Controller extends Controller
         $usuario = Auth::user()->email;
     
         try {
-            $response = Http::post("http://hcp080m81s7.sn.mynetname.net:8001/api/acceso", [
+            $response = Http::post("http://hgc09j5frwr.sn.mynetname.net:8000/api/acceso", [
                 'email' => $email,
                 'password' => $password,
             ]);
@@ -645,7 +645,7 @@ class DispensadoApiMedcol5Controller extends Controller
     
             if ($token) {
                 try {
-                    $responsefacturas = Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/anuladosapi");
+                    $responsefacturas = Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/anuladosapi");
                     $facturassapi = $responsefacturas->json()['data'] ?? [];
     
                     $contadorActualizados = 0;
@@ -676,7 +676,7 @@ class DispensadoApiMedcol5Controller extends Controller
                     
                     
     
-                    Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/closeallacceso");
+                    Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/closeallacceso");
     
                     Log::info('Desde la web syncapi autopista anulados', [
                         'lineas_actualizadas' => $contadorActualizados,

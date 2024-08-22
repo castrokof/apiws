@@ -44,24 +44,24 @@
 
             opacity: 8;
         }
-        
-               <!-- Añadir el CSS para soportar submenús -->
 
-      .dropdown-submenu {
+        < !-- Añadir el CSS para soportar submenús -->.dropdown-submenu {
             position: relative;
         }
-        
+
         .dropdown-submenu .dropdown-menu {
             top: 0;
             left: 100%;
             margin-top: -6px;
             margin-left: 0;
-            display: none; /* Ocultar por defecto */
+            display: none;
+            /* Ocultar por defecto */
         }
-        
+
         .dropdown-submenu:hover .dropdown-menu,
         .dropdown-submenu.show .dropdown-menu {
-            display: block; /* Mostrar al hacer hover o cuando tenga la clase 'show' */
+            display: block;
+            /* Mostrar al hacer hover o cuando tenga la clase 'show' */
         }
     </style>
 
@@ -120,23 +120,22 @@
                                         <a class="dropdown-item text-dark" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                             {{ __('Logout') }}
                                         </a>
-                                        <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Compras') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('tokenhercules') }}">{{ __('Mipres 2.0') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('submenu') }}">{{ __('Pendientes') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('dismenu') }}">{{ __('Dispensado') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('register') }}">{{ __('Crear Usuario') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('listasIndex') }}">{{ __('Crear listas') }}</a>
-                                            <a class="dropdown-item text-dark" href="{{ route('documentos') }}">{{ __('Crear documento') }}</a>
-                                             <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item text-dark" href="{{ route('documentos') }}">{{ __('Crear documento') }}</a>
+                                        <div class="dropdown-divider"></div>
 
-                                            <!-- Submenú -->
-                                            <div class="dropdown-submenu">
-                                                <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Compras') }}</a>
-                                                <div class="dropdown-menu">
-                                                    <a class="dropdown-item text-dark" href="{{ route('menucotizaciones') }}">{{ __('Cotizaciones') }}</a>
-                                                    <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
-                                                </div>
+                                        <!-- Submenú -->
+                                        <div class="dropdown-submenu">
+                                            <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Compras') }}</a>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item text-dark" href="{{ route('menucotizaciones') }}">{{ __('Cotizaciones') }}</a>
+                                                <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
                                             </div>
+                                        </div>
                                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                             @csrf
                                         </form>
@@ -316,6 +315,17 @@
                     <div class="list-group">
                         <a href="{{ route('medcol3.dispensado') }}" class="list-group-item list-group-item-action">
                             <i class="far fa-share-square"></i> Gestionar Dispensación de PCE-Huerfanas-Biologicos <span class="badge badge-pill badge-primary pull-right">PCE-HUE-BIO</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-danger">
+                <div class="card-body text-center">
+                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol EMCALI</div>
+                    <div class="list-group">
+                        <a href="{{ route('medcol5.dispensado') }}" class="list-group-item list-group-item-action">
+                            <i class="far fa-share-square"></i> Gestionar Dispensación de EMCALI <span class="badge badge-pill badge-primary pull-right">EMCALI</span>
                         </a>
                     </div>
                 </div>

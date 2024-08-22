@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('titulo')
-Dispensado Medcol Limonar
+Dispensado Medcol Emcali
 @endsection
 @section("styles")
 
@@ -34,9 +34,9 @@ Dispensado Medcol Limonar
 <div class="loaders"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>
 
 
-@include('menu.Medcol3.form.dispensado.forminformedispensado')
-@include('menu.Medcol3.tabs.tabsIndexDispensado')
-@include('menu.Medcol3.modal.modalGestionMultiple')
+@include('menu.Medcol5.form.dispensado.forminformedispensado')
+@include('menu.Medcol5.tabs.tabsIndexDispensado')
+@include('menu.Medcol5.modal.modalGestionMultiple')
 
 @endsection
 
@@ -71,7 +71,7 @@ Dispensado Medcol Limonar
             $("#detalle2").empty();
 
             $.ajax({
-                url: "{{ route('medcol3.informedis') }}",
+                url: "{{ route('medcol5.informedis') }}",
                 dataType: "json",
                 success: function(data) {
                     const {
@@ -219,7 +219,7 @@ Dispensado Medcol Limonar
 
 
                                 ajax: {
-                                    url: "{{route('medcol3.dispensado1')}}",
+                                    url: "{{route('medcol5.dispensado1')}}",
                                     data: {
                                         fechaini: fechaini,
                                         fechafin: fechafin,
@@ -523,7 +523,7 @@ Dispensado Medcol Limonar
                                     [28, "desc"]
                                 ],
                                 ajax: {
-                                    url: "{{route('medcol3.disrevisado')}}",
+                                    url: "{{route('medcol5.disrevisado')}}",
                                     data: {
                                         fechaini: fechaini,
                                         fechafin: fechafin,
@@ -761,7 +761,7 @@ Dispensado Medcol Limonar
                                     [28, "desc"]
                                 ],
                                 ajax: {
-                                    url: "{{route('medcol3.disanulado')}}",
+                                    url: "{{route('medcol5.disanulado')}}",
                                     data: {
                                         fechaini: fechaini,
                                         fechafin: fechafin,
@@ -1108,7 +1108,7 @@ Dispensado Medcol Limonar
                 beforeSend: function() {
                     $('.loaders').css("visibility", "visible");
                 },
-                url: "{{route('medcol3.dispensadosyncapi')}}",
+                url: "{{route('medcol5.dispensadosyncapi')}}",
                 type: 'GET',
                 success: function(data) {
                     $('#dispensados').DataTable().ajax.reload();
@@ -1153,7 +1153,7 @@ Dispensado Medcol Limonar
                 beforeSend: function() {
                     $('.loaders').css("visibility", "visible");
                 },
-                url: "{{route('medcol3.anuladosapi')}}",
+                url: "{{route('medcol5.anuladosapi')}}",
                 type: 'GET',
                 success: function(data) {
                     $('#dispensados').DataTable().ajax.reload();
@@ -1315,7 +1315,7 @@ Dispensado Medcol Limonar
                 }),
                 $.ajax({
 
-                    url: "{{route('add_dispensacion')}}",
+                    url: "{{route('medcol5.add_dispensacion')}}",
                     method: 'post',
                     data: {
                         data: dispensadotrue1,
@@ -1464,7 +1464,7 @@ Dispensado Medcol Limonar
             const numeroFactura = $('#numero_factura').val();
 
             $.ajax({
-                url: `{{ route('dispensado.medcol3', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
+                url: `{{ route('dispensado.medcol5', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
                 type: 'GET',
                 success: function(data) {
                     if (data && Array.isArray(data) && data.length > 0) {
@@ -1690,7 +1690,7 @@ Dispensado Medcol Limonar
                 console.log('Datos a enviar al controlador:', dispensadotrue1);
 
                 const response = await $.ajax({
-                    url: "{{ route('dispensado.guardar') }}",
+                    url: "{{ route('dispensado5.guardar') }}",
                     type: 'POST',
                     data: {
                         data: datos,

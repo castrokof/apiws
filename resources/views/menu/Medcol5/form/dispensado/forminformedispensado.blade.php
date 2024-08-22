@@ -3,13 +3,15 @@
         <div class="row mb-2">
             <div class="col-sm-6">
                 @if(Auth::user()->drogueria == '1')
-                <h1 class="m-0">Dispensado Medcol PCE, HUE Y BIO</h1>
+                <h1 class="m-0">Dispensado Medcol EMCALI</h1>
                 @elseif(Auth::user()->drogueria == '4')
                 <h1 class="m-0">Dispensado Medcol PCE</h1>
                 @elseif(Auth::user()->drogueria == '5')
                 <h1 class="m-0">Dispensado Medcol Huerfanas</h1>
                 @elseif(Auth::user()->drogueria == '6')
                 <h1 class="m-0">Dispensado Medcol BIOLOGICOS</h1>
+                @elseif(Auth::user()->drogueria == '8')
+                <h1 class="m-0">Dispensado Medcol EMCALI</h1>
                 @endif
             </div>
             <div class="col-sm-6">
@@ -39,7 +41,7 @@
                                 <label for="contrato" class="col-form-label">Droguería</label>
                                 <select name="contrato" id="contrato" class="form-control select2bs4" style="width: 100%;" required>
                                     <option value="">Seleccione opcion...</option>
-                                    <option value="PAC">EM01-FARMACIA EMCALI</option>
+                                    <option value="EM01">EM01-FARMACIA EMCALI</option>
                                     <option value="EVEN">EVEN-FARMACIA EVENTO</option>
                                 </select>
                             </div>

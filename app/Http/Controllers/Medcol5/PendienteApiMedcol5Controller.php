@@ -118,7 +118,7 @@ class PendienteApiMedcol5Controller extends Controller
 
         try {
 
-            $response = Http::post("http://hcp080m81s7.sn.mynetname.net:8001/api/acceso", [
+            $response = Http::post("http://hgc09j5frwr.sn.mynetname.net:8000/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
             ]);
@@ -126,15 +126,21 @@ class PendienteApiMedcol5Controller extends Controller
             $token = $response->json()["token"];
 
 
-            $responsefacturas = Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/pendientesapi");
+            $responsefacturas = Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/pendientesapi");
 
             $facturassapi = $responsefacturas->json()['data'];
+            
+            
 
             $contador = 0;
             $pendientes = [];
+            
+            //dd($facturassapi);
 
             foreach ($facturassapi as $factura) {
                 $existe = PendienteApiMedcol5::where('factura', $factura['factura'])->count();
+                
+                
 
                 if ($existe == 0 || $existe == '') {
                     $pendientes[] = [
@@ -172,7 +178,7 @@ class PendienteApiMedcol5Controller extends Controller
                 PendienteApiMedcol5::insert($pendientes);
             }
 
-            Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/closeallacceso");
+            Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/closeallacceso");
 
             $var = $this->createentregadospi(null);
 
@@ -184,14 +190,14 @@ class PendienteApiMedcol5Controller extends Controller
         } catch (\Exception $e) {
 
 
-            $response = Http::post("http://192.168.10.27:8001/api/acceso", [
+            $response = Http::post("http://192.168.6.8:8000/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
             ]);
 
             $token = $response->json()["token"];
 
-            $responsefacturas = Http::withToken($token)->get("http://192.168.10.27:8001/api/pendientesapi");
+            $responsefacturas = Http::withToken($token)->get("http://192.168.6.8:8000/api/pendientesapi");
 
             $facturassapi = $responsefacturas->json()['data'];
 
@@ -237,7 +243,7 @@ class PendienteApiMedcol5Controller extends Controller
                 PendienteApiMedcol5::insert($pendientes);
             }
 
-            Http::withToken($token)->get("http://192.168.10.27/api/closeallacceso");
+            Http::withToken($token)->get("http://192.168.6.8:8000/api/closeallacceso");
 
             $var = $this->createentregadospilocal(null);
 
@@ -308,11 +314,6 @@ class PendienteApiMedcol5Controller extends Controller
                     ->orderBy('id')
                     ->get();
             }
-
-
-
-
-
 
             return DataTables()->of($pendiente_api_medcol5)
                 ->addColumn('action', function ($pendiente) {
@@ -743,7 +744,7 @@ class PendienteApiMedcol5Controller extends Controller
         $password = 'colMed2023**';
 
         $response = Http::post(
-            "http://hcp080m81s7.sn.mynetname.net:8001/api/acceso",
+            "http://hgc09j5frwr.sn.mynetname.net:8000/api/acceso",
             [
                 'email' =>  $email,
                 'password' => $password,
@@ -756,7 +757,7 @@ class PendienteApiMedcol5Controller extends Controller
         $prueba = $response->json();
         $token = $prueba["token"];
 
-        $responsefacturas = Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/entregadosapi");
+        $responsefacturas = Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/entregadosapi");
 
         $facturassapi = $responsefacturas->json();
 
@@ -809,21 +810,21 @@ class PendienteApiMedcol5Controller extends Controller
             }
         }
 
-        Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/closeallacceso");
+        Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/closeallacceso");
 
         $pendientes = DB::table('pendiente_api_medcol5')
-            ->join('entregados_api_medcol3', function ($join) {
-                $join->on('pendiente_api_medcol5.orden_externa', '=', 'entregados_api_medcol3.orden_externa')
-                    ->on('pendiente_api_medcol5.codigo', '=', 'entregados_api_medcol3.codigo');
+            ->join('entregados_api_medcol5', function ($join) {
+                $join->on('pendiente_api_medcol5.orden_externa', '=', 'entregados_api_medcol5.orden_externa')
+                    ->on('pendiente_api_medcol5.codigo', '=', 'entregados_api_medcol5.codigo');
             })
             ->select(
                 'pendiente_api_medcol5.id as idd',
-                'entregados_api_medcol3.orden_externa',
-                'entregados_api_medcol3.codigo',
-                'entregados_api_medcol3.cantdpx',
-                'entregados_api_medcol3.fecha_factura',
-                'entregados_api_medcol3.documento',
-                'entregados_api_medcol3.factura'
+                'entregados_api_medcol5.orden_externa',
+                'entregados_api_medcol5.codigo',
+                'entregados_api_medcol5.cantdpx',
+                'entregados_api_medcol5.fecha_factura',
+                'entregados_api_medcol5.documento',
+                'entregados_api_medcol5.factura'
             )
             ->get();
 
@@ -891,7 +892,7 @@ class PendienteApiMedcol5Controller extends Controller
         $password = 'colMed2023**';
 
         $response = Http::post(
-            "http://192.168.10.27:8001/api/acceso",
+            "http://192.168.6.8:8000/api/acceso",
             [
                 'email' =>  $email,
                 'password' => $password,
@@ -904,7 +905,7 @@ class PendienteApiMedcol5Controller extends Controller
         $prueba = $response->json();
         $token = $prueba["token"];
 
-        $responsefacturas = Http::withToken($token)->get("http://192.168.10.27:8001/api/entregadosapi");
+        $responsefacturas = Http::withToken($token)->get("http://192.168.6.8:8000/api/entregadosapi");
 
         $facturassapi = $responsefacturas->json();
 
@@ -950,7 +951,7 @@ class PendienteApiMedcol5Controller extends Controller
             }
         }
 
-        Http::withToken($token)->get("http://192.168.10.27:8001/api/closeallacceso");
+        Http::withToken($token)->get("http://192.168.6.8:8000/api/closeallacceso");
 
         $pendientes = DB::table('pendiente_api_medcol5')
             ->join('entregadosapi', function ($join) {
