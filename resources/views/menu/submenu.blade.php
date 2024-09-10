@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>MEDCOL SW</title>
+    <title>MEDCOL PENDIENTES</title>
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;600&display=swap" rel="stylesheet">
@@ -20,19 +20,55 @@
 
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <style>
+        body {
+            background-color: #f4f7f9; /* Un gris claro para un aspecto limpio */
+            color: #2c3e50; /* Gris oscuro para buen contraste */
+            font-family: 'Nunito', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .navbar {
+            background-color: #ffffff; /* Blanco elegante para la barra de navegación */
+            border-bottom: 2px solid #a29bfe; /* Acento en lavanda claro */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra suave para dar profundidad */
+        }
+        
         .navbar-logo {
             display: inline-block;
             vertical-align: middle;
             width: 180px;
         }
-
+        
         .navbar-logo img {
             display: block;
             width: 100%;
-            height: 100%;
+            height: auto; /* Mantiene la proporción de la imagen */
         }
-
-
+        
+        .navbar .nav-link {
+            color: #2c3e50; /* Gris oscuro para los enlaces */
+            padding: 15px;
+            text-transform: uppercase;
+            font-weight: 700;
+            border-radius: 30px;
+            transition: all 0.3s ease-in-out;
+            border: 2px solid transparent; /* Sin borde por defecto */
+        }
+        
+        /* Efecto hover para simular botones */
+        .navbar .nav-link:hover {
+            background-color: #62fcc4;
+            color: #1e272e;
+            border: 2px solid #62fcc4; /* Aparece borde en hover */
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1); /* Sombra suave */
+        }
+        
+        /* Efecto de sobreimpresión al pasar el cursor (como si "salieran") */
+        .navbar .nav-link:hover {
+            transform: translateY(-3px); /* Se eleva ligeramente al hacer hover */
+        }
+        
         .loader1 {
             position: fixed;
             left: 0px;
@@ -40,14 +76,10 @@
             width: 100%;
             height: 100%;
             z-index: 9999;
-            background: url(./assets/lte/dist/img/loader.gif) 50% 50% no-repeat rgb(249, 249, 249);
-
-            opacity: 8;
+            background: url(./assets/lte/dist/img/loader.gif) 50% 50% no-repeat rgba(244, 247, 249, 0.9); /* Fondo claro semitransparente */
         }
         
-               /* <!-- Añadir el CSS para soportar submenús --> */
-
-      .dropdown-submenu {
+        .dropdown-submenu {
             position: relative;
         }
         
@@ -57,14 +89,76 @@
             margin-top: -6px;
             margin-left: 0;
             display: none; /* Ocultar por defecto */
+            background-color: #ffffff; /* Fondo blanco */
+            border: 1px solid #74b9ff; /* Borde azul claro */
         }
         
         .dropdown-submenu:hover .dropdown-menu,
         .dropdown-submenu.show .dropdown-menu {
             display: block; /* Mostrar al hacer hover o cuando tenga la clase 'show' */
         }
- 
-
+        
+        .dropdown-menu {
+            background-color: #ffffff; /* Fondo blanco para los menús desplegables */
+            border: 1px solid #a29bfe; /* Borde lavanda */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
+        }
+        
+        .dropdown-menu .dropdown-item {
+            color: #2c3e50; /* Texto gris oscuro */
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        
+        .dropdown-menu .dropdown-item:hover {
+            background-color: #74b9ff; /* Fondo azul claro en hover */
+            color: #ffffff; /* Texto blanco en hover */
+        }
+        
+        /* Botones o enlaces */
+        .btn {
+            background-color: #a29bfe; /* Fondo lavanda para botones */
+            color: #fff;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-weight: 600;
+            border: none;
+        }
+        
+        .btn:hover {
+            background-color: #6c5ce7; /* Un tono más oscuro de lavanda en hover */
+            color: #fff;
+        }
+        
+        /* Encabezados dentro del modal */
+        #modal-header h5 {
+            color: #6c5ce7; /* Color lavanda oscuro para los títulos del modal */
+            font-weight: bold;
+        }
+        
+        #modal-body {
+            background-color: #ffffff; /* Fondo blanco para el cuerpo del modal */
+            color: #2c3e50; /* Texto gris oscuro */
+        }
+        
+        /* Mejoras generales */
+        table {
+            color: #2c3e50; /* Texto gris oscuro en las tablas */
+            background-color: #ffffff; /* Fondo blanco en las tablas */
+        }
+        
+        th {
+            background-color: #a29bfe; /* Fondo lavanda claro en los encabezados */
+            color: #2c3e50; /* Texto gris oscuro */
+        }
+        
+        td {
+            background-color: #f4f7f9; /* Fondo gris claro en las celdas */
+        }
+        
+        tr:hover {
+            background-color: #74b9ff; /* Fondo azul claro en hover */
+        }
     </style>
 
 </head>
@@ -140,6 +234,14 @@
                                                 <div class="dropdown-menu">
                                                     <a class="dropdown-item text-dark" href="{{ route('menucotizaciones') }}">{{ __('Cotizaciones') }}</a>
                                                     <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
+                                                </div>
+                                            </div>
+                                            <!-- Submenú -->
+                                            <div class="dropdown-submenu">
+                                                <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('SOS') }}</a>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item text-dark" href="{{ route('indexsos') }}">{{ __('Validar Derechos') }}</a>
+                                                    <a class="dropdown-item text-dark" href="{{ route('indexformulas') }}">{{ __('Formulas SOS') }}</a>
                                                 </div>
                                             </div>
                                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
@@ -308,6 +410,8 @@
                 <div class="card-body text-center">
                     <div class="card-header"> <i class="fas fa-capsules"></i>MedCol San Fernando</div>
                     <div class="list-group">
+
+
                         <a href="{{ route('pendientes') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-share-square"></i> Gestionar Pendientes San Fernando <span class="badge badge-pill badge-primary pull-right">Salud Mental</span>
                         </a>
@@ -336,13 +440,24 @@
                     </div>
                 </div>
             </div>
-
+            
             <div class="card bg-success">
                 <div class="card-body text-center">
                     <div class="card-header"> <i class="fas fa-capsules"></i>MedCol EMCALI</div>
                     <div class="list-group">
                         <a href="{{ route('medcol5.pendientes') }}" class="list-group-item list-group-item-action">
                             <i class="far fa-share-square"></i> Gestionar Pendientes Farmacia Emcali <span class="badge badge-pill badge-primary pull-right">EMCALI</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card bg-danger">
+                <div class="card-body text-center">
+                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol SOS - JAMUNDI</div>
+                    <div class="list-group">
+                        <a href="{{ route('medcol5.pendientes') }}" class="list-group-item list-group-item-action">
+                            <i class="far fa-share-square"></i> Gestionar Pendientes Farmacia <span class="badge badge-pill badge-primary pull-right">SOS - JAMUNDI</span>
                         </a>
                     </div>
                 </div>

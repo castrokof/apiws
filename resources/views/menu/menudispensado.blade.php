@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>MEDCOL SW</title>
+    <title>MEDCOL DISPENSADOS</title>
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;600&display=swap" rel="stylesheet">
@@ -20,50 +20,153 @@
 
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <style>
+        /* Fondo y tipografía */
+        body {
+            background-color: #f7f9fb; /* Fondo gris claro */
+            color: #2d3436; /* Texto gris oscuro */
+            font-family: 'Nunito', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Barra de navegación */
+        .navbar {
+            background-color: #2ecc71; /* Verde vivo para la barra de navegación */
+            /*padding: 10px;*/
+            border-bottom: 2px solid #62fcc4; /* Acento en verde claro */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Logo */
         .navbar-logo {
             display: inline-block;
             vertical-align: middle;
             width: 180px;
         }
-
+        
         .navbar-logo img {
             display: block;
             width: 100%;
-            height: 100%;
+            height: auto; /* Mantiene la proporción de la imagen */
+        }
+        
+        /* Enlaces de navegación */
+        .navbar .nav-link {
+            color: #ffffff; /* Blanco para los enlaces */
+            padding: 15px;
+            text-transform: uppercase;
+            font-weight: 700;
+            border-radius: 30px;
+            transition: all 0.3s ease-in-out;
+            border: 2px solid transparent; /* Sin borde por defecto */
+        }
+        
+        /* Efecto hover para simular botones */
+        .navbar .nav-link:hover {
+            background-color: #34495e; /* Azul oscuro elegante */
+            color: #1abc9c; /* Verde menta para el texto */
+            border: 2px solid #34495e;
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
         }
 
-
-        .loader1 {
-            position: fixed;
-            left: 0px;
-            top: 0px;
-            width: 100%;
-            height: 100%;
-            z-index: 9999;
-            background: url(./assets/lte/dist/img/loader.gif) 50% 50% no-repeat rgb(249, 249, 249);
-
-            opacity: 8;
+        
+        /* Efecto de elevación en hover */
+        .navbar .nav-link:hover {
+            transform: translateY(-3px);
         }
-
-        < !-- Añadir el CSS para soportar submenús -->.dropdown-submenu {
+        
+        /* Submenús */
+        .dropdown-submenu {
             position: relative;
         }
-
+        
         .dropdown-submenu .dropdown-menu {
             top: 0;
             left: 100%;
             margin-top: -6px;
             margin-left: 0;
             display: none;
-            /* Ocultar por defecto */
+            background-color: #ffffff; /* Fondo blanco */
+            border: 1px solid #62fcc4; /* Verde claro */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-
+        
+        /* Mostrar submenú al pasar el cursor */
         .dropdown-submenu:hover .dropdown-menu,
         .dropdown-submenu.show .dropdown-menu {
             display: block;
-            /* Mostrar al hacer hover o cuando tenga la clase 'show' */
+        }
+        
+        /* Elementos dentro del submenú */
+        .dropdown-menu .dropdown-item {
+            color: #2d3436; /* Gris oscuro */
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        
+        .dropdown-menu .dropdown-item:hover {
+            background-color: #5df59d; /* Verde vivo en hover */
+            color: #ffffff; /* Texto blanco en hover */
+        }
+        
+        /* Botones */
+        .btn {
+            background-color: #6c5ce7; /* Lavanda para los botones */
+            color: #fff;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-weight: 600;
+            border: none;
+        }
+        
+        .btn:hover {
+            background-color: #a29bfe; /* Tono más claro de lavanda en hover */
+            color: #fff;
+        }
+        
+        /* Loader */
+        .loader1 {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: url(./assets/lte/dist/img/loader.gif) 50% 50% no-repeat rgba(249, 249, 249, 0.9); /* Fondo suave */
+        }
+        
+        /* Modal */
+        #modal-header h5 {
+            color: #6c5ce7; /* Lavanda oscuro para los títulos */
+            font-weight: bold;
+        }
+        
+        #modal-body {
+            background-color: #ffffff; /* Fondo blanco */
+            color: #2d3436; /* Texto gris oscuro */
+        }
+        
+        /* Tablas */
+        table {
+            color: #2d3436;
+            background-color: #ffffff;
+        }
+        
+        th {
+            background-color: #62fcc4; /* Verde claro en encabezados */
+            color: #2d3436;
+        }
+        
+        td {
+            background-color: #f7f9fb; /* Fondo gris suave en celdas */
+        }
+        
+        tr:hover {
+            background-color: #dfe6e9; /* Gris claro en hover */
         }
     </style>
+    
+    
 
 </head>
 
@@ -125,17 +228,17 @@
                                         <a class="dropdown-item text-dark" href="{{ route('dismenu') }}">{{ __('Dispensado') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('register') }}">{{ __('Crear Usuario') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('listasIndex') }}">{{ __('Crear listas') }}</a>
-                                        <a class="dropdown-item text-dark" href="{{ route('documentos') }}">{{ __('Crear documento') }}</a>
-                                        <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item text-dark" href="{{ route('documentos') }}">{{ __('Crear documento') }}</a>
+                                             <div class="dropdown-divider"></div>
 
-                                        <!-- Submenú -->
-                                        <div class="dropdown-submenu">
-                                            <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Compras') }}</a>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item text-dark" href="{{ route('menucotizaciones') }}">{{ __('Cotizaciones') }}</a>
-                                                <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
+                                            <!-- Submenú -->
+                                            <div class="dropdown-submenu">
+                                                <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Compras') }}</a>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item text-dark" href="{{ route('menucotizaciones') }}">{{ __('Cotizaciones') }}</a>
+                                                    <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
+                                                </div>
                                             </div>
-                                        </div>
                                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                             @csrf
                                         </form>
@@ -289,8 +392,6 @@
                 <div class="card-body text-center">
                     <div class="card-header"> <i class="fas fa-capsules"></i>MedCol San Fernando</div>
                     <div class="list-group">
-
-
                         <a href="{{ route('medcol2.dispensado') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-share-square"></i> Gestionar Dispensación de San Fernando <span class="badge badge-pill badge-primary pull-right">Salud Mental</span>
                         </a>
@@ -319,7 +420,7 @@
                     </div>
                 </div>
             </div>
-
+            
             <div class="card bg-danger">
                 <div class="card-body text-center">
                     <div class="card-header"> <i class="fas fa-capsules"></i>MedCol EMCALI</div>
@@ -330,18 +431,26 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="card bg-success">
+                <div class="card-body text-center">
+                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol SOS - JAMUNDI</div>
+                    <div class="list-group">
+                        <a href="{{ route('medcol5.dispensado') }}" class="list-group-item list-group-item-action">
+                            <i class="far fa-share-square"></i> Gestionar Dispensación <span class="badge badge-pill badge-primary pull-right">SOS - JAMUNDI</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
 
             @elseif(Auth::user()->rol == '3')
             <div class="card bg-light">
                 <div class="card-body text-center">
                     <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Consolidado de pendientes</div>
                     <div class="list-group">
-
-
                         <a href="{{ route('medcol3.dispensado') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-share-square"></i> Consultar Dispensación Medcol <span class="badge badge-pill badge-primary pull-right">consolidado Medcol</span>
                         </a>
-
                     </div>
                 </div>
             </div>
@@ -362,37 +471,27 @@
                             <a href="{{ route('login') }}" class="list-group-item list-group-item-action">
                                 <i class="fas fa-key"></i> Link Ininiciar sesión <span class="badge badge-pill badge-primary pull-right">Login</span>
                             </a>
-
                         </div>
                     </div>
                 </div>
                 <div class="card bg-primary">
                     <div class="card-body text-center">
                         <img class="img-fluid" src="{{ asset('assets/lte/dist/img/iconmedcol.png') }}" alt="Medcol image">
-
                     </div>
                 </div>
-
-
                 @if (Route::has('register'))
                 {{-- <a href="{{ route('register') }}">Register</a> --}}
                 @endif
-
                 @endauth
             </div>
             @endif
-
-
-
-
-
         </div>
-
     </div>
 
     <!-- jQuery -->
     <script src="{{asset("assets/lte/plugins/jquery/jquery.min.js")}}"></script>
     <!-- Bootstrap 4 -->
+    
 
     <script src="{{asset("assets/lte/plugins/bootstrap/js/bootstrap.bundle.min.js")}}"></script>
     <!-- AdminLTE App -->

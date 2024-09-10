@@ -62,10 +62,16 @@
             </div>
         </div>
     </div>
-    <button type="button" id="syncapi" class="btn-flotante tooltipsC" title="Sync Pendientes">
-        <i class="fas fa-capsules fa-1x"></i>
-        <span class="badge badge-pill badge-primary pull-right">Sync</span>
-    </button>
+    <div class="btn-flotante-container">
+        <button type="button" id="syncapi" class="btn-flotante tooltipsC" title="Sync Pendientes">
+            <i class="fas fa-capsules fa-1x"></i>
+            <span class="badge badge-pill badge-primary pull-right">Sync</span>
+        </button>
 
+        <button type="button" id="synanuladospndt" class="btn-flotante-second tooltipsC" title="Sync Anulados">
+            <i class="fas fa-trash fa-1x"></i>
+            <span class="badge badge-pill badge-warning pull-left">Sync Anulados</span>
+        </button>
+    </div>
 
 </div>

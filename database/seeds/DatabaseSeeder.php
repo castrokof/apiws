@@ -1,16 +1,49 @@
-<?php
+union all 
 
-use Illuminate\Database\Seeder;
-
-class DatabaseSeeder extends Seeder
-{
-    /**
-     * Seed the application's database.
-     *
-     * @return void
-     */
-    public function run()
-    {
-        // $this->call(UserSeeder::class);
-    }
-}
+select `u359728731_apisw`.`dispensado_medcol5`.`id` AS `id`,'Medcol5' AS `Origen`,
+`u359728731_apisw`.`dispensado_medcol5`.`idusuario` AS `idusuario`,
+`u359728731_apisw`.`dispensado_medcol5`.`tipo` AS `tipo`,
+`u359728731_apisw`.`dispensado_medcol5`.`facturad` AS `facturad`,
+`u359728731_apisw`.`dispensado_medcol5`.`factura` AS `factura`,
+`u359728731_apisw`.`dispensado_medcol5`.`tipodocument` AS `tipodocument`,
+`u359728731_apisw`.`dispensado_medcol5`.`historia` AS `historia`,
+`u359728731_apisw`.`dispensado_medcol5`.`autorizacion` AS `autorizacion`,
+`u359728731_apisw`.`dispensado_medcol5`.`cums` AS `cums`,
+`u359728731_apisw`.`dispensado_medcol5`.`expediente` AS `expediente`,
+`u359728731_apisw`.`dispensado_medcol5`.`consecutivo` AS `consecutivo`,
+`u359728731_apisw`.`dispensado_medcol5`.`cums_rips` AS `cums_rips`,
+`u359728731_apisw`.`dispensado_medcol5`.`codigo` AS `codigo`,
+`u359728731_apisw`.`dispensado_medcol5`.`tipo_medicamento` AS `tipo_medicamento`,
+`u359728731_apisw`.`dispensado_medcol5`.`nombre_generico` AS `nombre_generico`,
+`u359728731_apisw`.`dispensado_medcol5`.`atc` AS `atc`,
+`u359728731_apisw`.`dispensado_medcol5`.`forma` AS `forma`,
+`u359728731_apisw`.`dispensado_medcol5`.`concentracion` AS `concentracion`,
+`u359728731_apisw`.`dispensado_medcol5`.`unidad_medicamento` AS `unidad_medicamento`,
+`u359728731_apisw`.`dispensado_medcol5`.`numero_unidades` AS `numero_unidades`,
+`u359728731_apisw`.`dispensado_medcol5`.`regimen` AS `regimen`,
+`u359728731_apisw`.`dispensado_medcol5`.`paciente` AS `paciente`,
+`u359728731_apisw`.`dispensado_medcol5`.`primer_apellido` AS `primer_apellido`,
+`u359728731_apisw`.`dispensado_medcol5`.`segundo_apellido` AS `segundo_apellido`,
+`u359728731_apisw`.`dispensado_medcol5`.`primer_nombre` AS `primer_nombre`,
+`u359728731_apisw`.`dispensado_medcol5`.`segundo_nombre` AS `segundo_nombre`,
+`u359728731_apisw`.`dispensado_medcol5`.`cuota_moderadora` AS `cuota_moderadora`,
+`u359728731_apisw`.`dispensado_medcol5`.`copago` AS `copago`,
+`u359728731_apisw`.`dispensado_medcol5`.`numero_entrega` AS `numero_entrega`,
+`u359728731_apisw`.`dispensado_medcol5`.`fecha_ordenamiento` AS `fecha_ordenamiento`,
+`u359728731_apisw`.`dispensado_medcol5`.`fecha_suministro` AS `fecha_suministro`,
+`u359728731_apisw`.`dispensado_medcol5`.`dx` AS `dx`,
+`u359728731_apisw`.`dispensado_medcol5`.`id_medico` AS `id_medico`,
+`u359728731_apisw`.`dispensado_medcol5`.`medico` AS `medico`,
+`u359728731_apisw`.`dispensado_medcol5`.`mipres` AS `mipres`,
+`u359728731_apisw`.`dispensado_medcol5`.`precio_unitario` AS `precio_unitario`,
+`u359728731_apisw`.`dispensado_medcol5`.`valor_total` AS `valor_total`,
+`u359728731_apisw`.`dispensado_medcol5`.`reporte_entrega_nopbs` AS `reporte_entrega_nopbs`,
+`u359728731_apisw`.`dispensado_medcol5`.`estado` AS `estado`,
+`u359728731_apisw`.`dispensado_medcol5`.`centroprod` AS `centroprod`,
+`u359728731_apisw`.`dispensado_medcol5`.`drogueria` AS `drogueria`,
+`u359728731_apisw`.`dispensado_medcol5`.`user_id` AS `user_id`,
+`u359728731_apisw`.`dispensado_medcol5`.`cajero` AS `cajero`,
+`u359728731_apisw`.`dispensado_medcol5`.`ips` AS `ips`,
+`u359728731_apisw`.`dispensado_medcol5`.`created_at` AS `created_at`,
+`u359728731_apisw`.`dispensado_medcol5`.`updated_at` AS `updated_at` 
+from `u359728731_apisw`.`dispensado_medcol5`

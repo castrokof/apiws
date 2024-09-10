@@ -33,7 +33,6 @@ class PendienteApiMedcol3Controller extends Controller
     public function index(Request $request)
     {
 
-
              return view('menu.Medcol3.indexAnalista');
     }
     
@@ -1057,6 +1056,8 @@ class PendienteApiMedcol3Controller extends Controller
                 ->selectRaw('SUM(cantord) as cantord')
                 ->groupBy('nombre')
                 ->get();
+
+           
             
              }else{
                  
@@ -1074,6 +1075,92 @@ class PendienteApiMedcol3Controller extends Controller
              }
         
         //return view('menu.usuario.indexAnalista');
+    }
+
+    public function updateanuladosapi(Request $request)
+    {
+        $email = 'castrokofdev@gmail.com'; // Auth::user()->email
+        $password = 'colMed2023**';
+        $usuario = Auth::user()->email;
+    
+        try {
+            $response = Http::post("http://hcp080m81s7.sn.mynetname.net:8001/api/acceso", [
+                'email' => $email,
+                'password' => $password,
+            ]);
+    
+            $token = $response->json()["token"] ?? null;
+    
+            if ($token) {
+                try {
+                    $responsefacturas = Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/pendientesanuladosapi");
+                    $facturassapi = $responsefacturas->json()['data'] ?? [];
+    
+                    $contadorActualizados = 0;
+                    
+                    //dd($facturassapi);
+    
+                    foreach ($facturassapi as $factura) {
+                        if (isset($factura['orden_externa'])) {
+                            $actualizados = PendienteApiMedcol3::where('orden_externa', $factura['orden_externa'])
+                                ->where('estado', ['PENDIENTE'])
+                                ->update([
+                                    'estado' => 'ANULADO',
+                                    'fecha_anulado' => now(),
+                                    'updated_at' => now()
+                                ]);
+                        } 
+    
+                        if ($actualizados) {
+                            $contadorActualizados++;
+                        }
+                    }
+                    
+                    
+    
+                    Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/closeallacceso");
+    
+                    Log::info('Desde la web syncapi autopista anulados', [
+                        'lineas_actualizadas' => $contadorActualizados,
+                        'usuario' => $usuario
+                    ]);
+    
+                    return response()->json([
+                        [
+                            'respuesta' => $contadorActualizados . " Facturas anuladas",
+                            'titulo' => 'Lineas Actualizadas',
+                            'icon' => 'success',
+                            'position' => 'bottom-left'
+                        ]
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error($e->getMessage());
+    
+                    return response()->json([
+                        'respuesta' => 'Error: ' . $e->getMessage(),
+                        'titulo' => 'Error',
+                        'icon' => 'error',
+                        'position' => 'bottom-left'
+                    ]);
+                }
+            } else {
+                return response()->json([
+                    'respuesta' => 'Error: No se pudo obtener el token',
+                    'titulo' => 'Error',
+                    'icon' => 'error',
+                    'position' => 'bottom-left'
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+    
+            return response()->json([
+                'respuesta' => 'Error: ' . $e->getMessage(),
+                'titulo' => 'Error',
+                'icon' => 'error',
+                'position' => 'bottom-left'
+            ]);
+        }
     }
 
 
