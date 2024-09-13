@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('titulo')
-Pendientes Medcol Limonar
+Pendientes Medcol SOS-Jamundi
 @endsection
 @section("styles")
 
@@ -20,155 +20,7 @@ Pendientes Medcol Limonar
 <link href="{{asset("assets/css/botones.css")}}" rel="stylesheet" type="text/css" />
 
 
-<!-- <style>
-    /*btn flotante*/
-    .btn-flotante {
-        font-size: 14px;
-        /* Cambiar el tamaño de la tipografia */
-        text-transform: uppercase;
-        /* Texto en mayusculas */
-        font-weight: bold;
-        /* Fuente en negrita o bold */
-        color: #ffffff;
-        /* Color del texto */
-        border-radius: 40px 40px 40px 40px;
-        border-color: #ffffff;
-        /* Borde del boton */
-        letter-spacing: 2px;
-        /* Espacio entre letras */
-        background: linear-gradient(to right, #0880a8, #56e6ff) !important;
-        /* Color de fondo */
-        /*background-color: #e9321e; /* Color de fondo */
-        padding: 8px 15px;
-        /* Relleno del boton */
-        position: fixed;
-        top: 146px;
-
-        right: 40px;
-        transition: all 300ms ease 0ms;
-        box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.5);
-        z-index: 99;
-        /* border: none;
-    outline: none; */
-    }
-
-    .btn-flotante:hover {
-        background-color: #2c2fa5;
-        /* Color de fondo al pasar el cursor */
-        box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.3);
-        transform: translateY(-5px);
-    }
-
-    @media only screen and (max-width: 300px) {
-        .btn-flotante {
-            font-size: 14px;
-            padding: 12px 20px 0 0;
-            bottom: 20px;
-            right: 20px;
-        }
-    }
-
-    .loaders {
-
-        visibility: hidden;
-        background-color: rgba(255, 253, 253, 0.952);
-        position: absolute;
-        z-index: +100 !important;
-        width: 100%;
-        height: 100%;
-    }
-
-    .loaders img {
-        position: relative;
-        top: 50%;
-        left: 40%;
-        width: 180px;
-        height: 180px;
-    }
-
-    /* // Colores para las tarjetas widget */
-    .card {
-        background-color: #fff;
-        border-radius: 10px;
-        border: none;
-        position: relative;
-        margin-bottom: 30px;
-        box-shadow: 0 0.46875rem 2.1875rem rgba(90, 97, 105, 0.1), 0 0.9375rem 1.40625rem rgba(90, 97, 105, 0.1), 0 0.25rem 0.53125rem rgba(90, 97, 105, 0.12), 0 0.125rem 0.1875rem rgba(90, 97, 105, 0.1);
-    }
-
-    .l-bg-blue-dark-card {
-        background-color: linear-gradient(to right, #b7c7ec, #4286f4) !important;
-        color: #fff;
-    }
-
-
-
-    .l-bg-cherry {
-        background: linear-gradient(to right, #493240, #f09) !important;
-        color: #fff;
-    }
-
-    .l-bg-blue-dark {
-        background: linear-gradient(to right, #06b6cd, #319acb) !important;
-        color: #fff;
-    }
-
-    .l-bg-green-dark {
-        background: linear-gradient(to right, #0a504a, #3866ef) !important;
-        color: #fff;
-    }
-
-    .l-bg-orange-dark {
-        background: linear-gradient(to right, #a86008, #ffba56) !important;
-        color: #fff;
-    }
-
-    .l-bg-red-dark {
-        background: linear-gradient(to right, #a80d08, #ff6756) !important;
-        color: #fff;
-    }
-
-    .card .card-statistic-3 .card-icon-large .fas,
-    .card .card-statistic-3 .card-icon-large .far,
-    .card .card-statistic-3 .card-icon-large .fab,
-    .card .card-statistic-3 .card-icon-large .fal {
-        font-size: 110px;
-    }
-
-    .card .card-statistic-3 .card-icon {
-        text-align: center;
-        line-height: 50px;
-        margin-left: 15px;
-        color: #000;
-        position: absolute;
-        right: -5px;
-        top: 20px;
-        opacity: 0.1;
-    }
-
-    .l-bg-cyan {
-        background: linear-gradient(135deg, #289cf5, #84c0ec) !important;
-        color: #fff;
-    }
-
-    .l-bg-green {
-        background: linear-gradient(135deg, #23bdb8 0%, #43e794 100%) !important;
-        color: #fff;
-    }
-
-    .l-bg-orange {
-        background: linear-gradient(to right, #f9900e, #ffba56) !important;
-        color: #fff;
-    }
-
-    .l-bg-cyan {
-        background: linear-gradient(135deg, #289cf5, #84c0ec) !important;
-        color: #fff;
-    }
-</style> -->
-
 @endsection
-
 
 @section('scripts')
 
@@ -222,7 +74,7 @@ Pendientes Medcol Limonar
             $("#detalle4").empty();
             //$("#detalle5").empty();
             $.ajax({
-                url: "{{ route('medcol3.informe') }}",
+                url: "{{ route('medcol6.informe') }}",
                 // data: {
                 //     fechaini: fechaini,
                 //     fechafin: fechafin
@@ -439,7 +291,7 @@ Pendientes Medcol Limonar
                 data: data,
                 success: function(data) {
                     $('#pendientes').DataTable().ajax.reload();
-                     $('#porentregar').DataTable().ajax.reload();
+                    $('#porentregar').DataTable().ajax.reload();
                     // $('#entregados').DataTable().ajax.reload();
                     // $('#tanulados').DataTable().ajax.reload();
                     // $('#tdesabastecidos').DataTable().ajax.reload();
@@ -486,10 +338,10 @@ Pendientes Medcol Limonar
                                 [1, "desc"]
                             ],
                             ajax: {
-                                url: "{{route('medcol3.pendientes1')}}",
-                                data:{
-                                     _token:"{{ csrf_token() }}"
-                                    },
+                                url: "{{route('medcol6.pendientes1')}}",
+                                data: {
+                                    _token: "{{ csrf_token() }}"
+                                },
                                 method: 'POST'
                             },
                             columns: [{
@@ -640,10 +492,10 @@ Pendientes Medcol Limonar
                                 [1, "desc"]
                             ],
                             ajax: {
-                                url: "{{route('medcol3.porentregar')}}",
-                                data:{
-                                     _token:"{{ csrf_token() }}"
-                                    },
+                                url: "{{route('medcol6.porentregar')}}",
+                                data: {
+                                    _token: "{{ csrf_token() }}"
+                                },
                                 method: 'POST'
                             },
                             columns: [{
@@ -794,10 +646,10 @@ Pendientes Medcol Limonar
                                 [1, "desc"]
                             ],
                             ajax: {
-                                url: "{{route('medcol3.entregados')}}",
-                                data:{
-                                     _token:"{{ csrf_token() }}"
-                                    },
+                                url: "{{route('medcol6.entregados')}}",
+                                data: {
+                                    _token: "{{ csrf_token() }}"
+                                },
                                 method: 'POST'
                             },
                             columns: [{
@@ -948,10 +800,10 @@ Pendientes Medcol Limonar
                                 [1, "desc"]
                             ],
                             ajax: {
-                                url: "{{route('medcol3.desabastecidos')}}",
-                                data:{
-                                     _token:"{{ csrf_token() }}"
-                                    },
+                                url: "{{route('medcol6.desabastecidos')}}",
+                                data: {
+                                    _token: "{{ csrf_token() }}"
+                                },
                                 method: 'POST'
                             },
                             columns: [{
@@ -1102,10 +954,10 @@ Pendientes Medcol Limonar
                                 [1, "desc"]
                             ],
                             ajax: {
-                                url: "{{route('medcol3.anulados')}}",
-                                data:{
-                                     _token:"{{ csrf_token() }}"
-                                    },
+                                url: "{{route('medcol6.anulados')}}",
+                                data: {
+                                    _token: "{{ csrf_token() }}"
+                                },
                                 method: 'POST'
                             },
                             columns: [{
@@ -1254,7 +1106,7 @@ Pendientes Medcol Limonar
                     [1, "asc"]
                 ],
                 ajax: {
-                    url: "{{ route('medcol3.observaciones')}}",
+                    url: "{{ route('medcol6.observaciones')}}",
                     //type: "get",
                     data: {
                         id: nivel_idp2
@@ -1372,13 +1224,13 @@ Pendientes Medcol Limonar
                     $('#codigo').val(data.pendiente.codigo);
                     $('#nombre').val(data.pendiente.nombre);
                     $('#cant_pndt').val(data.saldo_pendiente);
-                    
-                    if(data.pendiente.cums == '' || data.pendiente.cums == null){
+
+                    if (data.pendiente.cums == '' || data.pendiente.cums == null) {
                         $('#cums').val(data.pendiente.codigo)
-                    }else{
+                    } else {
                         $('#cums').val(data.pendiente.cums);
                     }
-                    
+
                     $('#centroproduccion').val(data.pendiente.centroproduccion);
                     $('#observ').val(data.pendiente.observaciones);
                     $('#cantidad').val(data.pendiente.cantidad);
@@ -1447,13 +1299,13 @@ Pendientes Medcol Limonar
                     $('#centroproduccion_n').val(data.pendiente.centroproduccion);
                     $('#observ_n').val(data.pendiente.observaciones);
                     $('#fac_entrega').val(data.fac_entrega);
-                    
-                     if(data.pendiente.cums == '' || data.pendiente.cums == null){
-                       $('#cums_n').val(data.pendiente.codigo);
-                    }else{
-                       $('#cums_n').val(data.pendiente.cums);
+
+                    if (data.pendiente.cums == '' || data.pendiente.cums == null) {
+                        $('#cums_n').val(data.pendiente.codigo);
+                    } else {
+                        $('#cums_n').val(data.pendiente.cums);
                     }
-                    
+
                     $('#cantidad_n').val(data.pendiente.cantidad);
                     $('#cajero_n').val(data.pendiente.cajero);
                     $('#usuario_n').val(data.pendiente.usuario);
@@ -1634,7 +1486,7 @@ Pendientes Medcol Limonar
         // Función que envia el id al controlador y cambia el estado del registro
         $(document).on('click', '#syncapi', function() {
 
-            const text = 'De Medcol PCE-Huerfanas-Biologicos';
+            const text = 'De Medcol SOS - JAMUNDI';
 
             Swal.fire({
                 title: "¿Estás por sincronizar pendientes?",
@@ -1657,7 +1509,7 @@ Pendientes Medcol Limonar
                 beforeSend: function() {
                     $('.loaders').css("visibility", "visible");
                 },
-                url: "{{route('medcol3.syncapi')}}",
+                url: "{{route('medcol6.syncapi')}}",
                 type: 'GET',
                 success: function(data) {
                     $('#pendientes').DataTable().ajax.reload();
@@ -1682,11 +1534,11 @@ Pendientes Medcol Limonar
                 }
             });
         }
-        
+
         //Funcion para sincronizar los pendientes anuladas y actualizar el estado a ANULADO
         $(document).on('click', '#synanuladospndt', function() {
 
-            const text = 'De Medcol PCE-Huerfanas-Biologicos';
+            const text = 'De Medcol SOS - JAMUNDI';
 
             Swal.fire({
                 title: "¿Estás por sincronizar los pendientes anulados?",
@@ -1709,7 +1561,7 @@ Pendientes Medcol Limonar
                 beforeSend: function() {
                     $('.loaders').css("visibility", "visible");
                 },
-                url: "{{route('medcol3.pendientesanulados')}}",
+                url: "{{route('medcol6.pendientesanulados')}}",
                 type: 'GET',
                 success: function(data) {
                     $('#pendientes').DataTable().ajax.reload();
@@ -1727,18 +1579,18 @@ Pendientes Medcol Limonar
                 }
             });
         }
-        
+
         // Consulta de resumen de pendientes
         $(document).on('click', '#informependientesclic', function() {
             $('.modal-title-resumen-pendientes').text('Resumen de pendientes');
-                $('#modal-resumen-pendientes').modal({
-                    backdrop: 'static',
-                    keyboard: false
-                });
-                $('#modal-resumen-pendientes').modal('show');
-                $('#tablaIndexInformemedicamentos').DataTable().destroy();
+            $('#modal-resumen-pendientes').modal({
+                backdrop: 'static',
+                keyboard: false
+            });
+            $('#modal-resumen-pendientes').modal('show');
+            $('#tablaIndexInformemedicamentos').DataTable().destroy();
 
-                 ajaxRequest1();
+            ajaxRequest1();
         });
 
         function ajaxRequest1() {
@@ -1756,7 +1608,7 @@ Pendientes Medcol Limonar
                     [1, "asc"]
                 ],
                 ajax: {
-                    url: "{{route('informepedientes3')}}",
+                    url: "{{route('informepedientes6')}}",
                     type: 'get',
                 },
                 columns: [
@@ -1820,11 +1672,6 @@ Pendientes Medcol Limonar
             });
 
         }
-
-
-
-
-
 
     });
 

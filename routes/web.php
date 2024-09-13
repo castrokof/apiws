@@ -128,6 +128,7 @@ Route::get('/syncapi', 'PendienteApiController@createapendientespi')->name('sync
 Route::get('informe', 'PendienteApiController@informes')->name('informe')->middleware('verified')->middleware('verifyuser');
 
 Route::get('informepedientes', 'PendienteApiController@informepedientes')->name('informepedientes')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol2/pendientes/anuladosapi', 'PendienteApiController@updateanuladosapi')->name('medcol2.pendientesanulados')->middleware('verified')->middleware('verifyuser');
 
 
     //Rutas de tablas de Dispensado MEDCOL 2
@@ -187,7 +188,6 @@ Route::put('medcol3/dispensado/{id}', 'Medcol3\DispensadoApiMedcol4Controller@up
 
 Route::get('medcol3/dispensado/syncdisapi', 'Medcol3\DispensadoApiMedcol4Controller@createdispensadoapi')->name('medcol3.dispensadosyncapi')->middleware('verified')->middleware('verifyuser');
 Route::get('medcol3/dispensado/anuladosapi', 'Medcol3\DispensadoApiMedcol4Controller@updateanuladosapi')->name('medcol3.anuladosapi')->middleware('verified')->middleware('verifyuser');
-
 Route::post('medcol3/add_dispensado', 'Medcol3\DispensadoApiMedcol4Controller@adddispensacionarray')->name('add_dispensacion')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol3/update', 'Medcol3\DispensadoApiMedcol4Controller@actualizarDispensacion')->name('dispensado.guardar')->middleware('verified')->middleware('verifyuser');
 
@@ -212,6 +212,7 @@ Route::get('medcol5/editpendientes/{id}', 'Medcol5\PendienteApiMedcol5Controller
 Route::get('medcol5/showpendientes/{id}', 'Medcol5\PendienteApiMedcol5Controller@show')->name('medcol5.pendientes-show')->middleware('verified')->middleware('verifyuser');
 Route::put('medcol5/pendientes/{id}', 'Medcol5\PendienteApiMedcol5Controller@update')->name('medcol5.actualizar_pendientes')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol5/pendientes', 'Medcol5\PendienteApiMedcol5Controller@saveObs')->name('medcol5.crear_observacion')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol5/pendientes/anuladosapi', 'Medcol5\PendienteApiMedcol5Controller@updateanuladosapi')->name('medcol5.pendientesanulados')->middleware('verified')->middleware('verifyuser');
 
 Route::get('medcol5/observaciones', 'Medcol5\PendienteApiMedcol5Controller@getObservaciones')->name('medcol5.observaciones')->middleware('verified')->middleware('verifyuser');
 
@@ -412,7 +413,16 @@ Route::get('buscar-medcol5/{factura}', 'Medcol5\\DispensadoApiMedcol5Controller@
     
     //SERVICIOS WEB SOS
     
-    //SERVICIO SOPA DE CONSULTA USUARIO
+    //SERVICIO SOAP DE CONSULTA USUARIO
+    
+    Route::get('/indexSosValidarDerechos', 'MedcolSos\DerechosSosController@index')->name('indexsos')->middleware('verified')->middleware('verifyuser');
+    Route::post('/dataValidarDerechos', 'MedcolSos\DerechosSosController@consultarAfiliado')->name('dataSos')->middleware('verified')->middleware('verifyuser');
+    
+    //SERVICIO REST DE CONSULTA FORMULAS
+    
+    Route::get('/indexSosFormulasSos', 'MedcolSos\OrdenesSosController@index')->name('indexformulas')->middleware('verified')->middleware('verifyuser');
+    Route::post('/dataFormulasSos', 'MedcolSos\OrdenesSosController@formulasAfiliado')->name('dataFormulasSos')->middleware('verified')->middleware('verifyuser');
+    
     
     
 

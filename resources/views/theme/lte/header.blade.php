@@ -163,6 +163,14 @@
                                                     <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
                                                 </div>
                                             </div>
+                                            <!-- Submenú -->
+                                            <div class="dropdown-submenu">
+                                                <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('SOS') }}</a>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item text-dark" href="{{ route('indexsos') }}">{{ __('Validar Derechos') }}</a>
+                                                    <a class="dropdown-item text-dark" href="{{ route('indexformulas') }}">{{ __('Formulas SOS') }}</a>
+                                                </div>
+                                            </div>
                                      
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                         @csrf

@@ -20,6 +20,12 @@
 
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <style>
+        body {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            font-family: 'Nunito', sans-serif;
+        }
+        
         .navbar-logo {
             display: inline-block;
             vertical-align: middle;
@@ -45,7 +51,7 @@
             opacity: 8;
         }
         
-               <!-- Añadir el CSS para soportar submenús -->
+               /* <!-- Añadir el CSS para soportar submenús --> */
 
       .dropdown-submenu {
             position: relative;
@@ -62,6 +68,19 @@
         .dropdown-submenu:hover .dropdown-menu,
         .dropdown-submenu.show .dropdown-menu {
             display: block; /* Mostrar al hacer hover o cuando tenga la clase 'show' */
+        }
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-dark .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .navbar-dark .navbar-nav .nav-link:hover {
+            color: rgba(255, 255, 255, 1);
         }
     </style>
 
@@ -137,6 +156,14 @@
                                                     <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
                                                 </div>
                                             </div>
+                                            <!-- Submenú -->
+                                            <div class="dropdown-submenu">
+                                                <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('SOS') }}</a>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item text-dark" href="{{ route('indexsos') }}">{{ __('Validar Derechos') }}</a>
+                                                    <a class="dropdown-item text-dark" href="{{ route('indexformulas') }}">{{ __('Formulas SOS') }}</a>
+                                                </div>
+                                            </div>
                                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                             @csrf
                                         </form>
@@ -172,10 +199,27 @@
                                         <a class="dropdown-item text-dark" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                             {{ __('Logout') }}
                                         </a>
-                                        <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Compras') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('tokenhercules') }}">{{ __('Mipres 2.0') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('submenu') }}">{{ __('Pendientes') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('dismenu') }}">{{ __('Dispensado') }}</a>
+                                        <div class="dropdown-divider"></div>
+
+                                            <!-- Submenú -->
+                                            <div class="dropdown-submenu">
+                                                <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Compras') }}</a>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item text-dark" href="{{ route('menucotizaciones') }}">{{ __('Cotizaciones') }}</a>
+                                                    <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
+                                                </div>
+                                            </div>
+                                            <!-- Submenú -->
+                                            <div class="dropdown-submenu">
+                                                <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('SOS') }}</a>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item text-dark" href="{{ route('indexsos') }}">{{ __('Validar Derechos') }}</a>
+                                                    <a class="dropdown-item text-dark" href="{{ route('indexformulas') }}">{{ __('Formulas SOS') }}</a>
+                                                </div>
+                                            </div>
                                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                             @csrf
                                         </form>
@@ -211,10 +255,27 @@
                                         <a class="dropdown-item text-dark" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                             {{ __('Logout') }}
                                         </a>
-                                        <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Compras') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('tokenhercules') }}">{{ __('Mipres 2.0') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('submenu') }}">{{ __('Pendientes') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('dismenu') }}">{{ __('Dispensado') }}</a>
+                                        <div class="dropdown-divider"></div>
+
+                                            <!-- Submenú -->
+                                            <div class="dropdown-submenu">
+                                                <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Compras') }}</a>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item text-dark" href="{{ route('menucotizaciones') }}">{{ __('Cotizaciones') }}</a>
+                                                    <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
+                                                </div>
+                                            </div>
+                                            <!-- Submenú -->
+                                            <div class="dropdown-submenu">
+                                                <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('SOS') }}</a>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item text-dark" href="{{ route('indexsos') }}">{{ __('Validar Derechos') }}</a>
+                                                    <a class="dropdown-item text-dark" href="{{ route('indexformulas') }}">{{ __('Formulas SOS') }}</a>
+                                                </div>
+                                            </div>
                                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                             @csrf
                                         </form>

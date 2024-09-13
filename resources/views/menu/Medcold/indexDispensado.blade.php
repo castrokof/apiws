@@ -36,7 +36,7 @@ Dispensado Medcol Dolor
 
 @include('menu.Medcold.form.dispensado.forminformedispensado')
 @include('menu.Medcold.tabs.tabsIndexDispensado')
-@include('menu.Medcold.modal.modalGestionMultiple')
+@include('menu.Medcol3.modal.modalGestionMultiple')
 
 @endsection
 
@@ -57,22 +57,22 @@ Dispensado Medcol Dolor
 
 <script>
     $(document).ready(function() {
-
-
+        
+        
         $("#selectall").on('click', function() {
-            $(".case").prop("checked", this.checked);
+          $(".case").prop("checked", this.checked);
         });
-
-
-
+        
+        
+        
         fill_datatable1_resumen();
-
-
-        function fill_datatable1_resumen() {
+        
+        
+         function fill_datatable1_resumen() {
             $("#detalle").empty();
             $("#detalle1").empty();
             $("#detalle2").empty();
-
+            
             $.ajax({
                 url: "{{ route('medcold.informedis') }}",
                 // data: {
@@ -81,13 +81,9 @@ Dispensado Medcol Dolor
                 // },
                 dataType: "json",
                 success: function(data) {
-                    const {
-                        dispensado,
-                        revisado,
-                        anulado
-                    } = data;
-
-                    $("#detalle").append(`
+                  const { dispensado, revisado, anulado } = data;
+            
+                  $("#detalle").append(`
                     <div class="small-box shadow-lg l-bg-blue-dark">
                       <div class="inner">
                         <h5>PENDIENTES X REVISAR</h5>
@@ -100,9 +96,9 @@ Dispensado Medcol Dolor
                       </a>
                     </div>
                   `);
-
-                    $("#detalle1").append(`
-                    <div class="small-box shadow-lg l-bg-orange-dark">
+            
+                  $("#detalle1").append(`
+                    <div class="small-box shadow-lg l-bg-green-dark">
                       <div class="inner">
                         <h5>REVISADAS</h5>
                         <p><h5>${revisado ?? 0}</h5></p>
@@ -112,8 +108,8 @@ Dispensado Medcol Dolor
                       </div>
                     </div>
                   `);
-
-                    $("#detalle2").append(`
+            
+                  $("#detalle2").append(`
                     <div class="small-box shadow-lg l-bg-red-dark">
                       <div class="inner">
                         <h5>ANULADAS</h5>
@@ -127,7 +123,7 @@ Dispensado Medcol Dolor
                 }
             });
         }
-
+        
 
         var fechaini;
         var fechafin;
@@ -525,7 +521,9 @@ Dispensado Medcol Dolor
                                 ],
                                 ajax: {
                                     url: "{{route('medcold.disrevisado')}}",
-                                    data: {
+                                     data: {
+                                        fechaini: fechaini,
+                                        fechafin: fechafin,
                                         _token: "{{ csrf_token() }}"
                                     },
                                     method: 'POST'
@@ -711,7 +709,7 @@ Dispensado Medcol Dolor
                                         className: "btn  btn-outline-success btn-sm",
                                         customize: function(xlsx) {
                                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
-                                            $('row c[r^="AG"]', sheet).each(function() {
+                                            $('row c[r^="AG"]', sheet).each(function () {
                                                 $(this).attr('t', 's');
                                             });
                                         }
@@ -945,7 +943,7 @@ Dispensado Medcol Dolor
                                         className: "btn  btn-outline-success btn-sm",
                                         customize: function(xlsx) {
                                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
-                                            $('row c[r^="AG"]', sheet).each(function() {
+                                            $('row c[r^="AG"]', sheet).each(function () {
                                                 $(this).attr('t', 's');
                                             });
                                         }
@@ -1083,6 +1081,7 @@ Dispensado Medcol Dolor
             Swal.fire({
                 title: "¿Estás por sincronizar lo dispensado?",
                 text: text,
+                icon: "info",
                 type: "info",
                 showCancelButton: true,
                 showCloseButton: true,
@@ -1091,6 +1090,8 @@ Dispensado Medcol Dolor
                 if (result.value) {
 
                     ajaxRequestSyncDispensados();
+                    ajaxRequestSyncMedicamentos();
+                    ajaxRequestSyncTerceros();
 
                 }
             });
@@ -1119,7 +1120,56 @@ Dispensado Medcol Dolor
                 }
             });
         }
+        
+        
+        //funcion para sincronziar medicamentos
+        function ajaxRequestSyncMedicamentos() {
+            $.ajax({
+                beforeSend: function() {
+                    $('.loaders').css("visibility", "visible");
+                },
+                url: "{{route('medcol3.syncmedicamentosapi')}}",
+                type: 'GET',
+                success: function(data) {
+                   
 
+                    $.each(data, function(i, item) {
+                        Apiws.notificaciones(item.respuesta, item.titulo, item.icon, item.position);
+
+                    });
+                    // fill_datatable1_resumen();
+
+                },
+                complete: function() {
+                    $('.loaders').css("visibility", "hidden");
+                }
+            });
+        }
+        //funcion para sincronziar terceros
+           function ajaxRequestSyncTerceros() {
+            $.ajax({
+                beforeSend: function() {
+                    $('.loaders').css("visibility", "visible");
+                },
+                url: "{{route('medcol3.synctercerosapi')}}",
+                type: 'GET',
+                success: function(data) {
+                   
+
+                    $.each(data, function(i, item) {
+                        Apiws.notificaciones(item.respuesta, item.titulo, item.icon, item.position);
+
+                    });
+                    // fill_datatable1_resumen();
+
+                },
+                complete: function() {
+                    $('.loaders').css("visibility", "hidden");
+                }
+            });
+        }
+        
+        
         //Funcion para sincronizar las facturas anuladas y actualizar el estado
         $(document).on('click', '#synanulados', function() {
 
@@ -1128,7 +1178,8 @@ Dispensado Medcol Dolor
             Swal.fire({
                 title: "¿Estás por sincronizar los anulados?",
                 text: text,
-                type: "info",
+                icon: "error",
+                type: "error",
                 showCancelButton: true,
                 showCloseButton: true,
                 confirmButtonText: 'Aceptar',
@@ -1168,13 +1219,13 @@ Dispensado Medcol Dolor
 
         // Función que envia el id al controlador y cambia el estado del registro
         $(document).on('click', '#syncdis', function() {
-
+             
             var dispensado = [];
             var dispensadotrue1 = [];
 
-
+           
             // Utiliza 'tr' en lugar de 'tbody tr' para recorrer solo la fila específica
-            $("tbody tr").each(function(el) {
+           $("tbody tr").each(function(el){
 
                 var itemdispensado = {};
 
@@ -1198,15 +1249,15 @@ Dispensado Medcol Dolor
                 dispensado.push(itemdispensado);
 
             });
-
-
+           
+            
             $.each(dispensado, function(i, items) {
 
                 var dispensadotrue = {};
 
-                if (items.checked == true) {
-
-                    console.log("entra acá");
+                 if(items.checked == true){
+                     
+                      console.log("entra acá");
                     dispensadotrue.ID = items.id;
                     dispensadotrue.copago1 = items.copago1;
                     dispensadotrue.numero_entrega1 = items.numero_entrega1;
@@ -1220,17 +1271,17 @@ Dispensado Medcol Dolor
                     dispensadotrue.medico1 = items.medico1;
                     dispensadotrue.estado = items.estado;
                     dispensadotrue.user_id = items.user_id;
-
+                
                     dispensadotrue1.push(dispensadotrue);
-                }
-
+                 }
+                
             });
-
-            console.log(dispensadotrue1);
+        
+                console.log(dispensadotrue1);
 
             $.each(dispensadotrue1, function(i, items) {
-
-                console.log("entra acá1");
+            
+            console.log("entra acá1");
                 console.log(items.id);
                 console.log(items.fecha_orden);
                 console.log(items.diagnostico);
@@ -1257,7 +1308,7 @@ Dispensado Medcol Dolor
                     enviardatos(dispensadotrue1);
 
                 } else if (items.autorizacion1 != '' && items.mipre1 != '' && items.reporte_entrega1 != '') {
-
+                    
                     enviardatos(dispensadotrue1);
 
                 } else {
@@ -1271,7 +1322,7 @@ Dispensado Medcol Dolor
                 }
 
             });
-
+                    
         });
 
 
@@ -1322,33 +1373,33 @@ Dispensado Medcol Dolor
                         }
 
                     },
-                    error: function(xhr) {
-                        // Manejar errores de validación de la solicitud AJAX
-                        var errorMessage = "Revise los siguientes errores:<br>";
-                        var errorMessage2 = "";
-                        if (xhr.responseJSON && xhr.responseJSON.errors) {
-                            $.each(xhr.responseJSON.errors, function(fieldName, fieldErrors) {
-
-                                errorMessage2 += "<strong>" + fieldName + ":</strong><br>";
-                                $.each(fieldErrors, function(index, error) {
-                                    errorMessage2 += "- " + error + "<br>";
+                            error: function(xhr) {
+                                // Manejar errores de validación de la solicitud AJAX
+                                var errorMessage = "Revise los siguientes errores:<br>";
+                                var errorMessage2 = "";
+                                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                                    $.each(xhr.responseJSON.errors, function(fieldName, fieldErrors) {
+                                        
+                                        errorMessage2 += "<strong>" + fieldName + ":</strong><br>";
+                                        $.each(fieldErrors, function(index, error) {
+                                            errorMessage2 += "- " + error + "<br>";
+                                        });
+                                    });
+                                } else {
+                                    errorMessage += "Error en la solicitud.";
+                                }
+                                Swal.fire({
+                                    type: 'error',
+                                    title: errorMessage,
+                                    showConfirmButton: true,
+                                    html: errorMessage2
                                 });
-                            });
-                        } else {
-                            errorMessage += "Error en la solicitud.";
-                        }
-                        Swal.fire({
-                            type: 'error',
-                            title: errorMessage,
-                            showConfirmButton: true,
-                            html: errorMessage2
-                        });
-                    }
+                            }
 
                 });
 
         }
-
+        
         $('.dxcie10').select2({
             language: "es",
             theme: "bootstrap4",
@@ -1414,7 +1465,7 @@ Dispensado Medcol Dolor
             }
         }).trigger('change');
 
-
+        
         $("#selector").on('click', function() {
             $(".checkbox2").prop("checked", this.checked);
         });
@@ -1567,7 +1618,7 @@ Dispensado Medcol Dolor
                 const ips = ipsElement.val();
 
                 const userId = "{{ Auth::user()->id }}";
-
+                
                 const camposFaltantes = [];
                 if (!fechaOrden) camposFaltantes.push('Fecha de Ordenamiento');
                 if (!numeroEntrega) camposFaltantes.push('Número de Entrega');
@@ -1684,7 +1735,6 @@ Dispensado Medcol Dolor
                 // Limpiar y recargar la DataTable '#tablaRegistros'
                 $('#tablaRegistros').DataTable().clear().draw();
                 // Opcional: Recargar la DataTable desde el origen de datos
-                $('#dispensados').DataTable().ajax.reload();
                 // $('#tablaRegistros').DataTable().ajax.reload();
 
             } catch (error) {
@@ -1698,9 +1748,11 @@ Dispensado Medcol Dolor
                 });
             }
         }
-
+        
 
     });
+
+
 
 
     var idioma_espanol = {

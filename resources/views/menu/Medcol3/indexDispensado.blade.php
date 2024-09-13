@@ -10,7 +10,7 @@ Dispensado Medcol Limonar
 <link href="{{asset("assets/lte/plugins/datatables-bs4/css/dataTables.bootstrap4.css")}}" rel="stylesheet" type="text/css" />
 <link href="{{asset("assets/lte/plugins/icheck-bootstrap/icheck-bootstrap.min.css")}}" rel="stylesheet" type="text/css" />
 <link href="{{asset("assets/lte/plugins/fontawesome-free/css/all.min.css")}}" rel="stylesheet" type="text/css" />
-<!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script> -->
+
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.css" rel="stylesheet" type="text/css" />
@@ -57,30 +57,26 @@ Dispensado Medcol Limonar
 
 <script>
     $(document).ready(function() {
-
-
+        
+        
         $("#selectall").on('click', function() {
-            $(".case").prop("checked", this.checked);
+          $(".case").prop("checked", this.checked);
         });
-
+        
         fill_datatable1_resumen();
-
+        
         function fill_datatable1_resumen() {
-            $("#detalle").empty();
-            $("#detalle1").empty();
-            $("#detalle2").empty();
-
-            $.ajax({
-                url: "{{ route('medcol3.informedis') }}",
-                dataType: "json",
-                success: function(data) {
-                    const {
-                        dispensado,
-                        revisado,
-                        anulado
-                    } = data;
-
-                    $("#detalle").append(`
+          $("#detalle").empty();
+          $("#detalle1").empty();
+          $("#detalle2").empty();
+        
+          $.ajax({
+            url: "{{ route('medcol3.informedis') }}",
+            dataType: "json",
+            success: function(data) {
+              const { dispensado, revisado, anulado } = data;
+        
+              $("#detalle").append(`
                 <div class="small-box shadow-lg l-bg-blue-dark">
                   <div class="inner">
                     <h5>PENDIENTES X REVISAR</h5>
@@ -93,9 +89,9 @@ Dispensado Medcol Limonar
                   </a>
                 </div>
               `);
-
-                    $("#detalle1").append(`
-                <div class="small-box shadow-lg l-bg-orange-dark">
+        
+              $("#detalle1").append(`
+                <div class="small-box shadow-lg l-bg-green-dark">
                   <div class="inner">
                     <h5>REVISADAS</h5>
                     <p><h5>${revisado ?? 0}</h5></p>
@@ -105,8 +101,8 @@ Dispensado Medcol Limonar
                   </div>
                 </div>
               `);
-
-                    $("#detalle2").append(`
+        
+              $("#detalle2").append(`
                 <div class="small-box shadow-lg l-bg-red-dark">
                   <div class="inner">
                     <h5>ANULADAS</h5>
@@ -117,12 +113,15 @@ Dispensado Medcol Limonar
                   </div>
                 </div>
               `);
-                }
-            });
+            }
+          });
         }
+        
+        
 
         var fechaini;
         var fechafin;
+        var contrato;
 
         // Función para llenar la tabla al cargar la página
         fill_datatable_tabla();
@@ -132,19 +131,21 @@ Dispensado Medcol Limonar
 
             fechaini = $('#fechaini').val();
             fechafin = $('#fechafin').val();
-            //historia = $('#historia').val();
+            contrato = $('#contrato').val();
 
 
-            if (fechaini != '' && fechafin != '') {
+            if (fechaini != '' && fechafin != '' || contrato != '') {
 
                 $('#dispensados').DataTable().destroy();
+                $("#revisados").DataTable().destroy();
+                $("#anulados").DataTable().destroy();
 
-                fill_datatable_tabla(fechaini, fechafin);
+                fill_datatable_tabla(fechaini, fechafin, contrato);
 
             } else {
 
                 Swal.fire({
-                    title: 'Debes digitar fecha inicial y fecha final',
+                    title: 'Debes digitar fecha inicial y fecha final o la Droguería',
                     icon: 'warning',
                     buttons: {
                         cancel: "Cerrar"
@@ -159,7 +160,7 @@ Dispensado Medcol Limonar
 
             $('#fechaini').val('');
             $('#fechafin').val('');
-            //$('#historia').val('');
+            $('#contrato').val('');
 
             $('#dispensados').DataTable().destroy();
             $("#revisados").DataTable().destroy();
@@ -167,20 +168,20 @@ Dispensado Medcol Limonar
             fill_datatable_tabla();
         });
 
-        function fill_datatable_tabla(fechaini = '', fechafin = '') {
+        function fill_datatable_tabla(fechaini = '', fechafin = '', contrato = '') {
 
 
             $(function() {
                 // Se llama a la función correspondiente al tab activo al cargar la página
                 var activeTab = $(".nav-tabs .active");
                 var activeTabId = activeTab.attr("id");
-                callFunction(activeTabId, fechaini, fechafin);
+                callFunction(activeTabId);
 
                 // Se llama a la función correspondiente al tab seleccionado al cambiar de tab
                 $('a[data-toggle="pill"]').on("shown.bs.tab", function(e) {
                     var target = $(e.target);
                     var targetId = target.attr("id");
-                    callFunction(targetId, fechaini, fechafin);
+                    callFunction(activeTabId);
                 });
 
                 function callFunction(tabId) {
@@ -223,6 +224,7 @@ Dispensado Medcol Limonar
                                     data: {
                                         fechaini: fechaini,
                                         fechafin: fechafin,
+                                        contrato: contrato,
                                         _token: "{{ csrf_token() }}"
                                     },
                                     method: 'POST'
@@ -527,6 +529,7 @@ Dispensado Medcol Limonar
                                     data: {
                                         fechaini: fechaini,
                                         fechafin: fechafin,
+                                        contrato: contrato,
                                         _token: "{{ csrf_token() }}"
                                     },
                                     method: 'POST'
@@ -713,7 +716,7 @@ Dispensado Medcol Limonar
                                         className: "btn  btn-outline-success btn-sm",
                                         customize: function(xlsx) {
                                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
-                                            $('row c[r^="AG"]', sheet).each(function() {
+                                            $('row c[r^="AG"]', sheet).each(function () {
                                                 $(this).attr('t', 's');
                                             });
                                         }
@@ -951,7 +954,7 @@ Dispensado Medcol Limonar
                                         className: "btn  btn-outline-success btn-sm",
                                         customize: function(xlsx) {
                                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
-                                            $('row c[r^="AG"]', sheet).each(function() {
+                                            $('row c[r^="AG"]', sheet).each(function () {
                                                 $(this).attr('t', 's');
                                             });
                                         }
@@ -1126,7 +1129,7 @@ Dispensado Medcol Limonar
                 }
             });
         }
-
+        
         //Funcion para sincronizar las facturas anuladas y actualizar el estado
         $(document).on('click', '#synanulados', function() {
 
@@ -1135,7 +1138,7 @@ Dispensado Medcol Limonar
             Swal.fire({
                 title: "¿Estás por sincronizar los anulados?",
                 text: text,
-                type: "error",
+                type: "info",
                 showCancelButton: true,
                 showCloseButton: true,
                 confirmButtonText: 'Aceptar',
@@ -1173,14 +1176,17 @@ Dispensado Medcol Limonar
         }
 
 
+       
+
+            
         // Función que envia el id al controlador y cambia el estado del registro
         $(document).on('click', '#syncdis', function() {
-
+             
             var dispensado = [];
             var dispensadotrue1 = [];
-
+           
             // Utiliza 'tr' en lugar de 'tbody tr' para recorrer solo la fila específica
-            $("tbody tr").each(function(el) {
+           $("tbody tr").each(function(el){
 
                 var itemdispensado = {};
 
@@ -1204,15 +1210,15 @@ Dispensado Medcol Limonar
                 dispensado.push(itemdispensado);
 
             });
-
-
+           
+            
             $.each(dispensado, function(i, items) {
 
                 var dispensadotrue = {};
 
-                if (items.checked == true) {
-
-                    console.log("entra acá");
+                 if(items.checked == true){
+                     
+                      console.log("entra acá");
                     dispensadotrue.ID = items.id;
                     dispensadotrue.copago1 = items.copago1;
                     dispensadotrue.numero_entrega1 = items.numero_entrega1;
@@ -1226,19 +1232,22 @@ Dispensado Medcol Limonar
                     dispensadotrue.medico1 = items.medico1;
                     dispensadotrue.estado = items.estado;
                     dispensadotrue.user_id = items.user_id;
-
+                
                     dispensadotrue1.push(dispensadotrue);
+             
+                 }
+               
+                
 
-                }
-
+                
             });
-
-            console.log(dispensadotrue1);
+        
+                console.log(dispensadotrue1);
 
             $.each(dispensadotrue1, function(i, items) {
-
-
-                console.log("entra acá1");
+                
+            
+            console.log("entra acá1");
                 console.log(items.id);
                 console.log(items.fecha_orden);
                 console.log(items.diagnostico);
@@ -1250,7 +1259,7 @@ Dispensado Medcol Limonar
                 console.log(items.medico1);
                 console.log(items.estado);
                 console.log(items.user_id);
-
+                
                 /*if (items.fecha_orden > ){
                     
                     Swal.fire({
@@ -1265,8 +1274,7 @@ Dispensado Medcol Limonar
                 if (items.numero_entrega1 == '' || items.fecha_orden == '' || items.diagnostico == '' || items.ips == '') {
 
                     Swal.fire({
-                        //icon: 'warning',
-                        type: "error",
+                        icon: 'warning',
                         title: "Los campos numero de entrega, fecha orden, IPS, diagnostico no pueden estar vacios y La fecha de Orenamiento no puede ser mayor a la de Dispensación",
                         showConfirmButton: true,
                         timer: 1500
@@ -1280,14 +1288,13 @@ Dispensado Medcol Limonar
 
 
                 } else if (items.autorizacion1 != '' && items.mipre1 != '' && items.reporte_entrega1 != '') {
-
+                    
                     enviardatos(dispensadotrue1);
 
                 } else {
 
                     Swal.fire({
-                        //icon: 'warning',
-                        type: "warning",
+                        icon: 'warning',
                         title: "Los campos numero de autorización, Mipres y reporte de entrega no pueden estar vacios",
                         showConfirmButton: true,
                         timer: 1500
@@ -1296,15 +1303,18 @@ Dispensado Medcol Limonar
                 }
 
             });
-
+            
+            
+            
+                    
         });
 
 
         function enviardatos(dispensadotrue1) {
 
+
             Swal.fire({
-                    //icon: "info",
-                    type: 'info',
+                    icon: "info",
                     title: 'Espere por favor !',
                     html: 'Realizando la revision..', // add html attribute if you want or remove
                     showConfirmButton: false,
@@ -1342,45 +1352,42 @@ Dispensado Medcol Limonar
                                 showConfirmButton: true,
                                 timer: 1500
                             })
-
-
+                            
+                            
                             //console.log(index);
-
-                            //$("#dispensados").DataTable().row(index).remove().draw(false);
+                            
+                             //$("#dispensados").DataTable().row(index).remove().draw(false);
 
                             $("#dispensados").DataTable().ajax.reload();
 
                         }
 
                     },
-                    error: function(xhr) {
-                        // Manejar errores de validación de la solicitud AJAX
-                        var errorMessage = "Revise los siguientes errores:<br>";
-                        var errorMessage2 = "";
-                        if (xhr.responseJSON && xhr.responseJSON.errors) {
-                            $.each(xhr.responseJSON.errors, function(fieldName, fieldErrors) {
-
-                                errorMessage2 += "<strong>" + fieldName + ":</strong><br>";
-                                $.each(fieldErrors, function(index, error) {
-                                    errorMessage2 += "- " + error + "<br>";
+                            error: function(xhr) {
+                                // Manejar errores de validación de la solicitud AJAX
+                                var errorMessage = "Revise los siguientes errores:<br>";
+                                var errorMessage2 = "";
+                                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                                    $.each(xhr.responseJSON.errors, function(fieldName, fieldErrors) {
+                                        
+                                        errorMessage2 += "<strong>" + fieldName + ":</strong><br>";
+                                        $.each(fieldErrors, function(index, error) {
+                                            errorMessage2 += "- " + error + "<br>";
+                                        });
+                                    });
+                                } else {
+                                    errorMessage += "Error en la solicitud.";
+                                }
+                                Swal.fire({
+                                    type: 'error',
+                                    title: errorMessage,
+                                    showConfirmButton: true,
+                                    html: errorMessage2
                                 });
-                            });
-                        } else {
-                            errorMessage += "Error en la solicitud.";
-                        }
-                        Swal.fire({
-                            type: 'error',
-                            title: errorMessage,
-                            showConfirmButton: true,
-                            html: errorMessage2
-                        });
-                    }
-
-
+                            }
                 });
-
         }
-
+        
         $('.dxcie10').select2({
             language: "es",
             theme: "bootstrap4",
@@ -1446,10 +1453,11 @@ Dispensado Medcol Limonar
             }
         }).trigger('change');
 
-        
         $("#selector").on('click', function() {
             $(".checkbox2").prop("checked", this.checked);
         });
+
+
 
         //Funcion para buscar la factura y traer los datos al formulario y datatalbe
         $(document).ready(function() {
@@ -1577,7 +1585,6 @@ Dispensado Medcol Limonar
             });
         });
 
-
         //Funcion para realizar la revision de la dispensacion de forma multiple
         $(document).ready(function() {
             $('#enviarDispensado').on('click', function() {
@@ -1599,7 +1606,7 @@ Dispensado Medcol Limonar
                 const ips = ipsElement.val();
 
                 const userId = "{{ Auth::user()->id }}";
-                
+
                 const camposFaltantes = [];
                 if (!fechaOrden) camposFaltantes.push('Fecha de Ordenamiento');
                 if (!numeroEntrega) camposFaltantes.push('Número de Entrega');
@@ -1704,16 +1711,15 @@ Dispensado Medcol Limonar
                     text: 'Datos guardados correctamente.',
                     confirmButtonText: 'OK'
                 });
-                /* Limpiar el contenido del modal 'gestion_multiple' */
+                // Limpiar el contenido del modal 'gestion_multiple'
                 //$('#gestion_multiple').empty();
                 //$('#gestion_multiple').find('select').prop('selectedIndex', 0);
                 $('#gestion_multiple').find('input, textarea').val('');
                 $('#gestion_multiple').find('select').val('');
 
-                /* Limpiar y recargar la DataTable '#tablaRegistros' */
+                // Limpiar y recargar la DataTable '#tablaRegistros'
                 $('#tablaRegistros').DataTable().clear().draw();
-                /* Opcional: Recargar la DataTable desde el origen de datos */
-                $('#dispensados').DataTable().ajax.reload();
+                // Opcional: Recargar la DataTable desde el origen de datos
                 // $('#tablaRegistros').DataTable().ajax.reload();
 
             } catch (error) {
@@ -1726,6 +1732,12 @@ Dispensado Medcol Limonar
                 });
             }
         }
+        
+        
+        
+        
+
+
 
 
 

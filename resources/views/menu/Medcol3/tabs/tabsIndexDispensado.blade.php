@@ -57,19 +57,17 @@
     <div class="btn-flotante-container">
         <button type="button" id="syncapidis" class="btn-flotante tooltipsC" title="Sync Dispensados">
             <i class="fas fa-capsules fa-1x"></i>
-            <span class="badge badge-pill badge-primary pull-right">Sync Dispensados</span>
+            <span class="badge badge-pill pull-right">Sync Dispensados</span>
         </button>
         <button type="button" id="synanulados" class="btn-flotante-second tooltipsC" title="Sync Anulados">
             <i class="fas fa-trash fa-1x"></i>
-            <span class="badge badge-pill badge-warning pull-left">Sync Anulados</span>
+            <span class="badge badge-pill pull-left">Sync Anulados</span>
         </button>
     </div>
 
-
-    
     <button type="button" id="syncdis" class="btn-flotante1 tooltipsC" title="Enviar Dispensados">
-        <i class="fas fa-edit fa-2x"></i>
-        <span class="badge badge-pill badge-primary pull-right">Enviar Dispensados</span>
+        <i class="fas fa-capsules fa-2x"></i>
+        <span class="badge badge-pill pull-right">Enviar Dispensados</span>
     </button>
 
 
