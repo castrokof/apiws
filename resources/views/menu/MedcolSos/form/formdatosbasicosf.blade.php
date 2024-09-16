@@ -32,61 +32,65 @@
             <h5 class="mb-0">Datos del Afiliado</h5>
         </div>
         <div class="card-body">
-            <div id="datos-afiliado" class="row"></div>
+            <div id="datos-afiliado" class="row">
+                <!-- Aquí se cargarán dinámicamente los datos del afiliado -->
+            </div>
         </div>
     </div>
 
-    <!-- Datos de la Fórmula Médica -->
+    <!-- Tabla de Fórmulas Médicas y Médicos -->
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-info text-white">
-            <h5 class="mb-0">Datos de la Fórmula Médica</h5>
+            <h5 class="mb-0">Fórmulas Médicas y Médicos</h5>
         </div>
         <div class="card-body">
-            <div id="datos-formula" class="row"></div>
-        </div>
-    </div>
-
-    <!-- Datos del Médico -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-warning text-white">
-            <h5 class="mb-0">Datos del Médico</h5>
-        </div>
-        <div class="card-body">
-            <div id="datos-medico" class="row"></div>
-        </div>
-    </div>
-
-    <!-- Medicamentos -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-danger text-white">
-            <h5 class="mb-0">Medicamentos Formulados</h5>
-        </div>
-        <div class="card-body">
-            <!-- Tabla para listar los medicamentos -->
+            <!-- Tabla para mostrar las fórmulas y los médicos que ordenaron -->
             <table class="table table-bordered table-striped">
                 <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Código</th>
-                        <th>Nombre Medicamento</th>
-                        <th>Cantidad Ordenada</th>
-                        <th>Concentración</th>
-                        <th>Dosis</th>
-                        <th>Vía de Administración</th>
-                        <th>Frecuencia</th>
-                        <th>Duracion</th>
-                        <th>Número de Entregas</th>
-                    </tr>
+
                 </thead>
-                <tbody id="medicamentos-list">
-                    <!-- Aquí se cargarán dinámicamente los medicamentos -->
+                <tbody id="tabla-formulas">
+                    <!-- Aquí se cargarán dinámicamente las fórmulas médicas -->
                 </tbody>
             </table>
         </div>
     </div>
-    <!-- Navegación de Fórmulas -->
-    <div id="navegacion-formulas" class="d-flex justify-content-between">
-        <button id="btn-anterior" class="btn btn-secondary">Anterior</button>
-        <button id="btn-siguiente" class="btn btn-primary">Siguiente</button>
+
+    <!-- Medicamentos Formulados (Modal) -->
+    <div class="modal fade" id="medicamentosModal" tabindex="-1" aria-labelledby="medicamentosModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" id="modal-header">
+                    <!-- Aquí se mostrará el encabezado del modal con la información de la fórmula y del médico -->
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <!-- Aquí se cargará dinámicamente la tabla de medicamentos -->
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Código Medicamento</th>
+                                <th>Nombre Medicamento</th>
+                                <th>Cantidad Ordenada</th>
+                                <th>Concentración</th>
+                                <th>Dosis</th>
+                                <th>Vía de Administración</th>
+                                <th>Frecuencia</th>
+                                <th>Duración</th>
+                                <th>Número de Entregas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="medicamentos-list">
+                            <!-- Aquí se cargarán dinámicamente los medicamentos -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
     </div>
+    
 </div>
+

@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Models\Medcol3;
+namespace App\Models\Medcol6;
 
 use DateTimeInterface;
 
 use Illuminate\Database\Eloquent\Model;
 
-class DispensadoApiMedcol4 extends Model
+class DispensadoApiMedcol6 extends Model
 {
     
 
-    protected $table = 'dispensado_medcol4';
+    protected $table = 'dispensado_medcol6';
 
     protected $fillable = [
         'idusuario',
@@ -24,13 +24,16 @@ class DispensadoApiMedcol4 extends Model
         'expediente',
         'consecutivo',
         'cums_rips',
+        'codigoSOS',
         'codigo',
         'tipo_medicamento',
+        'nombre_comercial',
         'nombre_generico',
         'atc',
         'forma',
         'concentracion',
         'unidad_medicamento',
+        'cantidad_ordenada',
         'numero_unidades',
         'regimen',
         'paciente',
@@ -40,12 +43,19 @@ class DispensadoApiMedcol4 extends Model
         'segundo_nombre',
         'cuota_moderadora',
         'copago',
+        'num_total_entregas',
         'numero_entrega',
+        'numero_orden',
         'fecha_ordenamiento',
         'fecha_suministro',
         'dx',
+        'nitips',
+        'ips',
+        'tipoidmedico',
+        'numeroIdentificacion',
         'id_medico',
         'medico',
+        'especialidadmedico',
         'mipres',
         'precio_unitario',
         'valor_total',
@@ -54,9 +64,15 @@ class DispensadoApiMedcol4 extends Model
         'centroprod',
         'drogueria',
         'cajero',
-        'ips',
         'documento_origen',
-        'factura_origen'
+        'factura_origen',
+        'frecuencia',
+        'dosis',
+        'duracion_tratamiento',
+        'cobertura',
+        'tipocontrato',
+        'tipoentrega',
+        'cod_dispen_transacc'
     ];
 
    /* protected $casts = [

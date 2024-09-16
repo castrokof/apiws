@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Models\Medcol3;
+namespace App\Models\Medcol6;
 
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 
-class ObservacionesApiMedcol3 extends Model
+class ObservacionesApiMedcol6 extends Model
 {
     //
-    protected $table = 'observaciones_api_medcol3';
+    protected $table = 'observaciones_api_medcol6';
     protected $fillable = [
         'observacion',
         'usuario',

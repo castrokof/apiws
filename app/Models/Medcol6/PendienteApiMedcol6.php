@@ -1,13 +1,13 @@
 <?php
-namespace App\Models\Medcol3;
+namespace App\Models\Medcol6;
 
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 
-class PendienteApiMedcol3 extends Model
+class PendienteApiMedcol6 extends Model
 {
     //
-    protected $table = 'pendiente_api_medcol3';
+    protected $table = 'pendiente_api_medcol6';
 
 
     protected $fillable = [
@@ -40,7 +40,17 @@ class PendienteApiMedcol3 extends Model
         'doc_entrega',
         'factura_entrega',
         'centroproduccion',
-        'observaciones'
+        'observaciones',
+        'numero_orden',
+        'codigoSOS',
+        'municipio',
+        't_entrega_dias',
+        't_entrega_horas',
+        'cod_agrupador',
+        'nombre_comercial',
+        'causa_pendiente',
+        'lugar_entrega',
+        'secuencia_pendiente'
     ];
 
     protected function serializeDate(DateTimeInterface $date)

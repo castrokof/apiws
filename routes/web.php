@@ -242,6 +242,50 @@ Route::post('medcol5/disanulado', 'Medcol5\DispensadoApiMedcol5Controller@disanu
 Route::get('buscar-medcol5/{factura}', 'Medcol5\\DispensadoApiMedcol5Controller@buscar')->name('dispensado.medcol5')->middleware('verified')->middleware('verifyuser');
 
 
+//Rutas de tablas de pendientes MEDCOL 6 SOS y JAMUNDI
+
+Route::get('medcol6/pendientes', 'Medcol6\PendienteApiMedcol6Controller@index')->name('medcol6.pendientes')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/pendientes1', 'Medcol6\PendienteApiMedcol6Controller@index1')->name('medcol6.pendientes1')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/porentregar', 'Medcol6\PendienteApiMedcol6Controller@porentregar')->name('medcol6.porentregar')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/entregados', 'Medcol6\PendienteApiMedcol6Controller@entregados')->name('medcol6.entregados')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/desabastecidos', 'Medcol6\PendienteApiMedcol6Controller@getDesabastecidos')->name('medcol6.desabastecidos')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/anulados', 'Medcol6\PendienteApiMedcol6Controller@getAnulados')->name('medcol6.anulados')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/guardar_observacion', 'Medcol6\PendienteApiMedcol6Controller@guardar')->name('medcol6.guardar_observacion')->middleware('verified')->middleware('verifyuser');
+
+Route::get('medcol6/editpendientes/{id}', 'Medcol6\PendienteApiMedcol6Controller@edit')->name('medcol6.pendientes-edit')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/showpendientes/{id}', 'Medcol6\PendienteApiMedcol6Controller@show')->name('medcol6.pendientes-show')->middleware('verified')->middleware('verifyuser');
+Route::put('medcol6/pendientes/{id}', 'Medcol6\PendienteApiMedcol6Controller@update')->name('medcol6.actualizar_pendientes')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/pendientes', 'Medcol6\PendienteApiMedcol6Controller@saveObs')->name('medcol6.crear_observacion')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/pendientes/anuladosapi', 'Medcol6\PendienteApiMedcol6Controller@updateanuladosapi')->name('medcol6.pendientesanulados')->middleware('verified')->middleware('verifyuser');
+
+Route::get('medcol6/observaciones', 'Medcol6\PendienteApiMedcol6Controller@getObservaciones')->name('medcol6.observaciones')->middleware('verified')->middleware('verifyuser');
+
+Route::get('medcol6/syncapi', 'Medcol6\PendienteApiMedcol6Controller@createapendientespi')->name('medcol6.syncapi')->middleware('verified')->middleware('verifyuser');
+
+Route::get('medcol6/informe', 'Medcol6\PendienteApiMedcol6Controller@informes')->name('medcol6.informe')->middleware('verified')->middleware('verifyuser');
+
+Route::get('informepedientes6', 'Medcol6\PendienteApiMedcol6Controller@informepedientes')->name('informepedientes6')->middleware('verified')->middleware('verifyuser');
+
+
+//Rutas de tablas de Dispensado MEDCOL 6 SOS y JAMUNDI
+
+Route::get('medcol6/dispensado', 'Medcol6\DispensadoApiMedcol6Controller@index')->name('medcol6.dispensado')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/dispensado1', 'Medcol6\DispensadoApiMedcol6Controller@index1')->name('medcol6.dispensado1')->middleware('verified')->middleware('verifyuser');
+
+Route::post('medcol6/disrevisado', 'Medcol6\DispensadoApiMedcol6Controller@disrevisado')->name('medcol6.disrevisado')->middleware('verified')->middleware('verifyuser');
+Route::put('medcol6/dispensado/{id}', 'Medcol6\DispensadoApiMedcol6Controller@update')->name('medcol6.actualizar_dispensado')->middleware('verified')->middleware('verifyuser');
+
+Route::get('medcol6/dispensado/syncdisapi', 'Medcol6\DispensadoApiMedcol6Controller@createdispensadoapi')->name('medcol6.dispensadosyncapi')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/dispensado/anuladosapi', 'Medcol6\DispensadoApiMedcol6Controller@updateanuladosapi')->name('medcol6.anuladosapi')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/add_dispensado', 'Medcol6\DispensadoApiMedcol6Controller@adddispensacionarray')->name('add_dispensacion')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/update', 'Medcol6\DispensadoApiMedcol6Controller@actualizarDispensacion')->name('dispensado.guardar')->middleware('verified')->middleware('verifyuser');
+
+Route::get('medcol6/informedis', 'Medcol6\DispensadoApiMedcol6Controller@informes')->name('medcol6.informedis')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/disanulado', 'Medcol6\DispensadoApiMedcol6Controller@disanulado')->name('medcol6.disanulado')->middleware('verified')->middleware('verifyuser');
+
+Route::get('buscar-medcol6/{factura}', 'Medcol6\\DispensadoApiMedcol6Controller@buscar')->name('dispensado.medcol6')->middleware('verified')->middleware('verifyuser');
+
+
 /*
 **
 **
