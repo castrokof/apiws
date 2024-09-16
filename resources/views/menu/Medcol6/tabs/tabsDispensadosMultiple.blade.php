@@ -15,7 +15,7 @@
                 <div class="tab-content" id="custom-tabs-one-tabContent">
                     <div class="tab-pane fade active show" id="custom-tabs-one-datos-med-dispensado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-med-dispensado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.form.dispensado.form')
+                            @include('menu.Medcol6.form.dispensado.form')
                         </div>
                     </div>
                     

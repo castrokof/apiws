@@ -18,7 +18,7 @@
 
 
 
-                @include('menu.Medcol3.form.formAnalistaPsi')
+                @include('menu.Medcol6.form.formAnalistaPsi')
 
         </form>
         </div>

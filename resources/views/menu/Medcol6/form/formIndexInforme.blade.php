@@ -73,7 +73,7 @@
 
 
                                   @csrf
-                                  @include('menu.Medcol3.tablas.tablaIndexInforme')
+                                  @include('menu.Medcol6.tablas.tablaIndexInforme')
 
                             </div>
                            </div>

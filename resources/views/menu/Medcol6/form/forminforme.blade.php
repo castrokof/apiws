@@ -4,7 +4,7 @@
             <div class="row mb-2">
                 <div class="col-sm-6">
                    @if(Auth::user()->drogueria == '1')
-                    <h1 class="m-0">Pendientes Medcol PCE, HUE Y BIO</h1>
+                    <h1 class="m-0">Pendientes Medcol SOS - JAMUNDI</h1>
                    @elseif(Auth::user()->drogueria == '4')  
                    <h1 class="m-0">Pendientes Medcol PCE</h1>
                    @elseif(Auth::user()->drogueria == '5')  

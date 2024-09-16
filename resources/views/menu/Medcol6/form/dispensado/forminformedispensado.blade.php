@@ -3,7 +3,7 @@
         <div class="row mb-2">
             <div class="col-sm-6">
                 @if(Auth::user()->drogueria == '1')
-                <h1 class="m-0">Dispensado Medcol PCE, HUE Y BIO</h1>
+                <h1 class="m-0">Dispensado Medcol SOS - JAMUNDI</h1>
                 @elseif(Auth::user()->drogueria == '4')
                 <h1 class="m-0">Dispensado Medcol PCE</h1>
                 @elseif(Auth::user()->drogueria == '5')
@@ -15,7 +15,7 @@
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="#">Home</a></li>
-                    <li class="breadcrumb-item active">Pendientes v1</li>
+                    <li class="breadcrumb-item active">Dispensado v1</li>
                 </ol>
             </div>
         </div>
@@ -39,9 +39,10 @@
                                 <label for="contrato" class="col-form-label">Droguería</label>
                                 <select name="contrato" id="contrato" class="form-control select2bs4" style="width: 100%;" required>
                                     <option value="">Seleccione opcion...</option>
-                                    <option value="PAC">PAC-FARMACIA PLAN COMP</option>
-                                    <option value="EHU1">EHU1-FARMACIA HUÉRFANAS</option>
-                                    <option value="BIO1">BIO1-FARMACIA BIOLOGICOS</option>
+                                    <option value="FACO">FACO-FARMACIA SOS PASOANCHO</option>
+                                    <option value="FAID">FAID-FARMACIA SOS IDEO</option>
+                                    <option value="FAAU">FAAU-FARMACIA SOS AUTOPISTA</option>
+                                    <option value="FAJA">FAJA-FARMACIA JAMUNDI COMFENALCO</option>
                                     <option value="EVEN">EVEN-FARMACIA EVENTO</option>
                                 </select>
                             </div>

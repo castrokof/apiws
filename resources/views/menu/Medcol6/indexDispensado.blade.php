@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('titulo')
-Dispensado Medcol Limonar
+Dispensado Medcol SOS-Jamundi
 @endsection
 @section("styles")
 
@@ -34,9 +34,9 @@ Dispensado Medcol Limonar
 <div class="loaders"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>
 
 
-@include('menu.Medcol3.form.dispensado.forminformedispensado')
-@include('menu.Medcol3.tabs.tabsIndexDispensado')
-@include('menu.Medcol3.modal.modalGestionMultiple')
+@include('menu.Medcol6.form.dispensado.forminformedispensado')
+@include('menu.Medcol6.tabs.tabsIndexDispensado')
+@include('menu.Medcol6.modal.modalGestionMultiple')
 
 @endsection
 
@@ -71,7 +71,7 @@ Dispensado Medcol Limonar
           $("#detalle2").empty();
         
           $.ajax({
-            url: "{{ route('medcol3.informedis') }}",
+            url: "{{ route('medcol6.informedis') }}",
             dataType: "json",
             success: function(data) {
               const { dispensado, revisado, anulado } = data;
@@ -220,7 +220,7 @@ Dispensado Medcol Limonar
 
 
                                 ajax: {
-                                    url: "{{route('medcol3.dispensado1')}}",
+                                    url: "{{route('medcol6.dispensado1')}}",
                                     data: {
                                         fechaini: fechaini,
                                         fechafin: fechafin,
@@ -525,7 +525,7 @@ Dispensado Medcol Limonar
                                     [28, "desc"]
                                 ],
                                 ajax: {
-                                    url: "{{route('medcol3.disrevisado')}}",
+                                    url: "{{route('medcol6.disrevisado')}}",
                                     data: {
                                         fechaini: fechaini,
                                         fechafin: fechafin,
@@ -764,7 +764,7 @@ Dispensado Medcol Limonar
                                     [28, "desc"]
                                 ],
                                 ajax: {
-                                    url: "{{route('medcol3.disanulado')}}",
+                                    url: "{{route('medcol6.disanulado')}}",
                                     data: {
                                         fechaini: fechaini,
                                         fechafin: fechafin,
@@ -1088,7 +1088,7 @@ Dispensado Medcol Limonar
         // Función que envia el id al controlador y cambia el estado del registro
         $(document).on('click', '#syncapidis', function() {
 
-            const text = 'De Medcol PCE-Huerfanas-Biologicos';
+            const text = 'De Medcol SOS - Jamundi';
 
             Swal.fire({
                 title: "¿Estás por sincronizar lo dispensado?",
@@ -1111,7 +1111,7 @@ Dispensado Medcol Limonar
                 beforeSend: function() {
                     $('.loaders').css("visibility", "visible");
                 },
-                url: "{{route('medcol3.dispensadosyncapi')}}",
+                url: "{{route('medcol6.dispensadosyncapi')}}",
                 type: 'GET',
                 success: function(data) {
                     $('#dispensados').DataTable().ajax.reload();
@@ -1133,7 +1133,7 @@ Dispensado Medcol Limonar
         //Funcion para sincronizar las facturas anuladas y actualizar el estado
         $(document).on('click', '#synanulados', function() {
 
-            const text = 'De Medcol PCE-Huerfanas-Biologicos';
+            const text = 'De Medcol SOS - Jamundi';
 
             Swal.fire({
                 title: "¿Estás por sincronizar los anulados?",
@@ -1156,7 +1156,7 @@ Dispensado Medcol Limonar
                 beforeSend: function() {
                     $('.loaders').css("visibility", "visible");
                 },
-                url: "{{route('medcol3.anuladosapi')}}",
+                url: "{{route('medcol6.anuladosapi')}}",
                 type: 'GET',
                 success: function(data) {
                     $('#dispensados').DataTable().ajax.reload();
@@ -1311,7 +1311,6 @@ Dispensado Medcol Limonar
 
 
         function enviardatos(dispensadotrue1) {
-
 
             Swal.fire({
                     icon: "info",
@@ -1472,7 +1471,7 @@ Dispensado Medcol Limonar
             const numeroFactura = $('#numero_factura').val();
 
             $.ajax({
-                url: `{{ route('dispensado.medcol3', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
+                url: `{{ route('dispensado.medcol6', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
                 type: 'GET',
                 success: function(data) {
                     if (data && Array.isArray(data) && data.length > 0) {
@@ -1732,10 +1731,7 @@ Dispensado Medcol Limonar
                 });
             }
         }
-        
-        
-        
-        
+
 
 
 

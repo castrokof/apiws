@@ -23,30 +23,30 @@
                 <div class="tab-content" id="custom-tabs-one-tabContent">
                     <div class="tab-pane fade active show" id="custom-tabs-one-datos-de-dispensado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-de-dispensado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.dispensados.tablaIndexDispensados')
+                            @include('menu.Medcol6.tablas.dispensados.tablaIndexDispensados')
                         </div>
                     </div>
 
                     <div class="tab-pane fade " id="custom-tabs-one-datos-disrevisado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-disrevisado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.dispensados.tablaIndexRevisados')
+                            @include('menu.Medcol6.tablas.dispensados.tablaIndexRevisados')
                         </div>
 
                     </div>
                     <div class="tab-pane fade " id="custom-tabs-one-datos-disanulado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-disanulado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.dispensados.tablaIndexAnulados')
+                            @include('menu.Medcol6.tablas.dispensados.tablaIndexAnulados')
                         </div>
                     </div>
                     <!--<div class="tab-pane fade " id="custom-tabs-one-datos-desabastecido" role="tabpanel" aria-labelledby="custom-tabs-one-datos-desabastecido-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.tablaIndexDesabastecido')
+                            @include('menu.Medcol6.tablas.tablaIndexDesabastecido')
                         </div>
 
                     </div>
                     <div class="tab-pane fade " id="custom-tabs-one-datos-anulado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-anulado-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.tablaIndexAnulado')
+                            @include('menu.Medcol6.tablas.tablaIndexAnulado')
                         </div>
 
                     </div>-->
@@ -57,19 +57,17 @@
     <div class="btn-flotante-container">
         <button type="button" id="syncapidis" class="btn-flotante tooltipsC" title="Sync Dispensados">
             <i class="fas fa-capsules fa-1x"></i>
-            <span class="badge badge-pill badge-primary pull-right">Sync Dispensados</span>
+            <span class="badge badge-pill pull-right">Sync Dispensados</span>
         </button>
         <button type="button" id="synanulados" class="btn-flotante-second tooltipsC" title="Sync Anulados">
-            <i class="fas fa-capsules fa-1x"></i>
-            <span class="badge badge-pill badge-warning pull-left">Sync Anulados</span>
+            <i class="fas fa-trash fa-1x"></i>
+            <span class="badge badge-pill pull-left">Sync Anulados</span>
         </button>
     </div>
 
-
-    
     <button type="button" id="syncdis" class="btn-flotante1 tooltipsC" title="Enviar Dispensados">
         <i class="fas fa-capsules fa-2x"></i>
-        <span class="badge badge-pill badge-primary pull-right">Enviar Dispensados</span>
+        <span class="badge badge-pill pull-right">Enviar Dispensados</span>
     </button>
 
 

@@ -31,15 +31,15 @@ Pendientes Medcol SOS-Jamundi
 @section('content')
 <div class="loaders"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>
 
-@include('menu.Medcol3.form.forminforme')
-@include('menu.Medcol3.tabs.tabsIndexAnalista')
-@include('menu.Medcol3.modal.modalindexresumen')
-@include('menu.Medcol3.modal.modalindexaddseguimiento')
+@include('menu.Medcol6.form.forminforme')
+@include('menu.Medcol6.tabs.tabsIndexAnalista')
+@include('menu.Medcol6.modal.modalindexresumen')
+@include('menu.Medcol6.modal.modalindexaddseguimiento')
 
-@include('menu.Medcol3.modal.modalPendientes')
-@include('menu.Medcol3.modal.modalDetallePendiente')
+@include('menu.Medcol6.modal.modalPendientes')
+@include('menu.Medcol6.modal.modalDetallePendiente')
 
-@include('menu.Medcol3.modal.modalindexresumenpendientes')
+@include('menu.Medcol6.modal.modalindexresumenpendientes')
 
 
 @endsection
@@ -111,7 +111,7 @@ Pendientes Medcol SOS-Jamundi
                     $("#detalle1").append(
 
 
-                        '<div class="small-box shadow-lg l-bg-orange-dark"><div class="inner">' +
+                        '<div class="small-box shadow-lg l-bg-green-dark"><div class="inner">' +
                         '<h5>TOTAL ENTREGADOS</h5>' +
                         '<p><h5> ' + a +
                         '</h5></p>' +
@@ -129,7 +129,7 @@ Pendientes Medcol SOS-Jamundi
                     $("#detalle2").append(
 
 
-                        '<div class="small-box shadow-lg l-bg-green-dark"><div class="inner">' +
+                        '<div class="small-box shadow-lg l-bg-orange-dark"><div class="inner">' +
                         '<h5>EN TRAMITE</h5>' +
                         '<p><h5><i class="fas fa-comment-medical"></i> ' + a +
                         '</h5></p>' +

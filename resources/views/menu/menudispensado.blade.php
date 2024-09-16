@@ -479,7 +479,7 @@
                 <div class="card-body text-center">
                     <div class="card-header"> <i class="fas fa-capsules"></i>MedCol SOS - JAMUNDI</div>
                     <div class="list-group">
-                        <a href="{{ route('medcol5.dispensado') }}" class="list-group-item list-group-item-action">
+                        <a href="{{ route('medcol6.dispensado') }}" class="list-group-item list-group-item-action">
                             <i class="far fa-share-square"></i> Gestionar Dispensación <span class="badge badge-pill badge-primary pull-right">SOS - JAMUNDI</span>
                         </a>
                     </div>

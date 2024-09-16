@@ -28,7 +28,7 @@
                         <form id="form-general1" class="form-horizontal">
                             @csrf
                             <div class="card-body">
-                                @include('menu.Medcol3.tabs.tabsIndexPendientes')
+                                @include('menu.Medcol6.tabs.tabsIndexPendientes')
                             </div>
                             <!-- /.card-body -->
                             <div class="card-footer">

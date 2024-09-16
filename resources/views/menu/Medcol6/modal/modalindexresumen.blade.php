@@ -17,7 +17,7 @@
                 @csrf
 
 
-                @include('menu.Medcol3.form.formAnalista')
+                @include('menu.Medcol6.form.formAnalista')
 
 
         </form>

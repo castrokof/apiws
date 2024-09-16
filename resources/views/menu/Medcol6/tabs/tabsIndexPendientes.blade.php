@@ -19,12 +19,12 @@
                 <div class="tab-content" id="custom-tabs-one-tabContent">
                     <div class="tab-pane fade active show" id="custom-tabs-one-datos-med-pendiente" role="tabpanel" aria-labelledby="custom-tabs-one-datos-med-pendiente-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.form.form')
+                            @include('menu.Medcol6.form.form')
                         </div>
                     </div>
                     <div class="tab-pane fade" id="custom-tabs-one-datos-observaciones" role="tabpanel" aria-labelledby="custom-tabs-one-datos-observaciones-tab">
                         <div class="card-body">
-                            @include('menu.Medcol3.tablas.tablaObservaciones')
+                            @include('menu.Medcol6.tablas.tablaObservaciones')
                         </div>
                     </div>
                 </div>
