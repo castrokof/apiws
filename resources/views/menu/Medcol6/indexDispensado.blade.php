@@ -2178,7 +2178,7 @@ Dispensado Medcol Jamundi
                     $('#numeroIdentificacion').val(data.dispensado.numeroIdentificacion);
                     $('#factura').val(data.dispensado.factura);
                     $('#codigo').val(data.dispensado.codigo);
-                    $('#nombre_comercial').val(data.dispensado.nombre_comercial);
+                    $('#nombre_generico').val(data.dispensado.nombre_generico);
 
                     if (data.dispensado.cums === '' || data.dispensado.cums === null) {
                         $('#cums').val(data.dispensado.codigo);
@@ -2194,14 +2194,14 @@ Dispensado Medcol Jamundi
                     $('#medico').val(data.dispensado.medico);
                     $('#especialidadmedico').val(data.dispensado.especialidadmedico);
                     $('#estado').val(data.dispensado.estado);
-                    $('#fecha_entrega').val(safeDate(data.dispensado.fecha_suministro));
+                    /* $('#fecha_entrega').val(safeDate(data.dispensado.fecha_suministro)); */
                     $('#autorizacion').val(data.dispensado.autorizacion);
                     $('#mipres').val(data.dispensado.mipres);
                     $('#reporte_entrega_nopbs').val(data.dispensado.reporte_entrega_nopbs);
 
                     $('#hidden_id').val(id);
-                    $('#edit_dispensado').text("Editando registro dispensación: " + data.dispensado.numeroIdentificacion +
-                        " - " + data.dispensado.factura);
+                    $('#edit_dispensado').text("Editando el registro # " + data.dispensado.id +
+                        " de la factura " + data.dispensado.factura);
 
                     $('#action_button').val('Edit');
                     $('#action').val('Edit');
