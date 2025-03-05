@@ -40,7 +40,8 @@ class EntregadosApiMedcold extends Model
         'fecha_anulado',
         'doc_entrega',
         'factura_entrega',
-        'centroproduccion'
+        'centroproduccion',
+        'observaciones'
 
     ];
 

@@ -15,7 +15,7 @@
                         <div class="form-group row col-lg-12">
                             <div class="col-md-6">
                                    <label for="fechaini" class="col-xs-2 control-label requerido">Fecha de
-                                    Informes</label>
+                                    Informe</label>
                                     <div class="form-group row">
                                     <input type="date" name="fechaini" id="fechaini" class="form-control col-md-6"
                                         value="">

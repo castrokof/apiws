@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Listas\ListasDetalle;
 use App\Models\compras\medcol3\MedcolCotizaciones3;
 use App\Models\compras\medcol3\MedcolCotiGeneral3;
+use App\Imports\CotizacionesImport;
 use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Cache;
 use PhpParser\Node\Stmt\Return_;
 use stdClass;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ControllerMedcolCotizaciones3 extends Controller
 {
@@ -78,55 +80,52 @@ class ControllerMedcolCotizaciones3 extends Controller
 
     public function import(Request $request)
     {
+       $user_id = Auth::user()->id;
+        
        
-   if($request->ajax()){
-      $file = $request->file('file');
+        if ($request->ajax()) {
+            $file = $request->file('file');
 
-        if($file == null){
+            if ($file == null) {
+                return response()->json(['mensaje' => 'vacio']);
+            }
 
-         return response()->json(['mensaje' => 'vacio']);//return redirect('admin/archivo')->with('mensaje', 'No seleccionaste ningun archivo');
+            // Guardar metadatos del archivo
+            $archivo = new MedcolCotiGeneral3();
+            $archivo->archivo = $file->getClientOriginalName();
+            $archivo->registros = 0; // Se actualizará después de importar
+            $archivo->fecha_inicio = $request->fecha_inicio;
+            $archivo->fecha_fin = $request->fecha_fin;
+            $archivo->estado = 'activo';
+            $archivo->user_id = $user_id;
+            $archivo->save();
+            
+            
+            $name=time().$file->getClientOriginalName();  
+                              
+            //$destinationPath = public_path('xlsxin/');
+            //$file->move($destinationPath, $name);
+            $path = $file->storeAs('uploads', $name, 'local');
+            //$path=$destinationPath.$name;
+             
 
+            // Importar datos desde el archivo Excel
+            $import = new CotizacionesImport($request->fecha_inicio, $request->fecha_fin, $user_id, $archivo->id );
+            Excel::import($import, storage_path('app/' . $path));
 
-        }else{
+            // Actualizar la cantidad de registros importados
+            $archivo->registros = $import->getRowCount();
+            $archivo->save();
 
-        $this->importaExcel($request);
-       
-
-               return response()->json(['mensaje' => 'ok']); //return redirect('admin/archivo')->with('mensaje', 'Archivo cargado exitosamente');
-
-
+            if($import->getRowCount() == 0){
+                return response()->json(['mensaje' => 'ng']);
+            }else{
+                
+                return response()->json(['mensaje' => 'ok']);    
+            }
+            
         }
-
     }
-
-
-    }
-    
-    
-    public function importaExcel(Request $request, $totalcargados = '')
-    {
-
-         // Guardo la colección en $file
-
-       $file = $request->file('file');
-
-       $name=time().$file->getClientOriginalName();
-
-
-        $destinationPath = public_path('importbd/');
-
-        $file->move($destinationPath, $name);
-
-        $path=$destinationPath.$name;
-
-       // $import = new EstadosImport();
-
-    Excel::import(new EstadosImport, $path);
-
-
-    }
-    
-    
     
 
     /**
@@ -173,8 +172,6 @@ class ControllerMedcolCotizaciones3 extends Controller
 
                 $datas = DB::table('base_coti_general_medcol3')->select('activo')->where('id',$request->input('id'))->first();
 
-
-
                 foreach($datas as $data){
 
                   if($data == 'SI'){
@@ -198,6 +195,7 @@ class ControllerMedcolCotizaciones3 extends Controller
             }
 
     }
+    
      public function indexDetalleCotizaciones(Request $request)
     {
 
@@ -241,23 +239,21 @@ class ControllerMedcolCotizaciones3 extends Controller
                 ->make(true);
 
 
-            } else {
+            } 
+            
+            //else {
 
-                $datas = MedcolCotizaciones3::orderBy('id', 'asc')
-                ->where('listas_id', '=', null)->get();
-                return  DataTables()->of($datas)
-                        ->make(true);;
+              //  $datas = MedcolCotizaciones3::orderBy('id', 'asc')
+                //->where('listas_id', '=', null)->get();
+                //return  DataTables()->of($datas)
+                  //      ->make(true);
 
-            }
+            //}
         }
 
 
         return view('menu.Cotizaciones.Medcol3.index');
     }
-    
-    
-    
-
  
 
     /**

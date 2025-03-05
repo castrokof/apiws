@@ -6,6 +6,11 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
+
+use App\Models\Bd_direccionados;
+use App\Models\Bd_reporteentregado;
+use App\User;
 
 class HomeController extends Controller
 {
@@ -14,9 +19,17 @@ class HomeController extends Controller
      *
      * @return void
      */
+     
+     
+    public $token;
+    public $NIT;
+     
     public function __construct()
     {
         $this->middleware('auth');
+        $this->token = session('token');
+        $this->NIT = '901601000';
+        
     }
 
     /**
@@ -24,7 +37,9 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    
+     
+      
+ 
 //Funcion para consulta de lo direccionado por la EPS a medcol     
     public function index(Request $request)
     {   
@@ -32,33 +47,14 @@ class HomeController extends Controller
         $fechaini=$request->fechaini;
         $fechafin=$request->fechafin;
         $prescripcion = $request->prescripcion;
+       
+        $token = session('token');
         
-
-        
-
         $TokenHercules = session('tokenh');
  
         if( $TokenHercules != '' ||  $TokenHercules != null){
         
-        $NIT='901601000';
-        //$response = Http::withOptions([
-          //  'debug' => true,
-        //])->get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/GenerarToken/$NIT/$TokenHercules");
-     
-        $response = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/GenerarToken/$NIT/$TokenHercules");
-        
-        
-     
-        $token=$response->json();
-        $statusF=$response->status();
-
-        //dd($token);
-        if($statusF != 200){
-
-            return view('home', compact('statusF'));
-        }
-
-
+       
 // Array fechas
         $fecha = [$fechaAi];
         $fechai = [];
@@ -84,18 +80,62 @@ class HomeController extends Controller
          
         }
    
+       
 //Variable count de las fechas
     $pcf=count($fecha);
     $pcfi=count($fechai);
 
-
-
+      
     if(empty($fechaini) && empty($prescripcion)){
+   
     for ($i=0; $i < $pcf; $i++) { 
 
-        $medicamentosF = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/DireccionamientoXFecha/$NIT/$token/$fecha[$i]");
-    
-        $medicamentos2[]= $medicamentosF->json();
+        $medicamentosF = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/DireccionamientoXFecha/{$this->NIT}/$token/$fecha[$i]");
+        
+      
+                $medicamentosArray = $medicamentosF->json();
+                $medicamentos2[] = $medicamentosF->json();
+                
+                // Iterar sobre cada elemento del array
+                // Iterar sobre cada medicamento en la respuesta
+                    foreach ($medicamentosArray as $data) {
+                        // Usar 'firstOrCreate' para crear o obtener el registro si ya existe
+                        Bd_direccionados::firstOrCreate(
+                            ['Idt' => $data['ID']], // Condición para verificar si el registro existe
+                            [
+                                'IDDireccionamiento' => $data['IDDireccionamiento'],
+                                'NoPrescripcion' => $data['NoPrescripcion'],
+                                'TipoIDPaciente' => $data['TipoIDPaciente'],
+                                'NoIDPaciente' => $data['NoIDPaciente'],
+                                'CantTotAEntregar' => $data['CantTotAEntregar'],
+                                'NoEntrega' => $data['NoEntrega'],
+                                'TipoIDProv' => $data['TipoIDProv'],
+                                'NoIDProv' => $data['NoIDProv'],
+                                'CodSerTecAEntregar' => $data['CodSerTecAEntregar'],
+                                'FecMaxEnt' => $data['FecMaxEnt'],
+                                'FecDireccionamiento' => $data['FecDireccionamiento'],
+                                'NoIDEPS' => $data['NoIDEPS'],
+                                'CodEPS' => $data['CodEPS'],
+                                'CodSedeProv' => 'PROV007788', // Asegúrate que este valor esté disponible en el usuario autenticado
+                                'IdProgramacion' => null,
+                                'fechapro' => null,
+                                'fechaanuladopro' => null,
+                                'IdEntregado' => null,
+                                'fechaentregado' => null,
+                                'fechaanuladoentregado' => null,
+                                'IdReporteEntrega' => null,
+                                'fechareporteentregado' => null,
+                                'fechaanuladoreporteentregado' => null,
+                                'IdFacturado' => null,
+                                'fechafacturado' => null,
+                                'fechaanuladofacturado' => null,
+                                'estado' => 1
+                            ]
+                        );
+                    }
+                             
+        
+        
         
         $statusF= $medicamentosF->status();
         
@@ -108,13 +148,58 @@ class HomeController extends Controller
             
             for ($i=0; $i < $pcfi; $i++) { 
 
-                $medicamentosF = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/DireccionamientoXFecha/$NIT/$token/$fechai[$i]");
+                $medicamentosF = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/DireccionamientoXFecha/{$this->NIT}/$token/$fechai[$i]");
             
-                $medicamentos2[]= $medicamentosF->json();
+            
+                $medicamentosArray = $medicamentosF->json();
+                $medicamentos2[] = $medicamentosF->json();
+                
+                                // Iterar sobre cada elemento del array
+                 // Iterar sobre cada medicamento en la respuesta
+                    foreach ($medicamentosArray as $data) {
+                        // Usar 'firstOrCreate' para crear o obtener el registro si ya existe
+                        Bd_direccionados::firstOrCreate(
+                            ['Idt' => $data['ID']], // Condición para verificar si el registro existe
+                            [
+                                'IDDireccionamiento' => $data['IDDireccionamiento'],
+                                'NoPrescripcion' => $data['NoPrescripcion'],
+                                'TipoIDPaciente' => $data['TipoIDPaciente'],
+                                'NoIDPaciente' => $data['NoIDPaciente'],
+                                'CantTotAEntregar' => $data['CantTotAEntregar'],
+                                'NoEntrega' => $data['NoEntrega'],
+                                'TipoIDProv' => $data['TipoIDProv'],
+                                'NoIDProv' => $data['NoIDProv'],
+                                'CodSerTecAEntregar' => $data['CodSerTecAEntregar'],
+                                'FecMaxEnt' => $data['FecMaxEnt'],
+                                'FecDireccionamiento' => $data['FecDireccionamiento'],
+                                'NoIDEPS' => $data['NoIDEPS'],
+                                'CodEPS' => $data['CodEPS'],
+                                'CodSedeProv' => 'PROV007788', // Asegúrate que este valor esté disponible en el usuario autenticado
+                                'IdProgramacion' => null,
+                                'fechapro' => null,
+                                'fechaanuladopro' => null,
+                                'IdEntregado' => null,
+                                'fechaentregado' => null,
+                                'fechaanuladoentregado' => null,
+                                'IdReporteEntrega' => null,
+                                'fechareporteentregado' => null,
+                                'fechaanuladoreporteentregado' => null,
+                                'IdFacturado' => null,
+                                'fechafacturado' => null,
+                                'fechaanuladofacturado' => null,
+                                'estado' => 1
+                            ]
+                        );
+                    }
+                             
+                
+                
                 
                 $statusF= $medicamentosF->status();
                 
                 }
+                
+               
             
         return view('home', compact('medicamentos2','statusF'));
 
@@ -128,9 +213,51 @@ class HomeController extends Controller
             
             for ($i=0; $i < $pc; $i++) { 
 
-                $medicamentosF = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/DireccionamientoXPrescripcion/$NIT/$token/$prescripciona[$i]");
-            
-                $medicamentos2[]= $medicamentosF->json();
+                $medicamentosF = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/DireccionamientoXPrescripcion/{$this->NIT}/$token/$prescripciona[$i]");
+                
+                
+                $medicamentosArray = $medicamentosF->json();
+                $medicamentos2[] = $medicamentosF->json();
+                
+                                // Iterar sobre cada elemento del array
+                 // Iterar sobre cada medicamento en la respuesta
+                    foreach ($medicamentosArray as $data) {
+                        // Usar 'firstOrCreate' para crear o obtener el registro si ya existe
+                        Bd_direccionados::firstOrCreate(
+                            ['Idt' => $data['ID']], // Condición para verificar si el registro existe
+                            [
+                                'IDDireccionamiento' => $data['IDDireccionamiento'],
+                                'NoPrescripcion' => $data['NoPrescripcion'],
+                                'TipoIDPaciente' => $data['TipoIDPaciente'],
+                                'NoIDPaciente' => $data['NoIDPaciente'],
+                                'CantTotAEntregar' => $data['CantTotAEntregar'],
+                                'NoEntrega' => $data['NoEntrega'],
+                                'TipoIDProv' => $data['TipoIDProv'],
+                                'NoIDProv' => $data['NoIDProv'],
+                                'CodSerTecAEntregar' => $data['CodSerTecAEntregar'],
+                                'FecMaxEnt' => $data['FecMaxEnt'],
+                                'FecDireccionamiento' => $data['FecDireccionamiento'],
+                                'NoIDEPS' => $data['NoIDEPS'],
+                                'CodEPS' => $data['CodEPS'],
+                                'CodSedeProv' => 'PROV007788', // Asegúrate que este valor esté disponible en el usuario autenticado
+                                'IdProgramacion' => null,
+                                'fechapro' => null,
+                                'fechaanuladopro' => null,
+                                'IdEntregado' => null,
+                                'fechaentregado' => null,
+                                'fechaanuladoentregado' => null,
+                                'IdReporteEntrega' => null,
+                                'fechareporteentregado' => null,
+                                'fechaanuladoreporteentregado' => null,
+                                'IdFacturado' => null,
+                                'fechafacturado' => null,
+                                'fechaanuladofacturado' => null,
+                                'estado' => 1
+                            ]
+                        );
+                    }
+                                                
+                
                 
                 $statusF= $medicamentosF->status();
                 
@@ -140,7 +267,18 @@ class HomeController extends Controller
             
         return view('home', compact('medicamentos2','statusF'));
 
-        }
+        }else if(!empty($fechaini) && !empty($prescripcion)){
+            
+            $error = 'No puedes consultar una prescripción y un rango de fechas al mismo tiempo';
+            $medicamentos2[] = [];
+            $statusF = '000';
+            
+                return view('home', compact('error','medicamentos2','statusF'));
+            }
+            
+              
+            
+        //return view('home', compact('medicamentos2','statusF'));
         
         
            }else{
@@ -149,7 +287,6 @@ class HomeController extends Controller
                    
                 }
                 
-
 
     }
     
@@ -447,7 +584,18 @@ class HomeController extends Controller
         
             session(['tokenh' => $request->tokenhercules]);
             
-            return redirect('tokenhercules')->with('mensaje', 'Token almacenado correctamente!!
+          
+            $TokenHercules = session('tokenh');
+            
+            $NIT='901601000';
+            $response = Http::get("https://wsmipres.sispro.gov.co/WSSUMMIPRESNOPBS/api/GenerarToken/$NIT/$TokenHercules");
+            
+            $token=$response->json();
+            session(['token' => $token]);
+             
+            
+            
+            return redirect('tokenhercules')->with('mensaje', 'Token '.$token.' almacenado correctamente!!
             dirigete a direccionamiento en la barra superior');
             
     }
@@ -1078,6 +1226,10 @@ class HomeController extends Controller
 
 
         $pmipres = $request->data;
+        
+         $row = 0;
+         $data1 = [];
+         $status = [];
 
 
         foreach($pmipres as $mipre){
@@ -1086,20 +1238,26 @@ class HomeController extends Controller
 
             $responsepost = Http::put("https://wsmipres.sispro.gov.co/WSFACMIPRESNOPBS/api/FacturacionAnular/$NIT/$token/$idpro");
 
-            $status = $responsepost->status();
-            $data1=$responsepost->body();
+            $status[] = $responsepost->status();
+            $data1[]=$responsepost->body();
 
-            if($status != 200){
-            return response()->json(['result'=>$data1, 'success' => 'ya']);
-
-        }else if($status == 200){
-                return response()->json(['result'=>$data1, 'success' => 'ok']);
-            }
+             $row++;
 
         }
+        
+        /*if($status != 200){
+            return response()->json(['result'=>$data1, 'success' => 'ya']);
+
+        }else if($status == 200){*/
+                return response()->json(['result'=>$data1, 'result1' => $status, 'registros' => $row]);
+          //  }
 
     }
 } 
         
- 
+        
+
+
+
+
 

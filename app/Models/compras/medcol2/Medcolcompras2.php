@@ -28,6 +28,7 @@ class Medcolcompras2 extends Model
         'iva',
         'proveedor_id',
         'contrato',
+        'observaciones',
         'usuario_id'
     ];
     

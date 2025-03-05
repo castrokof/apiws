@@ -20,7 +20,14 @@ class PendienteApiController extends Controller
 
     public $var1 = null;
     public $var2 = null;
-    public $ip = null;
+    public $ip = 'http://hef08s3bxw8.sn.mynetname.net';
+    
+    //public $ip = 'http://hed08pf9dxt.sn.mynetname.net';
+    //public $puerto = ':8003';
+    public $puerto = ':8000';
+    
+  
+    
     public $res = false;
 
 
@@ -72,24 +79,31 @@ class PendienteApiController extends Controller
      */
     public function createapendientespi(Request $request)
     {
-
+        
         $email = 'sistemas.saludtempus@gmail.com'; // Auth::user()->email
         $password = '12345678';
 
         try {
 
-            $response = Http::post("http://190.145.32.226:8000/api/acceso", [
+            $response = Http::post($this->ip.$this->puerto."/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
             ]);
 
+    
+           
+
             $token = $response->json()["token"];
+            
+             
 
 
-            $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/pendientesapi");
+            $responsefacturas = Http::withToken($token)->get($this->ip.$this->puerto."/api/pendientesapi");
 
             $facturassapi = $responsefacturas->json()['data'];
-
+                
+            
+                
             $contador = 0;
             $pendientes = [];
 
@@ -132,7 +146,7 @@ class PendienteApiController extends Controller
                 PendientesApi::insert($pendientes);
             }
 
-            Http::withToken($token)->get("http://190.145.32.226:8000/api/closeallacceso");
+            Http::withToken($token)->get($this->ip.$this->puerto."/api/closeallacceso");
 
             $var = $this->createentregadospi(null);
 
@@ -437,11 +451,11 @@ class PendienteApiController extends Controller
         if (request()->ajax()) {
             $pendiente = PendientesApi::where('id', '=', $id)
                 ->first();
-
-            $saldo_pendiente = $pendiente->cantord - $pendiente->cantdpx;
-
-            // Concatenar los campos doc_entrega y factura_entrega
-            $fac_entrega = $pendiente->doc_entrega . ' ' . $pendiente->factura_entrega;
+                
+                    $saldo_pendiente = $pendiente->cantord - $pendiente->cantdpx;
+                    
+                    // Concatenar los campos doc_entrega y factura_entrega
+                    $fac_entrega = $pendiente->doc_entrega . ' ' . $pendiente->factura_entrega;
 
             return response()->json([
                 'pendiente' => $pendiente,
@@ -463,6 +477,8 @@ class PendienteApiController extends Controller
         if (request()->ajax()) {
             $pendiente = PendientesApi::where('id', '=', $id)
                 ->first();
+                
+      
 
             $saldo_pendiente = $pendiente->cantord - $pendiente->cantdpx;
 
@@ -496,24 +512,30 @@ class PendienteApiController extends Controller
 
     public function createentregadospi($var1)
     {
+        
+        //$ip = 'http://hef08s3bxw8.sn.mynetname.net';
+        //$puerto = ':8000';
+        
+        
+        
         $email = 'sistemas.saludtempus@gmail.com'; // Auth::user()->email
         $password = '12345678';
 
-        $response = Http::post(
-            "http://190.145.32.226:8000/api/acceso",
+        $response = Http::post($this->ip.$this->puerto."/api/acceso",
             [
                 'email' =>  $email,
                 'password' => $password,
             ]
         );
-
+        
+        
 
         // $this->createapendientespi($request);
 
         $prueba = $response->json();
         $token = $prueba["token"];
 
-        $responsefacturas = Http::withToken($token)->get("http://190.145.32.226:8000/api/entregadosapi");
+        $responsefacturas = Http::withToken($token)->get($this->ip.$this->puerto."/api/entregadosapi");
 
         $facturassapi = $responsefacturas->json();
 
@@ -559,7 +581,7 @@ class PendienteApiController extends Controller
             }
         }
 
-        Http::withToken($token)->get("http://190.145.32.226:8000/api/closeallacceso");
+        Http::withToken($token)->get($this->ip.$this->puerto."/api/closeallacceso");
 
         $pendientes = DB::table('pendientesapi')
             ->join('entregadosapi', function ($join) {
@@ -790,5 +812,97 @@ class PendienteApiController extends Controller
             return DataTables()->of($data)->make(true);
         }
         //return view('menu.usuario.indexAnalista');
+    }
+    
+    public function updateanuladosapi(Request $request)
+    {
+        $email = 'sistemas.saludtempus@gmail.com'; // Auth::user()->email
+        $password = '12345678';
+        $usuario = Auth::user()->email;
+        
+        
+  
+    
+        try {
+            //$response = Http::post("http://hed08pf9dxt.sn.mynetname.net:8003/api/acceso", [
+            $response = Http::post("http://hef08s3bxw8.sn.mynetname.net:8000/api/acceso", [
+                'email' => $email,
+                'password' => $password,
+            ]);
+    
+            $token = $response->json()["token"] ?? null;
+    
+            if ($token) {
+                try {
+                    //$responsefacturas = Http::withToken($token)->get("http://http://hed08pf9dxt.sn.mynetname.net:8003/api/pendientesanuladosapi");
+                    $responsefacturas = Http::withToken($token)->get("http://hef08s3bxw8.sn.mynetname.net:8000/api/pendientesanuladosapi");
+                    $facturassapi = $responsefacturas->json()['data'] ?? [];
+    
+                    $contadorActualizados = 0;
+                    
+                    //dd($facturassapi);
+    
+                    foreach ($facturassapi as $factura) {
+                        if (isset($factura['orden_externa'])) {
+                            $actualizados = PendienteApiMedcol3::where('orden_externa', $factura['orden_externa'])
+                                ->where('estado', ['PENDIENTE'])
+                                ->update([
+                                    'estado' => 'ANULADO',
+                                    'fecha_anulado' => now(),
+                                    'updated_at' => now()
+                                ]);
+                        } 
+    
+                        if ($actualizados) {
+                            $contadorActualizados++;
+                        }
+                    }
+                    
+                    
+    
+                    //Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8003/api/closeallacceso");
+                    Http::withToken($token)->get("http://hef08s3bxw8.sn.mynetname.net:8000/api/closeallacceso");
+    
+                    Log::info('Desde la web syncapi autopista anulados', [
+                        'lineas_actualizadas' => $contadorActualizados,
+                        'usuario' => $usuario
+                    ]);
+    
+                    return response()->json([
+                        [
+                            'respuesta' => $contadorActualizados . " Pendientes anuladas",
+                            'titulo' => 'Lineas Actualizadas',
+                            'icon' => 'success',
+                            'position' => 'bottom-left'
+                        ]
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error($e->getMessage());
+    
+                    return response()->json([
+                        'respuesta' => 'Error: ' . $e->getMessage(),
+                        'titulo' => 'Error',
+                        'icon' => 'error',
+                        'position' => 'bottom-left'
+                    ]);
+                }
+            } else {
+                return response()->json([
+                    'respuesta' => 'Error: No se pudo obtener el token',
+                    'titulo' => 'Error',
+                    'icon' => 'error',
+                    'position' => 'bottom-left'
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+    
+            return response()->json([
+                'respuesta' => 'Error: ' . $e->getMessage(),
+                'titulo' => 'Error',
+                'icon' => 'error',
+                'position' => 'bottom-left'
+            ]);
+        }
     }
 }

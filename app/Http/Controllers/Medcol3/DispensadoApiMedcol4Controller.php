@@ -569,57 +569,67 @@ class DispensadoApiMedcol4Controller extends Controller
      * @return \Illuminate\Http\Response
      */
     public function adddispensacionarray(Request $request)
-    {
-        $request->validate([
-        'data.*.diagnostico' => 'required', // Campo 'diagnostico' requerido
-        'data.*.fecha_orden' => 'required', // Campo 'fecha_orden' requerido
-        'data.*.ips' => 'required', // Campo 'ips' requerido
-        'data.*.numero_entrega1' => 'required', // Campo 'numero_entrega1' requerido
-        'data.*.fecha_suministro',
-        ]);
-        
-        $add_factura = $request->data;
-        $fecha_suministro = Carbon::parse($request->input('fecha_suministro'))->format('Y-m-d');
-        
-       
-       foreach ($add_factura as $add) {
-                // Obtener la fecha de ordenamiento y formatearla como objeto Carbon
-                $fechaOrden = Carbon::parse($add['fecha_orden'])->format('Y-m-d');
-               
-                // Verificar si la fecha_orden es mayor a la fecha_suministro
-                if (strtotime($fechaOrden) > strtotime($fecha_suministro)) {
-                    return response()->json([
-                        'errors' => [
-                            'fecha_orden' => [
-                                'La Fecha de Ordenamiento no puede ser superior a la Fecha de Suministro'
+            {
+                // Validar los campos requeridos
+                $request->validate([
+                    'data.*.diagnostico' => 'required', 
+                    'data.*.fecha_orden' => 'required', 
+                    'data.*.ips' => 'required', 
+                    'data.*.numero_entrega1' => 'required',
+                    'data.*.fecha_suministro' => 'nullable|date',
+                ]);
+            
+                // Obtener el array de datos de la solicitud
+                $add_factura = $request->data;
+            
+                // Validar la fecha de suministro
+                $fecha_suministro = Carbon::parse($request->input('fecha_suministro'))->format('Y-m-d');
+                
+                foreach ($add_factura as $add) {
+                    // Obtener la fecha de orden y formatearla
+                    $fechaOrden = Carbon::parse($add['fecha_orden'])->format('Y-m-d');
+            
+                    // Verificar si la fecha_orden es mayor a la fecha_suministro
+                    if (strtotime($fechaOrden) > strtotime($fecha_suministro)) {
+                        return response()->json([
+                            'errors' => [
+                                'fecha_orden' => [
+                                    'La Fecha de Ordenamiento no puede ser superior a la Fecha de Suministro'
+                                ]
                             ]
-                        ]
-                    ], 422);
+                        ], 422);
+                    }
+            
+                    // Intentar actualizar el registro
+                    $updated = DispensadoApiMedcol4::where('id', $add['ID'])
+                        ->update([
+                            'autorizacion'  => trim($add['autorizacion1']),
+                            'copago'  => trim($add['copago1']),
+                            'numero_entrega'  => trim($add['numero_entrega1']),
+                            'fecha_ordenamiento'  => trim($add['fecha_orden']),
+                            'dx'  => trim($add['diagnostico']),
+                            'ips'  => trim($add['ips']),
+                            'id_medico'  => trim($add['id_medico1']),
+                            'medico'  => trim($add['medico1']),
+                            'mipres'  => trim($add['mipres1']),
+                            'reporte_entrega_nopbs'  => trim($add['reporte_entrega1']),
+                            'estado'  => trim($add['estado']),
+                            'user_id'  => trim($add['user_id']),
+                            'updated_at'=>now()
+                        ]);
+            
+                    // Verificar si el registro fue actualizado
+                    if (!$updated) {
+                        return response()->json([
+                            'error' => "No se pudo actualizar el registro con ID: {$add['ID']}"
+                        ], 500);
+                    }
                 }
-               
-                DispensadoApiMedcol4::where('id',$add['ID'])
-                ->update([
-                    'autorizacion'  => trim($add['autorizacion1']),
-                    'copago'  => trim($add['copago1']),
-                    'numero_entrega'  => trim($add['numero_entrega1']),
-                    'fecha_ordenamiento'  => trim($add['fecha_orden']),
-                    'dx'  => trim($add['diagnostico']),
-                    'ips'  => trim($add['ips']),
-                    'id_medico'  => trim($add['id_medico1']),
-                    'medico'  => trim($add['medico1']),
-                    'mipres'  => trim($add['mipres1']),
-                    'reporte_entrega_nopbs'  => trim($add['reporte_entrega1']),
-                    'estado'  => trim($add['estado']),
-                    'user_id'  => trim($add['user_id']),
-                    'updated_at'=>now()]
-                  
-                    );
-       
-                }
-       
+            
+                // Retornar respuesta de éxito si todos los registros se actualizaron correctamente
                 return response()->json(['success' => 'ok']);
-    }
-    
+            }
+                
     
     
     public function updateanuladosapi(Request $request)
@@ -797,47 +807,66 @@ class DispensadoApiMedcol4Controller extends Controller
     
     public function buscar($factura)
     {
-        // Crear una instancia de la consulta principal sin ejecutarla de inmediato
+        // Verificar si la factura existe en la base de datos
+        $facturaExistente = DispensadoApiMedcol4::where('factura', $factura)->exists();
+    
+        if (!$facturaExistente) {
+            // Si la factura no existe, retornar un mensaje
+            return response()->json(['error' => 'Factura no encontrada, no se ha sincronizado en la API'], 404);
+        }
+    
+        // Obtener todos los ítems de la factura
+        $facturaItems = DispensadoApiMedcol4::where('factura', $factura)->get();
+    
+        // Verificar si algún ítem de la factura está en estado "ANULADA" o "REVISADO"
+        //$estadoInvalido = $facturaItems->whereIn('estado', ['ANULADA', 'REVISADO'])->first();
+        $estadoInvalido = $facturaItems->where('estado', ['ANULADA'])->first();
+    
+        if ($estadoInvalido) {
+            // Si se encuentra algún ítem en estado ANULADA o REVISADO, retornar un mensaje
+            return response()->json([
+                'error' => "Uno o más ítems de la factura {$factura} se encuentran en estado {$estadoInvalido->estado}."
+            ], 200);
+        }
+    
+        // Continuar con la consulta de ítems de la factura en estado DISPENSADO
         $dispensado_api_medcol4 = DispensadoApiMedcol4::query();
-
-        // Agregar una subconsulta para calcular la suma de la cuota moderadora usando selectRaw
-        $dispensado_api_medcol4->selectRaw('*, 
-        (CASE 
+    
+        // Sumar la cuota moderadora y aplicar los filtros
+        $resultados = $dispensado_api_medcol4->selectRaw('*, 
+            (CASE 
             WHEN ROW_NUMBER() OVER(PARTITION BY factura ORDER BY id) = 1 
                 THEN (SELECT SUM(cuota_moderadora) FROM dispensado_medcol4 AS d2 WHERE d2.factura = dispensado_medcol4.factura) 
             ELSE 0 
-        END) AS cuota_moderadora_sumada');
-
-        // Aplicar condiciones de búsqueda adicionales
-        $resultados = $dispensado_api_medcol4
+            END) AS cuota_moderadora_sumada')
             ->where('factura', $factura)
             ->where('estado', 'DISPENSADO')
             ->orderBy('fecha_suministro')
             ->get();
-
-        // Verificar si se encontraron resultados
-        if ($resultados->isNotEmpty()) {
-            // Mapear los resultados a un array asociativo para incluir campos adicionales
-            $data = $resultados->map(function ($item) {
-                // Convertir el modelo a un array asociativo
-                $dataArray = $item->toArray();
-
-                // Agregar campos HTML personalizados a los datos resultantes
-                $dataArray['action'] = '<input class="add_medicamento checkbox-large checkbox2 tooltipsC" type="checkbox" title="Seleccionar" id="' . $item->id . '" value="' . $item->id . '">';
-                $dataArray['autorizacion2'] = '<input type="text" name="autorizacion" id="' . $item->id . '" class="show_detail btn btn-xl bg-warning tooltipsC" style="max-width: 100%;" title="autorizacion" value="' . $item->autorizacion . '">';
-                $dataArray['mipres2'] = '<input type="text" name="mipres" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="mipres">';
-                $dataArray['reporte_entrega2'] = '<input type="text" name="reporte" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="Reporte de entrega">';
-                $dataArray['cuota_moderadora2'] = '<input type="text" name="cuota_moderadora" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="cuota_moderadora" value="' . $item->cuota_moderadora_sumada . '">';
-
-                return $dataArray;
-            });
-
-            // Retornar los datos en formato JSON para DataTable
-            return response()->json($data);
-        } else {
-            // Retornar un error si no se encontraron resultados
-            return response()->json(['error' => 'Factura no encontrada o no tiene estado DISPENSADO'], 404);
+    
+        // Verificar si se encontraron resultados en estado DISPENSADO
+        if ($resultados->isEmpty()) {
+            // Si no se encontraron resultados en estado DISPENSADO, retornar un mensaje
+            return response()->json(['error' => 'Factura no encontrada en estado DISPENSADO'], 404);
         }
+    
+        // Mapear los resultados a un array asociativo para incluir campos adicionales
+        $data = $resultados->map(function ($item) {
+            // Convertir el modelo a un array asociativo
+            $dataArray = $item->toArray();
+    
+            // Agregar campos HTML personalizados a los datos resultantes
+            $dataArray['action'] = '<input class="add_medicamento checkbox-large checkbox2 tooltipsC" type="checkbox" title="Seleccionar" id="' . $item->id . '" value="' . $item->id . '">';
+            $dataArray['autorizacion2'] = '<input type="text" name="autorizacion" id="' . $item->id . '" class="show_detail btn btn-xl bg-warning tooltipsC" style="max-width: 100%;" title="autorizacion" value="' . $item->autorizacion . '">';
+            $dataArray['mipres2'] = '<input type="text" name="mipres" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="mipres">';
+            $dataArray['reporte_entrega2'] = '<input type="text" name="reporte" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="Reporte de entrega">';
+            $dataArray['cuota_moderadora2'] = '<input type="text" name="cuota_moderadora" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="cuota_moderadora" value="' . $item->cuota_moderadora_sumada . '">'; // Corregido cierre de comilla
+    
+            return $dataArray;
+        });
+    
+        // Retornar los datos en formato JSON para DataTable
+        return response()->json($data);
     }
 
 

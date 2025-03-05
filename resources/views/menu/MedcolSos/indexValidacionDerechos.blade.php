@@ -244,6 +244,11 @@
                 }
             }).trigger('change');
 
+
+       
+
+      
+
         
          $('#guardar_entrada').click(function() {
 
@@ -310,7 +315,7 @@
                         $('#email').val(afiliado.email);
                         $('#estado').val(afiliado.estado);
                         $('#barrio').val(afiliado.barrio);
-                        $('#planfil').val(afiliado.plan);
+                        $('#planfil').val(afiliado.plan+" PC--> "+afiliado.planComplementario);
                         $('#rangoSalarial').val(afiliado.rangoSalarial);
                         $('#sexo').val(afiliado.sexo.trim()); // Trim para eliminar espacios extra
                         $('#tipoAfiliado').val(afiliado.tipoAfiliado);
@@ -346,6 +351,69 @@
                             showConfirmButton: false,
                             timer: 1000
                         });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Ocurrió un error en la consulta.',
+                        showConfirmButton: true
+                    });
+                },
+                complete: function() {
+                    $('.loader').css("visibility", "hidden");
+                }
+            });
+        });
+        
+        
+          $('#guardar_entrada').click(function() {
+
+            var url = "{{ route('dataSos1') }}";
+            
+            var tipoDocId = $('#tipoDocId').val();
+            var numeroDocId = $('#numeroDocId').val();
+            var plan = $('#plan').val();
+                    
+            Swal.fire({
+                type: "info",
+                title: 'Espere por favor !',
+                html: 'Consultando Datos....',
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+        
+            $.ajax({
+                beforeSend: function() {
+                    $('.loader').css("visibility", "visible");
+                },
+                url: url,
+                dataType: 'json',
+                method: 'post',
+                data: {
+                    tipoDocId: tipoDocId,
+                    numeroDocId: numeroDocId,
+                    plan: plan,
+                    "_token": $("meta[name='csrf-token']").attr("content")
+                },
+                success: function(response) {
+                    Swal.close(); // Cerrar la alerta de carga
+        
+                    if (response.status === 'error') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo realizar la consulta. Intente nuevamente.',
+                            showConfirmButton: true
+                        });
+                    } else if (response.status === 'success') {
+                        const afiliado = response.data.afiliado;
+                        const convenios = response.data.conveniosCapitacion.DatosConvenioCapitacion;
+                        
                     }
                 },
                 error: function(xhr, status, error) {

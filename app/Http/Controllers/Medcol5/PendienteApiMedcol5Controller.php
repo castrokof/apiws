@@ -118,15 +118,20 @@ class PendienteApiMedcol5Controller extends Controller
 
         try {
 
-            $response = Http::post("http://hgc09j5frwr.sn.mynetname.net:8000/api/acceso", [
+            //$response = Http::post("http://hgc09j5frwr.sn.mynetname.net:8000/api/acceso", [
+            
+            $response = Http::post("http://hed08pf9dxt.sn.mynetname.net:8000/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
             ]);
+            
 
             $token = $response->json()["token"];
 
 
-            $responsefacturas = Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/pendientesapi");
+            //$responsefacturas = Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/pendientesapi");
+            
+            $responsefacturas = Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8000/api/pendientesapi");
 
             $facturassapi = $responsefacturas->json()['data'];
             
@@ -178,7 +183,9 @@ class PendienteApiMedcol5Controller extends Controller
                 PendienteApiMedcol5::insert($pendientes);
             }
 
-            Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/closeallacceso");
+            //Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/closeallacceso");
+            
+            Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8000/api/closeallacceso");
 
             $var = $this->createentregadospi(null);
 
@@ -533,6 +540,75 @@ class PendienteApiMedcol5Controller extends Controller
 
         return view('menu.Medcol5.indexAnalista');
     }
+    
+        public function getVencidos(Request $request)
+        {
+             // Definir las fechas por defecto
+                $fechaAi = now()->startOfDay();
+                $fechaAf = now()->endOfDay();
+            
+                // Obtener la droguería del usuario autenticado
+                $drogueria = '';
+                switch (Auth::user()->drogueria) {
+                    case "1":
+                        $drogueria = ''; // Todos
+                        break;
+                    case "2":
+                        $drogueria = 'SALUD';
+                        break;
+                    case "3":
+                        $drogueria = 'DOLOR';
+                        break;
+                    case "4":
+                        $drogueria = 'PAC';
+                        break;
+                    case "5":
+                        $drogueria = 'EHU1';
+                        break;
+                    case "6":
+                        $drogueria = 'BIO1';
+                        break;
+                    case "8":
+                        $drogueria = 'EM01';
+                        break;
+                        
+                }
+            
+                if ($request->ajax()) {
+    
+                    if (Auth::user()->drogueria == '1') {
+                        $pendiente_api_medcol5 = PendienteApiMedcol5::where([['estado', 'VENCIDO']])
+                            ->whereDate('fecha_factura', '>=', '2024-11-01')
+                            ->orderBy('id')
+                            ->get();
+                    } else {
+        
+                        $pendiente_api_medcol5 = PendienteApiMedcol5::where([['estado', 'VENCIDO'], ['centroproduccion', $drogueria]])
+                            ->whereDate('fecha_factura', '>', '2024-10-01')
+                            ->orderBy('id')
+                            ->get();
+                    }
+        
+        
+        
+                    return DataTables()->of($pendiente_api_medcol5)
+                        ->addColumn('action', function ($pendiente) {
+                            $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
+                            " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
+                            <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
+                            $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
+                            " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
+                            <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i> </button>';
+        
+                            return $button . ' ' . $button2;
+                        })
+                        ->rawColumns(['action'])
+                        ->make(true);
+                }
+            
+                // Retornar la vista si no es una solicitud AJAX
+                return view('menu.Medcol5.indexAnalista');
+            }
 
     public function update(Request $request, $id)
     {
@@ -626,8 +702,8 @@ class PendienteApiMedcol5Controller extends Controller
         $idlist = $request->id;
 
         if (request()->ajax()) {
-            $data = DB::table('observaciones_api_medcol3')
-                ->where('observaciones_api_medcol3.pendiente_id', '=', $idlist)
+            $data = DB::table('observaciones_api_medcol5')
+                ->where('observaciones_api_medcol5.pendiente_id', '=', $idlist)
                 ->get();
 
             return DataTables()->of($data)->make(true);
@@ -757,7 +833,9 @@ class PendienteApiMedcol5Controller extends Controller
         $prueba = $response->json();
         $token = $prueba["token"];
 
-        $responsefacturas = Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/entregadosapi");
+        //$responsefacturas = Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/entregadosapi");
+        
+        $responsefacturas = Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8000/api/entregadosapi");
 
         $facturassapi = $responsefacturas->json();
 
@@ -810,7 +888,9 @@ class PendienteApiMedcol5Controller extends Controller
             }
         }
 
-        Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/closeallacceso");
+        //Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/closeallacceso");
+        
+        Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8000/api/closeallacceso");
 
         $pendientes = DB::table('pendiente_api_medcol5')
             ->join('entregados_api_medcol5', function ($join) {
@@ -1078,5 +1158,99 @@ class PendienteApiMedcol5Controller extends Controller
         }
 
         //return view('menu.usuario.indexAnalista');
+    }
+    
+    public function updateanuladosapi(Request $request)
+    {
+        $email = 'castrokofdev@gmail.com'; // Auth::user()->email
+        $password = 'colMed2023**';
+        $usuario = Auth::user()->email;
+    
+        try {
+            //$response = Http::post("http://hgc09j5frwr.sn.mynetname.net:8000/api/acceso", [
+            
+            $response = Http::post("http://hed08pf9dxt.sn.mynetname.net:8000/api/acceso", [
+                
+                'email' => $email,
+                'password' => $password,
+            ]);
+    
+            $token = $response->json()["token"] ?? null;
+    
+            if ($token) {
+                try {
+                    
+                    //$responsefacturas = Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/pendientesanuladosapi");
+                    
+                    $responsefacturas = Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8000/api/pendientesanuladosapi");
+                    $facturassapi = $responsefacturas->json()['data'] ?? [];
+    
+                    $contadorActualizados = 0;
+                    
+                    //dd($facturassapi);
+    
+                    foreach ($facturassapi as $factura) {
+                        if (isset($factura['orden_externa'])) {
+                            $actualizados = PendienteApiMedcol5::where('orden_externa', $factura['orden_externa'])
+                                ->where('estado', ['PENDIENTE'])
+                                ->update([
+                                    'estado' => 'ANULADO',
+                                    'fecha_anulado' => now(),
+                                    'updated_at' => now()
+                                ]);
+                        } 
+    
+                        if ($actualizados) {
+                            $contadorActualizados++;
+                        }
+                    }
+                    
+                    
+    
+                    //Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/closeallacceso");
+                    
+                    Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8000/api/closeallacceso");
+    
+                    Log::info('Desde la web syncapi autopista anulados', [
+                        'lineas_actualizadas' => $contadorActualizados,
+                        'usuario' => $usuario
+                    ]);
+    
+                    return response()->json([
+                        [
+                            'respuesta' => $contadorActualizados . " Pendientes anuladas",
+                            'titulo' => 'Lineas Actualizadas',
+                            'icon' => 'success',
+                            'position' => 'bottom-left'
+                        ]
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error($e->getMessage());
+    
+                    return response()->json([
+                        'respuesta' => 'Error: ' . $e->getMessage(),
+                        'titulo' => 'Error',
+                        'icon' => 'error',
+                        'position' => 'bottom-left'
+                    ]);
+                }
+            } else {
+                return response()->json([
+                    'respuesta' => 'Error: No se pudo obtener el token',
+                    'titulo' => 'Error',
+                    'icon' => 'error',
+                    'position' => 'bottom-left'
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+    
+            return response()->json([
+                'respuesta' => 'Error: ' . $e->getMessage(),
+                'titulo' => 'Error',
+                'icon' => 'error',
+                'position' => 'bottom-left'
+            ]);
+        }
     }
 }

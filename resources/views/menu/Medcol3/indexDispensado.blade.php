@@ -1470,41 +1470,52 @@ Dispensado Medcol Limonar
         /* Script para manejar la lógica de búsqueda y DataTable */
         function buscarFactura() {
             const numeroFactura = $('#numero_factura').val();
-
+        
             $.ajax({
                 url: `{{ route('dispensado.medcol3', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
                 type: 'GET',
                 success: function(data) {
-                    if (data && Array.isArray(data) && data.length > 0) {
+                    // Verificar si el backend no ha devuelto un error
+                    if (data && !data.error && Array.isArray(data) && data.length > 0) {
                         const firstRecord = data[0];
-
+        
                         $('#factura').val(firstRecord.factura);
                         $('#paciente').val(firstRecord.paciente);
                         $('#drogueria').val(firstRecord.drogueria);
                         $('#regimen').val(firstRecord.regimen);
                         $('#tipodocument').val(firstRecord.tipodocument);
                         $('#medico1').val(firstRecord.medico);
-
+        
                         if (firstRecord.fecha_suministro) {
                             const formattedFechaSuministro = new Date(firstRecord.fecha_suministro).toISOString().split('T')[0];
                             $('#fecha_suministro').val(formattedFechaSuministro);
                         } else {
                             $('#fecha_suministro').val('');
                         }
-
+        
                         $('#idusuario').val(firstRecord.idusuario);
                         $('#cajero').val(firstRecord.cajero);
-
+        
                         actualizarDataTable(data);
+                    } else if (data.error) {
+                        // Mostrar el mensaje de error específico devuelto por el backend
+                        mostrarError(data.error);
                     } else {
-                        console.error('Error: no se recibieron datos válidos o no se encontraron registros.');
-                        // Mostrar alerta de SweetAlert2 cuando no se encuentran registros
+                        // Si no se encuentran registros y no hay error, mostrar mensaje genérico
                         mostrarError('No se encontraron registros para la factura ingresada.');
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('Error al buscar la factura:', error);
-                    mostrarError('Error al buscar la factura. Por favor, inténtalo de nuevo.');
+                    
+                    // Extraer el mensaje de error del backend, si está disponible
+                    let errorMessage = 'Error al buscar la factura. Por favor, inténtalo de nuevo.';
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMessage = xhr.responseJSON.error;
+                    }
+        
+                    // Mostrar alerta con el error
+                    mostrarError(errorMessage);
                 }
             });
         }
@@ -1514,14 +1525,14 @@ Dispensado Medcol Limonar
             tablaRegistros.clear().rows.add(data).draw();
         }
 
+        // Función para mostrar alertas de error utilizando SweetAlert2
         function mostrarError(mensaje) {
-            // Mostrar alerta de SweetAlert2
             Swal.fire({
-                //icon: "error",
                 type: 'error',
-                title: 'Oops...',
+                icon: 'error',
+                title: 'Error',
                 text: mensaje,
-                confirmButtonText: 'OK'
+                confirmButtonText: 'Aceptar'
             });
         }
 
@@ -1535,6 +1546,7 @@ Dispensado Medcol Limonar
                     [25, 50, 100, 500, -1],
                     [25, 50, 100, 500, "Mostrar Todo"]
                 ],
+                //pageLength: -1 // Establece la opción por defecto para mostrar todo
                 paging: true,
                 lengthChange: false,
                 searching: true,

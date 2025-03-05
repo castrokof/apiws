@@ -25,9 +25,10 @@
         <label for="documento" class="col-xs-4 control-label requerido">Documento</label>
         <input type="text" name="documento" id="documento" class="form-control" value="{{old('documento')}}" minlength="6"  required >
     </div>
-
+  
 </div>
 
 
 
 
+ 

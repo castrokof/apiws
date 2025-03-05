@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Medcol6\ExportarExcel\ExportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -206,6 +207,7 @@ Route::post('medcol5/porentregar', 'Medcol5\PendienteApiMedcol5Controller@porent
 Route::post('medcol5/entregados', 'Medcol5\PendienteApiMedcol5Controller@entregados')->name('medcol5.entregados')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol5/desabastecidos', 'Medcol5\PendienteApiMedcol5Controller@getDesabastecidos')->name('medcol5.desabastecidos')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol5/anulados', 'Medcol5\PendienteApiMedcol5Controller@getAnulados')->name('medcol5.anulados')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol5/vencidos', 'Medcol5\PendienteApiMedcol5Controller@getVencidos')->name('medcol5.vencidos')->middleware('verified')->middleware('verifyuser');
 Route::get('medcol5/guardar_observacion', 'Medcol5\PendienteApiMedcol5Controller@guardar')->name('medcol5.guardar_observacion')->middleware('verified')->middleware('verifyuser');
 
 Route::get('medcol5/editpendientes/{id}', 'Medcol5\PendienteApiMedcol5Controller@edit')->name('medcol5.pendientes-edit')->middleware('verified')->middleware('verifyuser');
@@ -250,6 +252,7 @@ Route::post('medcol6/porentregar', 'Medcol6\PendienteApiMedcol6Controller@porent
 Route::post('medcol6/entregados', 'Medcol6\PendienteApiMedcol6Controller@entregados')->name('medcol6.entregados')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/desabastecidos', 'Medcol6\PendienteApiMedcol6Controller@getDesabastecidos')->name('medcol6.desabastecidos')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/anulados', 'Medcol6\PendienteApiMedcol6Controller@getAnulados')->name('medcol6.anulados')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/vencidos', 'Medcol6\PendienteApiMedcol6Controller@getVencidos')->name('medcol6.vencidos')->middleware('verified')->middleware('verifyuser');
 Route::get('medcol6/guardar_observacion', 'Medcol6\PendienteApiMedcol6Controller@guardar')->name('medcol6.guardar_observacion')->middleware('verified')->middleware('verifyuser');
 
 Route::get('medcol6/editpendientes/{id}', 'Medcol6\PendienteApiMedcol6Controller@edit')->name('medcol6.pendientes-edit')->middleware('verified')->middleware('verifyuser');
@@ -267,6 +270,8 @@ Route::get('medcol6/informe', 'Medcol6\PendienteApiMedcol6Controller@informes')-
 Route::get('informepedientes6', 'Medcol6\PendienteApiMedcol6Controller@informepedientes')->name('informepedientes6')->middleware('verified')->middleware('verifyuser');
 
 
+
+
 //Rutas de tablas de Dispensado MEDCOL 6 SOS y JAMUNDI
 
 Route::get('medcol6/dispensado', 'Medcol6\DispensadoApiMedcol6Controller@index')->name('medcol6.dispensado')->middleware('verified')->middleware('verifyuser');
@@ -277,13 +282,17 @@ Route::put('medcol6/dispensado/{id}', 'Medcol6\DispensadoApiMedcol6Controller@up
 
 Route::get('medcol6/dispensado/syncdisapi', 'Medcol6\DispensadoApiMedcol6Controller@createdispensadoapi')->name('medcol6.dispensadosyncapi')->middleware('verified')->middleware('verifyuser');
 Route::get('medcol6/dispensado/anuladosapi', 'Medcol6\DispensadoApiMedcol6Controller@updateanuladosapi')->name('medcol6.anuladosapi')->middleware('verified')->middleware('verifyuser');
-Route::post('medcol6/add_dispensado', 'Medcol6\DispensadoApiMedcol6Controller@adddispensacionarray')->name('add_dispensacion')->middleware('verified')->middleware('verifyuser');
-Route::post('medcol6/update', 'Medcol6\DispensadoApiMedcol6Controller@actualizarDispensacion')->name('dispensado.guardar')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/add_dispensado', 'Medcol6\DispensadoApiMedcol6Controller@adddispensacionarray')->name('medcol6.add_dispensacion')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/update', 'Medcol6\DispensadoApiMedcol6Controller@actualizarDispensacion')->name('dispensado6.guardar')->middleware('verified')->middleware('verifyuser');
 
 Route::get('medcol6/informedis', 'Medcol6\DispensadoApiMedcol6Controller@informes')->name('medcol6.informedis')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/gestionsdis', 'Medcol6\DispensadoApiMedcol6Controller@gestionsdis')->name('medcol6.gestionsdis')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/disanulado', 'Medcol6\DispensadoApiMedcol6Controller@disanulado')->name('medcol6.disanulado')->middleware('verified')->middleware('verifyuser');
 
-Route::get('buscar-medcol6/{factura}', 'Medcol6\\DispensadoApiMedcol6Controller@buscar')->name('dispensado.medcol6')->middleware('verified')->middleware('verifyuser');
+Route::get('buscar-medcol6/{factura}', 'Medcol6\DispensadoApiMedcol6Controller@buscar')->name('dispensado.medcol6')->middleware('verified')->middleware('verifyuser');
+
+Route::post('medcol6/exportar-excel', [ExportController::class, 'exportExcel'])->name('exportar.excel');
+
 
 
 /*
@@ -461,6 +470,7 @@ Route::get('buscar-medcol6/{factura}', 'Medcol6\\DispensadoApiMedcol6Controller@
     
     Route::get('/indexSosValidarDerechos', 'MedcolSos\DerechosSosController@index')->name('indexsos')->middleware('verified')->middleware('verifyuser');
     Route::post('/dataValidarDerechos', 'MedcolSos\DerechosSosController@consultarAfiliado')->name('dataSos')->middleware('verified')->middleware('verifyuser');
+    Route::post('/dataValidarDerechos1', 'MedcolSos\DerechosSosController@consultarAfiliadoMasivo')->name('dataSos1')->middleware('verified')->middleware('verifyuser');
     
     //SERVICIO REST DE CONSULTA FORMULAS
     
@@ -468,7 +478,3 @@ Route::get('buscar-medcol6/{factura}', 'Medcol6\\DispensadoApiMedcol6Controller@
     Route::post('/dataFormulasSos', 'MedcolSos\OrdenesSosController@formulasAfiliado')->name('dataFormulasSos')->middleware('verified')->middleware('verifyuser');
     
     
-    
-
-    
-

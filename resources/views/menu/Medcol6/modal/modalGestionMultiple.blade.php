@@ -1,6 +1,6 @@
 <!-- Modal -->
 <div class="modal fade" id="gestion_multiple" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-dialog modal-custom-size" role="document">
         <div class="modal-content">
             <div class="row">
                 <div class="col-lg-12">
@@ -18,11 +18,9 @@
                                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                     <i class="fas fa-minus"></i>
                                 </button>
-
                                 <button type="button" class="btn btn-tool" data-dismiss="modal">
                                     <i class="fas fa-times"></i>
                                 </button>
-
                             </div>
                         </div>
                         <form id="form-general1" class="form-horizontal">
@@ -32,7 +30,6 @@
                             </div>
                             <!-- /.card-body -->
                             <div class="card-footer">
-
                                 <div class="col-lg-3"></div>
                                 <div class="col-lg-6">
                                     @include('includes.boton-form-enviar-dispensados')                                    
@@ -47,3 +44,14 @@
         </div>
     </div>
 </div>
+
+<!-- CSS personalizado para hacer más grande el modal -->
+<style>
+    .modal-custom-size {
+        max-width: 90%; /* Ajusta el ancho */
+        height: 90%; /* Ajusta la altura */
+    }
+    .modal-content {
+        height: 100%; /* Hacer que el contenido del modal ocupe todo el espacio */
+    }
+</style>

@@ -232,6 +232,18 @@ $(document).ready(function(){
     
                       }
                    ],
+                   
+                   "createdRow": function(row, data, dataIndex) { 
+                    if (data[16] == "890303093") { 
+                    $(row).css("background-color", "#90EE90"); 
+                    $(row).addClass("warning");
+                    
+                    }else if(data[16] == "805001157"){
+                    $(row).css("background-color", "#87CEEB"); 
+                    $(row).addClass("warning"); 
+                    }
+        
+                   }
     });
 
 //Funcion de envio de datos

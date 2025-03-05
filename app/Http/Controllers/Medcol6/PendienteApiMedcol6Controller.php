@@ -7,6 +7,7 @@ use App\Models\Medcol6\PendienteApiMedcol6;
 use App\Models\Medcol6\EntregadosApiMedcol6;
 use App\Models\Medcol6\ObservacionesApiMedcol6;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,74 +38,107 @@ class PendienteApiMedcol6Controller extends Controller
     }
     
       public function index1(Request $request)
-    {
+        {
+            // Definir las fechas por defecto
+            $fechaAi = now()->startOfDay();
+            $fechaAf = now()->endOfDay();
         
+            // Obtener la droguería del usuario autenticado
+            $drogueria = '';
+            switch (Auth::user()->drogueria) {
+                case "1":
+                    $drogueria = ''; // Todos
+                    break;
+                case "2":
+                    $drogueria = 'SM01';
+                    break;
+                case "3":
+                    $drogueria = 'DLR1';
+                    break;
+                case "4":
+                    $drogueria = 'PAC';
+                    break;
+                case "5":
+                    $drogueria = 'EHU1';
+                    break;
+                case "6":
+                    $drogueria = 'BIO1';
+                    break;
+                case "8":
+                    $drogueria = 'EM01';
+                    break;
+                case "9":
+                    $drogueria = 'BPDT';
+                    break;
+                case "10":
+                    $drogueria = 'DPA1';
+                    break;
+                case "11":
+                    $drogueria = 'EVSM';
+                    break;
+                case "12":
+                    $drogueria = 'EVEN';
+                    break;
+                case "13":
+                    $drogueria = 'FRJA';
+                    break;
+            }
         
-        $i = Auth::user()->drogueria;
+            if ($request->ajax()) {
+                // Iniciar la consulta
+                $query = PendienteApiMedcol6::query();
         
-        switch ($i) {
-                    case "1":
-                        $drogueria = '';
-                        break;
-                    case "2":
-                        $drogueria = 'SALUD';
-                        break;
-                    case "3":
-                       $drogueria = 'DOLOR';
-                        break;
-                    case "4":
-                        $drogueria = 'PAC';
-                        break;
-                    case "5":
-                        $drogueria = 'EHU1';
-                        break;
-                    case "6":
-                         $drogueria = 'BIO1';
-                        break;    
+                // Filtrar por estado
+                $query->where(function($q) {
+                    $q->where('estado', 'PENDIENTE')
+                      ->orWhere('estado', NULL);
+                });
+        
+                // Filtrar por centro de producción si no es '1'
+                if (Auth::user()->drogueria !== '1') {
+                    
+                   if( Auth::user()->drogueria == '3')
+                    $query->where('centroproduccion', [$drogueria, 'DPA1']);
+                    else
+                    $query->where('centroproduccion',$drogueria);
+                    
                 }
         
+                // Filtrar por fechas si están presentes
+                if (!empty($request->fechaini) && !empty($request->fechafin)) {
+                    $fechaini = Carbon::parse($request->fechaini)->startOfDay();
+                    $fechafin = Carbon::parse($request->fechafin)->endOfDay();
+                    $query->whereBetween('fecha_factura', [$fechaini, $fechafin]);
+                } else {
+                    // Si no se proporcionan fechas, usar las fechas por defecto
+                    $query->whereBetween('fecha_factura', [$fechaAi, $fechaAf]);
+                }
         
+                // Filtrar por contrato si está presente
+                if (!empty($request->contrato)) {
+                    $query->where('centroproduccion', $request->contrato);
+                }
         
-        //dd($drogueria);
-
-        if ($request->ajax()) {
-            
-            if(Auth::user()->drogueria == '1'){
-            
-            $pendiente_api_medcol6 = PendienteApiMedcol6::where([['estado', 'PENDIENTE']])
-                 ->orWhere('estado', NULL)
-                /* ->where('orden_externa', 'LIKE', '%MP%') */
-                ->orderBy('id')
-                ->get();
-
-            
-        }else{
-                    $pendiente_api_medcol6 = PendienteApiMedcol6::where([['estado', 'PENDIENTE'],['centroproduccion',$drogueria]])
-                 ->orWhere('estado', NULL)
-                /* ->where('orden_externa', 'LIKE', '%MP%') */
-                ->orderBy('id')
-                ->get();
-
-           
+                // Obtener los resultados
+                $pendiente_api_medcol6 = $query->orderBy('id')->get();
+        
+                // Retornar los resultados para DataTables
+                return DataTables()->of($pendiente_api_medcol6)
+                    ->addColumn('action', function ($pendiente) {
+                        $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '" class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle">
+                            <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i></button>';
+                        $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar">
+                            <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i></button>';
+        
+                        return $button . ' ' . $button2;
+                    })
+                    ->rawColumns(['action'])
+                    ->make(true);
+            }
+        
+            // Retornar la vista si no es una solicitud AJAX
+            return view('menu.Medcol6.indexAnalista');
         }
-         return DataTables()->of($pendiente_api_medcol6)
-                ->addColumn('action', function ($pendiente) {
-                    $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
-                    " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
-                    <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
-                    $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
-                    " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
-                    <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i> </button>';
-
-                    return $button . ' ' . $button2;
-                })
-                ->rawColumns(['action'])
-                ->make(true);
-            
-        }
-
-        return view('menu.Medcol6.indexAnalista');
-    }
 
 
     /**
@@ -120,25 +154,34 @@ class PendienteApiMedcol6Controller extends Controller
 
         try {
 
-            $response = Http::post("http://hcp080m81s7.sn.mynetname.net:8001/api/acceso", [
+            $response = Http::post("http://hed08pf9dxt.sn.mynetname.net:8004/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
             ]);
 
             $token = $response->json()["token"];
+            
+           
 
-
-            $responsefacturas = Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/pendientesapi");
+            $responsefacturas = Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/pendientesapi");
 
             $facturassapi = $responsefacturas->json()['data'];
+            
+           
+            
 
             $contador = 0;
             $pendientes = [];
 
             foreach ($facturassapi as $factura) {
-                $existe = PendienteApiMedcol6::where('factura', $factura['factura'])->count();
+                $existe = PendienteApiMedcol6::where([['factura', $factura['factura']],['documento', $factura['documento']]])->count();
+                    
+                
 
                 if ($existe == 0 || $existe == '') {
+                    
+                    
+                        
                     $pendientes[] = [
                         'Tipodocum' => trim($factura['Tipodocum']),
                         'cantdpx' => trim($factura['cantdpx']),
@@ -165,16 +208,29 @@ class PendienteApiMedcol6Controller extends Controller
                         'centroproduccion' => trim($factura['CENTROPRODUCCION']),
                         'observaciones' => trim($factura['observaciones'])
                     ];
-
+                
+                    
+                       
                     $contador++;
+                    
+                   
+                    Log::info('Desde la web syncapi '.$contador . ' Linea creada y ' . trim($factura['documento']).trim($factura['factura']) . ' Medicamento - '. trim($factura['cums']).'=>'.trim($factura['nombre']).'Documento: '.trim($factura['historia']));
+                }else{
+                    
+                    Log::info('Desde la web syncapi '.$contador . ' Linea ya estaba en BD ' . trim($factura['documento']).trim($factura['factura']) . ' Medicamento - '. trim($factura['cums']).'=>'.trim($factura['nombre']).'Documento: '.trim($factura['historia']));
                 }
             }
-
+           
             if (!empty($pendientes)) {
+                
+                
                 PendienteApiMedcol6::insert($pendientes);
+                
+               
+                
             }
-
-            Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/closeallacceso");
+            
+            Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/closeallacceso");
 
             $var = $this->createentregadospi(null);
             
@@ -187,14 +243,14 @@ class PendienteApiMedcol6Controller extends Controller
         } catch (\Exception $e) {
 
 
-            $response = Http::post("http://192.168.10.27:8001/api/acceso", [
+            $response = Http::post("http://192.168.66.91:8004/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
             ]);
 
             $token = $response->json()["token"];
 
-            $responsefacturas = Http::withToken($token)->get("http://192.168.10.27:8001/api/pendientesapi");
+            $responsefacturas = Http::withToken($token)->get("http://192.168.66.91:8004/api/pendientesapi");
 
             $facturassapi = $responsefacturas->json()['data'];
 
@@ -202,7 +258,7 @@ class PendienteApiMedcol6Controller extends Controller
             $pendientes = [];
 
             foreach ($facturassapi as $factura) {
-                $existe = PendienteApiMedcol6::where('factura', $factura['factura'])->count();
+               $existe = PendienteApiMedcol6::where([['factura', $factura['factura']],['documento', $factura['documento']]])->count();
 
                 if ($existe == 0 || $existe == '') {
                     $pendientes[] = [
@@ -240,7 +296,7 @@ class PendienteApiMedcol6Controller extends Controller
                 PendienteApiMedcol6::insert($pendientes);
             }
 
-            Http::withToken($token)->get("http://192.168.10.27/api/closeallacceso");
+            Http::withToken($token)->get("http://192.168.66.91:8004/api/closeallacceso");
 
             $var = $this->createentregadospilocal(null);
 
@@ -299,7 +355,25 @@ class PendienteApiMedcol6Controller extends Controller
                         break;
                     case "6":
                          $drogueria = 'BIO1';
+                        break;
+                     case "8":
+                        $drogueria = 'EM01';
                         break;    
+                     case "9":
+                        $drogueria = 'FSIO';
+                        break;
+                    case "10":
+                        $drogueria = 'FSOS';
+                        break;
+                    case "11":
+                        $drogueria = 'FSAU';
+                        break;
+                    case "12":
+                        $drogueria = 'EVSO';
+                        break; 
+                    case "13":
+                        $drogueria = 'FRJA';
+                        break;         
                 }
                 
         if ($request->ajax()) {
@@ -345,59 +419,103 @@ class PendienteApiMedcol6Controller extends Controller
      */
     public function entregados(Request $request)
     {
-         $i = Auth::user()->drogueria;
+         // Definir las fechas por defecto
+            $fechaAi = now()->startOfDay();
+            $fechaAf = now()->endOfDay();
         
-        switch ($i) {
-                    case "1":
-                        $drogueria = '';
-                        break;
-                    case "2":
-                        $drogueria = 'SALUD';
-                        break;
-                    case "3":
-                       $drogueria = 'DOLOR';
-                        break;
-                    case "4":
-                        $drogueria = 'PAC';
-                        break;
-                    case "5":
-                        $drogueria = 'EHU1';
-                        break;
-                    case "6":
-                         $drogueria = 'BIO1';
-                        break;    
-                }
-        if ($request->ajax()) {
-            
-            if(Auth::user()->drogueria == '1'){
-                $pendiente_api_medcol6 = PendienteApiMedcol6::where([['estado', 'ENTREGADO']])
-                ->orderBy('id')
-                ->get();
-            }else{
-                $pendiente_api_medcol6 = PendienteApiMedcol6::where([['estado', 'ENTREGADO'],['centroproduccion',$drogueria]])
-                ->orderBy('id')
-                ->get();
+            // Obtener la droguería del usuario autenticado
+            $drogueria = '';
+            switch (Auth::user()->drogueria) {
+                case "1":
+                    $drogueria = ''; // Todos
+                    break;
+                case "2":
+                    $drogueria = 'SALUD';
+                    break;
+                case "3":
+                    $drogueria = 'DOLOR';
+                    break;
+                case "4":
+                    $drogueria = 'PAC';
+                    break;
+                case "5":
+                    $drogueria = 'EHU1';
+                    break;
+                case "6":
+                    $drogueria = 'BIO1';
+                    break;
+                case "8":
+                    $drogueria = 'EM01';
+                    break;
+                case "9":
+                    $drogueria = 'FSIO';
+                    break;
+                case "10":
+                    $drogueria = 'FSOS';
+                    break;
+                case "11":
+                    $drogueria = 'FSAU';
+                    break;
+                case "12":
+                    $drogueria = 'EVSO';
+                    break;
+                case "13":
+                    $drogueria = 'FRJA';
+                    break;
             }
-            
-            
-
-            return DataTables()->of($pendiente_api_medcol6)
-                ->addColumn('action', function ($pendiente) {
-                    $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
-                    " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
-                    <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
-                    $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
-                    " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
-                    <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i> </button>';
-
-                    return $button . ' ' . $button2;
-                })
-                ->rawColumns(['action'])
-                ->make(true);
+        
+            if ($request->ajax()) {
+                // Iniciar la consulta
+                $query = PendienteApiMedcol6::query();
+        
+                // Filtrar por estado
+                $query->where(function($q) {
+                    $q->where('estado', 'ENTREGADO')
+                      ->orWhere('estado', NULL);
+                });
+        
+                // Filtrar por centro de producción si no es '1'
+                if (Auth::user()->drogueria !== '1') {
+                    $query->where('centroproduccion', $drogueria);
+                }
+        
+                // Filtrar por fechas si están presentes
+                if (!empty($request->fechaini) && !empty($request->fechafin)) {
+                    $fechaini = Carbon::parse($request->fechaini)->startOfDay();
+                    $fechafin = Carbon::parse($request->fechafin)->endOfDay();
+                    $query->whereBetween('fecha_factura', [$fechaini, $fechafin]);
+                } else {
+                    // Si no se proporcionan fechas, usar las fechas por defecto
+                    $query->whereBetween('fecha_factura', [$fechaAi, $fechaAf]);
+                }
+        
+                // Filtrar por contrato si está presente
+                if (!empty($request->contrato)) {
+                    $query->where('centroproduccion', $request->contrato);
+                }
+        
+                // Obtener los resultados
+                $pendiente_api_medcol6 = $query->orderBy('id')->get();
+        
+                // Retornar los resultados para DataTables
+                return DataTables()->of($pendiente_api_medcol6)
+                    ->addColumn('action', function ($pendiente) {
+                        $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '" class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle">
+                            <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i></button>';
+                        $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar">
+                            <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i></button>';
+        
+                        return $button . ' ' . $button2;
+                    })
+                    ->rawColumns(['action'])
+                    ->make(true);
+            }
+        
+            // Retornar la vista si no es una solicitud AJAX
+            return view('menu.Medcol6.indexAnalista');
         }
-
-        return view('menu.Medcol6.indexAnalista');
-    }
+        
+        
 
     /**
      * Show the form for editing the specified resource.
@@ -427,7 +545,25 @@ class PendienteApiMedcol6Controller extends Controller
                         break;
                     case "6":
                          $drogueria = 'BIO1';
+                        break;
+                     case "8":
+                        $drogueria = 'EM01';
                         break;    
+                     case "9":
+                        $drogueria = 'FSIO';
+                        break;
+                    case "10":
+                        $drogueria = 'FSOS';
+                        break;
+                    case "11":
+                        $drogueria = 'FSAU';
+                        break;
+                    case "12":
+                        $drogueria = 'EVSO';
+                        break; 
+                    case "13":
+                        $drogueria = 'FRJA';
+                        break;         
                 }
         if ($request->ajax()) {
             
@@ -494,7 +630,25 @@ class PendienteApiMedcol6Controller extends Controller
                         break;
                     case "6":
                          $drogueria = 'BIO1';
+                        break; 
+                     case "8":
+                        $drogueria = 'EM01';
                         break;    
+                     case "9":
+                        $drogueria = 'FSIO';
+                        break;
+                    case "10":
+                        $drogueria = 'FSOS';
+                        break;
+                    case "11":
+                        $drogueria = 'FSAU';
+                        break;
+                    case "12":
+                        $drogueria = 'EVSO';
+                        break; 
+                    case "13":
+                        $drogueria = 'FRJA';
+                        break;         
                 }
 
         if ($request->ajax()) {
@@ -530,6 +684,104 @@ class PendienteApiMedcol6Controller extends Controller
 
         return view('menu.Medcol6.indexAnalista');
     }
+    
+    public function getVencidos(Request $request)
+    {
+         // Definir las fechas por defecto
+            $fechaAi = now()->startOfDay();
+            $fechaAf = now()->endOfDay();
+        
+            // Obtener la droguería del usuario autenticado
+            $drogueria = '';
+            switch (Auth::user()->drogueria) {
+                case "1":
+                    $drogueria = ''; // Todos
+                    break;
+                case "2":
+                    $drogueria = 'SALUD';
+                    break;
+                case "3":
+                    $drogueria = 'DOLOR';
+                    break;
+                case "4":
+                    $drogueria = 'PAC';
+                    break;
+                case "5":
+                    $drogueria = 'EHU1';
+                    break;
+                case "6":
+                    $drogueria = 'BIO1';
+                    break;
+                case "8":
+                    $drogueria = 'EM01';
+                    break;
+                case "9":
+                    $drogueria = 'FSIO';
+                    break;
+                case "10":
+                    $drogueria = 'FSOS';
+                    break;
+                case "11":
+                    $drogueria = 'FSAU';
+                    break;
+                case "12":
+                    $drogueria = 'EVSO';
+                    break;
+                case "13":
+                    $drogueria = 'FRJA';
+                    break;
+            }
+        
+            if ($request->ajax()) {
+                // Iniciar la consulta
+                $query = PendienteApiMedcol6::query();
+        
+                // Filtrar por estado
+                $query->where(function($q) {
+                    $q->where('estado', 'VENCIDO')
+                      ->orWhere('estado', NULL);
+                });
+        
+                // Filtrar por centro de producción si no es '1'
+                if (Auth::user()->drogueria !== '1') {
+                    $query->where('centroproduccion', $drogueria);
+                }
+        
+                // Filtrar por fechas si están presentes
+                if (!empty($request->fechaini) && !empty($request->fechafin)) {
+                    $fechaini = Carbon::parse($request->fechaini)->startOfDay();
+                    $fechafin = Carbon::parse($request->fechafin)->endOfDay();
+                    $query->whereBetween('fecha_factura', [$fechaini, $fechafin]);
+                } else {
+                    // Si no se proporcionan fechas, usar las fechas por defecto
+                    $query->whereBetween('fecha_factura', [$fechaAi, $fechaAf]);
+                }
+        
+                // Filtrar por contrato si está presente
+                if (!empty($request->contrato)) {
+                    $query->where('centroproduccion', $request->contrato);
+                }
+        
+                // Obtener los resultados
+                $pendiente_api_medcol6 = $query->orderBy('id')->get();
+        
+                // Retornar los resultados para DataTables
+                return DataTables()->of($pendiente_api_medcol6)
+                    ->addColumn('action', function ($pendiente) {
+                        $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '" class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle">
+                            <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i></button>';
+                        $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar">
+                            <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i></button>';
+        
+                        return $button . ' ' . $button2;
+                    })
+                    ->rawColumns(['action'])
+                    ->make(true);
+            }
+        
+            // Retornar la vista si no es una solicitud AJAX
+            return view('menu.Medcol6.indexAnalista');
+        }
 
     public function update(Request $request, $id)
     {
@@ -642,7 +894,7 @@ class PendienteApiMedcol6Controller extends Controller
     {
         //
         if (request()->ajax()) {
-            $pendiente = PendienteApiMedcol6::where('id', '=', $id)
+            $pendiente = PendienteApiMedcol6::where([['id', '=', $id]])
                 ->first();
 
             $saldo_pendiente = $pendiente->cantord - $pendiente->cantdpx;
@@ -708,7 +960,25 @@ class PendienteApiMedcol6Controller extends Controller
                         break;
                     case "6":
                          $drogueria = 'BIO1';
+                        break; 
+                         case "8":
+                        $drogueria = 'EM01';
                         break;    
+                     case "9":
+                        $drogueria = 'FSIO';
+                        break;
+                    case "10":
+                        $drogueria = 'FSOS';
+                        break;
+                    case "11":
+                        $drogueria = 'FSAU';
+                        break;
+                    case "12":
+                        $drogueria = 'EVSO';
+                        break; 
+                    case "13":
+                        $drogueria = 'FRJA';
+                        break;     
                 }
                 
     if(Auth::user()->drogueria == '1'){            
@@ -718,6 +988,7 @@ class PendienteApiMedcol6Controller extends Controller
         $tramitados =  PendienteApiMedcol6::where([['estado', 'TRAMITADO']])->count();
         $agotados =  PendienteApiMedcol6::where([['estado', 'DESABASTECIDO']])->count();
         $anulados =  PendienteApiMedcol6::where([['estado', 'ANULADO']])->count();
+        $vencidos =  PendienteApiMedcol6::where([['estado', 'VENCIDO']])->count();
     }else{
         
         $pendientes =  PendienteApiMedcol6::where([['estado', 'PENDIENTE'], ['centroproduccion',$drogueria]])->count();
@@ -725,11 +996,12 @@ class PendienteApiMedcol6Controller extends Controller
         $tramitados =  PendienteApiMedcol6::where([['estado', 'TRAMITADO'], ['centroproduccion',$drogueria]])->count();
         $agotados =  PendienteApiMedcol6::where([['estado', 'DESABASTECIDO'], ['centroproduccion',$drogueria]])->count();
         $anulados =  PendienteApiMedcol6::where([['estado', 'ANULADO'], ['centroproduccion',$drogueria]])->count();
+        $vencidos =  PendienteApiMedcol6::where([['estado', 'VENCIDO'], ['centroproduccion',$drogueria]])->count();
     }
         
     
 
-        return response()->json(['pendientes' => $pendientes, 'entregados' => $entregados, 'tramitados' => $tramitados, 'agotados' => $agotados, 'anulados' => $anulados]);
+        return response()->json(['pendientes' => $pendientes, 'entregados' => $entregados, 'tramitados' => $tramitados, 'agotados' => $agotados, 'anulados' => $anulados, 'vencidos' => $vencidos]);
     }
 
     public function createentregadospi($var1)
@@ -738,7 +1010,7 @@ class PendienteApiMedcol6Controller extends Controller
         $password = 'colMed2023**';
 
         $response = Http::post(
-            "http://hcp080m81s7.sn.mynetname.net:8001/api/acceso",
+            "http://hed08pf9dxt.sn.mynetname.net:8004/api/acceso",
             [
                 'email' =>  $email,
                 'password' => $password,
@@ -751,10 +1023,12 @@ class PendienteApiMedcol6Controller extends Controller
         $prueba = $response->json();
         $token = $prueba["token"];
 
-        $responsefacturas = Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/entregadosapi");
+        $responsefacturas = Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/entregadosapi");
 
         $facturassapi = $responsefacturas->json();
 
+        
+        //dd($facturassapi);
         
         $contadorei = 0;
         $contador1 = 0;
@@ -762,13 +1036,16 @@ class PendienteApiMedcol6Controller extends Controller
         foreach ($facturassapi['data'] as $factura) {
 
 
-            $existe =  EntregadosApiMedcol6::where('factura', $factura['factura'])->count();
+           
+
+            $existe =  EntregadosApiMedcol6::where([
+                ['factura', trim($factura['factura'])],['documento', trim($factura['documento'])]])->count();
             
-          
+               
 
             if ($existe == 0 || $existe == '') {
                 
-                
+               
                 
                EntregadosApiMedcol6::create([
                     'Tipodocum' => trim($factura['Tipodocum']),
@@ -800,10 +1077,15 @@ class PendienteApiMedcol6Controller extends Controller
              
                 
                $contador1++;
+               
+               Log::info('Desde la web syncapi '.$contador1 . ' Linea creada entregados y ' . trim($factura['documento']).trim($factura['factura']) . ' Medicamento - '. trim($factura['cums']).'=>'.trim($factura['nombre']).'Documento: '.trim($factura['historia']));
+            }else{
+                
+                Log::info('Desde la web syncapi '.$contador1 . ' ya creada en entregados y ' . trim($factura['documento']).trim($factura['factura']) . ' Medicamento - '. trim($factura['cums']).'=>'.trim($factura['nombre']).'Documento: '.trim($factura['historia']));
             }
         }
 
-        Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/closeallacceso");
+        Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/closeallacceso");
 
         $pendientes = DB::table('pendiente_api_medcol6')
             ->join('entregados_api_medcol6', function ($join) {
@@ -819,8 +1101,10 @@ class PendienteApiMedcol6Controller extends Controller
                 'entregados_api_medcol6.documento',
                 'entregados_api_medcol6.factura'
             )
+            ->where([['pendiente_api_medcol6.estado', 'PENDIENTE']])
             ->get();
-
+            
+           
 
         foreach ($pendientes as $key => $value) {
 
@@ -832,6 +1116,8 @@ class PendienteApiMedcol6Controller extends Controller
                     ['pendiente_api_medcol6.codigo', '=', $value->codigo],
                     ['pendiente_api_medcol6.usuario', 'RFAST']
                 ])->count();
+                
+                
 
             if ($entregados == 0 || $entregados == null) {
 
@@ -882,7 +1168,7 @@ class PendienteApiMedcol6Controller extends Controller
         $password = 'colMed2023**';
 
         $response = Http::post(
-            "http://192.168.10.27:8001/api/acceso",
+            "http://192.168.66.91:8004/api/acceso",
             [
                 'email' =>  $email,
                 'password' => $password,
@@ -895,7 +1181,7 @@ class PendienteApiMedcol6Controller extends Controller
         $prueba = $response->json();
         $token = $prueba["token"];
 
-        $responsefacturas = Http::withToken($token)->get("http://192.168.10.27:8001/api/entregadosapi");
+        $responsefacturas = Http::withToken($token)->get("http://192.168.66.91:8004/api/entregadosapi");
 
         $facturassapi = $responsefacturas->json();
 
@@ -938,10 +1224,13 @@ class PendienteApiMedcol6Controller extends Controller
                 ]);
 
                 $contador1++;
+            }else{
+                
+                
             }
         }
 
-        Http::withToken($token)->get("http://192.168.10.27:8001/api/closeallacceso");
+        Http::withToken($token)->get("http://192.168.66.91:8004/api/closeallacceso");
 
         $pendientes = DB::table('pendiente_api_medcol6')
             ->join('entregadosapi', function ($join) {
@@ -1038,7 +1327,25 @@ class PendienteApiMedcol6Controller extends Controller
                         break;
                     case "6":
                          $drogueria = 'BIO1';
+                        break;
+                     case "8":
+                        $drogueria = 'EM01';
                         break;    
+                     case "9":
+                        $drogueria = 'FSIO';
+                        break;
+                    case "10":
+                        $drogueria = 'FSOS';
+                        break;
+                    case "11":
+                        $drogueria = 'FSAU';
+                        break;
+                    case "12":
+                        $drogueria = 'EVSO';
+                        break; 
+                    case "13":
+                        $drogueria = 'FRJA';
+                        break;         
                 }
         
 
@@ -1080,7 +1387,7 @@ class PendienteApiMedcol6Controller extends Controller
         $usuario = Auth::user()->email;
     
         try {
-            $response = Http::post("http://hcp080m81s7.sn.mynetname.net:8001/api/acceso", [
+            $response = Http::post("http://hed08pf9dxt.sn.mynetname.net:8004/api/acceso", [
                 'email' => $email,
                 'password' => $password,
             ]);
@@ -1089,7 +1396,7 @@ class PendienteApiMedcol6Controller extends Controller
     
             if ($token) {
                 try {
-                    $responsefacturas = Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/pendientesanuladosapi");
+                    $responsefacturas = Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/pendientesanuladosapi");
                     $facturassapi = $responsefacturas->json()['data'] ?? [];
     
                     $contadorActualizados = 0;
@@ -1114,7 +1421,7 @@ class PendienteApiMedcol6Controller extends Controller
                     
                     
     
-                    Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/closeallacceso");
+                    Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/closeallacceso");
     
                     Log::info('Desde la web syncapi autopista anulados', [
                         'lineas_actualizadas' => $contadorActualizados,

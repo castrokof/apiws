@@ -18,6 +18,9 @@
                     <li class="nav-item">
                         <a class="nav-link" id="custom-tabs-one-datos-anulado-tab" data-toggle="pill" href="#custom-tabs-one-datos-anulado" role="tab" aria-controls="custom-tabs-one-datos-anulado" aria-selected="false">Anulado</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-one-datos-vencidos-tab" data-toggle="pill" href="#custom-tabs-one-datos-vencidos" role="tab" aria-controls="custom-tabs-one-datos-vencidos" aria-selected="false">Vencidos</a>
+                    </li>
 
                     <div class="card-tools pull-right">
 
@@ -58,14 +61,26 @@
                         </div>
 
                     </div>
+                    <div class="tab-pane fade " id="custom-tabs-one-datos-vencidos" role="tabpanel" aria-labelledby="custom-tabs-one-datos-vencidos-tab">
+                        <div class="card-body">
+                            @include('menu.Medcol5.tablas.tablaIndexVencidos')
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <button type="button" id="syncapi" class="btn-flotante tooltipsC" title="Sync Pendientes">
-        <i class="fas fa-capsules fa-1x"></i>
-        <span class="badge badge-pill badge-primary pull-right">Sync</span>
-    </button>
+    <div class="btn-flotante-container">
+        <button type="button" id="syncapi" class="btn-flotante tooltipsC" title="Sync Pendientes">
+            <i class="fas fa-capsules fa-1x"></i>
+            <span class="badge badge-pill pull-right">Sync Pendientes</span>
+        </button>
 
+        <button type="button" id="synanuladospndt" class="btn-flotante-second tooltipsC" title="Sync Anulados">
+            <i class="fas fa-trash fa-1x"></i>
+            <span class="badge badge-pill pull-left">Sync Anulados</span>
+        </button>
+    </div>
 
 </div>

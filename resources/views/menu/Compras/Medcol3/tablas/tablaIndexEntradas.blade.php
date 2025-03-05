@@ -16,17 +16,9 @@
                         <thead>
                             <tr>
                                 <th>Acciones</th>
-                                <th>Id</th>
                                 <th>Orden</th>
                                 <th># Orden</th>
                                 <th>Proveedor</th>
-                                <th>Codigo</th>
-                                <th>Nombre articulo</th>
-                                <th>Marca</th>
-                                <th>Cantidad</th>
-                                <th>Vlr Unitario</th>
-                                <th>Total</th>
-                                <th>Contrato</th>
                                 <th>Fecha Orden</th>
                                 <th>Usuario</th>
                             </tr>

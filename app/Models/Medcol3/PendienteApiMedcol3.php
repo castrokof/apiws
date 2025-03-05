@@ -30,7 +30,6 @@ class PendienteApiMedcol3 extends Model
         'codigo',
         'nombre',
         'cums',
-        'observaciones',
         'cantidad',
         'cajero',
         'usuario',

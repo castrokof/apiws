@@ -152,6 +152,7 @@ Formulas Pacientes SOS
 
 @section('contenido')
 @include('menu.MedcolSos.modal.modalFormulasSos')
+
 @include('menu.MedcolSos.modal.modalFacturaArticulo')
 @endsection
 
@@ -206,188 +207,250 @@ Formulas Pacientes SOS
                 }).trigger('change');
 
 
-                //let datosFormulasMedicas = [];
-                
+                    var datosFormulasMedicas = [];
+                    
+                    $('#guardar_entrada').click(function() {
+                       
+                        var url = "{{ route('dataFormulasSos') }}";
+                        var tipoDocId = $('#tipoDocId').val();
+                        var numeroDocId = $('#numeroDocId').val();
+                    
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Espere por favor...',
+                            html: 'Consultando datos...',
+                            showConfirmButton: false,
+                            allowOutsideClick: false,
+                            willOpen: () => {
+                                Swal.showLoading();
+                            },
+                        });
+                    
+                        $.ajax({
+                            url: url,
+                            dataType: 'json',
+                            method: 'post',
+                            data: {
+                                tipoIdentificacion: tipoDocId,
+                                numeroIdentificacion: numeroDocId,
+                                "_token": $("meta[name='csrf-token']").attr("content")
+                            },
+                            success: function(response) {
+                                Swal.close(); // Cerrar la alerta de carga
+                    
+                                if (response.status === 'error') {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'No se pudo realizar la consulta. Intente nuevamente.',
+                                        showConfirmButton: true
+                                    });
+                                    return;
+                                }
+                    
+                                if (response.status === 'success') {
+                                    const result = response.data.result;
+                    
+                                    // Validar que los datos de la fórmula médica existan
+                                    if (!result || !result.datosFormulasMedica || result.datosFormulasMedica.length === 0) {
+                                        Swal.fire({
+                                            icon: 'warning',
+                                            title: 'Sin resultados',
+                                            text: 'No se encontraron fórmulas médicas para este afiliado.',
+                                            showConfirmButton: true
+                                        });
+                                        return;
+                                    }
+                    
+                                    datosFormulasMedicas = result.datosFormulasMedica; // Guardar los datos en la variable global
+                                    console.log(datosFormulasMedicas);
+                    
+                                    // Mostrar el contenedor de resultados
+                                    $('#resultado-consulta').removeClass('d-none');
+                    
+                                    // Destruir el DataTable si ya existe
+                                    if ($.fn.DataTable.isDataTable('#tabla-formulas-medicas')) {
+                                        $('#tabla-formulas-medicas').DataTable().destroy();
+                                    }
+                    
+                                    // Limpiar los datos anteriores
+                                    $('#datos-afiliado, #tabla-formulas').empty();
+                    
+                                    // Datos del Afiliado
+                                    $('#datos-afiliado').append(`
+                                        <div class="col-md-6 mb-3">
+                                            <label><strong>Tipo de Identificación:</strong></label>
+                                            <input type="text" class="form-control" readonly value="${result.tipoIdentificacion}">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label><strong>Número de Identificación:</strong></label>
+                                            <input type="text" class="form-control" readonly value="${result.numeroIdentificacion}">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label><strong>Nombre Completo:</strong></label>
+                                            <input type="text" class="form-control" readonly value="${result.primerNombre} ${result.segundoNombre || ''} ${result.primerApellido} ${result.segundoApellido || ''}">
+                                        </div>
+                                    `);
+                    
+                                    // Tabla de Formulas Médicas, Médicos y Medicamentos
+                                    let tablaFormulas = `
+                                        <table id="tabla-formulas-medicas" class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Fecha Fórmula</th>
+                                                    <th>Número Fórmula</th>
+                                                    <th>Diagnostico</th>
+                                                    <th>Nombre del Médico</th>
+                                                    <th>Especialidad</th>
+                                                    <th>Medicamentos</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                    `;
+                    
+                                    datosFormulasMedicas.forEach((formula, index) => {
+                                        const datosGenerales = formula.datosGenerales;
+                                        const datosMedico = formula.datosMedico;
+                                        const medicamentos = formula.datosMedicamentos;
+                    
+                                        // Generar tabla de medicamentos para cada fórmula
+                                        let listaMedicamentos = `
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Código</th>
+                                                        <th>Medicamento</th>
+                                                        <th>Cantidad</th>
+                                                        <th>Dosis</th>
+                                                        <th>Vía Administración</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                        `;
+                    
+                                        medicamentos.forEach((medicamento, i) => {
+                                            listaMedicamentos += `
+                                                <tr>
+                                                    <td>${i + 1}</td>
+                                                    <td>${medicamento.codigoMedicamento}</td>
+                                                    <td>${medicamento.nombreMedicamento}</td>
+                                                    <td>${medicamento.cantidadAEntregar}</td>
+                                                    <td>${medicamento.cantidadDosis}</td>
+                                                    <td>${medicamento.viaAdministracion}</td>
+                                                </tr>
+                                            `;
+                                        });
+                    
+                                        listaMedicamentos += `</tbody></table>`;
+                    
+                                        // Añadir la fila de fórmula con los medicamentos ya visibles
+                                        tablaFormulas += `
+                                            <tr>
+                                                <td>${datosGenerales.fechaFormula}</td>
+                                                <td>${datosGenerales.numeroFormula}</td>
+                                                <td>${datosGenerales.codigoDiagnostico}</td>
+                                                <td>${datosMedico.primerNombre} ${datosMedico.segundoNombre || ''} ${datosMedico.primerApellido} ${datosMedico.segundoApellido}</td>
+                                                <td>${datosMedico.especialidad}</td>
+                                                <td>${listaMedicamentos}</td>
+                                            </tr>
+                                        `;
+                                    });
+                    
+                                    tablaFormulas += `
+                                            </tbody>
+                                        </table>
+                                    `;
+                    
+                                    // Añadir la tabla de fórmulas al DOM
+                                    $('#tabla-formulas').append(tablaFormulas);
+                    
+                                    // Inicializar DataTable en la tabla creada
+                                    $('#tabla-formulas-medicas').DataTable({
+                                        
+                                        language: idioma_espanol,
+                                       
+                                        lengthMenu: [
+                                            [25, 50, 100, 500, -1],
+                                            [25, 50, 100, 500, "Mostrar Todo"]
+                                        ],
+                                       
+                                        aaSorting: [
+                                            [0, "desc"]
+                                        ],
 
-                $('#guardar_entrada').click(function() {
-                    var url = "{{ route('dataFormulasSos') }}";
-                    var tipoDocId = $('#tipoDocId').val();
-                    var numeroDocId = $('#numeroDocId').val();
 
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Espere por favor...',
-                        html: 'Consultando datos...',
-                        showConfirmButton: false,
-                        allowOutsideClick: false,
-                        willOpen: () => {
-                            Swal.showLoading();
-                        },
-                    });
+                               
 
-                    $.ajax({
-                        url: url,
-                        dataType: 'json',
-                        method: 'post',
-                        data: {
-                            tipoIdentificacion: tipoDocId,
-                            numeroIdentificacion: numeroDocId,
-                            "_token": $("meta[name='csrf-token']").attr("content")
-                        },
-                        success: function(response) {
-                            Swal.close();
+                                    
 
-                            if (response.status === 'error') {
+                                    
+                                //Botones----------------------------------------------------------------------
+
+                                "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+
+                                buttons: [{
+
+                                        extend: 'copyHtml5',
+                                        titleAttr: 'Copiar Registros',
+                                        title: "Informe Facturas",
+                                        className: "btn  btn-outline-primary btn-sm"
+
+
+                                    },
+                                    {
+
+                                        extend: 'excelHtml5',
+                                        titleAttr: 'Exportar Excel',
+                                        title: "Informe Facturas",
+                                        className: "btn  btn-outline-success btn-sm",
+                                        customize: function(xlsx) {
+                                            var sheet = xlsx.xl.worksheets['Sheet1'];
+                                            $('row c[r^="AG"]', sheet).attr('t', 's');
+                                        }
+                                    },
+                                    {
+
+                                        extend: 'csvHtml5',
+                                        titleAttr: 'Exportar csv',
+                                        className: "btn  btn-outline-warning btn-sm"
+
+                                    },
+                                    {
+
+                                        extend: 'pdfHtml5',
+                                        titleAttr: 'Exportar pdf',
+                                        className: "btn  btn-outline-secondary btn-sm"
+
+
+                                    }
+                                ]
+                                        
+                                    });
+                    
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Datos consultados correctamente',
+                                        showConfirmButton: false,
+                                        timer: 1000
+                                    });
+                                }
+                            },
+                            error: function(xhr, status, error) {
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Error',
-                                    text: 'No se pudo realizar la consulta. Intente nuevamente.',
+                                    text: 'Ocurrió un error en la consulta.',
                                     showConfirmButton: true
                                 });
-                                return;
                             }
-
-                            if (response.status === 'success') {
-                                const result = response.data.result;
-                                datosFormulasMedicas = result.datosFormulasMedica;
-
-                                $('#resultado-consulta').removeClass('d-none');
-                                $('#datos-afiliado, #tabla-formulas').empty();
-
-                                $('#datos-afiliado').append(`
-                                    <div class="col-md-6 mb-3">
-                                        <label><strong>Tipo de Identificación:</strong></label>
-                                        <input type="text" class="form-control" readonly value="${result.tipoIdentificacion}">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label><strong>Número de Identificación:</strong></label>
-                                        <input type="text" class="form-control" readonly value="${result.numeroIdentificacion}">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label><strong>Nombre Completo:</strong></label>
-                                        <input type="text" class="form-control" readonly value="${result.primerNombre} ${result.segundoNombre || ''} ${result.primerApellido} ${result.segundoApellido || ''}">
-                                    </div>
-                                `);
-
-                                let tablaFormulas = `
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Fecha Fórmula</th>
-                                                <th>Número Fórmula</th>
-                                                <th>Nombre del Médico</th>
-                                                <th>Especialidad</th>
-                                                <th>Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                `;
-
-                                datosFormulasMedicas.forEach((formula, index) => {
-                                    const datosGenerales = formula.datosGenerales;
-                                    const datosMedico = formula.datosMedico;
-
-                                    tablaFormulas += `
-                                        <tr>
-                                            <td>${datosGenerales.fechaFormula}</td>
-                                            <td>${datosGenerales.numeroFormula}</td>
-                                            <td>${datosMedico.primerNombre} ${datosMedico.segundoNombre || ''} ${datosMedico.primerApellido} ${datosMedico.segundoApellido}</td>
-                                            <td>${datosMedico.especialidad}</td>
-                                            <td>
-                                                <button type="button" class="btn btn-info" onclick="verMedicamentos('${datosGenerales.numeroFormula}')">Ver Medicamentos</button>
-                                            </td>
-                                        </tr>
-                                    `;
-                                });
-
-                                tablaFormulas += `</tbody></table>`;
-                                $('#tabla-formulas').append(tablaFormulas);
-
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Datos consultados correctamente',
-                                    showConfirmButton: false,
-                                    timer: 1000
-                                });
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'Ocurrió un error en la consulta.',
-                                showConfirmButton: true
-                            });
-                        }
+                        });
                     });
-                });
-
-                //Funcion para buscar la factura y traer los datos al formulario y datatalbe
-                /* $(document).ready(function() {
-                    $('#verMedicamentos').on('click', function() {
-                        // Llamamos a la función guardarDispensacion al hacer clic en el botón "Enviar"
-                        verMedicamentos(numeroFormula);
-                    });
-                }); */
-
-                
-
-                // Función que muestra los medicamentos
-                function verMedicamentos(numeroFormula) {
-                    const formula = datosFormulasMedicas.find(formula => formula.datosGenerales.numeroFormula === numeroFormula);
-                    if (!formula) {
-                        console.error('Fórmula no encontrada');
-                        return;
-                    }
-                    
-                    const datosGenerales = formula.datosGenerales;
-                    const datosMedico = formula.datosMedico;
-                    const medicamentos = formula.datosMedicamentos;
-
-                    $('#modal-header').html(`
-                        <h5>Fórmula N° ${datosGenerales.numeroFormula}</h5>
-                        <p>Médico: ${datosMedico.primerNombre} ${datosMedico.segundoNombre || ''} ${datosMedico.primerApellido} ${datosMedico.segundoApellido}</p>
-                        <p>Especialidad: ${datosMedico.especialidad}</p>
-                    `);
-
-                    let tablaMedicamentos = `
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Código</th>
-                                    <th>Medicamento</th>
-                                    <th>Cantidad</th>
-                                    <th>Dosis</th>
-                                    <th>Vía Administración</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                    `;
-
-                    medicamentos.forEach((medicamento, i) => {
-                        tablaMedicamentos += `
-                            <tr>
-                                <td>${i + 1}</td>
-                                <td>${medicamento.codigoMedicamento}</td>
-                                <td>${medicamento.nombreMedicamento}</td>
-                                <td>${medicamento.cantidadAEntregar}</td>
-                                <td>${medicamento.cantidadDosis}</td>
-                                <td>${medicamento.viaAdministracion}</td>
-                            </tr>
-                        `;
-                    });
-
-                    tablaMedicamentos += `</tbody></table>`;
-                    $('#modal-body').html(tablaMedicamentos);
-                    $('#medicamentosModal').modal('show');
-                }
-
-
-
-
                    
                });
+               
+               
+                 
 
 
 

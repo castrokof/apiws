@@ -11,7 +11,6 @@
     <input type="text" name="marca" id="marca" class="form-control" value="{{old('marca')}} " readonly>
     </select>
   </div>
-  
 
   <div class="col-lg-6">
     <label for="nombrea" class="col-xs-6 control-label requerido">Nombre articulo</label>
@@ -79,4 +78,3 @@
 <div class="col-lg-3">
   <input type="hidden" name="usuario_id" id="usuario_id" class="form-control" value="{{ Auth::user()->name ?? '' }}" readonly>
 </div>
-

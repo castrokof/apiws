@@ -1,4 +1,50 @@
+
+
 <div class="row">
+            <div class="col-md-8">
+                @csrf
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="m-0 text-dark">Ingrese Rango de Fechas</h2>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <label for="fecha" class="col-form-label">Fecha inicial</label>
+                                <input type="date" name="fechaini" id="fechaini" class="form-control" value="{{ old('fechaini') }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="fechafin" class="col-form-label">Fecha final</label>
+                                <input type="date" name="fechafin" id="fechafin" class="form-control" value="{{ old('fechafin') }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="contrato" class="col-form-label">Farmacia</label>
+                                <select name="contrato" id="contrato" class="form-control select2bs4" style="width: 100%;" required>
+                                    <option value="">Seleccione opcion...</option>
+                                    <option value="BIO1">BIO1-FARMACIA BIOLOGICOS</option>
+                                    <option value="DLR1">DLR1-FARMACIA DOLOR</option>
+                                    <option value="DPA1">DPA1-FARMACIA PALIATIVOS</option>
+                                    <option value="EHU1">EHU1-FARMACIA HUERFANAS</option>
+                                    <option value="EM01">EM01-FARMACIA EMCALI</option>
+                                    <option value="EVEN">EVEN-FARMACIA EVENTO</option>
+                                    <option value="EVSM">EVSM-EVENTO SALUD MENTAL</option>
+                                    <option value="FRJA">FRJA-FARMACIA JAMUNDI</option>
+                                    <option value="INY">INY-FARMACIA INYECTABLES</option>
+                                    <option value="PAC">PAC-FARMACIA PAC</option>
+                                    <option value="SM01">SM01-FARMACIA SALUD MENTAL</option>
+                                    <option value="BPDT">BPDT-BOLSA</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button type="submit" name="reset" id="reset" class="btn btn-warning btn-block">Limpiar</button>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="submit" name="buscar" id="buscar" class="btn btn-primary btn-block">Buscar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
     <div class="col-12">
         <div class="card card-primary card-tabs">
             <div class="card-header p-0 pt-1">
@@ -17,6 +63,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="custom-tabs-one-datos-anulado-tab" data-toggle="pill" href="#custom-tabs-one-datos-anulado" role="tab" aria-controls="custom-tabs-one-datos-anulado" aria-selected="false">Anulado</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-one-datos-vencidos-tab" data-toggle="pill" href="#custom-tabs-one-datos-vencidos" role="tab" aria-controls="custom-tabs-one-datos-vencidos" aria-selected="false">Vencidos</a>
                     </li>
 
                     <div class="card-tools pull-right">
@@ -55,6 +104,12 @@
                     <div class="tab-pane fade " id="custom-tabs-one-datos-anulado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-anulado-tab">
                         <div class="card-body">
                             @include('menu.Medcol6.tablas.tablaIndexAnulado')
+                        </div>
+
+                    </div>
+                    <div class="tab-pane fade " id="custom-tabs-one-datos-vencidos" role="tabpanel" aria-labelledby="custom-tabs-one-datos-vencidos-tab">
+                        <div class="card-body">
+                            @include('menu.Medcol6.tablas.tablaIndexVencidos')
                         </div>
 
                     </div>

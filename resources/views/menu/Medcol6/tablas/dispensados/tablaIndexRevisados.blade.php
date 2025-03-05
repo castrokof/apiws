@@ -30,31 +30,47 @@
                             <th>Unidad Medicamento</th>
                             <th>Número Unidades</th>
                             <th>Regimen</th>
-                            <th>Paciente</th>
+                            <th>Paciente</th> 
                             <th>Primer Apellido</th>
                             <th>Segundo Apellido</th>
                             <th>Primer Nombre</th>
                             <th>Segundo Nombre</th>
                             <th>Cuota Moderadora</th>
                             <th>Copago</th>
+                            <th>Orden medica</th>
+                            <th>Total Entregas</th>
                             <th>Número Entrega</th>
                             <th>Fecha Ordenamiento</th>
                             <th>Fecha Suministro</th>
                             <th>DX</th>
+                            <th>NIT IPS</th>
                             <th>IPS</th>
                             <th>Autorización</th>
                             <th>MIPRES</th>
                             <th>Reporte Entrega NOPBS</th>
                             <th>ID Médico</th>
+                            <th>Documento Médico</th>
                             <th>Médico</th>
-                            <th>Precio Unitario</th>
+                            <th>Especialidad Medico</th>
+                            <th>Precio Unitario</th> 
                             <th>Valor Total</th>
                             <th>Estado</th>
                             <th>Centro Producción</th>
                             <th>Droguería</th>
-                            <th>User_id</th>
                             <th>Cajero</th>
-                            <th>Acciones</th>
+                            <th>User_id</th>
+                            <th>Nit IPS</th>
+                            <th>Frecuencia</th>
+                            <th>Dosis</th>
+                            <th>Duración Tratamiento</th>
+                            <th>Cobertura</th> 
+                            <th>Tipo contrato</th>
+                            <th>Tipo entrega</th>
+                            <th>Plan</th>
+                            <th>Via</th>
+                            <th>Ciudad</th>
+                            <th>Acciones</th> 
+                            
                         </tr>
                     </thead>
                     <tbody>

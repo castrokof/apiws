@@ -28,6 +28,7 @@ class Medcolcompras4 extends Model
         'iva',
         'proveedor_id',
         'contrato',
+        'observaciones',
         'usuario_id'
     ];
     
@@ -38,4 +39,5 @@ class Medcolcompras4 extends Model
     {
         return $this->belongsTo(Medcolterceros4::class, 'proveedor_id', 'id');
     }
+    
 }

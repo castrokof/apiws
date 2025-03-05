@@ -7,35 +7,33 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-12">
-            <div class="card col-12">
-                <div class="card-header">{{ __('Hercules') }}</div>
+            <div class="card col-l-12">
+                <div class="card-header">{{ __('Medcol') }}</div>
 
                 <div class="card-body">
-                    @if (session("TokenHercules"))
-                    <div class="alert alert-warning alert-dismissible" data-auto-dismiss="3000">
+                    @if (session("mensaje"))
+                    <div class="alert alert-warning alert-dismissible" data-auto-dismiss="6000">
                         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                        <h5><i class="icon fas fa-check"></i> Mensaje Tempus</h5>
-                        <li>{{ session("TokenHercules")}}</li>
+                        <h5><i class="icon fas fa-check"></i> Mensaje Medcol</h5>
+                        <li>{{ session("mensaje")}}</li>
                     </div>
                     @endif
-
-
+      
+                     
                     <form  action="{{route('tokenhercules1')}}" method="post">
                     @csrf
                     @include('form-consulta-hercules')
-
+                    
                     <button type="submit" id="consultar" class="btn btn-success">Agregar</button>
-
-                    <button type="button" id="consultar" class="btn btn-warning"><a href="/submenu">Retornar</a> </button>
-
+                    
                     </form>
-
+                    
 
 
                 </div>
+               
 
-
-
+                    
 
                 </div>
             </div>
@@ -57,7 +55,7 @@
 
 <script>
 
-
-
+  
+       
 </script>
 @endsection

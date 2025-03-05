@@ -7,7 +7,7 @@
             </div>
         </div>
         <div class="col-lg-4">
-            <button type="button" class="btn btn-success btn-block" id="buscarFactura">
+            <button type="button" class="btn btn-success btn-block" id="buscarFactura" >
                 Buscar
             </button>
         </div>
@@ -135,3 +135,4 @@
         </table>
     </div>
 </div>
+

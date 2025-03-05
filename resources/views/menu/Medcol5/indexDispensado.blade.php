@@ -95,7 +95,7 @@ Dispensado Medcol Emcali
               `);
 
                     $("#detalle1").append(`
-                <div class="small-box shadow-lg l-bg-orange-dark">
+                <div class="small-box shadow-lg l-bg-green-dark">
                   <div class="inner">
                     <h5>REVISADAS</h5>
                     <p><h5>${revisado ?? 0}</h5></p>
@@ -123,6 +123,7 @@ Dispensado Medcol Emcali
 
         var fechaini;
         var fechafin;
+        var contrato;
 
         // Función para llenar la tabla al cargar la página
         fill_datatable_tabla();
@@ -132,19 +133,21 @@ Dispensado Medcol Emcali
 
             fechaini = $('#fechaini').val();
             fechafin = $('#fechafin').val();
-            //historia = $('#historia').val();
+            contrato = $('#contrato').val();
 
 
-            if (fechaini != '' && fechafin != '') {
+            if (fechaini != '' && fechafin != '' || contrato != '') {
 
                 $('#dispensados').DataTable().destroy();
+                $("#revisados").DataTable().destroy();
+                $("#anulados").DataTable().destroy();
 
-                fill_datatable_tabla(fechaini, fechafin);
+                fill_datatable_tabla(fechaini, fechafin, contrato);
 
             } else {
 
                 Swal.fire({
-                    title: 'Debes digitar fecha inicial y fecha final',
+                    title: 'Debes digitar fecha inicial y fecha final o la Droguería',
                     icon: 'warning',
                     buttons: {
                         cancel: "Cerrar"
@@ -159,7 +162,7 @@ Dispensado Medcol Emcali
 
             $('#fechaini').val('');
             $('#fechafin').val('');
-            //$('#historia').val('');
+            $('#contrato').val('');
 
             $('#dispensados').DataTable().destroy();
             $("#revisados").DataTable().destroy();
@@ -167,20 +170,20 @@ Dispensado Medcol Emcali
             fill_datatable_tabla();
         });
 
-        function fill_datatable_tabla(fechaini = '', fechafin = '') {
+        function fill_datatable_tabla(fechaini = '', fechafin = '', contrato = '') {
 
 
             $(function() {
                 // Se llama a la función correspondiente al tab activo al cargar la página
                 var activeTab = $(".nav-tabs .active");
                 var activeTabId = activeTab.attr("id");
-                callFunction(activeTabId, fechaini, fechafin);
+                callFunction(activeTabId);
 
                 // Se llama a la función correspondiente al tab seleccionado al cambiar de tab
                 $('a[data-toggle="pill"]').on("shown.bs.tab", function(e) {
                     var target = $(e.target);
                     var targetId = target.attr("id");
-                    callFunction(targetId, fechaini, fechafin);
+                    callFunction(activeTabId);
                 });
 
                 function callFunction(tabId) {
@@ -223,6 +226,7 @@ Dispensado Medcol Emcali
                                     data: {
                                         fechaini: fechaini,
                                         fechafin: fechafin,
+                                        contrato: contrato,
                                         _token: "{{ csrf_token() }}"
                                     },
                                     method: 'POST'
@@ -514,8 +518,8 @@ Dispensado Medcol Emcali
                                 language: idioma_espanol,
                                 processing: true,
                                 lengthMenu: [
-                                    [25, 50, 100, 500, -1],
-                                    [25, 50, 100, 500, "Mostrar Todo"]
+                                    [25, 50, 100, 500, 5000, -1],
+                                    [25, 50, 100, 500, 5000, "Mostrar Todo"]
                                 ],
                                 processing: true,
                                 serverSide: true,
@@ -527,6 +531,7 @@ Dispensado Medcol Emcali
                                     data: {
                                         fechaini: fechaini,
                                         fechafin: fechafin,
+                                        contrato: contrato,
                                         _token: "{{ csrf_token() }}"
                                     },
                                     method: 'POST'
@@ -765,6 +770,7 @@ Dispensado Medcol Emcali
                                     data: {
                                         fechaini: fechaini,
                                         fechafin: fechafin,
+                                        contrato: contrato,
                                         _token: "{{ csrf_token() }}"
                                     },
                                     method: 'POST'
@@ -1085,7 +1091,7 @@ Dispensado Medcol Emcali
         // Función que envia el id al controlador y cambia el estado del registro
         $(document).on('click', '#syncapidis', function() {
 
-            const text = 'De Medcol PCE-Huerfanas-Biologicos';
+            const text = 'De Medcol EMCALI';
 
             Swal.fire({
                 title: "¿Estás por sincronizar lo dispensado?",
@@ -1130,7 +1136,7 @@ Dispensado Medcol Emcali
         //Funcion para sincronizar las facturas anuladas y actualizar el estado
         $(document).on('click', '#synanulados', function() {
 
-            const text = 'De Medcol PCE-Huerfanas-Biologicos';
+            const text = 'De Medcol EMCALI';
 
             Swal.fire({
                 title: "¿Estás por sincronizar los anulados?",
@@ -1462,41 +1468,52 @@ Dispensado Medcol Emcali
         /* Script para manejar la lógica de búsqueda y DataTable */
         function buscarFactura() {
             const numeroFactura = $('#numero_factura').val();
-
+        
             $.ajax({
                 url: `{{ route('dispensado.medcol5', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
                 type: 'GET',
                 success: function(data) {
-                    if (data && Array.isArray(data) && data.length > 0) {
+                    // Verificar si el backend no ha devuelto un error
+                    if (data && !data.error && Array.isArray(data) && data.length > 0) {
                         const firstRecord = data[0];
-
+        
                         $('#factura').val(firstRecord.factura);
                         $('#paciente').val(firstRecord.paciente);
                         $('#drogueria').val(firstRecord.drogueria);
                         $('#regimen').val(firstRecord.regimen);
                         $('#tipodocument').val(firstRecord.tipodocument);
                         $('#medico1').val(firstRecord.medico);
-
+        
                         if (firstRecord.fecha_suministro) {
                             const formattedFechaSuministro = new Date(firstRecord.fecha_suministro).toISOString().split('T')[0];
                             $('#fecha_suministro').val(formattedFechaSuministro);
                         } else {
                             $('#fecha_suministro').val('');
                         }
-
+        
                         $('#idusuario').val(firstRecord.idusuario);
                         $('#cajero').val(firstRecord.cajero);
-
+        
                         actualizarDataTable(data);
+                    } else if (data.error) {
+                        // Mostrar el mensaje de error específico devuelto por el backend
+                        mostrarError(data.error);
                     } else {
-                        console.error('Error: no se recibieron datos válidos o no se encontraron registros.');
-                        // Mostrar alerta de SweetAlert2 cuando no se encuentran registros
+                        // Si no se encuentran registros y no hay error, mostrar mensaje genérico
                         mostrarError('No se encontraron registros para la factura ingresada.');
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('Error al buscar la factura:', error);
-                    mostrarError('Error al buscar la factura. Por favor, inténtalo de nuevo.');
+                    
+                    // Extraer el mensaje de error del backend, si está disponible
+                    let errorMessage = 'Error al buscar la factura. Por favor, inténtalo de nuevo.';
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMessage = xhr.responseJSON.error;
+                    }
+        
+                    // Mostrar alerta con el error
+                    mostrarError(errorMessage);
                 }
             });
         }
@@ -1506,14 +1523,14 @@ Dispensado Medcol Emcali
             tablaRegistros.clear().rows.add(data).draw();
         }
 
+        // Función para mostrar alertas de error utilizando SweetAlert2
         function mostrarError(mensaje) {
-            // Mostrar alerta de SweetAlert2
             Swal.fire({
-                //icon: "error",
                 type: 'error',
-                title: 'Oops...',
+                icon: 'error',
+                title: 'Error',
                 text: mensaje,
-                confirmButtonText: 'OK'
+                confirmButtonText: 'Aceptar'
             });
         }
 

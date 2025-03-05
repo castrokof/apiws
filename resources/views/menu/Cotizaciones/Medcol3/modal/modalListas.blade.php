@@ -23,8 +23,7 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <form action="" id="Form" name="Form"class="form-horizontal" method="POST"
-                                enctype="multipart/form-data">
+                            <form id="Form" enctype="multipart/form-data">
                                 @csrf
                                 <div class="loader"> <img src="{{ asset("assets/$theme/dist/img/loader6.gif") }}"
                                         class="" /> </div>
@@ -37,7 +36,7 @@
 
                                     <div class="col-lg-3"></div>
                                     <div class="col-lg-6">
-                                        @include('includes.boton-form-crear-empresa-empleado-usuario')
+                                        @include('includes.boton-form-crear')
 
                                     </div>
                                 </div>

@@ -435,8 +435,11 @@
                 <div class="card-body text-center">
                     <div class="card-header"> <i class="fas fa-capsules"></i>MedCol San Fernando</div>
                     <div class="list-group">
-                        <a href="{{ route('medcol2.dispensado') }}" class="list-group-item list-group-item-action">
+                        <a href="{{ route('medcol6.dispensado') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-share-square"></i> Gestionar Dispensación de San Fernando <span class="badge badge-pill badge-primary pull-right">Salud Mental</span>
+                        </a>
+                        <a href="{{ route('medcol2.dispensado') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-share-square"></i> Link Anterior Dispensación de San Fernando <span class="badge badge-pill badge-secondary pull-right">Salud Mental</span>
                         </a>
 
                     </div>
@@ -446,8 +449,11 @@
                 <div class="card-body text-center">
                     <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Dolor y Paliativos</div>
                     <div class="list-group">
-                        <a href="{{ route('medcold.dispensado') }}" class="list-group-item list-group-item-action">
+                        <a href="{{ route('medcol6.dispensado') }}" class="list-group-item list-group-item-action">
                             <i class="far fa-share-square"></i> Gestionar Dispensación de Dolor y Paliativos <span class="badge badge-pill badge-primary pull-right">Dolor y Paliativos</span>
+                        </a>
+                        <a href="{{ route('medcold.dispensado') }}" class="list-group-item list-group-item-action">
+                            <i class="far fa-share-square"></i> Link Anterior Dispensación de Dolor y Paliativos <span class="badge badge-pill badge-secondary pull-right">Dolor y Paliativos</span>
                         </a>
                     </div>
                 </div>
@@ -457,8 +463,11 @@
                 <div class="card-body text-center">
                     <div class="card-header"> <i class="fas fa-capsules"></i>MedCol PCE-Huerfanas-Biologicos</div>
                     <div class="list-group">
-                        <a href="{{ route('medcol3.dispensado') }}" class="list-group-item list-group-item-action">
+                        <a href="{{ route('medcol6.dispensado') }}" class="list-group-item list-group-item-action">
                             <i class="far fa-share-square"></i> Gestionar Dispensación de PCE-Huerfanas-Biologicos <span class="badge badge-pill badge-primary pull-right">PCE-HUE-BIO</span>
+                        </a>
+                         <a href="{{ route('medcol3.dispensado') }}" class="list-group-item list-group-item-action">
+                            <i class="far fa-share-square"></i> Link Anterior  Dispensación de PCE-Huerfanas-Biologicos <span class="badge badge-pill badge-secondary pull-right">PCE-HUE-BIO</span>
                         </a>
                     </div>
                 </div>
@@ -468,8 +477,11 @@
                 <div class="card-body text-center">
                     <div class="card-header"> <i class="fas fa-capsules"></i>MedCol EMCALI</div>
                     <div class="list-group">
-                        <a href="{{ route('medcol5.dispensado') }}" class="list-group-item list-group-item-action">
+                        <a href="{{ route('medcol6.dispensado') }}" class="list-group-item list-group-item-action">
                             <i class="far fa-share-square"></i> Gestionar Dispensación de EMCALI <span class="badge badge-pill badge-primary pull-right">EMCALI</span>
+                        </a>
+                         <a href="{{ route('medcol5.dispensado') }}" class="list-group-item list-group-item-action">
+                            <i class="far fa-share-square"></i> Link Anterior  Dispensación de EMCALI <span class="badge badge-pill badge-secondary pull-right">EMCALI</span>
                         </a>
                     </div>
                 </div>
@@ -477,11 +489,12 @@
             
             <div class="card bg-success">
                 <div class="card-body text-center">
-                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol SOS - JAMUNDI</div>
+                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol JAMUNDI</div>
                     <div class="list-group">
                         <a href="{{ route('medcol6.dispensado') }}" class="list-group-item list-group-item-action">
-                            <i class="far fa-share-square"></i> Gestionar Dispensación <span class="badge badge-pill badge-primary pull-right">SOS - JAMUNDI</span>
+                            <i class="far fa-share-square"></i> Gestionar Dispensación <span class="badge badge-pill badge-primary pull-right">JAMUNDI</span>
                         </a>
+                        
                     </div>
                 </div>
             </div>

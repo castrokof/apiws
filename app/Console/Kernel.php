@@ -13,7 +13,15 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+           //Commands\CronApiPendientes::class, 
+           //Commands\CronApiDispensados::class,
+           //Commands\CronApiDispensadosDolor::class,
+           //Commands\CronApiPendientesDolor::class,
+           //Commands\CronApiDispensadosSaludMental::class,
+           //Commands\CronApiPendientesSaludMental::class,
+           //Commands\CronApiDispensadosEmcali::class,
+           Commands\CronApiDispensadosSos::class,
+           
     ];
 
     /**
@@ -23,9 +31,19 @@ class Kernel extends ConsoleKernel
      * @return void
      */
     protected function schedule(Schedule $schedule)
-    {
-        // $schedule->command('inspire')->hourly();
-    }
+{
+    //$schedule->command('cron:api_pendientes')->cron('0 */4 * * *');
+    //$schedule->command('cron:api_dispensados')->cron('0 */3 * * *');
+    //$schedule->command('cron:api_dispensadosdolor')->cron('0 */3 * * *');
+    //$schedule->command('cron:api_pendientesdolor')->cron('0 */4 * * *');
+    //$schedule->command('cron:api_dispensadossaludmental')->cron('0 */3 * * *');
+    //$schedule->command('cron:api_pendientessaludmental')->cron('0 */4 * * *');
+    //$schedule->command('cron:api_dispensadosemcali')->cron('*/30 * * * *');
+    $schedule->command('cron:api_dispensadossos')->cron('*/10 * * * *');
+    
+    
+    
+}
 
     /**
      * Register the commands for the application.

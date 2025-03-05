@@ -1076,7 +1076,7 @@ class PendienteApiMedcol3Controller extends Controller
         
         //return view('menu.usuario.indexAnalista');
     }
-
+    
     public function updateanuladosapi(Request $request)
     {
         $email = 'castrokofdev@gmail.com'; // Auth::user()->email
@@ -1127,7 +1127,7 @@ class PendienteApiMedcol3Controller extends Controller
     
                     return response()->json([
                         [
-                            'respuesta' => $contadorActualizados . " Facturas anuladas",
+                            'respuesta' => $contadorActualizados . " Pendientes anuladas",
                             'titulo' => 'Lineas Actualizadas',
                             'icon' => 'success',
                             'position' => 'bottom-left'

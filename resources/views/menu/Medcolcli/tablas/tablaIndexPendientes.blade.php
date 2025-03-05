@@ -26,7 +26,7 @@
                             <th>Direccion</th>
                             <th>Telefono</th>
                             <th>Documento</th>
-                            <th>Factura</th>
+                            <th>No. Pendiente</th>
                             <th>Código</th>
                             <th>Medicamento</th>
                             <th>CUMS</th>

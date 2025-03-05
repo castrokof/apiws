@@ -72,7 +72,11 @@ class DispensadoApiMedcol6 extends Model
         'cobertura',
         'tipocontrato',
         'tipoentrega',
-        'cod_dispen_transacc'
+        'cod_dispen_transacc',
+        'plan',
+        'via',
+        'ciudad',
+        'ID_REGISTRO'
     ];
 
    /* protected $casts = [

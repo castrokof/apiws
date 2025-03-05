@@ -81,6 +81,7 @@
                        <tbody>
                         @foreach ($medicamentos2 ?? '' as $item3)
                         @foreach ($item3 as $item)
+                         @if(!in_array($item['EstProgramacion'] ?? '', [0,2]))
                         <tr>
                             <td><button type="button" name="Dispensar" title="Clic para dispensar" id="{{$item['ID'] ?? ''}}" data-p="{{$item['NoPrescripcion'] ?? ''}}"  data-c="{{$item['CodSerTecAEntregar'] ?? ''}}"  data-e="{{$item['NoEntrega'] ?? ''}}" data-fe="{{$item['FecEntrega'] ?? ''}}" data-td="{{$item['TipoIDPaciente'] ?? ''}}" data-d="{{$item['NoIDPaciente'] ?? ''}}" data-te="{{$item['CantTotAEntregar'] ?? ''}}" class = "dispensar btn-float  bg-gradient-info btn-sm tooltipsC"  title="Clic para dispensar"><i class="fas fa-file-medical"><i class="fa fa-fw fa-plus-circle"></i></i></a></td>
                             <td><input class="case" type="checkbox" title="Selecciona Orden" value="{{$item['ID'] ?? ''}}"></td>
@@ -164,6 +165,7 @@
                             <td>{{$item['FecAnulacion'] ?? ''}}</td>
                             
                         </tr>
+                        @endif
                         @endforeach
                         @endforeach
                         </tbody>    

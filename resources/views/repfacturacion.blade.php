@@ -85,6 +85,7 @@ height:100%;
                        <tbody>
                         @foreach ($medicamentos2 ?? '' as $item3)
                         @foreach ($item3 as $item)
+                        @if(!in_array($item['EstFacturacion'] ?? '', [0]))
                         <tr>
                             <td><input class="case" type="checkbox" title="Selecciona Orden" value="{{$item['ID'] ?? ''}}"></td>
                             <td> {{$item['ID'] ?? ''}}</td>
@@ -110,6 +111,7 @@ height:100%;
                             <td>{{$item['FecAnulacion'] ?? ''}}</td>
 
                         </tr>
+                        @endif
                         @endforeach
                         @endforeach
                         </tbody>
@@ -260,35 +262,69 @@ $(document).ready(function(){
            },
            //dataType:"json",
            success:function(data){
-            if(data.success == 'ya'){
+                      
+                        var id = "";
+                        var idFacturacion = "";
+                        var resstatus = "";
 
-                $.each(JSON.parse(data.result), function(i, items) {
-                    Swal.fire(
-                        {
-                          icon: 'warning',
-                          title: items,
-                          showConfirmButton: true,
-                          //timer: 1500
-                        }
-                      )
+                        let resp = [];
+                        let resps = [];
+                        
+                                             
+                        // Suponiendo que 'data' es el objeto con los arrays "result" y "result1"
 
-                });
-            //$('#mipres').DataTable().destroy();
-            }else if(data.success == 'ok'){
+                     
 
-             $.each(JSON.parse(data.result), function(i, item) {
-                    Swal.fire(
-                        {
-                          icon: 'success',
-                          title: item.Mensaje,
-                          showConfirmButton: true,
-                          //timer: 1500
-                        }
-                      )
-                    });
-                    //$('#mipres').DataTable().destroy();
+                        $.each(data.result, function(index, jsonString) {
+                            // Parsea cada cadena JSON dentro de "result"
+                            var jsonData = JSON.parse(jsonString);
+                              
+                            var statusCode = data.result1[index];    
 
-                }
+                            var errorIcon = "<i class='fas fa-times-circle' style='font-size: 24px; color: red;'></i>";
+                            if (statusCode == 422) {
+                                    
+                                    id = jsonData.Mensaje;
+                                    idFacturacion = jsonData.Errors;
+                                    resstatus = statusCode;
+
+                                    resp.push("Msj: "+ id + " status: " + resstatus + errorIcon +  '<br>');
+
+                                 }
+
+
+                            // Ahora jsonData es un array de objetos JSON
+                            $.each(jsonData, function(i, obj) {
+                                // Accede a las propiedades de cada objeto
+                                var successIcon = '<i class="fas fa-check-circle animate__animated animate__tada" style="font-size:24px;color:green"></i>';
+                                                                 
+                                 if (statusCode == 200) {
+                                    
+                                    id = obj.Mensaje;
+                                    idFacturacion = obj.IdFacturacion;
+                                    resstatus = statusCode;
+
+                                    resp.push("Mensaje:" + id +  " status: " + resstatus + successIcon + '<br>');
+                                 }
+
+                                 
+                                 
+
+                                // Haz lo que necesites con los datos, por ejemplo, imprímelos en la consola
+                                console.log("Id:", id, "IdFacturacion:", idFacturacion);
+                            });
+                        });
+              
+                        
+
+
+                        Swal.fire({
+                            icon: "warning",
+                            title: "Mensaje de Mipres Facturación anulados Rows: " + data.registros,
+                            html: resp.join(''),
+                            showConfirmButton: true,
+                            
+                        })
 
             },complete: function(){
                 $('.loader').css("visibility", "hidden");

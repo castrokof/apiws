@@ -461,10 +461,10 @@
             
             <div class="card bg-danger">
                 <div class="card-body text-center">
-                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol SOS - JAMUNDI</div>
+                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol New Servidor</div>
                     <div class="list-group">
                         <a href="{{ route('medcol6.pendientes') }}" class="list-group-item list-group-item-action">
-                            <i class="far fa-share-square"></i> Gestionar Pendientes Farmacia <span class="badge badge-pill badge-primary pull-right">SOS - JAMUNDI</span>
+                            <i class="far fa-share-square"></i> Gestionar Pendientes Farmacia <span class="badge badge-pill badge-primary pull-right">NEW SRV</span>
                         </a>
                     </div>
                 </div>

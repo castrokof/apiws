@@ -1,19 +1,7 @@
 <div class="form-group row">
-    <div class="col-lg-2">
-        <label for="nombre1" class="col-xs-4 control-label requerido">Primer nombre</label>
-        <input type="text" name="nombre1" id="nombre1" class="form-control" readonly>
-    </div>
-    <div class="col-lg-2">
-        <label for="nombre2" class="col-xs-4 control-label ">Segundo nombre</label>
-        <input type="text" name="nombre2" id="nombre2" class="form-control " readonly>
-    </div>
-    <div class="col-lg-2">
-        <label for="apellido1" class="col-xs-4 control-label requerido">Primer apellido</label>
-        <input type="text" name="apellido1" id="apellido1" class="form-control " readonly>
-    </div>
-    <div class="col-lg-2">
-        <label for="apellido2" class="col-xs-4 control-label ">Segundo apellido</label>
-        <input type="text" name="apellido2" id="apellido2" class="form-control " readonly>
+    <div class="col-md-6">
+        <label for="nombre_completo">Paciente</label>
+        <input type="text" id="nombre_completo" class="form-control" readonly>
     </div>
     <div class="col-lg-1">
         <label for="Tipodocum" class="col-xs-4 control-label ">Identificación</label>
@@ -48,7 +36,7 @@
 </div>
 <div class="form-group row">
     <div class="col-lg-2">
-        <label for="fecha_factura" class="col-xs-4 control-label requerido">Fecha Factura</label>
+        <label for="fecha_factura" class="col-xs-4 control-label requerido">Fecha Pendiente</label>
         <input type="date" name="fecha_factura" id="fecha_factura" class="form-control" readonly>
     </div>
     <div class="col-lg-3">
@@ -141,7 +129,7 @@
     </div>
     <div class="col-lg-2">
         <label for="doc_entrega" class="col-xs-4 control-label requerido">Doc Entrega</label>
-        <input type="text" name="doc_entrega" id="doc_entrega" class="form-control " minlength="6" value="MCD" readonly> </br>
+        <input type="text" name="doc_entrega" id="doc_entrega" class="form-control " minlength="6" value="" readonly> </br>
 
         <label for="factura_entrega" class="col-xs-4 control-label requerido">Factura Entrega</label>
         <input type="number" name="factura_entrega" id="factura_entrega" class="form-control" placeholder="No. Factura Rfast...">
@@ -153,5 +141,6 @@
         <label for="observacion" class="col-xs-8 control-label requerido">Observaciones</label>
         <textarea name="observacion" id="observacion" class="form-control UpperCase" rows="5" placeholder="Ingrese las observaciones ..." required></textarea>
     </div>
-
 </div>
+
+

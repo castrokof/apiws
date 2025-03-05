@@ -7,7 +7,7 @@
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="#">Home</a></li>
-                    <li class="breadcrumb-item active">Pendientes v1</li>
+                    <li class="breadcrumb-item active">Dispensado v1</li>
                 </ol>
             </div>
         </div>
@@ -19,13 +19,22 @@
                     <div class="card-body">
                         <h2 class="m-0 text-dark">Ingrese Rango de Fechas</h2>
                         <div class="form-group row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="fecha" class="col-form-label">Fecha inicial</label>
                                 <input type="date" name="fechaini" id="fechaini" class="form-control" value="{{ old('fechaini') }}">
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="fechafin" class="col-form-label">Fecha final</label>
                                 <input type="date" name="fechafin" id="fechafin" class="form-control" value="{{ old('fechafin') }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="contrato" class="col-form-label">Droguería</label>
+                                <select name="contrato" id="contrato" class="form-control select2bs4" style="width: 100%;" required>
+                                    <option value="">Seleccione opcion...</option>
+                                    <option value="SM01">SM01-FARMACIA SALUD MENTAL</option>
+                                    <option value="INY">INY-FARMACIA INYECTABLES</option>
+                                    <option value="EVEN">EVEN-FARMACIA EVENTO SM</option>
+                                </select>
                             </div>
                         </div>
                         <div class="row">
@@ -34,6 +43,11 @@
                             </div>
                             <div class="col-md-6">
                                 <button type="submit" name="buscar" id="buscar" class="btn btn-success btn-block">Buscar</button>
+                            </div>
+                            <div class="col-md-12 mt-3">
+                                <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#gestion_multiple">
+                                    Gestion Multiple
+                                </button>
                             </div>
                         </div>
                     </div>
