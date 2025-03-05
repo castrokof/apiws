@@ -1384,7 +1384,7 @@ $(document).ready(function() {
 
 
 
-        //Función para abrir modal del detalle de la evolución y muestra las observaciones agregadas
+        //Función para abrir modal del detalle del pendiente y muestra las observaciones agregadas
         $(document).on('click', '.edit_pendiente', function() {
 
             $('#form-general1').trigger('reset');

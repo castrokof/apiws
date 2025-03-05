@@ -285,6 +285,9 @@ Route::get('medcol6/dispensado/anuladosapi', 'Medcol6\DispensadoApiMedcol6Contro
 Route::post('medcol6/add_dispensado', 'Medcol6\DispensadoApiMedcol6Controller@adddispensacionarray')->name('medcol6.add_dispensacion')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/update', 'Medcol6\DispensadoApiMedcol6Controller@actualizarDispensacion')->name('dispensado6.guardar')->middleware('verified')->middleware('verifyuser');
 
+Route::get('medcol6/showdispensado/{id}', 'Medcol6\DispensadoApiMedcol6Controller@showdis')->name('medcol6.dispensado-show')->middleware('verified')->middleware('verifyuser');
+Route::put('medcol6/editdispensado/{id}', 'Medcol6\DispensadoApiMedcol6Controller@updatedis')->name('medcol6.dispensado_update')->middleware('verified')->middleware('verifyuser');
+
 Route::get('medcol6/informedis', 'Medcol6\DispensadoApiMedcol6Controller@informes')->name('medcol6.informedis')->middleware('verified')->middleware('verifyuser');
 Route::get('medcol6/gestionsdis', 'Medcol6\DispensadoApiMedcol6Controller@gestionsdis')->name('medcol6.gestionsdis')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/disanulado', 'Medcol6\DispensadoApiMedcol6Controller@disanulado')->name('medcol6.disanulado')->middleware('verified')->middleware('verifyuser');
