@@ -2021,11 +2021,13 @@ Dispensado Medcol Jamundi
                         const itemdispensado = {
                             checked: tds.find(":checkbox").prop("checked"),
                             id: tds.find(":checkbox:checked").attr('id'),
-                            duracion_tratamiento: tds.eq(6).find('input').val(),
-                            cuota_moderadora: tds.eq(7).find('input').val(),
-                            autorizacion: tds.eq(8).find('input').val(),
-                            mipres: tds.eq(9).find('input').val(),
-                            reporte_entrega: tds.eq(10).find('input').val(),
+                            frecuencia: tds.eq(6).find('input').val(),
+                            dosis: tds.eq(7).find('input').val(),
+                            duracion_tratamiento: tds.eq(8).find('input').val(),
+                            cuota_moderadora: tds.eq(9).find('input').val(),
+                            autorizacion: tds.eq(10).find('input').val(),
+                            mipres: tds.eq(11).find('input').val(),
+                            reporte_entrega: tds.eq(12).find('input').val(),
                             user_id: userId,
                             fecha_suministro: fechaDisp,
                             fecha_orden: fechaOrden,
@@ -2046,49 +2048,66 @@ Dispensado Medcol Jamundi
                 // Validar y filtrar los elementos que se van a guardar
                 const dispensadotrue1 = [];
                 for (const item of dispensado) {
-                    if (item.checked) {
-
-                        console.log(item.autorizacion);
-                        // Validar primero si item.autorizacion tiene un valor (no está vacío o null)
-                        if (item.autorizacion && (!item.mipres || !item.reporte_entrega)) {
+                    if (!item.checked) continue;
+                
+                    console.log(item.autorizacion);
+                
+                    // Validar que duracion_tratamiento tenga exactamente 3 caracteres
+                    if (item.duracion_tratamiento?.length > 3) {
+                        await Swal.fire({
+                            type: "error",
+                            icon: "error",
+                            title: "Error",
+                            text: "El campo Duración del Tratamiento debe tener máximo 3 caracteres",
+                            confirmButtonText: 'OK'
+                        });
+                        return;
+                    }
+                
+                    // Si autorizacion está vacío, solo validar Frecuencia y Dosis
+                    if (!item.autorizacion) {
+                        if (!item.frecuencia?.trim() || !item.dosis?.trim() || !item.duracion_tratamiento?.trim()) {
                             await Swal.fire({
-                                icon: "error", // Usar "icon" en lugar de "type"
-                                title: "Error",
-                                text: "Los campos MIPRES y Reporte de Entrega deben completarse",
-                                confirmButtonText: 'OK'
-                            });
-                            return;
-                        }
-
-
-
-                        // Validación de Frecuencia, Dosis, Duración del Tratamiento
-                        //const frecuencia = item.frecuencia ? item.frecuencia.trim() : '';
-                        //const dosis = item.dosis ? item.dosis.trim() : '';
-                        const duracionTratamiento = item.duracion_tratamiento ? item.duracion_tratamiento.trim() : '';
-
-
-
-
-                        // Validación de Frecuencia, Dosis, Duración del Tratamiento
-                        if ( /*!frecuencia || !dosis ||*/ !duracionTratamiento) {
-                            await Swal.fire({
+                                type: "error",
                                 icon: "error",
                                 title: "Error",
-                                text: "Los campos Duración del Tratamiento deben completarse",
-                                //text: "Los campos Frecuencia, Dosis y Duración del Tratamiento deben completarse",
+                                text: "Los campos Frecuencia, Dosis y Duración del Tratamiento deben completarse",
                                 confirmButtonText: 'OK'
                             });
                             return;
                         }
-
-                        dispensadotrue1.push(item);
+                    } else {
+                        // Definir validaciones para cuando autorizacion tiene un valor
+                        const validations = [
+                            { condition: !item.mipres || !item.reporte_entrega, message: "Los campos MIPRES y Reporte de Entrega deben completarse" },
+                            { condition: item.autorizacion.length !== 12, message: "El campo Autorización debe tener exactamente 12 caracteres" },
+                            { condition: item.mipres?.length !== 20, message: "El campo MIPRES debe tener exactamente 20 caracteres" },
+                            { condition: item.reporte_entrega?.length !== 8, message: "El campo Reporte de Entrega debe tener exactamente 8 caracteres" },
+                            { condition: !item.frecuencia?.trim() || !item.dosis?.trim(), message: "Los campos Frecuencia y Dosis deben completarse" }
+                        ];
+                
+                        // Ejecutar validaciones y mostrar alerta si falla alguna
+                        for (const { condition, message } of validations) {
+                            if (condition) {
+                                await Swal.fire({
+                                    type: "error",
+                                    icon: "error",
+                                    title: "Error",
+                                    text: message,
+                                    confirmButtonText: 'OK'
+                                });
+                                return;
+                            }
+                        }
                     }
+                
+                    dispensadotrue1.push(item);
                 }
 
                 // Si no hay registros a enviar, mostrar alerta
                 if (dispensadotrue1.length === 0) {
                     await Swal.fire({
+                        type: "warning",
                         icon: "warning",
                         title: "Advertencia",
                         text: "No hay registros seleccionados para guardar.",
@@ -2115,6 +2134,7 @@ Dispensado Medcol Jamundi
 
                 // Mostrar éxito
                 await Swal.fire({
+                    type: 'success',
                     icon: 'success',
                     title: 'Éxito',
                     text: 'Datos guardados correctamente.',
