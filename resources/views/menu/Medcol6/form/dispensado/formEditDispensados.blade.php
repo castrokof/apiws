@@ -22,6 +22,10 @@
         <label for="fecha_suministro" class="control-label requerido">Fecha Suministro</label>
         <input type="date" name="fecha_suministro" id="fecha_suministro" class="form-control" readonly>
     </div>
+    <div class="col-lg-4">
+        <label for="estado" class="control-label requerido">Estado</label>
+        <input type="text" name="estado" id="estado" class="form-control" readonly>
+    </div>
 </div>
 
 <fieldset>
@@ -43,10 +47,7 @@
 </fieldset>
 
 <div class="form-group row">
-    <div class="col-lg-4">
-        <label for="estado" class="control-label requerido">Estado</label>
-        <input type="text" name="estado" id="estado" class="form-control" readonly>
-    </div>
+    
     <div class="col-lg-8">
         <label for="observacion" class="control-label requerido">Observaciones</label>
         <textarea name="observacion" id="observacion" class="form-control UpperCase" rows="3" placeholder="Ingrese las observaciones ..." required></textarea>

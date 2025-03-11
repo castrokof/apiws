@@ -884,14 +884,31 @@ class DispensadoApiMedcol6Controller extends Controller
 
         // Sumar la cuota moderadora y aplicar los filtros
         $resultados = $dispensado_api_medcol6->selectRaw('*, 
-            (CASE 
-            WHEN ROW_NUMBER() OVER(PARTITION BY factura ORDER BY id) = 1 
-                THEN (SELECT SUM(cuota_moderadora) FROM dispensado_medcol6 AS d2 WHERE d2.factura = dispensado_medcol6.factura) 
-            ELSE 0 
-            END) AS cuota_moderadora_sumada')
+                (CASE 
+                    WHEN ROW_NUMBER() OVER(
+                        PARTITION BY factura 
+                        ORDER BY id
+                    ) = 1 
+                    AND codigo NOT IN ("1010", "1011", "1012") 
+                        THEN (
+                            CASE 
+                                WHEN EXISTS (SELECT 1 FROM dispensado_medcol6 AS d2 WHERE d2.factura = dispensado_medcol6.factura AND d2.codigo = "1010") 
+                                    THEN LEAST(4700, (SELECT SUM(cuota_moderadora) FROM dispensado_medcol6 AS d3 WHERE d3.factura = dispensado_medcol6.factura))
+                                WHEN EXISTS (SELECT 1 FROM dispensado_medcol6 AS d2 WHERE d2.factura = dispensado_medcol6.factura AND d2.codigo = "1011") 
+                                    THEN LEAST(19200, (SELECT SUM(cuota_moderadora) FROM dispensado_medcol6 AS d3 WHERE d3.factura = dispensado_medcol6.factura))
+                                WHEN EXISTS (SELECT 1 FROM dispensado_medcol6 AS d2 WHERE d2.factura = dispensado_medcol6.factura AND d2.codigo = "1012") 
+                                    THEN LEAST(50300, (SELECT SUM(cuota_moderadora) FROM dispensado_medcol6 AS d3 WHERE d3.factura = dispensado_medcol6.factura))
+                                ELSE 
+                                    (SELECT SUM(cuota_moderadora) FROM dispensado_medcol6 AS d3
+                                     WHERE d3.factura = dispensado_medcol6.factura)
+                            END
+                        ) 
+                    ELSE 0 
+                END) AS cuota_moderadora_sumada'
+            )
             ->where('factura', $factura)
             ->where('estado', 'DISPENSADO')
-            ->whereNotIn('codigo', ['1010', '1011', '1012'])
+            ->whereNotIn('codigo', ['1010', '1011', '1012']) // Filtra los códigos después del cálculo
             ->orderBy('nombre_generico')
             ->get();
 
@@ -1073,4 +1090,59 @@ class DispensadoApiMedcol6Controller extends Controller
         }
         return view('menu.Medcol6.indexDispensado');
     }
+
+    public function gestionFacturasRevisadas(Request $request)
+    {
+        $i = Auth::user()->drogueria;
+    
+        // Mapeo de droguerías según el usuario
+        $droguerias = [
+            "1" => '',
+            "2" => 'SALUD',
+            "3" => 'DOLOR',
+            "4" => 'PAC',
+            "5" => 'EHU1',
+            "6" => 'BIO1',
+            "8" => 'EM01',
+            "9" => 'FSIO',
+            "10" => 'FSOS',
+            "11" => 'FSAU',
+            "12" => 'EVSO',
+            "13" => 'FRJA',
+        ];
+    
+        $drogueria = $droguerias[$i] ?? null;
+    
+        // Validar fechas y establecer valores por defecto
+        $fechaInicio = $request->filled('fechaini') 
+            ? Carbon::parse($request->fechaini)->startOfDay() 
+            : now()->subMonth()->startOfDay();
+        
+        $fechaFin = $request->filled('fechafin') 
+            ? Carbon::parse($request->fechafin)->endOfDay() 
+            : now()->endOfDay();
+    
+        // Capturar tipo de medicamento enviado desde el frontend
+        $tipoMedicamento = $request->input('tipo_medicamento', '2');
+    
+        // Construcción de la consulta con filtros aplicados
+        $queryBase = DispensadoApiMedcol6::select(DB::raw('COUNT(DISTINCT(factura)) as total'))
+            ->where('tipo_medicamento', $tipoMedicamento)
+            ->whereBetween('fecha_suministro', [$fechaInicio, $fechaFin])
+            ->where('estado', 'REVISADO');
+    
+        // Aplicar filtro de droguería si el usuario no es admin (droguería "1")
+        if ($i !== "1" && $drogueria) {
+            $queryBase->where('centroprod', $drogueria);
+        }
+    
+        // Obtener total de facturas revisadas
+        $totalFacturasRevisadas = $queryBase->first()->total;
+    
+        return response()->json([
+            'total_facturas_revisadas' => $totalFacturasRevisadas
+        ]);
+    }
+
+
 }
