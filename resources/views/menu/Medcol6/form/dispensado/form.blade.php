@@ -11,8 +11,8 @@
     </div>
 
     <!-- Información de la factura y paciente -->
-    <div class="row mb-4">
-        <div class="col-lg-2">
+    <div class="row mb-5">
+        <div class="col-lg-1">
             <div class="form-group">
                 <label for="factura">Número de Factura</label>
                 <input type="text" class="form-control" id="factura" name="factura" readonly>
@@ -23,7 +23,7 @@
             </div>
         </div>
 
-        <div class="col-lg-2">
+        <div class="col-lg-1">
             <div class="form-group">
                 <label for="regimen">Régimen</label>
                 <input type="text" class="form-control" id="regimen" name="regimen" readonly>
@@ -53,6 +53,12 @@
             <div class="form-group">
                 <label for="cajero">Auxiliar Dispenso</label>
                 <input type="text" class="form-control" id="cajero" name="cajero" readonly>
+            </div>
+        </div>
+        <div class="col-lg-1">
+            <div class="form-group">
+                <label for="estado2">Estado</label>
+                <input type="text" class="form-control" id="estado2" name="estado2" readonly>
             </div>
         </div>
     </div>
@@ -100,7 +106,7 @@
                 <div class="col-md-2">
                     <div class="form-group">
                         <label for="formula1">No. de Formula</label>
-                        <input type="number" class="form-control" id="formula1" name="formula1">
+                        <input type="number" class="form-control" id="formula1" name="formula1" required>
                     </div>
                 </div>
             </div>
@@ -118,6 +124,8 @@
                         <th>Cantidad</th>
                         <th>$ Unitario</th>
                         <th>$ Total</th>
+                        <th>Frecuencia</th>
+                        <th>Dosis</th>
                         <th>Duración Tratamiento</th>
                         <th>Cuota Moderadora</th>
                         <th>Autorización</th>
