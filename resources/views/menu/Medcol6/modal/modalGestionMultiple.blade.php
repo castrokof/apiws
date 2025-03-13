@@ -29,12 +29,7 @@
                                 @include('menu.Medcol6.tabs.tabsDispensadosMultiple')
                             </div>
                             <!-- /.card-body -->
-                            <div class="card-footer">
-                                <div class="col-lg-3"></div>
-                                <div class="col-lg-6">
-                                    @include('includes.boton-form-enviar-dispensados')                                    
-                                </div>
-                            </div>
+                            
                             <!-- /.card-footer -->
                         </form>
 

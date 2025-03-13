@@ -1832,6 +1832,7 @@ Dispensado Medcol Jamundi
                         $('#numero_entrega1').val(firstRecord.numero_entrega);
                         $('#num_total_entregas').val(firstRecord.num_total_entregas);
                         $('#formula1').val(firstRecord.numero_orden);
+                        $('#facturaelectronica').val(firstRecord.documento_origen + ' - ' + firstRecord.factura_origen);
                         // Asignar valores a los select (verificando si existe la opción)
                         $('#ips').val(firstRecord.ips).trigger('change');
 

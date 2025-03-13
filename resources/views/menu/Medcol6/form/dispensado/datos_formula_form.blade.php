@@ -56,6 +56,12 @@
                 <label for="fecha_solicitud">Fecha Solicitud</label>
                 <input type="date" class="form-control" id="fecha_solicitud" name="fecha_solicitud" readonly>
             </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="diagnostico2">Diagnóstico</label>
+                    <input type="text" class="form-control" id="diagnostico2" name="diagnostico2" readonly>
+                </div>
+            </div>
             
         </div>
     </div>

@@ -9,8 +9,7 @@
                 <div class="col-lg-8">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-file-invoice"></i></span>
-                        <input type="text" name="numero_factura" id="numero_factura" class="form-control"
-                            placeholder="Ingrese el número de factura" aria-label="Número de Factura">
+                        <input type="text" name="numero_factura" id="numero_factura" class="form-control" placeholder="Ingrese el número de factura" aria-label="Número de Factura">
                         <button type="button" class="btn btn-primary" id="buscarFactura">
                             <i class="fas fa-search"></i> Buscar
                         </button>
@@ -26,7 +25,7 @@
             <h5 class="mb-0">Información de Factura y Paciente</h5>
         </div>
         <div class="card-body">
-            <div class="row">
+            <div class="row g-3">
                 <div class="col-md-2">
                     <div class="mb-3">
                         <label for="factura" class="form-label">Número de Factura</label>
@@ -69,9 +68,9 @@
                         <label for="cajero" class="form-label">Auxiliar Dispenso</label>
                         <input type="text" class="form-control bg-light" id="cajero" name="cajero" readonly>
                     </div>
-
                 </div>
-                <div class="col-md-1">
+
+                <div class="col-md-2">
                     <div class="mb-3">
                         <label for="estado2" class="form-label">Estado</label>
                         <div class="input-group">
@@ -81,6 +80,12 @@
                                 <i class="fas fa-circle text-danger d-none" id="estado-inactivo"></i>
                             </span>
                         </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="facturaelectronica" class="form-label">Factura Electrónica
+                            <i class="fas fa-info-circle text-primary" title="Aquí se muestra la factura electrónica asociada. Solo sí tiene cuota moderadora"></i>
+                        </label>
+                        <input type="text" class="form-control bg-light" id="facturaelectronica" name="facturaelectronica" readonly>
                     </div>
                 </div>
             </div>
@@ -93,7 +98,7 @@
             <h5 class="mb-0">Completar la dispensación de la Fórmula</h5>
         </div>
         <div class="card-body">
-            <div class="row">
+            <div class="row g-3">
                 <div class="col-md-2">
                     <div class="mb-3">
                         <label for="fecha_orden" class="form-label">Fecha Ordenamiento</label>
@@ -112,14 +117,14 @@
                             <span class="input-group-text">de</span>
                             <input type="number" class="form-control" id="num_total_entregas" name="num_total_entregas" placeholder="2" min="1">
                         </div>
-                        <small class="form-text text-muted"><i class="fas fa-info-circle"></i> Indique el número de esta entrega y el total de entregas.</small>
+                        <small class="form-text text-muted"><i class="fas fa-info-circle text-primary"></i> Indique el número de esta entrega y el total de entregas.</small>
                     </div>
                 </div>
 
                 <div class="col-md-3">
                     <div class="mb-3">
                         <label for="diagnostico" class="form-label">Diagnóstico</label>
-                        <select name="diagnostico" id="diagnostico" class="form-select" required>
+                        <select name="diagnostico" class="dxcie10 form-control select2bs4" style="width: 100%;" required>
                             <option value="" disabled selected>Seleccione diagnóstico</option>
                             <!-- Opciones se cargarán dinámicamente -->
                         </select>
@@ -129,7 +134,7 @@
                 <div class="col-md-2">
                     <div class="mb-3">
                         <label for="ips" class="form-label">IPS Formulación</label>
-                        <select name="ips" id="ips" class="form-select" required>
+                        <select name="ips" class="ipsmul form-control select2bs4" style="width: 100%;" required>
                             <option value="" disabled selected>Seleccione IPS</option>
                             <!-- Opciones se cargarán dinámicamente -->
                         </select>
@@ -153,14 +158,14 @@
     <div class="card shadow-sm">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Lista de Medicamentos/Insumos</h5>
-            <div>
+            <!-- <div>
                 <button type="button" class="btn btn-sm btn-success" id="guardarSeleccionados">
                     <i class="fas fa-save"></i> Guardar Seleccionados
                 </button>
                 <button type="button" class="btn btn-sm btn-secondary" id="imprimirFormula">
                     <i class="fas fa-print"></i> Imprimir
                 </button>
-            </div>
+            </div> -->
         </div>
         <div class="card-body table-responsive">
             <table id="tablaRegistros" class="table table-striped table-hover">
@@ -189,28 +194,23 @@
                 <tbody>
                     <!-- Aquí se agregarán las filas de la tabla dinámicamente -->
                 </tbody>
-                <!-- <tfoot class="table-light">
-                    <tr>
-                        <th colspan="5" class="text-end">Totales:</th>
-                        <th id="total-precio">0.00</th>
-                        <th colspan="3"></th>
-                        <th id="total-cuota">0.00</th>
-                        <th colspan="3"></th>
-                    </tr>
-                </tfoot> -->
             </table>
         </div>
         <div class="card-footer">
             <div class="d-flex justify-content-between">
-                <!-- <div>
-                    <span class="badge bg-primary">Total items: <span id="total-items">0</span></span>
-                </div> -->
                 <div>
-                    <button type="button" class="btn btn-primary" id="finalizar">
+                    <button type="button" class="btn btn-primary btn-sm rounded me-2" id="enviarDispensado">
                         <i class="fas fa-check-circle"></i> Finalizar Dispensación
+                    </button>
+                    <button type="reset" class="btn btn-danger btn-sm rounded me-2" id="clean" >
+                        <i class="fas fa-trash"></i> Borrar
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm rounded" data-dismiss="modal">
+                        <i class="fas fa-times"></i> Cerrar
                     </button>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
