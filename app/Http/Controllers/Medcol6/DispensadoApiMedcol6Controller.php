@@ -907,7 +907,7 @@ class DispensadoApiMedcol6Controller extends Controller
                 END) AS cuota_moderadora_sumada'
             )
             ->where('factura', $factura)
-            ->where('estado', 'DISPENSADO')
+            ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
             ->whereNotIn('codigo', ['1010', '1011', '1012']) // Filtra los códigos después del cálculo
             ->orderBy('nombre_generico')
             ->get();
@@ -922,17 +922,17 @@ class DispensadoApiMedcol6Controller extends Controller
         $data = $resultados->map(function ($item) {
             // Convertir el modelo a un array asociativo
             $dataArray = $item->toArray();
-
+    
             // Agregar campos HTML personalizados a los datos resultantes
             $dataArray['action'] = '<input class="add_medicamento checkbox-large checkbox2 tooltipsC" type="checkbox" title="Seleccionar" id="' . $item->id . '" value="' . $item->id . '">';
-            //$dataArray['frecuencia2'] = '<input type="text" name="frecuencia2" id="' . $item->id . '" class="show_detail form-control btn bg-secondary tooltipsC" style="max-width: 100%;" title="Frecuencia con la cual el paciente debe tomar el medicamento">';
-            //$dataArray['dosis2'] = '<input type="number" name="dosis2" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="Es la cantidad que debe tomar el paciente">';
-            $dataArray['duracion_tratamiento2'] = '<input type="number" name="duracion_tratamiento2" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 60%;" title="Poner la cantidad en días">';
+            $dataArray['frecuencia2'] = '<input type="text" name="frecuencia2" id="' . $item->id . '" class="show_detail form-control btn bg-secondary tooltipsC" style="max-width: 100%;" title="Frecuencia con la cual el paciente debe tomar el medicamento" value="' . $item->frecuencia . '">';
+            $dataArray['dosis2'] = '<input type="number" name="dosis2" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="Es la cantidad que debe tomar el paciente" value="' . $item->dosis . '">';
+            $dataArray['duracion_tratamiento2'] = '<input type="number" name="duracion_tratamiento2" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 60%;" title="Poner la cantidad en días" value="' . $item->duracion_tratamiento . '">';
             $dataArray['autorizacion2'] = '<input type="text" name="autorizacion" id="' . $item->id . '" class="show_detail btn btn-xl bg-warning tooltipsC" style="max-width: 100%;" title="Autorizacion" value="' . $item->autorizacion . '">';
-            $dataArray['mipres2'] = '<input type="text" name="mipres" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="mipres">';
-            $dataArray['reporte_entrega2'] = '<input type="text" name="reporte" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="Reporte de entrega">';
+            $dataArray['mipres2'] = '<input type="text" name="mipres" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="mipres" value="' . $item->mipres . '">';
+            $dataArray['reporte_entrega2'] = '<input type="text" name="reporte" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="Reporte de entrega" value="' . $item->reporte_entrega_nopbs . '">';
             $dataArray['cuota_moderadora2'] = '<input type="text" name="cuota_moderadora" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 65%;" title="Cuota Moderadora" value="' . $item->cuota_moderadora_sumada . '">';
-
+    
             return $dataArray;
         });
 
@@ -953,10 +953,10 @@ class DispensadoApiMedcol6Controller extends Controller
             'data.*.fecha_suministro',
             'data.*.num_total_entregas',
             'data.*.numero_orden',
-            'data.*.duracion_tratamiento'
+            'data.*.duracion_tratamiento',
             //'data.*.plan',
-            //'data.*.frecuencia',
-            //'data.*.dosis',
+            'data.*.frecuencia',
+            'data.*.dosis'
         ]);
 
         // Obtener la fecha de suministro y formatearla como objeto Carbon
@@ -1004,10 +1004,10 @@ class DispensadoApiMedcol6Controller extends Controller
                         'num_total_entregas' => trim($idd['num_total_entregas']),
                         'numero_orden' => trim($idd['numero_orden']),
                         'duracion_tratamiento' => trim($idd['duracion_tratamiento']),
+                        'frecuencia' => trim($idd['frecuencia']),
+                        'dosis' => trim($idd['dosis']),
                         'updated_at' => now()
                         //'plan' => trim($idd['plan']),
-                        //'frecuencia' => trim($idd['frecuencia']),
-                        //'dosis' => trim($idd['dosis']),
                     ]);
             }
 

@@ -1828,7 +1828,14 @@ Dispensado Medcol Jamundi
                         $('#tipodocument').val(firstRecord.tipodocument);
                         $('#medico1').val(firstRecord.medico);
                         $('#fecha_solicitud').val(firstRecord.fecha_suministro);
+                        $('#fecha_orden').val(firstRecord.fecha_ordenamiento);
+                        $('#numero_entrega1').val(firstRecord.numero_entrega);
+                        $('#num_total_entregas').val(firstRecord.num_total_entregas);
+                        $('#formula1').val(firstRecord.numero_orden);
+                        // Asignar valores a los select (verificando si existe la opción)
+                        $('#ips').val(firstRecord.ips).trigger('change');
 
+                        $('#estado2').val(firstRecord.estado);
                         $('#id_medico').val(firstRecord.id_medico);
                         $('#tipoidmedico').val(firstRecord.tipoidmedico);
                         $('#numeroIdentificacion').val(firstRecord.numeroIdentificacion);
@@ -1932,6 +1939,12 @@ Dispensado Medcol Jamundi
                     },
                     {
                         data: 'valor_total'
+                    },
+                    {
+                        data: 'frecuencia2'
+                    },
+                    {
+                        data: 'dosis2'
                     },
                     {
                         data: 'duracion_tratamiento2'
@@ -2049,9 +2062,9 @@ Dispensado Medcol Jamundi
                 const dispensadotrue1 = [];
                 for (const item of dispensado) {
                     if (!item.checked) continue;
-                
+
                     console.log(item.autorizacion);
-                
+
                     // Validar que duracion_tratamiento tenga exactamente 3 caracteres
                     if (item.duracion_tratamiento?.length > 3) {
                         await Swal.fire({
@@ -2063,7 +2076,7 @@ Dispensado Medcol Jamundi
                         });
                         return;
                     }
-                
+
                     // Si autorizacion está vacío, solo validar Frecuencia y Dosis
                     if (!item.autorizacion) {
                         if (!item.frecuencia?.trim() || !item.dosis?.trim() || !item.duracion_tratamiento?.trim()) {
@@ -2078,16 +2091,34 @@ Dispensado Medcol Jamundi
                         }
                     } else {
                         // Definir validaciones para cuando autorizacion tiene un valor
-                        const validations = [
-                            { condition: !item.mipres || !item.reporte_entrega, message: "Los campos MIPRES y Reporte de Entrega deben completarse" },
-                            { condition: item.autorizacion.length !== 12, message: "El campo Autorización debe tener exactamente 12 caracteres" },
-                            { condition: item.mipres?.length !== 20, message: "El campo MIPRES debe tener exactamente 20 caracteres" },
-                            { condition: item.reporte_entrega?.length !== 8, message: "El campo Reporte de Entrega debe tener exactamente 8 caracteres" },
-                            { condition: !item.frecuencia?.trim() || !item.dosis?.trim(), message: "Los campos Frecuencia y Dosis deben completarse" }
+                        const validations = [{
+                                condition: !item.mipres || !item.reporte_entrega,
+                                message: "Los campos MIPRES y Reporte de Entrega deben completarse"
+                            },
+                            {
+                                condition: item.autorizacion.length !== 12,
+                                message: "El campo Autorización debe tener exactamente 12 caracteres"
+                            },
+                            {
+                                condition: item.mipres?.length !== 20,
+                                message: "El campo MIPRES debe tener exactamente 20 caracteres"
+                            },
+                            {
+                                condition: item.reporte_entrega?.length !== 8,
+                                message: "El campo Reporte de Entrega debe tener exactamente 8 caracteres"
+                            },
+                            {
+                                condition: !item.frecuencia?.trim() || !item.dosis?.trim(),
+                                message: "Los campos Frecuencia y Dosis deben completarse"
+                            }
                         ];
-                
+
                         // Ejecutar validaciones y mostrar alerta si falla alguna
-                        for (const { condition, message } of validations) {
+                        for (const {
+                                condition,
+                                message
+                            }
+                            of validations) {
                             if (condition) {
                                 await Swal.fire({
                                     type: "error",
@@ -2100,7 +2131,7 @@ Dispensado Medcol Jamundi
                             }
                         }
                     }
-                
+
                     dispensadotrue1.push(item);
                 }
 
