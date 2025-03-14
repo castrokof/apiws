@@ -178,6 +178,7 @@
                             </div>
                         </th>
                         <th>Código</th>
+                        <th>Cums</th>
                         <th>Nombre Genérico</th>
                         <th>Cantidad</th>
                         <th>$ Unitario</th>
@@ -188,7 +189,7 @@
                         <th>Cuota Mod.</th>
                         <th>Autorización</th>
                         <th>MIPRES</th>
-                        <th>Reporte</th>
+                        <th>Reporte Entregado</th>
                     </tr>
                 </thead>
                 <tbody>

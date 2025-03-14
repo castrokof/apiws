@@ -1,7 +1,7 @@
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Información de Factura y Paciente</h5>
+            <h5 class="mb-0">Información de Factura y Médico</h5>
         </div>
         <div class="card-body">
             <div class="row row-cols-1 row-cols-md-3 g-3">
