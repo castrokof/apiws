@@ -883,7 +883,8 @@ class DispensadoApiMedcol6Controller extends Controller
         $dispensado_api_medcol6 = DispensadoApiMedcol6::query();
 
         // Sumar la cuota moderadora y aplicar los filtros
-        $resultados = $dispensado_api_medcol6->selectRaw('*, 
+        $resultados = $dispensado_api_medcol6->selectRaw(
+            '*, 
                 (CASE 
                     WHEN ROW_NUMBER() OVER(
                         PARTITION BY factura 
@@ -905,7 +906,7 @@ class DispensadoApiMedcol6Controller extends Controller
                         ) 
                     ELSE 0 
                 END) AS cuota_moderadora_sumada'
-            )
+        )
             ->where('factura', $factura)
             ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
             ->whereNotIn('codigo', ['1010', '1011', '1012']) // Filtra los códigos después del cálculo
@@ -918,11 +919,19 @@ class DispensadoApiMedcol6Controller extends Controller
             return response()->json(['error' => 'Factura no encontrada en estado <strong>DISPENSADO</strong><br> o ya se encuentra <strong>REVISADA</strong>'], 404);
         }
 
+        // Obtener la IPS de cada resultado
+        $resultados = $resultados->map(function ($item) {
+            $ipsId = $item->ips;
+            $lista = !empty($ipsId) ? ListasDetalle::where('id', $ipsId)->first() : null;
+            $item->ips_nombre = $lista ? $lista->nombre : 'Desconocido';
+            return $item;
+        });
+
         // Mapear los resultados a un array asociativo para incluir campos adicionales
         $data = $resultados->map(function ($item) {
             // Convertir el modelo a un array asociativo
             $dataArray = $item->toArray();
-    
+
             // Agregar campos HTML personalizados a los datos resultantes
             $dataArray['action'] = '<input class="add_medicamento checkbox-large checkbox2 tooltipsC" type="checkbox" title="Seleccionar" id="' . $item->id . '" value="' . $item->id . '">';
             $dataArray['frecuencia2'] = '<input type="text" name="frecuencia2" id="' . $item->id . '" class="show_detail form-control btn bg-secondary tooltipsC" style="max-width: 100%;" title="Frecuencia con la cual el paciente debe tomar el medicamento" value="' . $item->frecuencia . '">';
@@ -932,7 +941,7 @@ class DispensadoApiMedcol6Controller extends Controller
             $dataArray['mipres2'] = '<input type="text" name="mipres" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="mipres" value="' . $item->mipres . '">';
             $dataArray['reporte_entrega2'] = '<input type="text" name="reporte" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="Reporte de entrega" value="' . $item->reporte_entrega_nopbs . '">';
             $dataArray['cuota_moderadora2'] = '<input type="text" name="cuota_moderadora" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 65%;" title="Cuota Moderadora" value="' . $item->cuota_moderadora_sumada . '">';
-    
+
             return $dataArray;
         });
 
@@ -1094,7 +1103,7 @@ class DispensadoApiMedcol6Controller extends Controller
     public function gestionFacturasRevisadas(Request $request)
     {
         $i = Auth::user()->drogueria;
-    
+
         // Mapeo de droguerías según el usuario
         $droguerias = [
             "1" => '',
@@ -1110,39 +1119,37 @@ class DispensadoApiMedcol6Controller extends Controller
             "12" => 'EVSO',
             "13" => 'FRJA',
         ];
-    
+
         $drogueria = $droguerias[$i] ?? null;
-    
+
         // Validar fechas y establecer valores por defecto
-        $fechaInicio = $request->filled('fechaini') 
-            ? Carbon::parse($request->fechaini)->startOfDay() 
+        $fechaInicio = $request->filled('fechaini')
+            ? Carbon::parse($request->fechaini)->startOfDay()
             : now()->subMonth()->startOfDay();
-        
-        $fechaFin = $request->filled('fechafin') 
-            ? Carbon::parse($request->fechafin)->endOfDay() 
+
+        $fechaFin = $request->filled('fechafin')
+            ? Carbon::parse($request->fechafin)->endOfDay()
             : now()->endOfDay();
-    
+
         // Capturar tipo de medicamento enviado desde el frontend
         $tipoMedicamento = $request->input('tipo_medicamento', '2');
-    
+
         // Construcción de la consulta con filtros aplicados
         $queryBase = DispensadoApiMedcol6::select(DB::raw('COUNT(DISTINCT(factura)) as total'))
             ->where('tipo_medicamento', $tipoMedicamento)
             ->whereBetween('fecha_suministro', [$fechaInicio, $fechaFin])
             ->where('estado', 'REVISADO');
-    
+
         // Aplicar filtro de droguería si el usuario no es admin (droguería "1")
         if ($i !== "1" && $drogueria) {
             $queryBase->where('centroprod', $drogueria);
         }
-    
+
         // Obtener total de facturas revisadas
         $totalFacturasRevisadas = $queryBase->first()->total;
-    
+
         return response()->json([
             'total_facturas_revisadas' => $totalFacturasRevisadas
         ]);
     }
-
-
 }

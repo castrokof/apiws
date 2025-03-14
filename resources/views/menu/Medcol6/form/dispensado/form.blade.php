@@ -199,13 +199,13 @@
         <div class="card-footer">
             <div class="d-flex justify-content-between">
                 <div>
-                    <button type="button" class="btn btn-primary btn-sm rounded me-2" id="enviarDispensado">
+                    <button type="button" class="btn btn-primary rounded me-2" id="enviarDispensado">
                         <i class="fas fa-check-circle"></i> Finalizar Dispensación
                     </button>
-                    <button type="reset" class="btn btn-danger btn-sm rounded me-2" id="clean" >
-                        <i class="fas fa-trash"></i> Borrar
+                    <button type="reset" class="btn btn-danger rounded me-2" id="clean">
+                        <i class="fas fa-trash"></i> Limpiar
                     </button>
-                    <button type="button" class="btn btn-secondary btn-sm rounded" data-dismiss="modal">
+                    <button type="button" class="btn btn-secondary rounded" data-dismiss="modal">
                         <i class="fas fa-times"></i> Cerrar
                     </button>
                 </div>
