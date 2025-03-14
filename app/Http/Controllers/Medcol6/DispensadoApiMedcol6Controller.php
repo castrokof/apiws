@@ -940,6 +940,7 @@ class DispensadoApiMedcol6Controller extends Controller
             $dataArray['autorizacion2'] = '<input type="text" name="autorizacion" id="' . $item->id . '" class="show_detail btn btn-xl bg-warning tooltipsC" style="max-width: 100%;" title="Autorizacion" value="' . $item->autorizacion . '">';
             $dataArray['mipres2'] = '<input type="text" name="mipres" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="mipres" value="' . $item->mipres . '">';
             $dataArray['reporte_entrega2'] = '<input type="text" name="reporte" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="Reporte de entrega" value="' . $item->reporte_entrega_nopbs . '">';
+            /* $dataArray['cuota_moderadora2'] = $item->cuota_moderadora_sumada; */
             $dataArray['cuota_moderadora2'] = '<input type="text" name="cuota_moderadora" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 65%;" title="Cuota Moderadora" value="' . $item->cuota_moderadora_sumada . '">';
 
             return $dataArray;
