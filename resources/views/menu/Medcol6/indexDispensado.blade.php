@@ -1837,11 +1837,12 @@ Dispensado Medcol Jamundi
                         $('#diagnostico2').val(firstRecord.dx);
                         var newips = new Option(firstRecord.ips_nombre, firstRecord.ips, true, true);
                         $('.ipsmul').append(newips).trigger('change');
-                        
+
                         var newdx = new Option(firstRecord.dx, firstRecord.dx, true, true);
                         $('.dxcie10').append(newdx).trigger('change');
-
+                        
                         $('#estado2').val(firstRecord.estado);
+                        actualizarEstadoIndicator(firstRecord.estado);
                         $('#id_medico').val(firstRecord.id_medico);
                         $('#tipoidmedico').val(firstRecord.tipoidmedico);
                         $('#numeroIdentificacion').val(firstRecord.numeroIdentificacion);
@@ -2043,13 +2044,13 @@ Dispensado Medcol Jamundi
                         const itemdispensado = {
                             checked: tds.find(":checkbox").prop("checked"),
                             id: tds.find(":checkbox:checked").attr('id'),
-                            frecuencia: tds.eq(6).find('input').val(),
-                            dosis: tds.eq(7).find('input').val(),
-                            duracion_tratamiento: tds.eq(8).find('input').val(),
-                            cuota_moderadora: tds.eq(9).find('input').val(),
-                            autorizacion: tds.eq(10).find('input').val(),
-                            mipres: tds.eq(11).find('input').val(),
-                            reporte_entrega: tds.eq(12).find('input').val(),
+                            frecuencia: tds.eq(7).find('input').val(),
+                            dosis: tds.eq(8).find('input').val(),
+                            duracion_tratamiento: tds.eq(9).find('input').val(),
+                            cuota_moderadora: tds.eq(10).find('input').val(),
+                            autorizacion: tds.eq(11).find('input').val(),
+                            mipres: tds.eq(12).find('input').val(),
+                            reporte_entrega: tds.eq(13).find('input').val(),
                             user_id: userId,
                             fecha_suministro: fechaDisp,
                             fecha_orden: fechaOrden,
@@ -2282,9 +2283,16 @@ Dispensado Medcol Jamundi
 
         });
 
+        function actualizarEstadoIndicator(estado) {
+            // Ocultar ambos íconos antes de actualizar
+            $('#estado-activo, #estado-inactivo').addClass('d-none');
 
-
-
+            if (estado === 'DISPENSADO') {
+                $('#estado-inactivo').removeClass('d-none'); // Mostrar estado inactivo
+            } else if (estado === 'REVISADO') {
+                $('#estado-activo').removeClass('d-none'); // Mostrar estado activo
+            }
+        }
 
 
 

@@ -158,14 +158,17 @@
     <div class="card shadow-sm">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Lista de Medicamentos/Insumos</h5>
-            <!-- <div>
-                <button type="button" class="btn btn-sm btn-success" id="guardarSeleccionados">
-                    <i class="fas fa-save"></i> Guardar Seleccionados
+            <div>
+                <button type="button" class="btn btn-sm btn-primary" id="btnInvima" onclick="window.open('https://enlinea.invima.gov.co/rs/cum/comprob_cum.jsp', '_blank')">
+                    <i class="fas fa-external-link-alt"></i> Invima
                 </button>
-                <button type="button" class="btn btn-sm btn-secondary" id="imprimirFormula">
-                    <i class="fas fa-print"></i> Imprimir
+                <button type="button" class="btn btn-sm btn-success" id="btnBoxalud" onclick="window.open('https://portal.epsdelagente.com.co/Externo/BoxaludExterno/Seguridad/Login.aspx', '_blank')">
+                    <i class="fas fa-external-link-alt"></i> Boxalud
                 </button>
-            </div> -->
+                <button type="button" class="btn btn-sm btn-warning" id="btnHistorial" onclick="window.open('https://manteliviano.com/public_apiws/medcolcli/dispensado', '_blank')">
+                    <i class="fas fa-history"></i> Ver Historial
+                </button>
+            </div>
         </div>
         <div class="card-body table-responsive">
             <table id="tablaRegistros" class="table table-striped table-hover">
