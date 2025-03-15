@@ -41,7 +41,6 @@ Dispensado Medcol Jamundi
 
 @section('scripts')
 
-
 <script src="{{asset("assets/pages/scripts/admin/usuario/crearuser.js")}}" type="text/javascript"></script>
 @endsection
 
@@ -722,13 +721,13 @@ Dispensado Medcol Jamundi
                                 },
                                 columns: [
 
-                                    {
+                                    /* {
                                         data: 'action', //56
                                         orderable: false
                                     },
                                     {
                                         data: 'id'
-                                    },
+                                    }, */
                                     {
                                         data: 'idusuario' //1
                                     },
@@ -1004,6 +1003,7 @@ Dispensado Medcol Jamundi
                                                 fechafin: fechafin,
                                                 contrato: contrato,
                                                 cobertura: cobertura,
+                                                estado: 'REVISADO',
                                                 _token: "{{ csrf_token() }}"
                                             };
 
@@ -1801,6 +1801,7 @@ Dispensado Medcol Jamundi
 
 
 
+
         //Funcion para buscar la factura y traer los datos al formulario y datatalbe
         $(document).ready(function() {
             $('#buscarFactura').on('click', function() {
@@ -1813,10 +1814,24 @@ Dispensado Medcol Jamundi
         function buscarFactura() {
             const numeroFactura = $('#numero_factura').val();
 
+            // Mostrar el spinner con SweetAlert2
+            Swal.fire({
+                icon: 'info',
+                title: 'Buscando factura...',
+                text: 'Por favor, espera mientras obtenemos la información.',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             $.ajax({
                 url: `{{ route('dispensado.medcol6', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
                 type: 'GET',
                 success: function(data) {
+                    Swal.close(); // Ocultar el loader
+
                     // Verificar si el backend no ha devuelto un error
                     if (data && !data.error && Array.isArray(data) && data.length > 0) {
                         const firstRecord = data[0];
@@ -1840,7 +1855,7 @@ Dispensado Medcol Jamundi
 
                         var newdx = new Option(firstRecord.dx, firstRecord.dx, true, true);
                         $('.dxcie10').append(newdx).trigger('change');
-                        
+
                         $('#estado2').val(firstRecord.estado);
                         actualizarEstadoIndicator(firstRecord.estado);
                         $('#id_medico').val(firstRecord.id_medico);
@@ -1866,6 +1881,33 @@ Dispensado Medcol Jamundi
                         $('#cajero').val(firstRecord.cajero);
 
                         actualizarDataTable(data);
+
+                        // Mostrar mensaje de éxito con SweetAlert2
+                        /* Swal.fire({
+                            icon: 'success',
+                            title: 'Factura encontrada',
+                            text: 'Los datos se han cargado correctamente.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }); */
+
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: "top-end",
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.onmouseenter = Swal.stopTimer;
+                                toast.onmouseleave = Swal.resumeTimer;
+                            }
+                        });
+                        Toast.fire({
+                            icon: "success",
+                            title: 'Factura encontrada',
+                            text: 'Los datos se han cargado correctamente.'
+                        });
+
                     } else if (data.error) {
                         // Mostrar el mensaje de error específico devuelto por el backend
                         mostrarError(data.error);
@@ -2075,13 +2117,13 @@ Dispensado Medcol Jamundi
 
                     console.log(item.autorizacion);
 
-                    // Validar que duracion_tratamiento tenga exactamente 3 caracteres
-                    if (item.duracion_tratamiento?.length > 3) {
+                    // Validar que duracion_tratamiento tenga máximo 3 caracteres y entre 1 y 365 días
+                    if (item.duracion_tratamiento?.length > 3 || item.duracion_tratamiento < 1 || item.duracion_tratamiento > 365) {
                         await Swal.fire({
                             type: "error",
                             icon: "error",
                             title: "Error",
-                            text: "El campo Duración del Tratamiento debe tener máximo 3 caracteres",
+                            text: "El campo Duración del Tratamiento debe estar entre 1 y 365 días",
                             confirmButtonText: 'OK'
                         });
                         return;

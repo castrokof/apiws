@@ -11,8 +11,8 @@
 
                     <thead>
                         <tr>
-                            <th>Acciones</th>
-                            <th>Id Registro</th>
+                            <!-- <th>Acciones</th>
+                            <th>Id Registro</th> -->
                             <th>ID Usuario</th>
                             <th>Tipo</th>
                             <th>Facturad</th>

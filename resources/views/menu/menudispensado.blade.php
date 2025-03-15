@@ -489,10 +489,10 @@
             
             <div class="card bg-success">
                 <div class="card-body text-center">
-                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol JAMUNDI</div>
+                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Centralizado</div>
                     <div class="list-group">
                         <a href="{{ route('medcol6.dispensado') }}" class="list-group-item list-group-item-action">
-                            <i class="far fa-share-square"></i> Gestionar Dispensación <span class="badge badge-pill badge-primary pull-right">JAMUNDI</span>
+                            <i class="far fa-share-square"></i> Gestionar Dispensación <span class="badge badge-pill badge-primary pull-right">Centralizado</span>
                         </a>
                         
                     </div>
