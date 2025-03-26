@@ -209,6 +209,7 @@ Dispensado Medcol Jamundi
         $("#ejecutar_informe").click(function() {
             fechaInicio = $("#modal_fechaini").val();
             fechaFin = $("#modal_fechafin").val();
+            contrato = $("#modal_contrato").val();
 
             if (!fechaInicio || !fechaFin) {
                 alert("Por favor seleccione ambas fechas.");
@@ -217,6 +218,7 @@ Dispensado Medcol Jamundi
 
             // Llamar a la función con las fechas seleccionadas
             generar_informe(fechaInicio, fechaFin);
+            cargarTablaForgif(fechaInicio, fechaFin, contrato);
             //$("#modal_generar_informe").modal("hide");
         });
 
@@ -326,6 +328,116 @@ Dispensado Medcol Jamundi
                 }
             });
         }
+
+        // Función para generar el informe basado en las fechas seleccionadas
+        function cargarTablaForgif(fechaini, fechafin) {
+            // Destruir DataTable existente si ya está inicializado
+            if ($.fn.DataTable.isDataTable('#tablaForgif')) {
+                $('#tablaForgif').DataTable().destroy();
+            }
+
+            // Inicializar DataTable con los nuevos datos
+            $('#tablaForgif').DataTable({
+                language: idioma_espanol,
+                processing: true,
+                serverSide: true,
+                lengthMenu: [
+                    [25, 50, 100, 500, 5000, -1],
+                    [25, 50, 100, 500, 5000, "Mostrar Todo"]
+                ],
+                ajax: {
+                    url: "{{ route('medcol6.forgif') }}",
+                    type: 'POST',
+                    data: {
+                        fechaini: fechaini,
+                        fechafin: fechafin,
+                        contrato: contrato,
+                        //contrato: $("#contrato").val(), // Puedes obtener otros filtros aquí
+                        //cobertura: $("#cobertura").val(),
+                        _token: "{{ csrf_token() }}"
+                    }
+                },
+                columns: [
+                    {
+                        data: 'nit_prestador'
+                    },
+                    {
+                        data: 'razon_social_prestador'
+                    },
+                    {
+                        data: 'codigo_generico_eps'
+                    },
+                    {
+                        data: 'expediente'
+                    },
+                    {
+                        data: 'codigo'
+                    },
+                    {
+                        data: 'nombre_generico'
+                    },
+                    {
+                        data: 'nombre_comercial'
+                    },
+                    {
+                        data: 'unidad_medicamento'
+                    },
+                    {
+                        data: 'precio_unitario'
+                    },
+                    {
+                        data: 'cums'
+                    },
+                    {
+                        data: 'ambito'
+                    },
+                    {
+                        data: 'registro_sanitario_invima'
+                    },
+                    {
+                        data: 'opcion'
+                    },
+                    {
+                        data: 'cobertura'
+                    },
+                    {
+                        data: 'regulado'
+                    },
+                    {
+                        data: 'categoria_medicamento'
+                    },
+                    {
+                        data: 'forma'
+                    },
+                    {
+                        data: 'tarifa_tope_regulado'
+                    }
+                ],
+                dom: '<"row"<"col-md-4"l><"col-md-4"f><"col-md-4"B>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+                buttons: [{
+                        extend: 'copyHtml5',
+                        titleAttr: 'Copiar Registros',
+                        className: "btn btn-outline-primary btn-sm"
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        titleAttr: 'Exportar Excel',
+                        className: "btn btn-outline-success btn-sm"
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        titleAttr: 'Exportar CSV',
+                        className: "btn btn-outline-warning btn-sm"
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        titleAttr: 'Exportar PDF',
+                        className: "btn btn-outline-secondary btn-sm"
+                    }
+                ]
+            });
+        }
+
 
 
         var fechaini;

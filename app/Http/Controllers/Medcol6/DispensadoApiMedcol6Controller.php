@@ -1153,4 +1153,89 @@ class DispensadoApiMedcol6Controller extends Controller
             'total_facturas_revisadas' => $totalFacturasRevisadas
         ]);
     }
+
+    public function gestionForgif(Request $request)
+    {
+        $user = Auth::user();
+        $i = $user->drogueria ?? "1"; // Valor por defecto
+
+        $droguerias = [
+            "1" => '',
+            "2" => 'SALUD',
+            "3" => 'DOLOR',
+            "4" => 'PAC',
+            "5" => 'EHU1',
+            "6" => 'BIO1',
+            "8" => 'EM01',
+            "9" => 'FSIO',
+            "10" => 'FSOS',
+            "11" => 'FSAU',
+            "12" => 'EVSO',
+            "13" => 'FRJA',
+        ];
+
+        $drogueria = $droguerias[$i] ?? null;
+
+        $fechaInicio = $request->filled('fechaini')
+            ? Carbon::parse($request->fechaini)->startOfDay()
+            : now()->subMonth()->startOfDay();
+
+        $fechaFin = $request->filled('fechafin')
+            ? Carbon::parse($request->fechafin)->endOfDay()
+            : now()->endOfDay();
+
+        $contrato = $request->input('contrato', null);
+
+        // Subconsulta para traer solo un registro por código
+        $subquery = DispensadoApiMedcol6::selectRaw('MIN(id) as id')
+            ->where('centroprod', [$contrato])
+            ->whereBetween('fecha_suministro', [$fechaInicio, $fechaFin])
+            ->whereNotIn('codigo', ['1010', '1011', '1012'])
+            ->groupBy('codigo');
+
+        $queryBase = DispensadoApiMedcol6::select([
+            'expediente',
+            'codigo',
+            'nombre_generico',
+            'nombre_comercial',
+            'precio_unitario',
+            'cums',
+            'ambito',
+            'cobertura',
+            'forma'
+        ])
+            ->whereIn('id', $subquery)
+            ->orderBy('fecha_suministro', 'asc');
+
+        if ($i !== "1" && $drogueria) {
+            $queryBase->where('centroprod', $drogueria);
+        }
+
+        // Paginación de DataTables
+        $totalRegistros = $queryBase->count();
+        $data = $queryBase->skip($request->start)->take($request->length)->get();
+        //$data = $queryBase->limit($request->length)->offset($request->start)->get();
+
+        // Agregar los valores por defecto
+        $resultados = $data->map(function ($item) {
+            return array_merge($item->toArray(), [
+                'nit_prestador' => 901601000,
+                'razon_social_prestador' => 'SALUD MEDCOL SAS',
+                'registro_sanitario_invima' => 'invima-12345',
+                'unidad_medicamento' => 1,
+                'codigo_generico_eps' => 'NA',
+                'opcion' => 1,
+                'regulado' => 'NA',
+                'categoria_medicamento' => 'M/I',
+                'tarifa_tope_regulado' => 0
+            ]);
+        });
+
+        return response()->json([
+            "draw" => intval($request->draw),
+            "recordsTotal" => $totalRegistros,
+            "recordsFiltered" => $totalRegistros,
+            "data" => $resultados
+        ]);
+    }
 }

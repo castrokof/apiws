@@ -290,6 +290,7 @@ Route::put('medcol6/editdispensado/{id}', 'Medcol6\DispensadoApiMedcol6Controlle
 
 Route::get('medcol6/informedis', 'Medcol6\DispensadoApiMedcol6Controller@informes')->name('medcol6.informedis')->middleware('verified')->middleware('verifyuser');
 Route::get('medcol6/gestionsdis', 'Medcol6\DispensadoApiMedcol6Controller@gestionsdis')->name('medcol6.gestionsdis')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/forgif', 'Medcol6\DispensadoApiMedcol6Controller@gestionForgif')->name('medcol6.forgif')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/disanulado', 'Medcol6\DispensadoApiMedcol6Controller@disanulado')->name('medcol6.disanulado')->middleware('verified')->middleware('verifyuser');
 
 Route::get('buscar-medcol6/{factura}', 'Medcol6\DispensadoApiMedcol6Controller@buscar')->name('dispensado.medcol6')->middleware('verified')->middleware('verifyuser');
