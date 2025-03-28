@@ -1,6 +1,6 @@
 <!-- Modal Generar Informe -->
 <div class="modal fade" id="modal_generar_informe" tabindex="-1" role="dialog" aria-labelledby="modal_generar_informe_label">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="modal_generar_informe_label">Generar Informe</h5>
@@ -52,8 +52,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" id="sicmedic-tab" data-toggle="tab" href="#sicmedic" role="tab" aria-controls="sicmedic" aria-selected="false">
+                            Informe Medicamentos
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" id="insumos-tab" data-toggle="tab" href="#insumos" role="tab" aria-controls="insumos" aria-selected="false">
                             Informe Insumos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="multiples-tab" data-toggle="tab" href="#multiples" role="tab" aria-controls="multiples" aria-selected="false">
+                            Dispensación Multiple <!-- vvvf -->
                         </a>
                     </li>
                 </ul>
@@ -65,7 +75,7 @@
                         <div id="resultado_informe" class="mt-3" style="display: none;">
                             <h5 class="text-center text-dark">Resultados del Informe</h5>
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="card shadow-sm border-primary">
                                         <div class="card-header bg-primary text-white text-center">
                                             Pendientes por Revisar
@@ -73,12 +83,20 @@
                                         <div class="card-body" id="detalle_informe"></div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="card shadow-sm border-success">
                                         <div class="card-header bg-success text-white text-center">
                                             Revisadas
                                         </div>
                                         <div class="card-body" id="detalle_informe1"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card shadow-sm border-danger">
+                                        <div class="card-header bg-danger text-white text-center">
+                                            Anulados
+                                        </div>
+                                        <div class="card-body" id="detalle_informe2"></div>
                                     </div>
                                 </div>
                             </div>
@@ -120,10 +138,20 @@
                     </div>
 
 
-                    <!-- Pestaña 3: Informe Insumos -->
+                    <!-- Pestaña 3: Informe Medicamentos -->
+                    <div class="tab-pane fade" id="sicmedic" role="tabpanel" aria-labelledby="sicmedic-tab">
+                        <h5 class="text-center text-dark">Contenido del Informe Medicamentos</h5>
+                        <p class="text-center">Aquí va el contenido específico del Informe SIC-Medicamentos.</p>
+                    </div>
+                    <!-- Pestaña 4: Informe Insumos -->
                     <div class="tab-pane fade" id="insumos" role="tabpanel" aria-labelledby="insumos-tab">
                         <h5 class="text-center text-dark">Contenido del Informe Insumos</h5>
                         <p class="text-center">Aquí va el contenido específico del Informe Insumos.</p>
+                    </div>
+                    <!-- Pestaña 5: Dispensación Multiple -->
+                    <div class="tab-pane fade" id="multiples" role="tabpanel" aria-labelledby="multiples-tab">
+                        <h5 class="text-center text-dark">Contenido del Informe Dispensacion Multiple</h5>
+                        <p class="text-center">Aquí va el contenido específico del Informe Dispensacion Multiple.</p>
                     </div>
                 </div>
             </div>

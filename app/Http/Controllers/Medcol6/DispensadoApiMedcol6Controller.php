@@ -1189,6 +1189,7 @@ class DispensadoApiMedcol6Controller extends Controller
         // Subconsulta para traer solo un registro por código
         $subquery = DispensadoApiMedcol6::selectRaw('MIN(id) as id')
             ->where('centroprod', [$contrato])
+            ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
             ->whereBetween('fecha_suministro', [$fechaInicio, $fechaFin])
             ->whereNotIn('codigo', ['1010', '1011', '1012'])
             ->groupBy('codigo');
