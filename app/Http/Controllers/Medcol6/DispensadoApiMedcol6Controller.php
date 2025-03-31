@@ -551,6 +551,9 @@ class DispensadoApiMedcol6Controller extends Controller
             //'cobertura' => 'nullable|string'
         ]);
 
+        $fechaAi = now()->startOfDay()->toDateTimeString();
+        $fechaAf = now()->endOfDay()->toDateTimeString();
+
         $droguerias = [
             '' => 'Todas',
             '2' => 'SALUD',

@@ -357,8 +357,7 @@ Dispensado Medcol Jamundi
                         _token: "{{ csrf_token() }}"
                     }
                 },
-                columns: [
-                    {
+                columns: [{
                         data: 'nit_prestador'
                     },
                     {
@@ -2449,8 +2448,8 @@ Dispensado Medcol Jamundi
         }
 
 
-
     });
+
 
 
     var idioma_espanol = {
