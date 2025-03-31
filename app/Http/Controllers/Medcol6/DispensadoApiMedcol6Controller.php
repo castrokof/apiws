@@ -537,7 +537,182 @@ class DispensadoApiMedcol6Controller extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
     public function disrevisado(Request $request)
+    {
+        // Validar parámetros de DataTables
+        $request->validate([
+            'draw' => 'required|integer',
+            'start' => 'integer',
+            'length' => 'integer',
+            //'fechaini' => 'nullable|date',
+            //'fechafin' => 'nullable|date|after_or_equal:fechaini',
+            //'contrato' => 'nullable|string',
+            //'cobertura' => 'nullable|string'
+        ]);
+
+        $droguerias = [
+            '' => 'Todas',
+            '2' => 'SALUD',
+            '3' => 'DOLOR',
+            '4' => 'PAC',
+            '5' => 'EHU1',
+            '6' => 'BIO1',
+            '8' => 'EM01',
+            '9' => 'FSIO',
+            '10' => 'FSOS',
+            '11' => 'FSAU',
+            '12' => 'EVSO',
+            '13' => 'FRJA'
+        ];
+
+        $drogueria = $droguerias[Auth::user()->drogueria] ?? '';
+
+        $query = DispensadoApiMedcol6::query();
+
+        // Aplicar filtro de droguería
+        if ($drogueria) {
+            if ($drogueria === 'PAC') {
+                $query->whereIn('centroprod', ['FRJA', 'EVEN', 'PAC', 'EM01', 'EHU1', 'BPDT']);
+            } elseif ($drogueria !== 'Todas') {
+                $query->where('centroprod', $drogueria);
+            }
+        }
+
+        // Validar que fechaini y fechafin sean obligatorios
+        if (!empty($request->fechaini) && !empty($request->fechafin)) {
+            $fechaIni = Carbon::parse($request->fechaini)->startOfDay()->toDateTimeString();
+            $fechaFin = Carbon::parse($request->fechafin)->endOfDay()->toDateTimeString();
+            $query->whereBetween('fecha_suministro', [$fechaIni, $fechaFin]);
+
+            // Aplicar contrato si está presente
+            if (!empty($request->contrato)) {
+                $query->where('centroprod', $request->contrato);
+            }
+
+            // Aplicar cobertura si está presente
+            if (!empty($request->cobertura)) {
+                $query->where('tipo_medicamento', $request->cobertura);
+            }
+        } else {
+            // Si no se pasan fechas, usar el rango del día actual
+            $query->whereBetween('fecha_suministro', [$fechaAi, $fechaAf]);
+        }
+
+        // Aplicar filtro de estado y códigos
+        $query->where(function ($q) {
+            $q->where('estado', 'REVISADO')
+                ->whereNotIn('codigo', ['1010', '1011', '1012']);
+        })->orWhere(function ($q) {
+            $q->whereNull('estado');
+        });
+
+        // Obtener total de registros sin filtrar
+        $totalRecords = DispensadoApiMedcol6::count();
+
+        // Obtener total filtrado
+        $filteredRecords = $query->count();
+
+        // Paginación y obtención de datos
+        $data = $query->skip($request->start)
+            ->take($request->length)
+            ->get();
+
+        // Obtener información de ListasDetalle
+        $ipsIds = $data->pluck('ips')->filter()->unique();
+        $listas = ListasDetalle::whereIn('id', $ipsIds)->get()->keyBy('id');
+
+        // Formatear datos
+        $formattedData = $data->map(function ($item) use ($listas) {
+            $lista = $listas[$item->ips] ?? null;
+
+            return [
+                // Tus campos de datos aquí
+                'id' => $item->id,
+                'idusuario' => $item->idusuario,
+                'tipo' => $item->tipo,
+                'facturad' => $item->facturad ?? '',
+                'factura' => $item->factura ?? '',
+                'tipodocument' => $item->tipodocument ?? '',
+                'historia' => $item->historia ?? '',
+                'cums' => $item->cums ?? '',
+                'expediente' => $item->expediente ?? '',
+                'consecutivo' => $item->consecutivo ?? '',
+                'cums_rips' => $item->cums_rips ?? '',
+                'codigo' => $item->codigo ?? '',
+                'tipo_medicamento' => $item->tipo_medicamento ?? '',
+                'nombre_generico' => $item->nombre_generico ?? '',
+                'atc' => $item->atc ?? '',
+                'forma' => $item->forma ?? '',
+                'concentracion' => $item->concentracion ?? '',
+                'unidad_medicamento' => $item->unidad_medicamento ?? '',
+                'numero_unidades' => $item->numero_unidades ?? '',
+                'regimen' => $item->regimen ?? '',
+                'paciente' => $item->paciente ?? '',
+                'primer_apellido' => $item->primer_apellido ?? '',
+                'segundo_apellido' => $item->segundo_apellido ?? '',
+                'primer_nombre' => $item->primer_nombre ?? '',
+                'segundo_nombre' => $item->segundo_nombre ?? '',
+                'cuota_moderadora' => $item->cuota_moderadora ?? '',
+                'copago' => $item->copago ?? '',
+                'numero_orden' => $item->numero_orden ?? '',
+                'numero_entrega' => $item->numero_entrega ?? '',
+                'num_total_entregas' => $item->num_total_entregas ?? '',
+                'fecha_ordenamiento' => $item->fecha_ordenamiento ?? '',
+                'fecha_suministro' => $item->fecha_suministro ?? '',
+                'dx' => $item->dx ?? '',
+                // ... otros campos ...
+                'nitips' => $lista->slug ?? '',
+                'ips_nombre' => $lista->nombre ?? '',
+
+                'autorizacion' => $item->autorizacion ?? '',
+                'mipres' => $item->mipres ?? '',
+                'reporte_entrega_nopbs' => $item->reporte_entrega_nopbs ?? '',
+                'id_medico' => $item->id_medico ?? '',
+                'numeroIdentificacion' => $item->numeroIdentificacion ?? '',
+                'medico' => $item->medico ?? '',
+                'especialidadmedico' => $item->especialidadmedico ?? '',
+                'precio_unitario' => $item->precio_unitario ?? '',
+                'valor_total' => $item->valor_total ?? '',
+                'estado' => $item->estado ?? '',
+                'centroprod' => $item->centroprod ?? '',
+                'drogueria' => $item->drogueria ?? '',
+                'cajero' => $item->cajero ?? '',
+                'user_id' => $item->user_id ?? '',
+                'nitips' => $lista->slug ?? '',
+                'frecuencia' => $item->frecuencia ?? '',
+                'dosis' => $item->dosis ?? '',
+                'duracion_tratamiento' => $item->duracion_tratamiento ?? '',
+                'cobertura' => $item->cobertura ?? '',
+                'tipocontrato' => $item->tipocontrato ?? '',
+                'tipoentrega' => $item->tipoentrega ?? '',
+                'plan' => $item->plan ?? '',
+                'via' => $item->via ?? '',
+                'ciudad' => $item->ciudad ?? '',
+
+                'action' => '
+                     <button type="button" name="show_detail" id="' . $item->id . '" 
+                         class="show_detail btn btn-sm btn-secondary tooltipsC" title="Detalle">
+                         <i class="fas fa-prescription-bottle-alt"></i> Detalle
+                     </button>
+                     <button type="button" name="edit_dispensado" id="' . $item->id . '" 
+                         class="edit_dispensado btn btn-sm btn-info tooltipsC" title="Editar">
+                         <i class="fas fa-pencil-alt"></i> Editar
+                     </button>
+                 '
+            ];
+        });
+
+        return response()->json([
+            'draw' => $request->draw,
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $formattedData
+        ]);
+    }
+
+
+    /* public function disrevisado(Request $request)
     {
         $fechaAi = now()->startOfDay()->toDateTimeString();
         $fechaAf = now()->endOfDay()->toDateTimeString();
@@ -623,7 +798,7 @@ class DispensadoApiMedcol6Controller extends Controller
         }
 
         return view('menu.Medcol6.indexDispensado', ['droguerias' => $drogueria]);
-    }
+    } */
 
 
     /**
