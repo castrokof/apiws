@@ -34,6 +34,7 @@ Dispensado Medcol Jamundi
         align-items: center;
         z-index: 9999;
     }
+
 </style>
 
 @endsection

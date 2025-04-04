@@ -34,19 +34,23 @@
                         <div class="col-md-4">
                             <label for="modal_contrato">Farmacia</label>
                             <select name="modal_contrato" id="modal_contrato" class="form-control select2bs4">
-                                <option value="">Seleccione opcion...</option>
-                                <option value="BIO1">BIO1-FARMACIA BIOLOGICOS</option>
-                                <option value="DLR1">DLR1-FARMACIA DOLOR</option>
-                                <option value="DPA1">DPA1-FARMACIA PALIATIVOS</option>
-                                <option value="EHU1">EHU1-FARMACIA HUERFANAS</option>
-                                <option value="EM01">EM01-FARMACIA EMCALI</option>
-                                <option value="EVEN">EVEN-FARMACIA EVENTO</option>
-                                <option value="EVSM">EVSM-EVENTO SALUD MENTAL</option>
-                                <option value="FRJA">FRJA-FARMACIA JAMUNDI</option>
-                                <option value="INY">INY-FARMACIA INYECTABLES</option>
-                                <option value="PAC">PAC-FARMACIA PAC</option>
-                                <option value="SM01">SM01-FARMACIA SALUD MENTAL</option>
-                                <option value="BPDT">BPDT-BOLSA</option>
+                                <option value="">Seleccione opción...</option>
+                                <optgroup label="Farmacias Principales">
+                                    <option value="BIO1">BIO1-FARMACIA BIOLOGICOS</option>
+                                    <option value="DLR1">DLR1-FARMACIA DOLOR</option>
+                                    <option value="DPA1">DPA1-FARMACIA PALIATIVOS</option>
+                                    <option value="EM01">EM01-FARMACIA EMCALI</option>
+                                    <option value="EHU1">EHU1-FARMACIA HUERFANAS</option>
+                                    <option value="FRJA">FRJA-FARMACIA JAMUNDI</option>
+                                    <option value="INY">INY-FARMACIA INYECTABLES</option>
+                                    <option value="PAC">PAC-FARMACIA PAC</option>
+                                    <option value="SM01">SM01-FARMACIA SALUD MENTAL</option>
+                                </optgroup>
+                                <optgroup label="Farmacias Especializadas">
+                                    <option value="BPDT">BPDT-BOLSA</option>
+                                    <option value="EVEN">EVEN-FARMACIA EVENTO</option>
+                                    <option value="EVSM">EVSM-EVENTO SALUD MENTAL</option>
+                                </optgroup>
                             </select>
                         </div>
                     </div>

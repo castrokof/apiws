@@ -49,18 +49,22 @@
                                 <label for="contrato" class="col-form-label">Droguería</label>
                                 <select name="contrato" id="contrato" class="form-control select2bs4" required>
                                     <option value="">Seleccione opción...</option>
-                                    <option value="BIO1">BIO1-FARMACIA BIOLOGICOS</option>
-                                    <option value="DLR1">DLR1-FARMACIA DOLOR</option>
-                                    <option value="DPA1">DPA1-FARMACIA PALIATIVOS</option>
-                                    <option value="EHU1">EHU1-FARMACIA HUERFANAS</option>
-                                    <option value="EM01">EM01-FARMACIA EMCALI</option>
-                                    <option value="EVEN">EVEN-FARMACIA EVENTO</option>
-                                    <option value="EVSM">EVSM-EVENTO SALUD MENTAL</option>
-                                    <option value="FRJA">FRJA-FARMACIA JAMUNDI</option>
-                                    <option value="INY">INY-FARMACIA INYECTABLES</option>
-                                    <option value="PAC">PAC-FARMACIA PAC</option>
-                                    <option value="SM01">SM01-FARMACIA SALUD MENTAL</option>
-                                    <option value="BPDT">BPDT-BOLSA</option>
+                                    <optgroup label="Farmacias Principales">
+                                        <option value="BIO1">BIO1-FARMACIA BIOLOGICOS</option>
+                                        <option value="DLR1">DLR1-FARMACIA DOLOR</option>
+                                        <option value="DPA1">DPA1-FARMACIA PALIATIVOS</option>
+                                        <option value="EM01">EM01-FARMACIA EMCALI</option>
+                                        <option value="EHU1">EHU1-FARMACIA HUERFANAS</option>
+                                        <option value="FRJA">FRJA-FARMACIA JAMUNDI</option>
+                                        <option value="INY">INY-FARMACIA INYECTABLES</option>
+                                        <option value="PAC">PAC-FARMACIA PAC</option>
+                                        <option value="SM01">SM01-FARMACIA SALUD MENTAL</option>
+                                    </optgroup>
+                                    <optgroup label="Farmacias Especializadas">
+                                        <option value="BPDT">BPDT-BOLSA</option>
+                                        <option value="EVEN">EVEN-FARMACIA EVENTO</option>
+                                        <option value="EVSM">EVSM-EVENTO SALUD MENTAL</option>
+                                    </optgroup>
                                 </select>
                             </div>
                             <div class="col-md-3">
@@ -72,7 +76,7 @@
                                 </select>
                             </div>
                         </div>
-            
+
                         <div class="form-group row mt-3">
                             <div class="col-md-3">
                                 <button type="submit" name="reset" id="reset" class="btn btn-warning btn-block">Limpiar</button>
@@ -99,7 +103,7 @@
                 <button class="btn btn-info btn-block mb-2" type="button" data-toggle="collapse" data-target="#resumenPanel" aria-expanded="false" aria-controls="resumenPanel">
                     Ver resumen
                 </button>
-            
+
                 <div class="collapse" id="resumenPanel">
                     <div class="card card-body">
                         <div class="row">
