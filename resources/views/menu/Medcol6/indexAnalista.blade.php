@@ -2066,7 +2066,7 @@ Pendientes Medcol
                     `);
 
                     $("#detalle_informe1").append(`
-                        <div class="small-box shadow-lg l-bg-orange-dark">
+                        <div class="small-box shadow-lg l-bg-green-dark">
                             <div class="inner">
                                 <!--<h5>REVISADAS</h5>-->
                                 <h5>CONTRATO</h5>
