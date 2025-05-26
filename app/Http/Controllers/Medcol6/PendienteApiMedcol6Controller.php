@@ -160,22 +160,15 @@ class PendienteApiMedcol6Controller extends Controller
 
             $token = $response->json()["token"];
 
-
-
             $responsefacturas = Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/pendientesapi");
 
             $facturassapi = $responsefacturas->json()['data'];
-
-
-
 
             $contador = 0;
             $pendientes = [];
 
             foreach ($facturassapi as $factura) {
                 $existe = PendienteApiMedcol6::where([['factura', $factura['factura']], ['documento', $factura['documento']]])->count();
-
-
 
                 if ($existe == 0 || $existe == '') {
 

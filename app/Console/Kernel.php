@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-           //Commands\CronApiPendientes::class, 
+           Commands\CronApiPendientes::class, 
            //Commands\CronApiDispensados::class,
            //Commands\CronApiDispensadosDolor::class,
            //Commands\CronApiPendientesDolor::class,
@@ -32,14 +32,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
 {
-    //$schedule->command('cron:api_pendientes')->cron('0 */4 * * *');
+    $schedule->command('cron:api_pendientes')->cron('*/6 * * * *');
     //$schedule->command('cron:api_dispensados')->cron('0 */3 * * *');
     //$schedule->command('cron:api_dispensadosdolor')->cron('0 */3 * * *');
     //$schedule->command('cron:api_pendientesdolor')->cron('0 */4 * * *');
     //$schedule->command('cron:api_dispensadossaludmental')->cron('0 */3 * * *');
     //$schedule->command('cron:api_pendientessaludmental')->cron('0 */4 * * *');
     //$schedule->command('cron:api_dispensadosemcali')->cron('*/30 * * * *');
-    $schedule->command('cron:api_dispensadossos')->cron('*/10 * * * *');
+    $schedule->command('cron:api_dispensadossos')->cron('*/5 * * * *');
     
     
     

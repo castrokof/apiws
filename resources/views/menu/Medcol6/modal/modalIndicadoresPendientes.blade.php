@@ -63,6 +63,11 @@
                                 Informe Pendientes
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pendientesconsaldos-tab" data-toggle="tab" href="#pendientesconsaldos" role="tab" aria-controls="pendientesconsaldos" aria-selected="true">
+                                Pendientes vs Saldos
+                            </a>
+                        </li>
                         <!-- <li class="nav-item">
                             <a class="nav-link" id="forgif-tab" data-toggle="tab" href="#forgif" role="tab" aria-controls="forgif" aria-selected="false">
                                 Informe ForGif
@@ -104,7 +109,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>  
+                                </div>
                                 <div class="row g-4">
                                     <!-- Card: Total Pendientes -->
                                     <div class="col-md-4">
@@ -175,7 +180,32 @@
                             </div>
                         </div>
 
-                        <!-- Pestaña 2: Informe ForGif -->
+                        <!-- Pestaña 2: Pendientes vs Saldos -->
+                        <div class="tab-pane fade" id="pendientesconsaldos" role="tabpanel" aria-labelledby="pendientesconsaldos-tab">
+                            <h5 class="text-center text-dark">Contenido del Informe Pendientes vs Saldos</h5>
+                            <div class="card-body table-responsive">
+                                <table id="tablaPendSald" class="table table-striped table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Fecha Pendiente</th>
+                                            <th>Código</th>
+                                            <th>Nombre</th>
+                                            <th>Cums</th>
+                                            <th>Cantidad Pendiente</th>
+                                            <th>Saldo</th>
+                                            <th>Pendiente vs Saldo</th>
+                                            <th>Fecah Saldo</th>
+                                            <th>Farmacia</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Aquí se agregarán las filas de la tabla dinámicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Pestaña 3: Informe ForGif -->
                         <div class="tab-pane fade" id="forgif" role="tabpanel" aria-labelledby="forgif-tab">
                             <h5 class="text-center text-dark">Contenido del Informe FOR_GIF_003</h5>
                             <div class="card-body table-responsive">
@@ -209,19 +239,19 @@
                             </div>
                         </div>
 
-                        <!-- Pestaña 3: Informe Medicamentos -->
+                        <!-- Pestaña 4: Informe Medicamentos -->
                         <div class="tab-pane fade" id="sicmedic" role="tabpanel" aria-labelledby="sicmedic-tab">
                             <h5 class="text-center text-dark">Contenido del Informe Medicamentos</h5>
                             <p class="text-center">Aquí va el contenido específico del Informe SIC-Medicamentos.</p>
                         </div>
 
-                        <!-- Pestaña 4: Informe Insumos -->
+                        <!-- Pestaña 5: Informe Insumos -->
                         <div class="tab-pane fade" id="insumos" role="tabpanel" aria-labelledby="insumos-tab">
                             <h5 class="text-center text-dark">Contenido del Informe Insumos</h5>
                             <p class="text-center">Aquí va el contenido específico del Informe Insumos.</p>
                         </div>
 
-                        <!-- Pestaña 5: Dispensación Multiple -->
+                        <!-- Pestaña 6: Dispensación Multiple -->
                         <div class="tab-pane fade" id="multiples" role="tabpanel" aria-labelledby="multiples-tab">
                             <h5 class="text-center text-dark">Contenido del Informe Dispensacion Multiple</h5>
                             <p class="text-center">Aquí va el contenido específico del Informe Dispensacion Multiple.</p>
