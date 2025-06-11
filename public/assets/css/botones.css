@@ -185,3 +185,427 @@
     top: 20px;
     opacity: 0.1;
 }
+
+
+/* Estilos específicos para el modal - Agregar a tu CSS existente */
+
+/* Contenedor principal del modal */
+.modal-modern .modal-content {
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    border: none;
+    overflow: hidden;
+}
+
+.modal-modern {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header del modal */
+.modal-modern .modal-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border-bottom: none;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-modern .modal-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: modal-pulse 4s ease-in-out infinite;
+}
+
+@keyframes modal-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.modal-modern .modal-title {
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.modal-modern .modal-title i {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.modal-header-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-modern .modal-header .btn-close {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    opacity: 1;
+    filter: brightness(0) invert(1);
+    position: relative;
+    z-index: 1;
+}
+
+/* Body del modal */
+.modal-modern .modal-body {
+    padding: 30px;
+    background: #f8f9fa;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* Secciones dentro del modal */
+.modal-section {
+    margin-bottom: 30px;
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.modal-section:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+}
+
+/* Títulos de sección */
+.modal-section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid #31df9d;
+}
+
+.modal-section-title i {
+    color: #31df9d;
+    font-size: 1.1rem;
+}
+
+/* Grid para formularios */
+.modal-form-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.modal-form-group {
+    position: relative;
+}
+
+.modal-form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.modal-form-group.half-width {
+    grid-column: span 2;
+}
+
+/* Labels en el modal */
+.modal-modern label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modal-modern .required::after {
+    content: '*';
+    color: #e74c3c;
+    margin-left: 5px;
+}
+
+/* Inputs, selects y textareas en el modal */
+.modal-modern input, 
+.modal-modern select, 
+.modal-modern textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e6ed;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    font-family: inherit;
+}
+
+.modal-modern input:focus, 
+.modal-modern select:focus, 
+.modal-modern textarea:focus {
+    outline: none;
+    border-color: #31df9d;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(49, 223, 157, 0.1);
+    transform: translateY(-2px);
+}
+
+.modal-modern input[readonly] {
+    background: #f1f3f4;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Sección de gestión especial */
+.modal-management-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid #31df9d;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-management-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #31df9d, #00b4db, #31df9d);
+    animation: modal-shimmer 2s linear infinite;
+}
+
+@keyframes modal-shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: 200px 0; }
+}
+
+/* Grid para estados */
+.modal-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.modal-status-item {
+    background: white;
+    padding: 18px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.modal-status-item:hover {
+    transform: translateY(-3px);
+}
+
+.modal-status-item.hidden {
+    display: none;
+}
+
+/* Select personalizado */
+.modal-modern select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+/* Textarea */
+.modal-modern textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Badge para cantidad */
+.modal-quantity-badge {
+    background: #31df9d;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 8px;
+    display: inline-block;
+}
+
+/* Sección de información de usuario */
+.modal-user-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+}
+
+.modal-user-info input,
+.modal-user-info textarea {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.modal-user-info input::placeholder,
+.modal-user-info textarea::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.modal-user-info label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.modal-user-info .modal-section-title {
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Footer del modal */
+.modal-modern .modal-footer {
+    background: white;
+    border-top: 1px solid #e9ecef;
+    padding: 1.5rem 2rem;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+/* Botones en el modal */
+.modal-modern .btn {
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.modal-modern .btn-primary {
+    background: linear-gradient(135deg, #31df9d 0%, #00b4db 100%);
+    border: none;
+    box-shadow: 0 5px 15px rgba(49, 223, 157, 0.3);
+}
+
+.modal-modern .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(49, 223, 157, 0.4);
+}
+
+.modal-modern .btn-secondary {
+    background: #6c757d;
+    border: none;
+}
+
+.modal-modern .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Responsive para el modal */
+@media (max-width: 768px) {
+    .modal-form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-modern .modal-body {
+        padding: 20px;
+    }
+    
+    .modal-section {
+        padding: 20px;
+    }
+    
+    .modal-modern .modal-title {
+        font-size: 1.4rem;
+    }
+}
+
+/* Animaciones para inputs */
+.modal-modern input:not([readonly]):hover,
+.modal-modern select:hover,
+.modal-modern textarea:hover {
+    border-color: #31df9d;
+    transform: translateY(-1px);
+}
+
+/* Scrollbar personalizado para el modal */
+.modal-modern .modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-modern .modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.modal-modern .modal-body::-webkit-scrollbar-thumb {
+    background: #31df9d;
+    border-radius: 10px;
+}
+
+.modal-modern .modal-body::-webkit-scrollbar-thumb:hover {
+    background: #00b4db;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modal-modern .modal-header {
+        padding: 1rem 1.5rem;
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .modal-modern .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-modern .modal-footer {
+        padding: 1rem 1.5rem;
+    }
+    
+    .modal-header-controls {
+        order: -1;
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .modal-footer-content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* Estilo adicional para modal maximizado */
+.modal-maximized {
+    padding: 0 !important;
+}
+
+.modal-maximized .modal-dialog {
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+}
+
+.modal-maximized .modal-content {
+    height: 100vh;
+    border-radius: 0 !important;
+}
+
+.modal-maximized .modal-body {
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
+}
+
