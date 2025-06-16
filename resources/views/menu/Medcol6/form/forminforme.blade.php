@@ -109,6 +109,8 @@
                                     <option value="PAC">PAC-FARMACIA PAC</option>
                                     <option value="SM01">SM01-FARMACIA SALUD MENTAL</option>
                                     <option value="BPDT">BPDT-BOLSA</option>
+                                    <option value="BDNT">BDNT-BOLSA NORTE</option>
+                                    <option value="EVIO">EVIO-EVENTO IDEO</option>
                                 </select>
                             </div>
                         </div>

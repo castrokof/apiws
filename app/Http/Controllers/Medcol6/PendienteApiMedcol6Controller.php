@@ -1631,4 +1631,6 @@ class PendienteApiMedcol6Controller extends Controller
         ]);
     }
 
+    
+
 }

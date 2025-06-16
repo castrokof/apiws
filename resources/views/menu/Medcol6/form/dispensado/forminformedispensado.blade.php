@@ -62,6 +62,8 @@
                                     </optgroup>
                                     <optgroup label="Farmacias Especializadas">
                                         <option value="BPDT">BPDT-BOLSA</option>
+                                        <option value="BDNT">BDNT-BOLSA NORTE</option>
+                                        <option value="EVIO">EVIO-EVENTO IDEO</option>
                                         <option value="EVEN">EVEN-FARMACIA EVENTO</option>
                                         <option value="EVSM">EVSM-EVENTO SALUD MENTAL</option>
                                     </optgroup>
