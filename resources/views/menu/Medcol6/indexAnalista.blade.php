@@ -1747,12 +1747,12 @@ Pendientes Medcol
         // Función que envia el id al controlador y cambia el estado del registro
         $(document).on('click', '#syncapi', function() {
 
-            const text = 'De Medcol JAMUNDI';
+            const text = 'De Medcol Centralizado';
 
             Swal.fire({
                 title: "¿Estás por sincronizar pendientes?",
                 text: text,
-                type: "info",
+                icon: "info",
                 showCancelButton: true,
                 showCloseButton: true,
                 confirmButtonText: 'Aceptar',
@@ -1799,12 +1799,12 @@ Pendientes Medcol
         //Funcion para sincronizar los pendientes anuladas y actualizar el estado a ANULADO
         $(document).on('click', '#synanuladospndt', function() {
 
-            const text = 'De Medcol - JAMUNDI';
+            const text = 'De Medcol - Centralizado';
 
             Swal.fire({
                 title: "¿Estás por sincronizar los pendientes anulados?",
                 text: text,
-                type: "error",
+                icon: "error",
                 showCancelButton: true,
                 showCloseButton: true,
                 confirmButtonText: 'Aceptar',
