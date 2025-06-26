@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('titulo')
-Pendientes Medcol SOS-Jamundi
+Pendientes Medcol Jamundi
 @endsection
 @section("styles")
 
@@ -33,13 +33,12 @@ Pendientes Medcol SOS-Jamundi
 
 @include('menu.Medcol6.form.forminforme')
 @include('menu.Medcol6.tabs.tabsIndexAnalista')
-@include('menu.Medcol6.modal.modalindexresumen')
-@include('menu.Medcol6.modal.modalindexaddseguimiento')
 
 @include('menu.Medcol6.modal.modalPendientes')
 @include('menu.Medcol6.modal.modalDetallePendiente')
 
 @include('menu.Medcol6.modal.modalindexresumenpendientes')
+@include('menu.Medcol6.modal.modalIndicadoresPendientes')
 
 
 @endsection
@@ -58,6 +57,57 @@ Pendientes Medcol SOS-Jamundi
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
 
+<script>
+$(document).ready(function() {
+    // Cargar datos al abrir el dropdown
+    $('#dropdownPendientes').on('show.bs.dropdown', function() {
+        const pacienteId = $('#historia').val(); // Obtener ID del paciente
+        
+        $.ajax({
+            url: `/api/pacientes/${pacienteId}/pendientes`,
+            method: 'GET',
+            success: function(data) {
+                const tbody = $('#tablaPendientes tbody').empty();
+                
+                data.forEach(pendiente => {
+                    tbody.append(`
+                        <tr>
+                            <td>${moment(pendiente.fecha).format('DD/MM/YYYY')}</td>
+                            <td>${pendiente.codigo}</td>
+                            <td>${pendiente.molecula}</td>
+                            <td>${pendiente.documento}</td>
+                            <td>${pendiente.numero}</td>
+                            <td>
+                                <span class="estado-badge estado-${pendiente.estado}">
+                                    ${pendiente.estado}
+                                </span>
+                            </td>
+                        </tr>
+                    `);
+                });
+                
+                $('#contadorPendientes').text(`Mostrando ${data.length} registros`);
+            },
+            error: function() {
+                $('#tablaPendientes tbody').html(`
+                    <tr>
+                        <td colspan="6" class="text-center text-danger">
+                            Error al cargar los datos
+                        </td>
+                    </tr>
+                `);
+            }
+        });
+    });
+
+    // Cerrar dropdown al hacer clic fuera
+    $('body').on('click', function(e) {
+        if (!$(e.target).closest('.dropdown').length) {
+            $('.dropdown-menu').hide();
+        }
+    });
+});
+</script>
 
 <script>
     $(document).ready(function() {
@@ -67,114 +117,42 @@ Pendientes Medcol SOS-Jamundi
 
 
         function fill_datatable1_resumen() {
-            $("#detalle").empty();
-            $("#detalle1").empty();
-            $("#detalle2").empty();
-            $("#detalle3").empty();
-            $("#detalle4").empty();
-            //$("#detalle5").empty();
+            $("#detalle, #detalle1, #detalle2, #detalle3, #detalle4, #detalle5").empty();
+        
             $.ajax({
                 url: "{{ route('medcol6.informe') }}",
-                // data: {
-                //     fechaini: fechaini,
-                //     fechafin: fechafin
-                // },
                 dataType: "json",
                 success: function(data) {
-                    //Widget Total Horas
-                    // $.each(data.pendientes, function(i, item) {
-                    var a = data.pendientes;
-                    if (a == null) {
-                        a = 0;
-                    } else {
-                        a = data.pendientes;
-                    }
-
-                    $("#detalle").append(
-                        '<div class="small-box shadow-lg  l-bg-blue-dark"><div class="inner">' +
-                        '<h5>TOTAL PENDIENTES</h5>' +
-                        '<p><h5> ' + a +
-                        '</h5></p>' +
-                        '</div><a class="informependientes" id="informependientesclic" href="#"><div class="icon"><i class="fas fa-notes-medical informependientes"></i></div></a>'
-
-                    );
-
-                    // })
-
-                    //  $.each(data.entregados, function(i, item) {
-                    var a = data.entregados;
-                    if (a == null) {
-                        a = 0;
-                    } else {
-                        a = data.entregados;
-                    }
-                    $("#detalle1").append(
-
-
-                        '<div class="small-box shadow-lg l-bg-green-dark"><div class="inner">' +
-                        '<h5>TOTAL ENTREGADOS</h5>' +
-                        '<p><h5> ' + a +
-                        '</h5></p>' +
-                        '</div><div class="icon"><i class="fas fa-briefcase-medical"></i></div></div>'
-
-                    );
-
-                    // })
-                    var a = data.tramitados;
-                    if (a == null) {
-                        a = 0;
-                    } else {
-                        a = data.tramitados;
-                    }
-                    $("#detalle2").append(
-
-
-                        '<div class="small-box shadow-lg l-bg-orange-dark"><div class="inner">' +
-                        '<h5>EN TRAMITE</h5>' +
-                        '<p><h5><i class="fas fa-comment-medical"></i> ' + a +
-                        '</h5></p>' +
-                        '</div><div class="icon"><i class="fas fa-ambulance"></i></div></div>'
-
-                    );
-
-                    // })
-                    var a = data.anulados;
-                    if (a == null) {
-                        a = 0;
-                    } else {
-                        a = data.anulados;
-                    }
-                    $("#detalle3").append(
-
-
-                        '<div class="small-box shadow-lg l-bg-red-dark"><div class="inner">' +
-                        '<h5>ANULADOS</h5>' +
-                        '<p><h6><i class="fas fa-hospital"></i> ' + a +
-                        '</h6></p>' +
-                        '</div><div class="icon"><i class="fas fa-trash-alt"></i></div></div>'
-
-                    );
-
-                    // }) Card para los medicamentos desabastecidos
-                    var a = data.agotados;
-                    if (a == null) {
-                        a = 0;
-                    } else {
-                        a = data.agotados;
-                    }
-                    $("#detalle4").append(
-
-
-                        '<div class="small-box shadow-lg l-bg-red-dark"><div class="inner">' +
-                        '<h5>DESABASTECIDOS</h5>' +
-                        '<p><h6> ' + a +
-                        '</h6></p>' +
-                        '</div><div class="icon"><i class="fas fa-trash-alt"></i></div></div>'
-
-                    );
-
+                    const cardsData = [
+                        { id: "#detalle", title: "TOTAL PENDIENTES", value: data.pendientes || 0, icon: "fas fa-notes-medical", bgColor: "l-bg-blue-dark" },
+                        { id: "#detalle1", title: "TOTAL ENTREGADOS", value: data.entregados || 0, icon: "fas fa-briefcase-medical", bgColor: "l-bg-green-dark" },
+                        { id: "#detalle2", title: "EN TRAMITE", value: data.tramitados || 0, icon: "fas fa-comment-medical", bgColor: "l-bg-orange-dark" },
+                        { id: "#detalle3", title: "ANULADOS", value: data.anulados || 0, icon: "fas fa-hospital", bgColor: "l-bg-red-dark" },
+                        { id: "#detalle4", title: "DESABASTECIDOS", value: data.agotados || 0, icon: "fas fa-exclamation-triangle", bgColor: "l-bg-orange-dark" },
+                        { id: "#detalle5", title: "VENCIDOS", value: data.vencidos || 0, icon: "fas fa-clock", bgColor: "l-bg-gray-dark" }
+                    ];
+        
+                    cardsData.forEach(card => {
+                        $(card.id).append(createCard(card.title, card.value, card.icon, card.bgColor));
+                    });
                 }
-            })
+            });
+        }
+        
+        function createCard(title, value, icon, bgColor) {
+            return `
+                <div class="small-box shadow-lg ${bgColor}">
+                    <div class="inner">
+                        <h5>${title}</h5>
+                        <p><h5>${value}</h5></p>
+                    </div>
+                     <a class="informependientes" id="informependientesclic" href="#">
+                    <div class="icon">
+                       <i class="${icon}"></i>
+                    </div>
+                    </a>
+                </div>
+            `;
         }
 
         function mostrarOcultarCampos() {
@@ -299,9 +277,59 @@ Pendientes Medcol SOS-Jamundi
                 }
             });
         }
+        
+        
+        var fechaini;
+        var fechafin;
+        var contrato;
+        
+        // Función para llenar la tabla al cargar la página
+        fill_datatable_tabla();
+        
+        // Callback para filtrar los datos de la tabla y detalle
+        $('#buscar').click(function() {
+            fechaini = $('#fechaini').val();
+            fechafin = $('#fechafin').val();
+            contrato = $('#contrato').val();
+        
+            // Validación mejorada
+            if ((fechaini != '' && fechafin != '') || contrato != '') {
+        
+                // Destruir las DataTables antes de llenarlas nuevamente
+                $('#pendientes').DataTable().destroy();
+                $("#tdesabastecidos").DataTable().destroy();
+                $("#porentregar").DataTable().destroy();
+                $("#entregados").DataTable().destroy();
+        
+                // Llamar a la función para llenar la tabla con los filtros aplicados
+                fill_datatable_tabla(fechaini, fechafin, contrato);
+        
+            } else {
+                // Mostrar alerta si no se ingresan las fechas o el contrato
+                Swal.fire({
+                    title: 'Debes digitar fecha inicial y fecha final o la Droguería',
+                    icon: 'warning',
+                    confirmButtonText: 'Cerrar'
+                });
+            }
+        });
 
+        $('#reset').click(function() {
 
-        $(function() {
+            $('#fechaini').val('');
+            $('#fechafin').val('');
+            $('#contrato').val('');
+
+            $('#pendientes').DataTable().destroy();
+            $("#tdesabastecidos").DataTable().destroy();
+            $("#porentregar").DataTable().destroy();
+            $("#entregados").DataTable().destroy();
+            fill_datatable_tabla();
+        });
+        
+        
+        function fill_datatable_tabla(fechaini = '', fechafin = '', contrato = '') {
+            $(function() {
             // Se llama a la función correspondiente al tab activo al cargar la página
             var activeTab = $(".nav-tabs .active");
             var activeTabId = activeTab.attr("id");
@@ -329,8 +357,8 @@ Pendientes Medcol SOS-Jamundi
                             language: idioma_espanol,
                             processing: true,
                             lengthMenu: [
-                                [25, 50, 100, 500, -1],
-                                [25, 50, 100, 500, "Mostrar Todo"]
+                                [25, 50, 100, 500, 5000,10000, -1],
+                                [25, 50, 100, 500, 5000,10000, "Mostrar Todo"]
                             ],
                             processing: true,
                             serverSide: true,
@@ -340,6 +368,9 @@ Pendientes Medcol SOS-Jamundi
                             ajax: {
                                 url: "{{route('medcol6.pendientes1')}}",
                                 data: {
+                                    fechaini: fechaini,
+                                    fechafin: fechafin,
+                                    contrato: contrato,
                                     _token: "{{ csrf_token() }}"
                                 },
                                 method: 'POST'
@@ -425,6 +456,9 @@ Pendientes Medcol SOS-Jamundi
                                 },
                                 {
                                     data: 'centroproduccion'
+                                },
+                                 {
+                                    data: 'municipio'
                                 }
                             ],
 
@@ -648,6 +682,9 @@ Pendientes Medcol SOS-Jamundi
                             ajax: {
                                 url: "{{route('medcol6.entregados')}}",
                                 data: {
+                                    fechaini: fechaini,
+                                    fechafin: fechafin,
+                                    contrato: contrato,
                                     _token: "{{ csrf_token() }}"
                                 },
                                 method: 'POST'
@@ -956,6 +993,167 @@ Pendientes Medcol SOS-Jamundi
                             ajax: {
                                 url: "{{route('medcol6.anulados')}}",
                                 data: {
+                                    fechaini: fechaini,
+                                    fechafin: fechafin,
+                                    contrato: contrato,
+                                    _token: "{{ csrf_token() }}"
+                                },
+                                method: 'POST'
+                            },
+                            columns: [{
+                                    data: 'action',
+                                    orderable: false
+                                },
+                                {
+                                    data: 'id'
+                                },
+                                {
+                                    data: 'Tipodocum'
+                                },
+                                {
+                                    data: 'cantdpx'
+                                },
+                                {
+                                    data: 'cantord'
+                                },
+                                {
+                                    data: 'fecha_factura'
+                                },
+                                {
+                                    data: 'fecha'
+                                },
+                                {
+                                    data: 'historia'
+                                },
+                                {
+                                    data: 'apellido1'
+                                },
+                                {
+                                    data: 'apellido2'
+                                },
+                                {
+                                    data: 'nombre1'
+                                },
+                                {
+                                    data: 'nombre2'
+                                },
+                                {
+                                    data: 'cantedad'
+                                },
+                                {
+                                    data: 'direcres'
+                                },
+                                {
+                                    data: 'telefres'
+                                },
+                                {
+                                    data: 'documento'
+                                },
+                                {
+                                    data: 'factura'
+                                },
+                                {
+                                    data: 'codigo'
+                                },
+                                {
+                                    data: 'nombre'
+                                },
+                                {
+                                    data: 'cums'
+                                },
+                                {
+                                    data: 'cantidad'
+                                },
+                                {
+                                    data: 'cajero'
+                                },
+                                {
+                                    data: 'usuario'
+                                },
+                                {
+                                    data: 'estado'
+                                },
+                                {
+                                    data: 'fecha_anulado'
+                                },
+                                {
+                                    data: 'fecha_entrega'
+                                },
+                                {
+                                    data: 'centroproduccion'
+                                }
+                            ],
+
+                            //Botones----------------------------------------------------------------------
+
+                            "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+
+                            buttons: [{
+
+                                    extend: 'copyHtml5',
+                                    titleAttr: 'Copiar Registros',
+                                    title: "Control de horas",
+                                    className: "btn  btn-outline-primary btn-sm"
+
+
+                                },
+                                {
+
+                                    extend: 'excelHtml5',
+                                    titleAttr: 'Exportar Excel',
+                                    title: "Control de horas",
+                                    className: "btn  btn-outline-success btn-sm"
+
+
+                                },
+                                {
+
+                                    extend: 'csvHtml5',
+                                    titleAttr: 'Exportar csv',
+                                    className: "btn  btn-outline-warning btn-sm"
+
+                                },
+                                {
+
+                                    extend: 'pdfHtml5',
+                                    titleAttr: 'Exportar pdf',
+                                    className: "btn  btn-outline-secondary btn-sm"
+
+
+                                }
+                            ],
+
+                        });
+
+                } // aqui va la tabla de los vencidos 
+                else if (tabId === "custom-tabs-one-datos-vencidos-tab") {
+                    // Llamar a la función correspondiente al tab "En Tramite"
+                    /* console.log("Pagos Parciales"); */
+
+                    // Destruir la tabla existente
+                    if ($.fn.DataTable.isDataTable("#tvencidos")) {
+                        $("#tvencidos").DataTable().destroy();
+                    }
+                    // Funcion para pintar con data table la pestaña Lista de pendientes vencidos
+                    var datatable =
+                        $('#tvencidos').DataTable({
+                            language: idioma_espanol,
+                            processing: true,
+                            lengthMenu: [
+                                [25, 50, 100, 500, -1],
+                                [25, 50, 100, 500, "Mostrar Todo"]
+                            ],
+                            processing: true,
+                            serverSide: true,
+                            aaSorting: [
+                                [1, "desc"]
+                            ],
+                            ajax: {
+                                url: "{{route('medcol6.vencidos')}}",
+                                data: {
+                                    fechaini: fechaini,
+                                    fechafin: fechafin,
+                                    contrato: contrato,
                                     _token: "{{ csrf_token() }}"
                                 },
                                 method: 'POST'
@@ -1089,6 +1287,10 @@ Pendientes Medcol SOS-Jamundi
             }
 
         });
+        }
+
+
+        
 
 
         //--------------------------------Tabla relacion Observaciones y los documentos pendientes----------------------------//
@@ -1187,7 +1389,7 @@ Pendientes Medcol SOS-Jamundi
         //Función para abrir modal del detalle de la evolución y muestra las observaciones agregadas
         $(document).on('click', '.edit_pendiente', function() {
 
-            $('#form-general')[0].reset();
+            $('#form-general1').trigger('reset');
             var id = $(this).attr('id');
             var nivel_idp2 = $(this).attr('id');
 
@@ -1195,6 +1397,7 @@ Pendientes Medcol SOS-Jamundi
 
                 if ($.fn.DataTable.isDataTable('#tobservaciones')) {
                     $('#tobservaciones').DataTable().destroy();
+                    $('#tobservaciones').empty();
                 }
                 fill_datatable_f(nivel_idp2);
             }
@@ -1209,13 +1412,17 @@ Pendientes Medcol SOS-Jamundi
                     $('#Tipodocum').val(data.pendiente.Tipodocum);
                     $('#cantdpx').val(data.pendiente.cantdpx);
                     $('#cantord').val(data.pendiente.cantord);
-                    $('#fecha_factura').val(moment(data.pendiente.fecha_factura).format('YYYY-MM-DD'));
-                    $('#fecha').val(moment(data.pendiente.fecha).format('YYYY-MM-DD'));
+                    const safeDate = (dateStr) => dateStr ? moment(dateStr).format('YYYY-MM-DD') : '';
+                    $('#fecha_factura').val(safeDate(data.pendiente.fecha_factura));
+                    $('#fecha').val(safeDate(data.pendiente.fecha));
+                    //$('#fecha').val(moment(data.pendiente.fecha).format('YYYY-MM-DD'));
                     $('#historia').val(data.pendiente.historia);
                     $('#apellido1').val(data.pendiente.apellido1);
                     $('#apellido2').val(data.pendiente.apellido2);
                     $('#nombre1').val(data.pendiente.nombre1);
                     $('#nombre2').val(data.pendiente.nombre2);
+                    const nombreCompleto = `${data.pendiente.nombre1} ${data.pendiente.nombre2} ${data.pendiente.apellido1} ${data.pendiente.apellido2}`;
+                        $("#nombre_completo").val(nombreCompleto.trim().replace(/\s+/g, ' '));
                     $('#cantedad').val(data.pendiente.cantedad);
                     $('#direcres').val(data.pendiente.direcres);
                     $('#telefres').val(data.pendiente.telefres);
@@ -1232,6 +1439,31 @@ Pendientes Medcol SOS-Jamundi
                     }
 
                     $('#centroproduccion').val(data.pendiente.centroproduccion);
+                    
+                    // Mapeo de servicios a documentos de entrega
+                    var servicioDocMap = {
+                        "BIO1": "CDBI",
+                        "PAC": "CDPC",
+                        "DLR1": "CDDO",
+                        "DPA1": "CDDO",
+                        "EM01": "CDEM",
+                        "FRIO": "CDIO",
+                        "EHU1": "CDHU",
+                        "FRJA": "CDJA",
+                        "SM01": "CDSM"
+                    };
+                    
+                    // Obtener el valor del centro de producción (servicio)
+                    var servicio = data.pendiente.centroproduccion;
+                    
+                    // Actualizar el campo Doc Entrega según el servicio
+                    if (servicioDocMap.hasOwnProperty(servicio)) {
+                        $('#doc_entrega').val(servicioDocMap[servicio]);
+                    } else {
+                        $('#doc_entrega').val(''); // Si no hay coincidencia, dejar vacío o mantener un valor por defecto
+                    }
+                    
+                    
                     $('#observ').val(data.pendiente.observaciones);
                     $('#cantidad').val(data.pendiente.cantidad);
                     $('#cajero').val(data.pendiente.cajero);
@@ -1486,12 +1718,12 @@ Pendientes Medcol SOS-Jamundi
         // Función que envia el id al controlador y cambia el estado del registro
         $(document).on('click', '#syncapi', function() {
 
-            const text = 'De Medcol SOS - JAMUNDI';
+            const text = 'De Medcol Centralizado';
 
             Swal.fire({
                 title: "¿Estás por sincronizar pendientes?",
                 text: text,
-                type: "info",
+                icon: "info",
                 showCancelButton: true,
                 showCloseButton: true,
                 confirmButtonText: 'Aceptar',
@@ -1538,12 +1770,12 @@ Pendientes Medcol SOS-Jamundi
         //Funcion para sincronizar los pendientes anuladas y actualizar el estado a ANULADO
         $(document).on('click', '#synanuladospndt', function() {
 
-            const text = 'De Medcol SOS - JAMUNDI';
+            const text = 'De Medcol - Centraliazado';
 
             Swal.fire({
                 title: "¿Estás por sincronizar los pendientes anulados?",
                 text: text,
-                type: "error",
+                icon: "error",
                 showCancelButton: true,
                 showCloseButton: true,
                 confirmButtonText: 'Aceptar',
@@ -1671,6 +1903,182 @@ Pendientes Medcol SOS-Jamundi
 
             });
 
+        }
+        
+        $("#generar_informe").click(function() {
+            // Obtener valores de los campos
+            const fechaInicio = $("#modal_fechaini").val().trim();
+            const fechaFin = $("#modal_fechafin").val().trim();
+            const contrato = $("#modal_contrato").val().trim(); // Opcional
+
+            // Validar campos obligatorios
+            if (!fechaInicio || !fechaFin) {
+                mostrarError("Debe seleccionar ambas fechas (fecha inicial y fecha final)");
+                return;
+            }
+
+            // Validar que la fecha de inicio no sea mayor a la fecha fin
+            if (new Date(fechaInicio) > new Date(fechaFin)) {
+                mostrarError("La fecha de inicio no puede ser mayor a la fecha final");
+                return;
+            }
+
+            // Llamar a la función generadora del informe
+            show_report(fechaInicio, fechaFin, contrato || null);
+        });
+
+        // Función auxiliar para mostrar errores (puedes personalizarla)
+        function mostrarError(mensaje) {
+            // Opción 1: Usar SweetAlert (recomendado para mejor UX)
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de validación',
+                    text: mensaje
+                });
+            }
+            // Opción 2: Usar toast (ejemplo con Toastr)
+            else if (typeof toastr !== 'undefined') {
+                toastr.error(mensaje);
+            }
+            // Opción 3: Alert estándar (como último recurso)
+            else {
+                alert(mensaje);
+            }
+        }
+
+        function show_report(fechaInicio, fechaFin, contrato) {
+            $("#detalle_informe").empty();
+            $("#detalle_informe1").empty();
+            $("#detalle_informe2").empty();
+
+            const nombresExcluidos = ['FSAU', 'FSIO', 'FSOS', 'ENMP', 'EVSO'];
+            const servicioMap = {
+                "FRJA": "Jamundí",
+                "DOMI": "Domicilios",
+                "PAC": "PCE",
+                "EHU1": "Huérfanas",
+                "BIO1": "Biológicos",
+                "SM01": "Salud Mental",
+                "DLR1": "Dolor",
+                "EVEN": "Evento",
+                "EM01": "Emcali",
+                "FRIO": "Ideo",
+                "EVSM": "Evento SM",
+                "BPDT": "Bolsa",
+                "DPA1": "Paliativos",
+                "INY": "Inyectables"
+            };
+
+            $.ajax({
+                url: "{{ route('medcol6.getreport') }}",
+                data: {
+                    fechaini: fechaInicio,
+                    fechafin: fechaFin,
+                    contrato: contrato
+                },
+                dataType: "json",
+                success: function(data) {
+                    // Actualizar la nueva card con el total general
+                    actualizarTotalGeneral(data.total_pendientes_generados);
+
+                    $("#resultado_informe").show();
+                    const {
+                        pendiente,
+                        entregas_48h,
+                        anulado,
+                        porcentaje_entregas_48h,
+                        porcentaje_pendientes
+                    } = data;
+
+                    let htmlDispensado = "<ul>";
+                    pendiente.forEach(item => {
+                        const nombreCentroprod = servicioMap[item.centroproduccion] || item.centroproduccion;
+                        if (!nombresExcluidos.includes(nombreCentroprod)) {
+                            htmlDispensado += `<li>${nombreCentroprod}: ${item.total}</li>`;
+                        }
+                    });
+                    htmlDispensado += "</ul>";
+
+                    let htmlEntregado = "<ul>";
+                    // Primero añadimos el porcentaje general de entregas en 48h
+                    htmlEntregado += `<li>Oportunidad de entrega 48h: <strong> ${porcentaje_entregas_48h}% </strong></li>`;
+
+                    // Luego continuamos con el resto de los elementos
+                    entregas_48h.forEach(item => {
+                        const nombreCentroprod = servicioMap[item.centroproduccion] || item.centroproduccion;
+                        if (!nombresExcluidos.includes(nombreCentroprod)) {
+                            htmlEntregado += `<li>${nombreCentroprod}: ${item.total}</li>`;
+                        }
+                    });
+                    htmlEntregado += "</ul>";
+
+                    let htmlAnulado = "<ul>";
+                    anulado.forEach(item => {
+                        const nombreCentroprod = servicioMap[item.centroproduccion] || item.centroproduccion;
+                        if (!nombresExcluidos.includes(nombreCentroprod)) {
+                            htmlAnulado += `<li>${nombreCentroprod}: ${item.total}</li>`;
+                        }
+                    });
+                    htmlAnulado += "</ul>";
+
+                    $("#detalle_informe").append(`
+                        <div class="small-box shadow-lg l-bg-blue-dark">
+                            <div class="inner">
+                                <!--<h5>PENDIENTES X REVISAR</h5>-->
+                                <h5>CONTRATO</h5>
+                                <p>${htmlDispensado}</p>
+                            </div>
+                            <a class="informependientes" id="informependientesclic" href="#">
+                                <div class="icon">
+                                    <!-- <i class="fas fa-notes-medical informependientes"></i> -->
+                                </div>
+                            </a>
+                        </div>
+                    `);
+
+                    $("#detalle_informe1").append(`
+                        <div class="small-box shadow-lg l-bg-green-dark">
+                            <div class="inner">
+                                <!--<h5>REVISADAS</h5>-->
+                                <h5>CONTRATO</h5>
+                                <p>${htmlEntregado}</p>
+                            </div>
+                            <div class="icon">
+                                <!-- <i class="fas fa-briefcase-medical"></i> -->
+                            </div>
+                        </div>
+                    `);
+
+                    $("#detalle_informe2").append(`
+                        <div class="small-box shadow-lg l-bg-red-dark">
+                            <div class="inner">
+                                <!--<h5>ANULADAS</h5>-->
+                                <h5>CONTRATO</h5>
+                                <p>${htmlAnulado}</p>
+                            </div>
+                            <div class="icon">
+                                <!-- <i class="fas fa-ban"></i> -->
+                            </div>
+                        </div>
+                    `);
+                }
+            });
+        }
+
+        // Esta función se llamará cuando se reciban los datos del controlador
+        function actualizarTotalGeneral(totalPendientesEntregados) {
+            $("#detalle_informe_total").html(`
+                <div class="small-box shadow-lg" style="background: linear-gradient(to right, #7952b3, #9a77d1); color: #fff;">
+                    <div class="inner text-center">
+                        <h2 class="display-4 fw-bold">${totalPendientesEntregados}</h2>
+                        <p class="mb-0">Total de pendientes generados</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                </div>
+            `);
         }
 
     });

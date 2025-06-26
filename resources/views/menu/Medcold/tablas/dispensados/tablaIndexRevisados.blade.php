@@ -17,7 +17,6 @@
                             <th>Factura</th>
                             <th>Tipo Documento</th>
                             <th>Historia</th>
-                            <th>Autorización</th>
                             <th>CUMS</th>
                             <th>Expediente</th>
                             <th>Consecutivo</th>
@@ -41,16 +40,20 @@
                             <th>Número Entrega</th>
                             <th>Fecha Ordenamiento</th>
                             <th>Fecha Suministro</th>
-                            <th>DX</th>
+                            <th>Dx</th>
+                            <th>ips</th>
+                            <th>Autorización</th>
+                            <th>MIPRES</th>
+                            <th>Reporte Entrega NOPBS</th>
                             <th>ID Médico</th>
                             <th>Médico</th>
-                            <th>MIPRES</th>
                             <th>Precio Unitario</th>
                             <th>Valor Total</th>
-                            <th>Reporte Entrega NOPBS</th>
                             <th>Estado</th>
                             <th>Centro Producción</th>
                             <th>Droguería</th>
+                            <th>User_id</th>
+                            <th>Cajero</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>

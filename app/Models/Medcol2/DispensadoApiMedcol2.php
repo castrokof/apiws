@@ -53,7 +53,9 @@ class DispensadoApiMedcol2 extends Model
         'drogueria',
         'user_id',
         'cajero',
-        'ips'
+        'ips',
+        'documento_origen',
+        'factura_origen'
     ];
 
    /* protected $casts = [

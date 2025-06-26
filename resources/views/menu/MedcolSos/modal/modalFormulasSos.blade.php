@@ -5,7 +5,7 @@
         <span id="form_result"></span>
         <div id="card-drawel" class="card card-info">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="card-title">-Formulas Pacientes SOS</h3>
+                <h3 class="card-title">Formulas Pacientes SOS</h3>
                 <div class="ml-auto d-flex">
                     
                 </div>

@@ -19,6 +19,26 @@
     <link href="{{ asset('assets/js/gijgo-combined-1.9.13/css/gijgo.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/select2-bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/select2.min.css') }}" rel="stylesheet" type="text/css" />
+    
+    
+    <style>
+        .loader {
+            visibility: hidden;
+            background-color: rgba(255, 253, 253, 0.952);
+            position: absolute;
+            z-index: +100 !important;
+            width: 100%;
+            height: 100%;
+        }
+
+        .loader img {
+            position: relative;
+            top: 5%;
+            left: 40%;
+            width: 200px;
+            height: 200px;
+        }
+    </style>
 @endsection
 
 
@@ -138,16 +158,12 @@
 
             });
 
-
-
-
             // Función que envía los datos de listas al controlador ademas controla los input con sweat alert2
-
-          $('#subir').click(function() {
+            $('#subir').click(function() {
 
                 var formData = new FormData(document.getElementById("Form"));
 
-
+                console.log(formData);
                 $.ajax({
                     beforeSend: function() {
                         $('.loader').css("visibility", "visible");
@@ -161,18 +177,18 @@
 
                         if (response.mensaje == 'ok') {
                             $('#modal-listas').modal('hide');
-                            Manteliviano.notificaciones('Archivo cargado exitosamente',
+                            Apiws.notificaciones('Archivo cargado exitosamente',
                                 'Compras Medcol', 'success');
-                            //   $('#tarchivos').DataTable().ajax.reload();
+                              $('#tarchivos').DataTable().ajax.reload();
                         } else if (response.mensaje == 'vacio') {
 
-                            Manteliviano.notificaciones('No seleccionaste ningun arhivo',
+                            Apiws.notificaciones('No seleccionaste ningun arhivo',
                                 'Compras Medcol', 'info');
                         } else if (response.mensaje == 'ng') {
                             $('#modal-listas').modal('hide');
-                            Manteliviano.notificaciones('Registros duplicados en base de datos',
+                            Apiws.notificaciones('Registros duplicados en base de datos',
                                 'Compras Medcol', 'warning');
-                            //   $('#tarchivos').DataTable().ajax.reload();
+                               $('#tarchivos').DataTable().ajax.reload();
 
                         }
                     },
@@ -212,7 +228,7 @@
                     } else {
 
 
-                        Manteliviano.notificaciones(
+                        Apiws.notificaciones(
                             'El campo file debe ser un archivo de tipo: xls, xlsx',
                             'Compras Medcol', 'warning');
                         // $('#tarchivos').DataTable().ajax.reload();
@@ -258,7 +274,7 @@
                     success: function(data) {
 
                         $('#listasCotizaciones').DataTable().ajax.reload();
-                        Manteliviano.notificaciones(data.respuesta, data.titulo, data.icon);
+                        Apiws.notificaciones(data.respuesta, data.titulo, data.icon);
                     }
                 });
             }
@@ -267,7 +283,7 @@
             // Función para pintar Tabla detalle de listas
 
 
-            filtroDetalle();
+       
 
             function filtroDetalle(idlistp = '') {
 
@@ -284,7 +300,7 @@
                         [1, "desc"]
                     ],
                     ajax: {
-                        url: "{{ route('medcol3.indexDetalleCotizaciones') }}",
+                        url: "{{ route('medcol3.indexDetalleCotizaciones1') }}",
                         data: {
                             id: idlistp
                         }
@@ -397,7 +413,8 @@
                 $('#form-general2')[0].reset();
                 $('#list_id').val(idlist);
                 $.ajax({
-                    url: "editar-listas/" + idlist + "",
+                   url: "{{ route('indexDetalleCotizaciones3', ':idlist') }}".replace(':idlist', idlist),
+                   type:'GET',
                     dataType: "json",
                     success: function(result) {
                         $.each(result, function(i, items) {
@@ -415,7 +432,7 @@
 
                     if (jqXHR.status === 403) {
 
-                        Manteliviano.notificaciones('No tienes permisos para realizar esta accion',
+                        Apiws.notificaciones('No tienes permisos para realizar esta accion',
                             'Sistema Paliativos', 'warning');
 
                     }

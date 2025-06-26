@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Medcol6;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Jobs\DispensadoSosApiJob;
 
 use App\Models\Listas\ListasDetalle;
 use App\Models\Medcol6\DispensadoApiMedcol6;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Cache;
 use PhpParser\Node\Stmt\Return_;
 use stdClass;
+
 
 class DispensadoApiMedcol6Controller extends Controller
 {
@@ -55,29 +57,83 @@ class DispensadoApiMedcol6Controller extends Controller
             case "6":
                 $drogueria = 'BIO1';
                 break;
+             
+             case "8":
+                $drogueria = 'EM01';
+                break;    
+             case "9":
+                $drogueria = 'FSIO';
+                break;
+            case "10":
+                $drogueria = 'FSOS';
+                break;
+            case "11":
+                $drogueria = 'FSAU';
+                break;
+            case "12":
+                $drogueria = 'EVSO';
+                break; 
+            case "13":
+                $drogueria = 'FRJA';
+                break;     
+                    
         }
 
         if (Auth::user()->drogueria == '1') {
 
-            $dispensado =  DispensadoApiMedcol6::where([['estado', 'DISPENSADO'], ['fecha_suministro', '>=', '2024-09-01 00:00:00']])->count();
-            $revisado =  DispensadoApiMedcol6::where([['estado', 'REVISADO'],  ['fecha_suministro', '>=', '2024-09-01 00:00:00']])->count();
-            $anulado =  DispensadoApiMedcol6::where([['estado', 'ANULADA'],  ['fecha_suministro', '>=', '2024-09-01 00:00:00']])->count();
+           // Agrupar y contar por estado y centroprod
+            $dispensado = DispensadoApiMedcol6::select('centroprod', DB::raw('count(*) as total'))
+                ->where('estado', 'DISPENSADO')
+                ->where('fecha_suministro', '>=', '2024-09-01 00:00:00')
+                ->whereNotIn('codigo', ['1010', '1011', '1012'])
+                ->groupBy('centroprod')
+                ->get();
+            
+            $revisado = DispensadoApiMedcol6::select('centroprod', DB::raw('count(*) as total'))
+                ->where('estado', 'REVISADO')
+                ->where('fecha_suministro', '>=', '2024-09-01 00:00:00')
+                ->whereNotIn('codigo', ['1010', '1011', '1012'])
+                ->groupBy('centroprod')
+                ->get();
+            
+            $anulado = DispensadoApiMedcol6::select('centroprod', DB::raw('count(*) as total'))
+                ->where('estado', 'ANULADA')
+                ->where('fecha_suministro', '>=', '2024-09-01 00:00:00')
+                ->whereNotIn('codigo', ['1010', '1011', '1012'])
+                ->groupBy('centroprod')
+                ->get();
+    
         } else {
 
-            $dispensado =  DispensadoApiMedcol6::where([['estado', 'DISPENSADO'], ['centroprod', $drogueria],  ['fecha_suministro', '>=', '2024-09-01 00:00:00']])->count();
-            $revisado =  DispensadoApiMedcol6::where([['estado', 'REVISADO'], ['centroprod', $drogueria],  ['fecha_suministro', '>=', '2024-09-01 00:00:00']])->count();
-            $anulado =  DispensadoApiMedcol6::where([['estado', 'ANULADA'], ['centroprod', $drogueria],  ['fecha_suministro', '>=', '2024-09-01 00:00:00']])->count();
-        }
+             $dispensado = DispensadoApiMedcol6::select('centroprod', DB::raw('count(*) as total'))
+                ->where('estado', 'DISPENSADO')
+                ->where('centroprod', $drogueria)
+                ->where('fecha_suministro', '>=', '2024-09-01 00:00:00')
+                ->whereNotIn('codigo', ['1010', '1011', '1012'])
+                ->groupBy('centroprod')
+                ->get();
+            
+            $revisado = DispensadoApiMedcol6::select('centroprod', DB::raw('count(*) as total'))
+                ->where('estado', 'REVISADO')
+                ->where('centroprod', $drogueria)
+                ->where('fecha_suministro', '>=', '2024-09-01 00:00:00')
+                ->whereNotIn('codigo', ['1010', '1011', '1012'])
+                ->groupBy('centroprod')
+                ->get();
+            
+            $anulado = DispensadoApiMedcol6::select('centroprod', DB::raw('count(*) as total'))
+                ->where('estado', 'ANULADA')
+                ->where('centroprod', $drogueria)
+                ->where('fecha_suministro', '>=', '2024-09-01 00:00:00')
+                ->whereNotIn('codigo', ['1010', '1011', '1012'])
+                ->groupBy('centroprod')
+                ->get();
+                }
 
 
 
         return response()->json(['dispensado' => $dispensado, 'revisado' => $revisado, 'anulado' => $anulado]);
     }
-
-
-
-
-
 
     public function index(Request $request)
     {
@@ -85,131 +141,103 @@ class DispensadoApiMedcol6Controller extends Controller
         return view('menu.Medcol6.indexDispensado');
     }
 
+    
+    /**
+     * Método index1 para obtener y filtrar datos de dispensación de medicamentos.
+     * 
+     * 🔹 **Mejoras y lógica aplicada:**
+     * - **Fechas (`fechaini`, `fechafin`) son obligatorias.** Si no se envían, se usa el día actual.
+     * - **`contrato` y `cobertura` son opcionales**, y pueden combinarse de cualquier manera:
+     *   - Se puede filtrar por (`fechaini`, `fechafin`) únicamente.
+     *   - Se puede agregar `contrato` con (`fechaini`, `fechafin`).
+     *   - Se puede agregar `cobertura` con (`fechaini`, `fechafin`).
+     *   - Se pueden incluir `contrato` y `cobertura` juntos.
+     * - **Optimización del código**:
+     *   - Uso de `Carbon::parse()->startOfDay()` y `endOfDay()` para gestionar rangos de fechas.
+     *   - Se mejora la lógica de filtros para evitar verificaciones innecesarias.
+     *   - Se aplica la condición `where` de manera más estructurada.
+     * - **Mejora en la consulta:** Se filtran datos por `estado` y códigos específicos de manera más eficiente.
+     * 
+     * @param  Request $request  Datos enviados desde la vista.
+     * @return \Illuminate\Http\JsonResponse|Illuminate\View\View
+     */
     public function index1(Request $request)
     {
-        $fechaAi = now()->toDateString() . " 00:00:00";
-        $fechaAf = now()->toDateString() . " 23:59:59";
-
+        $fechaAi = now()->startOfDay()->toDateTimeString();
+        $fechaAf = now()->endOfDay()->toDateTimeString();
+    
         $droguerias = [
             '' => 'Todas',
             '2' => 'SALUD',
             '3' => 'DOLOR',
             '4' => 'PAC',
             '5' => 'EHU1',
-            '6' => 'BIO1'
+            '6' => 'BIO1',
+            '8' => 'EM01',
+            '9' => 'FSIO',
+            '10' => 'FSOS',
+            '11' => 'FSAU',
+            '12' => 'EVSO',
+            '13' => 'FRJA'
         ];
-
+    
         $drogueria = $droguerias[Auth::user()->drogueria] ?? '';
-
+    
         if ($request->ajax()) {
-
-            $dispensado_api_medcol6 = DispensadoApiMedcol6::query();
-
-
-            if (!empty($drogueria)) {
-
-                if ($drogueria == 'PAC')
-                    $dispensado_api_medcol6->whereIn('centroprod', ['PAC', 'EVEN']);
-                else
-                    $dispensado_api_medcol6->where('centroprod', $drogueria);
+            $query = DispensadoApiMedcol6::query();
+    
+            // Filtro por droguería
+            if ($drogueria) {
+                if ($drogueria === 'PAC') {
+                    $query->whereIn('centroprod', ['FRJA', 'EVEN', 'PAC', 'EM01', 'EHU1', 'FRIO']);
+                } elseif ($drogueria !== 'Todas') {
+                    $query->where('centroprod', $drogueria);
+                }
             }
-
-            if (!empty($request->fechaini) && !empty($request->fechafin) && $request->contrato != '') {
-                $fechaini = new Carbon($request->fechaini);
-                $fechaini = $fechaini->toDateString();
-
-                $fechafin = new Carbon($request->fechafin);
-                $fechafin = $fechafin->toDateString();
-                $contrato = $request->contrato;
-
-                $Resultados1 = $dispensado_api_medcol6->where('centroprod', $contrato)
-                    ->whereBetween('fecha_suministro', [$fechaini . ' 00:00:00', $fechafin . ' 23:59:59']);
-            } elseif (empty($request->fechaini) && empty($request->fechafin) && $request->contrato == '') {
-
-                $dispensado_api_medcol6->whereBetween('fecha_suministro', [$fechaAi, $fechaAf]);
+    
+            // Validar que fechaini y fechafin sean obligatorios
+            if (!empty($request->fechaini) && !empty($request->fechafin)) {
+                $fechaIni = Carbon::parse($request->fechaini)->startOfDay()->toDateTimeString();
+                $fechaFin = Carbon::parse($request->fechafin)->endOfDay()->toDateTimeString();
+                $query->whereBetween('fecha_suministro', [$fechaIni, $fechaFin]);
+    
+                // Aplicar contrato si está presente
+                
+               
+                if (!empty($request->contrato)) {
+                    
+                    $query->whereIn('centroprod', $request->contrato);
+                
+                    }
+    
+                // Aplicar cobertura si está presente
+                if (!empty($request->cobertura)) {
+                    $query->where('tipo_medicamento', $request->cobertura);
+                }
+            } else {
+                // Si no se pasan fechas, usar el rango del día actual
+                $query->whereBetween('fecha_suministro', [$fechaAi, $fechaAf]);
             }
-
-            // Agregar una subconsulta para calcular la suma de la cuota moderadora
-            $dispensado_api_medcol6->selectRaw('*, 
-                    (CASE 
-                        WHEN ROW_NUMBER() OVER(PARTITION BY factura ORDER BY id) = 1 
-                            THEN (SELECT SUM(cuota_moderadora) FROM dispensado_medcol6 AS d2 WHERE d2.factura = dispensado_medcol6.factura) 
-                        ELSE 0 
-                    END) AS cuota_moderadora_sumada');
-
-
-            $dispensado_api_medcol6->where('estado', 'DISPENSADO')->orWhereNull('estado');
-
-            $resultados = $dispensado_api_medcol6->orderBy('fecha_suministro')->get();
-
-
+    
+            // Aplicar filtros de estado y códigos
+            $query->where(function ($q) {
+                $q->where('estado', 'DISPENSADO')
+                    ->whereNotIn('codigo', ['1010', '1011', '1012'])
+                    ->orWhereNull('estado');
+            });
+    
+            // Obtener resultados ordenados
+            $resultados = $query->orderBy('fecha_suministro')->get();
+    
             return DataTables()->of($resultados)
-                ->addColumn('action', function ($pendiente) {
-                    return '<input class="add_medicamento checkbox-large case tooltipsC" type="checkbox" title="Selecciona Orden" id="' . $pendiente->id . '" value="' . $pendiente->id . '">';
-                })
-                ->addColumn('fecha_orden', function ($pendiente) {
-                    return '<input type="date" name="date_orden" id="' . $pendiente->id . '"
-                            class="show_detail btn btn-xl bg-secondary tooltipsC" title="Fecha">';
-                })
-                ->addColumn('numero_entrega1', function ($pendiente) {
-                    return '<input type="text" name="entrega" id="' . $pendiente->id . '"
-                            class="show_detail btn btn-xl bg-secondary tooltipsC" title="entrega">';
-                })
-                ->addColumn('diagnostico', function ($pendiente) {
-                    return '<select name="dx" id="' . $pendiente->id . '"
-                            class="diagnos form-control select2bs4" style="width: 100%;" required></select>';
-                })
-
-                ->addColumn('autorizacion1', function ($pendiente) {
-                    return '<input type="text" name="autorizacion" id="' . $pendiente->id . '"
-                            class="show_detail btn btn-xl bg-warning tooltipsC"  title="autorizacion"
-                            value="' . $pendiente->autorizacion . '">';
-                })
-                ->addColumn('mipres1', function ($pendiente) {
-                    return '<input type="text" name="mipres" id="' . $pendiente->id . '"
-                            class="show_detail btn btn-xl bg-warning tooltipsC" title="mipres">';
-                })
-                ->addColumn('reporte_entrega1', function ($pendiente) {
-                    return '<input type="text" name="reporte" id="' . $pendiente->id . '"
-                            class="show_detail btn btn-xl bg-info tooltipsC" title="Reporte de entrega">';
-                })
-                ->addColumn('id_medico1', function ($pendiente) {
-                    return '<input type="text" name="id_medico1" id="' . $pendiente->id . '"
-                            class="show_detail btn btn-xl bg-info tooltipsC" title="Id medico"
-                            value="' . $pendiente->id_medico . '">';
-                })
-                ->addColumn('medico1', function ($pendiente) {
-                    return '<input type="text" name="medico1" id="' . $pendiente->id . '"
-                            class="show_detail btn btn-xl bg-info tooltipsC" title="Medico"
-                            value="' . $pendiente->medico . '">';
-                })
-                ->addColumn('copago1', function ($pendiente) {
-                    return '<input type="text" name="medico1" id="' . $pendiente->id . '"
-                        class="show_detail btn btn-xl bg-info tooltipsC" title="Copago"
-                        value="' . $pendiente->cuota_moderadora_sumada . '">';
-                })
-                ->addColumn('ips', function ($pendiente) {
-                    return '<select name="ips" id="' . $pendiente->id . '"
-                            class="ipsss form-control select2bs4" style="width: 100%;" required></select>';
-                })
-                ->rawColumns([
-                    'action',
-                    'fecha_orden',
-                    'numero_entrega1',
-                    'diagnostico',
-                    'autorizacion1',
-                    'mipres1',
-                    'reporte_entrega1',
-                    'id_medico1',
-                    'medico1',
-                    'copago1',
-                    'ips'
-                ])
+                ->addColumn('copago1', fn($pendiente) => $pendiente->cuota_moderadora_sumada)
+                ->rawColumns(['copago1'])
                 ->make(true);
         }
-
+        
         return view('menu.Medcol6.indexDispensado', ['droguerias' => $droguerias]);
     }
+
 
 
 
@@ -220,53 +248,104 @@ class DispensadoApiMedcol6Controller extends Controller
      */
     public function createdispensadoapi(Request $request)
     {
+    
+    
+    // Obtener la fecha límite de los últimos 7 días
+    $fechaLimite = Carbon::now()->startOfWeek()->subDays(8)->startOfDay();
+    
+  
+    
         $email = 'castrokofdev@gmail.com'; // Auth::user()->email
         $password = 'colMed2023**';
         $usuario = Auth::user()->email;
+        
+          set_time_limit(0);
+          ini_set('memory_limit', '512M');
 
 
         try {
 
 
-            $response = Http::post("http://hcp080m81s7.sn.mynetname.net:8001/api/acceso", [
+            $response = Http::post("http://hed08pf9dxt.sn.mynetname.net:8004/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
             ]);
 
             $token = $response->json()["token"];
 
+            
+
             if ($token) {
 
 
                 try {
 
-                    $response = Http::post("http://hcp080m81s7.sn.mynetname.net:8001/api/acceso", [
-                        'email' =>  $email,
-                        'password' => $password,
-                    ]);
+               
 
-                    //$prueba = $response->json();
-                    $token = $response->json()["token"];
+                 
+            $responsefacturas = Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/dispensadoapi");
+            
+           
+            
+            $facturassapi = $responsefacturas->json()['data'];
+    
+            $contadorei = 0;
+            $contador = 0;
+            
+           
+            // Obtener las facturas existentes en un solo query
+            
+             // Crear las claves únicas de cada entrada en $facturassapi
+                $clavesFacturasApi = array_map(function ($f) {
+                    return trim($f['factura']) . '-' . trim($f['codigo']) . '-' . trim($f['ID_REGISTRO']);
+                }, $facturassapi);
+            
+                $facturasExistentes = collect();
+            
+                // Consultar la base de datos en chunks para evitar demasiados placeholders
+                foreach (array_chunk($facturassapi, 500) as $chunk) {
+                    $facturas = array_map(fn($f) => trim($f['factura']), $chunk);
+                    $codigos = array_map(fn($f) => trim($f['codigo']), $chunk);
+                    $ids = array_map(fn($f) => trim($f['ID_REGISTRO']), $chunk);
+            
+                    $resultados = DispensadoApiMedcol6::select('factura', 'codigo', 'ID_REGISTRO')
+                        ->whereIn('factura', $facturas)
+                        ->whereIn('codigo', $codigos)
+                        ->whereIn('ID_REGISTRO', $ids)
+                        ->where('fecha_suministro', '>=', $fechaLimite)
+                        ->get();
+            
+                    $facturasExistentes = $facturasExistentes->merge($resultados);
+                }
+            
+                // Crear claves únicas de los existentes en base de datos
+                $facturasExistentesFlip = array_flip(
+                    $facturasExistentes->map(function ($item) {
+                        return trim($item->factura) . '-' . trim($item->codigo) . '-' . trim($item->ID_REGISTRO);
+                    })->toArray()
+                );
+            
+                $dispensados = [];
+             
+               foreach ($facturassapi as $factura) {
+                
+                // Verificar si la factura ya existe en el array obtenido antes
+                $clave = trim($factura['factura']) . '-' . trim($factura['codigo']) . '-' . trim($factura['ID_REGISTRO']);
+               
+               
+                
+                 if (isset($facturasExistentesFlip[$clave])) {
+                        // Registrar en el log como "NO" (porque ya existe)
+                        Log::info("{$clave} => NO (ya existe)");
+                        continue;
+                    }
+                
+                    // Registrar en el log como "SI" (porque se va a insertar)
+                    Log::info("{$clave} => SI (se inserta)");
+                
+                
 
-
-                    $responsefacturas = Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/dispensadoapi");
-
-                    $facturassapi = $responsefacturas->json()['data'];
-
-                    $contadorei = 0;
-                    $contador = 0;
-
-                    foreach ($facturassapi as $factura) {
-
-                        // Verificar si la factura ya existe en la base de datos
-
-
-                        $existe = DispensadoApiMedcol6::where([['factura', $factura['factura']], ['codigo', $factura['codigo']]])->exists();
-
-                        $dispensados = [];
-
-                        if (!$existe) {
-                            $dispensados[] = [
+               $dispensados[] = [
                                 'idusuario'  => trim($factura['idusuario']),
                                 'tipo'  => trim($factura['tipo']),
                                 'facturad'  => trim($factura['facturad']),
@@ -285,6 +364,7 @@ class DispensadoApiMedcol6Controller extends Controller
                                 'forma'  => trim($factura['forma']),
                                 'concentracion'  => trim($factura['concentracion']),
                                 'unidad_medicamento'  => trim($factura['unidad_medicamento']),
+                                'cantidad_ordenada'  => trim($factura['cantidad_ordenada']),
                                 'numero_unidades'  => trim($factura['numero_unidades']),
                                 'regimen'  => trim($factura['regimen']),
                                 'paciente'  => trim($factura['paciente']),
@@ -309,29 +389,51 @@ class DispensadoApiMedcol6Controller extends Controller
                                 'drogueria'  => trim($factura['drogueria']),
                                 'cajero'  => trim($factura['cajero']),
                                 'documento_origen'  => trim($factura['documento_origen']),
-                                'factura_origen'  => trim($factura['factura_origen'])
-                            ];
-
-                            if (!empty($dispensados)) {
-                                DispensadoApiMedcol6::insert($dispensados);
-                            }
-
-                            $contador++;
-                        }
+                                'factura_origen'  => trim($factura['factura_origen']),
+                                'ciudad'  => trim($factura['ciudad']),
+                                'via'  => trim($factura['via']),
+                                'ambito'  => trim($factura['ambito']),
+                                'tipoidmedico'  => trim($factura['tipoidmedico']),
+                                'especialidadmedico'  => trim($factura['especialidadmedico']),
+                                'numeroIdentificacion'  => trim($factura['numeroIdentificacion']),
+                                'tipocontrato'  => trim($factura['tipocontrato']),
+                                'cod_dispen_transacc'  => trim($factura['cod_dispen_transacc']),
+                                'cobertura'  => trim($factura['cobertura']),
+                                'cod_dispensario_sos'  => trim($factura['cod_dispensario_sos']),
+                                'tipoentrega'  => trim($factura['tipoentrega']),
+                                'ID_REGISTRO'  => trim($factura['ID_REGISTRO']),
+                                'created_at'  => now()
+                    ];
+                    
+                    $contador++;
+                    
+               }
+               
+              
+                    
+                if (!empty($dispensados)) {
+                    $chunks = array_chunk($dispensados, 500); // Divide en lotes de 500 registros
+                    
+                    
+                    foreach ($chunks as $chunk) {
+                        DispensadoApiMedcol6::insertOrIgnore($chunk);
                     }
+                }
 
 
-                    Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/closeallacceso");
+                    
+                    Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/closeallacceso");
 
-                    Log::info('Desde la web syncapi centralizado' . $contador . ' Lineas dispensadas' . ' Usuario: ' . $usuario);
+                    Log::info('Desde la web syncapi centralizado ' . $contador . ' Lineas dispensadas' . ' Usuario: ' . $usuario);
 
                     return response()->json([
                         ['respuesta' => $contador . ' Lineas creadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']
                     ]);
+                    
                 } catch (\Exception $e) {
 
                     // Manejo de la excepción
-                    Log::error($e->getMessage()); // Registrar el error en los logs de Laravel
+                    Log::error('Error en la sincronización SERVER IP FIJA: '.$e->getMessage()); // Registrar el error en los logs de Laravel
 
                     return response()->json([
                         ['respuesta' => 'Error: ' . $e->getMessage(), 'titulo' => 'Error', 'icon' => 'error', 'position' => 'bottom-left']
@@ -345,7 +447,7 @@ class DispensadoApiMedcol6Controller extends Controller
             try {
 
 
-                $response = Http::post("http://192.168.10.27:8001/api/acceso", [
+                $response = Http::post("http://192.168.66.95:8004/api/acceso", [
                     'email' =>  $email,
                     'password' => $password,
                 ]);
@@ -357,14 +459,9 @@ class DispensadoApiMedcol6Controller extends Controller
                     try {
 
 
-                        $response = Http::post("http://192.168.10.27:8001/api/acceso", [
-                            'email' =>  $email,
-                            'password' => $password,
-                        ]);
+                       
 
-                        $token = $response->json()["token"];
-
-                        $responsefacturas = Http::withToken($token)->get("http://192.168.10.27:8001/api/dispensadoapi");
+                        $responsefacturas = Http::withToken($token)->get("http://192.168.66.91:8004/api/dispensadoapi");
 
                         $facturassapi = $responsefacturas->json()['data'];
 
@@ -399,6 +496,7 @@ class DispensadoApiMedcol6Controller extends Controller
                                     'forma'  => trim($factura['forma']),
                                     'concentracion'  => trim($factura['concentracion']),
                                     'unidad_medicamento'  => trim($factura['unidad_medicamento']),
+                                    'cantidad_ordenada'  => trim($factura['cantidad_ordenada']),
                                     'numero_unidades'  => trim($factura['numero_unidades']),
                                     'regimen'  => trim($factura['regimen']),
                                     'paciente'  => trim($factura['paciente']),
@@ -414,6 +512,7 @@ class DispensadoApiMedcol6Controller extends Controller
                                     'dx'  => trim($factura['dx']),
                                     'id_medico'  => trim($factura['id_medico']),
                                     'medico'  => trim($factura['medico']),
+                                    'numeroIdentificacion'  => trim($factura['numeroIdentificacion']),
                                     'mipres'  => trim($factura['mipres']),
                                     'precio_unitario'  => trim($factura['precio_unitario']),
                                     'valor_total'  => trim($factura['valor_total']),
@@ -423,7 +522,19 @@ class DispensadoApiMedcol6Controller extends Controller
                                     'drogueria'  => trim($factura['drogueria']),
                                     'cajero'  => trim($factura['cajero']),
                                     'documento_origen'  => trim($factura['documento_origen']),
-                                    'factura_origen'  => trim($factura['factura_origen'])
+                                    'factura_origen'  => trim($factura['factura_origen']),
+                                    'ciudad'  => trim($factura['ciudad']),
+                                    'via'  => trim($factura['via']),
+                                    'ambito'  => trim($factura['ambito']),
+                                    'tipoidmedico'  => trim($factura['tipoidmedico']),
+                                    'especialidadmedico'  => trim($factura['especialidadmedico']),
+                                    'tipocontrato'  => trim($factura['tipocontrato']),
+                                    'cod_dispen_transacc'  => trim($factura['cod_dispen_transacc']),
+                                    'cobertura'  => trim($factura['cobertura']),
+                                    'cod_dispensario_sos'  => trim($factura['cod_dispensario_sos']),
+                                    'tipoentrega'  => trim($factura['tipoentrega']),
+                                    'ID_REGISTRO'  => trim($factura['ID_REGISTRO']),
+                                    'created_at'  => now()
 
                                 ];
 
@@ -435,7 +546,7 @@ class DispensadoApiMedcol6Controller extends Controller
                             }
                         }
 
-                        Http::withToken($token)->get("http://192.168.10.27/api/closeallacceso");
+                        Http::withToken($token)->get("http://192.168.66.91:8004/api/closeallacceso");
 
 
                         Log::info('Desde la web syncapi centralizado local' . $contador . ' Lineas dispensadas' . ' Usuario: ' . $usuario);
@@ -445,9 +556,7 @@ class DispensadoApiMedcol6Controller extends Controller
                         ]);
 
 
-                        /*return response()->json([
-                ['respuesta' => 'Error: ' . $e->getMessage(), 'titulo' => 'Error', 'icon' => 'error', 'position' => 'bottom-left']
-            ]);*/
+            
                     } catch (\Exception $e) {
 
                         // Manejo de la excepción
@@ -478,81 +587,181 @@ class DispensadoApiMedcol6Controller extends Controller
      */
     public function disrevisado(Request $request)
     {
-        $fechaAi = now()->toDateString() . " 00:00:00";
-        $fechaAf = now()->toDateString() . " 23:59:59";
+        // Validar parámetros de DataTables
+        $request->validate([
+            'draw' => 'required|integer',
+            'start' => 'integer',
+            'length' => 'integer',
+            //'fechaini' => 'nullable|date',
+            //'fechafin' => 'nullable|date|after_or_equal:fechaini',
+            //'contrato' => 'nullable|string',
+            //'cobertura' => 'nullable|string'
+        ]);
+        
+        $fechaAi = now()->startOfDay()->toDateTimeString();
+        $fechaAf = now()->endOfDay()->toDateTimeString();
+        
+    
+        $droguerias = [
+            '' => 'Todas',
+            '2' => 'SALUD',
+            '3' => 'DOLOR',
+            '4' => 'PAC',
+            '5' => 'EHU1',
+            '6' => 'BIO1',
+            '8' => 'EM01',
+            '9' => 'FSIO',
+            '10' => 'FSOS',
+            '11' => 'FSAU',
+            '12' => 'EVSO',
+            '13' => 'FRJA'
+        ];
+    
+        $drogueria = $droguerias[Auth::user()->drogueria] ?? '';
 
-        $i = Auth::user()->drogueria;
-
-        switch ($i) {
-            case "1":
-                $drogueria = '';
-                break;
-            case "2":
-                $drogueria = 'SALUD';
-                break;
-            case "3":
-                $drogueria = 'DOLOR';
-                break;
-            case "4":
-                $drogueria = 'PAC';
-                break;
-            case "5":
-                $drogueria = 'EHU1';
-                break;
-            case "6":
-                $drogueria = 'BIO1';
-                break;
-        }
-
-        if ($request->ajax()) {
-            $query = DispensadoApiMedcol6::whereIn('estado', ['REVISADO', null])
-                ->orderBy('id');
-
-            if (Auth::user()->drogueria != '1') {
+        $query = DispensadoApiMedcol6::query();
+    
+        // Aplicar filtro de droguería
+        if ($drogueria) {
+            if ($drogueria === 'PAC') {
+                $query->whereIn('centroprod', ['FRJA', 'EVEN', 'PAC', 'EM01', 'EHU1', 'BPDT']);
+            } elseif ($drogueria !== 'Todas') {
                 $query->where('centroprod', $drogueria);
             }
+        }
+    
+        // Validar que fechaini y fechafin sean obligatorios
+            if (!empty($request->fechaini) && !empty($request->fechafin)) {
+                $fechaIni = Carbon::parse($request->fechaini)->startOfDay()->toDateTimeString();
+                $fechaFin = Carbon::parse($request->fechafin)->endOfDay()->toDateTimeString();
+                $query->whereBetween('fecha_suministro', [$fechaIni, $fechaFin]);
 
-            if (!empty($request->fechaini) && !empty($request->fechafin) && $request->contrato != '') {
-                $fechaini = Carbon::parse($request->fechaini);
-                $fechafin = Carbon::parse($request->fechafin)->endOfDay();
-                $contrato = $request->contrato;
+                // Aplicar contrato si está presente
+                if (!empty($request->contrato)) {
+                    $query->whereIn('centroprod', $request->contrato);
+                }
 
-                $query->where('centroprod', $contrato)
-                    ->whereBetween('fecha_suministro', [$fechaini . ' 00:00:00', $fechafin . ' 23:59:59']);
-            } elseif (empty($request->fechaini) && empty($request->fechafin) && $request->contrato == '') {
+                // Aplicar cobertura si está presente
+                if (!empty($request->cobertura)) {
+                    $query->where('tipo_medicamento', $request->cobertura);
+                }
+            } else {
+                // Si no se pasan fechas, usar el rango del día actual
                 $query->whereBetween('fecha_suministro', [$fechaAi, $fechaAf]);
             }
-
-            $resultados = $query->get()->map(function ($item) {
-                $ipsId = $item->ips;
-                $lista = ListasDetalle::where('id', $ipsId)->first();
-                $item->ips_nombre = $lista ? $lista->nombre : '';
-                return $item;
+            
+            // Aplicar filtro de estado y códigos
+            $query->where(function ($q) {
+                $q->where('estado', 'REVISADO')
+                  ->whereNotIn('codigo', ['1010', '1011', '1012']);
+            })->orWhere(function ($q) {
+                $q->whereNull('estado');
             });
-
-            return DataTables()->of($resultados)
-                ->addColumn('action', function ($pendiente) {
-                    $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
-                        " class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle"  >
-                        <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i> </button>';
-                    $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '
-                        " class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar"  >
-                        <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i> </button>';
-
-                    return $button . ' ' . $button2;
-                })
-                ->addColumn('fecha Orden', function ($pendiente) {
-                    $inputdate = '<input type="date" name="date_orden" id="' . $pendiente->id . '
-                        " class="show_detail btn btn-app bg-secondary tooltipsC" title="Fecha">';
-
-                    return $inputdate;
-                })
-                ->rawColumns(['action', 'fecha Orden'])
-                ->make(true);
-        }
-
-        return view('menu.Medcol6.indexDispensado', ['droguerias' => $drogueria]);
+    
+        // Obtener total de registros sin filtrar
+        $totalRecords = DispensadoApiMedcol6::count();
+    
+        // Obtener total filtrado
+        $filteredRecords = $query->count();
+    
+        // Paginación y obtención de datos
+        $data = $query->skip($request->start)
+                     ->take($request->length)
+                     ->get();
+    
+        // Obtener información de ListasDetalle
+        $ipsIds = $data->pluck('ips')->filter()->unique();
+        $listas = ListasDetalle::whereIn('id', $ipsIds)->get()->keyBy('id');
+    
+        // Formatear datos
+        $formattedData = $data->map(function ($item) use ($listas) {
+            $lista = $listas[$item->ips] ?? null;
+            
+            return [
+                // Tus campos de datos aquí
+                'id' => $item->id,
+                'idusuario' => $item->idusuario,
+                'tipo' => $item->tipo,
+                'facturad' => $item->facturad ?? '',
+                'factura' => $item->factura ?? '',
+                'tipodocument' => $item->tipodocument ?? '',
+                'historia' => $item->historia ?? '',
+                'cums' => $item->cums ?? '',
+                'expediente' => $item->expediente ?? '',
+                'consecutivo' => $item->consecutivo ?? '',
+                'cums_rips' => $item->cums_rips ?? '',
+                'codigo' => $item->codigo ?? '',
+                'tipo_medicamento' => $item->tipo_medicamento ?? '',
+                'nombre_generico' => $item->nombre_generico ?? '',
+                'atc' => $item->atc ?? '',
+                'forma' => $item->forma ?? '',
+                'concentracion' => $item->concentracion ?? '',
+                'unidad_medicamento' => $item->unidad_medicamento ?? '',
+                'numero_unidades' => $item->numero_unidades ?? '',
+                'regimen' => $item->regimen ?? '',
+                'paciente' => $item->paciente ?? '',
+                'primer_apellido' => $item->primer_apellido ?? '',
+                'segundo_apellido' => $item->segundo_apellido ?? '',
+                'primer_nombre' => $item->primer_nombre ?? '',
+                'segundo_nombre' => $item->segundo_nombre ?? '',
+                'cuota_moderadora' => $item->cuota_moderadora ?? '',
+                'copago' => $item->copago ?? '',
+                'numero_orden' => $item->numero_orden ?? '',
+                'numero_entrega' => $item->numero_entrega ?? '',
+                'num_total_entregas' => $item->num_total_entregas ?? '',
+                'fecha_ordenamiento' => $item->fecha_ordenamiento ?? '',
+                'fecha_suministro' => $item->fecha_suministro ?? '',
+                'dx' => $item->dx ?? '',
+                // ... otros campos ...
+                'nitips' => $lista->slug ?? '',
+                'ips_nombre' => $lista->nombre ?? '',
+                
+                'autorizacion' => $item->autorizacion ?? '',
+                'mipres' => $item->mipres ?? '',
+                'reporte_entrega_nopbs' => $item->reporte_entrega_nopbs ?? '',
+                'id_medico' => $item->id_medico ?? '',
+                'numeroIdentificacion' => $item->numeroIdentificacion ?? '',
+                'medico' => $item->medico ?? '',
+                'especialidadmedico' => $item->especialidadmedico ?? '',
+                'precio_unitario' => $item->precio_unitario ?? '',
+                'valor_total' => $item->valor_total ?? '',
+                'estado' => $item->estado ?? '',
+                'centroprod' => $item->centroprod ?? '',
+                'drogueria' => $item->drogueria ?? '',
+                'cajero' => $item->cajero ?? '',
+                'user_id' => $item->user_id ?? '',
+                'nitips' => $lista->slug ?? '',
+                'frecuencia' => $item->frecuencia ?? '',
+                'dosis' => $item->dosis ?? '',
+                'duracion_tratamiento' => $item->duracion_tratamiento ?? '',
+                'cobertura' => $item->cobertura ?? '',
+                'tipocontrato' => $item->tipocontrato ?? '',
+                'tipoentrega' => $item->tipoentrega ?? '',
+                'plan' => $item->plan ?? '',
+                'via' => $item->via ?? '',
+                'ciudad' => $item->ciudad ?? '',
+                
+                'action' => '
+                    <button type="button" name="show_detail" id="'.$item->id.'" 
+                        class="show_detail btn btn-sm btn-secondary tooltipsC" title="Detalle">
+                        <i class="fas fa-prescription-bottle-alt"></i> Detalle
+                    </button>
+                    <button type="button" name="edit_dispensado" id="'.$item->id.'" 
+                        class="edit_dispensado btn btn-sm btn-info tooltipsC" title="Editar">
+                        <i class="fas fa-pencil-alt"></i> Editar
+                    </button>
+                '
+            ];
+        });
+    
+        return response()->json([
+            'draw' => $request->draw,
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $formattedData
+        ]);
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -588,6 +797,7 @@ class DispensadoApiMedcol6Controller extends Controller
                     ]
                 ], 422);
             }
+            
 
             DispensadoApiMedcol6::where('id', $add['ID'])
                 ->update(
@@ -622,7 +832,7 @@ class DispensadoApiMedcol6Controller extends Controller
         $usuario = Auth::user()->email;
 
         try {
-            $response = Http::post("http://hcp080m81s7.sn.mynetname.net:8001/api/acceso", [
+            $response = Http::post("http://hed08pf9dxt.sn.mynetname.net:8004/api/acceso", [
                 'email' => $email,
                 'password' => $password,
             ]);
@@ -631,38 +841,52 @@ class DispensadoApiMedcol6Controller extends Controller
 
             if ($token) {
                 try {
-                    $responsefacturas = Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/anuladosapi");
-                    $facturassapi = $responsefacturas->json()['data'] ?? [];
+                    $responsefacturas = Http::withToken($token)->get("hed08pf9dxt.sn.mynetname.net:8004/api/anuladosapi");
+                    //$facturassapi = $responsefacturas->json()['data'] ?? [];
+                    $facturas = $responsefacturas->json()['facturas'] ?? [];
+                    $facturasElectronicas = $responsefacturas->json()['facturas_electronicas'] ?? [];
 
                     $contadorActualizados = 0;
 
-                    //dd($facturassapi);
+                    //dd($facturas);
 
-                    foreach ($facturassapi as $factura) {
-                        if (isset($factura['factura'])) {
+                    // Procesar facturas
+                    foreach ($facturas as $factura) {
+                        if (!empty($factura['factura'])) {
                             $actualizados = DispensadoApiMedcol6::where('factura', $factura['factura'])
                                 ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
                                 ->update([
                                     'estado' => 'ANULADA',
                                     'updated_at' => now()
                                 ]);
-                        } elseif (isset($factura['factura_electronica'])) {
-                            $actualizados = DispensadoApiMedcol6::whereRaw("CONCAT(documento_origen, factura_origen) = ?", [$factura['factura_electronica']])
-                                ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
-                                ->update([
-                                    'estado' => 'ANULADA',
-                                    'updated_at' => now()
-                                ]);
+                    
+                            if ($actualizados > 0) {
+                                $contadorActualizados++;
+                            }
                         }
-
-                        if ($actualizados) {
-                            $contadorActualizados++;
+                    }
+                    
+                    // Procesar facturas electrónicas
+                    foreach ($facturasElectronicas as $factura) {
+                        if (!empty($factura['factura_electronica'])) {
+                            $actualizados = DispensadoApiMedcol6::whereRaw(
+                                "CONCAT(documento_origen, factura_origen) = ?",
+                                [$factura['factura_electronica']]
+                            )
+                            ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
+                            ->update([
+                                'estado' => 'ANULADA',
+                                'updated_at' => now()
+                            ]);
+                    
+                            if ($actualizados > 0) {
+                                $contadorActualizados++;
+                            }
                         }
                     }
 
 
-
-                    Http::withToken($token)->get("http://hcp080m81s7.sn.mynetname.net:8001/api/closeallacceso");
+                    Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/closeallacceso");
 
                     Log::info('Desde la web syncapi centralizado anulados', [
                         'lineas_actualizadas' => $contadorActualizados,
@@ -788,47 +1012,93 @@ class DispensadoApiMedcol6Controller extends Controller
 
     public function buscar($factura)
     {
-        // Crear una instancia de la consulta principal sin ejecutarla de inmediato
-        $dispensado_api_medcol6 = DispensadoApiMedcol6::query();
-
-        // Agregar una subconsulta para calcular la suma de la cuota moderadora usando selectRaw
-        $dispensado_api_medcol6->selectRaw('*, 
-        (CASE 
-            WHEN ROW_NUMBER() OVER(PARTITION BY factura ORDER BY id) = 1 
-                THEN (SELECT SUM(cuota_moderadora) FROM dispensado_medcol6 AS d2 WHERE d2.factura = dispensado_medcol6.factura) 
-            ELSE 0 
-        END) AS cuota_moderadora_sumada');
-
-        // Aplicar condiciones de búsqueda adicionales
-        $resultados = $dispensado_api_medcol6
-            ->where('factura', $factura)
-            ->where('estado', 'DISPENSADO')
-            ->orderBy('fecha_suministro')
-            ->get();
-
-        // Verificar si se encontraron resultados
-        if ($resultados->isNotEmpty()) {
-            // Mapear los resultados a un array asociativo para incluir campos adicionales
-            $data = $resultados->map(function ($item) {
-                // Convertir el modelo a un array asociativo
-                $dataArray = $item->toArray();
-
-                // Agregar campos HTML personalizados a los datos resultantes
-                $dataArray['action'] = '<input class="add_medicamento checkbox-large checkbox2 tooltipsC" type="checkbox" title="Seleccionar" id="' . $item->id . '" value="' . $item->id . '">';
-                $dataArray['autorizacion2'] = '<input type="text" name="autorizacion" id="' . $item->id . '" class="show_detail btn btn-xl bg-warning tooltipsC" style="max-width: 100%;" title="autorizacion" value="' . $item->autorizacion . '">';
-                $dataArray['mipres2'] = '<input type="text" name="mipres" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="mipres">';
-                $dataArray['reporte_entrega2'] = '<input type="text" name="reporte" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="Reporte de entrega">';
-                $dataArray['cuota_moderadora2'] = '<input type="text" name="cuota_moderadora" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="cuota_moderadora" value="' . $item->cuota_moderadora_sumada . '">';
-
-                return $dataArray;
-            });
-
-            // Retornar los datos en formato JSON para DataTable
-            return response()->json($data);
-        } else {
-            // Retornar un error si no se encontraron resultados
-            return response()->json(['error' => 'Factura no encontrada o no tiene estado DISPENSADO'], 404);
+        // Verificar si la factura existe en la base de datos
+        $facturaExistente = DispensadoApiMedcol6::where('factura', $factura)->whereNotIn('codigo', ['1010', '1011', '1012'])->exists();
+    
+        if (!$facturaExistente) {
+            // Si la factura no existe, retornar un mensaje específico
+            return response()->json(['error' => 'Factura no encontrada, no se ha sincronizado en la API'], 404);
         }
+    
+        // Verificar si la factura está en otro estado como "ANULADA" o "REVISADO"
+        $facturaEstado = DispensadoApiMedcol6::where('factura', $factura)->whereNotIn('codigo', ['1010', '1011', '1012'])
+            ->whereIn('estado', ['ANULADA'])
+            ->first();
+    
+        if ($facturaEstado) {
+            // Si la factura está en estado ANULADA o REVISADO, retornar un mensaje específico
+            return response()->json(['error' => "La factura {$factura} se encuentra en estado {$facturaEstado->estado}."], 200);
+        }
+    
+        // Continuar con la consulta de facturas en estado DISPENSADO
+        $dispensado_api_medcol6 = DispensadoApiMedcol6::query();
+        
+    
+        // Sumar la cuota moderadora y aplicar los filtros
+        $resultados = $dispensado_api_medcol6->selectRaw('*, 
+                (CASE 
+                    WHEN ROW_NUMBER() OVER(
+                        PARTITION BY factura 
+                        ORDER BY id
+                    ) = 1 
+                    AND codigo NOT IN ("1010", "1011", "1012") 
+                        THEN (
+                            CASE 
+                                WHEN EXISTS (SELECT 1 FROM dispensado_medcol6 AS d2 WHERE d2.factura = dispensado_medcol6.factura AND d2.codigo = "1010") 
+                                    THEN LEAST(4700, (SELECT SUM(cuota_moderadora) FROM dispensado_medcol6 AS d3 WHERE d3.factura = dispensado_medcol6.factura))
+                                WHEN EXISTS (SELECT 1 FROM dispensado_medcol6 AS d2 WHERE d2.factura = dispensado_medcol6.factura AND d2.codigo = "1011") 
+                                    THEN LEAST(19200, (SELECT SUM(cuota_moderadora) FROM dispensado_medcol6 AS d3 WHERE d3.factura = dispensado_medcol6.factura))
+                                WHEN EXISTS (SELECT 1 FROM dispensado_medcol6 AS d2 WHERE d2.factura = dispensado_medcol6.factura AND d2.codigo = "1012") 
+                                    THEN LEAST(50300, (SELECT SUM(cuota_moderadora) FROM dispensado_medcol6 AS d3 WHERE d3.factura = dispensado_medcol6.factura))
+                                ELSE 
+                                    (SELECT SUM(cuota_moderadora) FROM dispensado_medcol6 AS d3
+                                     WHERE d3.factura = dispensado_medcol6.factura)
+                            END
+                        ) 
+                    ELSE 0 
+                END) AS cuota_moderadora_sumada'
+            )
+            ->where('factura', $factura)
+            //->where('estado', 'DISPENSADO')
+            ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
+            ->whereNotIn('codigo', ['1010', '1011', '1012']) // Filtra los códigos después del cálculo
+            ->orderBy('nombre_generico')
+            ->get();
+    
+        // Verificar si se encontraron resultados
+        if ($resultados->isEmpty()) {
+            // Si no se encontraron resultados, retornar un mensaje específico
+            return response()->json(['error' => 'Factura no encontrada en estado <strong>DISPENSADO</strong><br> o ya se encuentra <strong>REVISADA</strong>'], 404);
+        }
+        
+        // Obtener la IPS de cada resultado
+        $resultados = $resultados->map(function ($item) {
+            $ipsId = $item->ips;
+            $lista = !empty($ipsId) ? ListasDetalle::where('id', $ipsId)->first() : null;
+            $item->ips_nombre = $lista ? $lista->nombre : 'Desconocido';
+            return $item;
+        });
+    
+        // Mapear los resultados a un array asociativo para incluir campos adicionales
+        $data = $resultados->map(function ($item) {
+            // Convertir el modelo a un array asociativo
+            $dataArray = $item->toArray();
+    
+            // Agregar campos HTML personalizados a los datos resultantes
+            $dataArray['action'] = '<input class="add_medicamento checkbox-large checkbox2 tooltipsC" type="checkbox" title="Seleccionar" id="' . $item->id . '" value="' . $item->id . '">';
+            $dataArray['frecuencia2'] = '<input type="text" name="frecuencia2" id="' . $item->id . '" class="show_detail form-control btn bg-secondary tooltipsC" style="max-width: 100%;" title="Frecuencia con la cual el paciente debe tomar el medicamento" value="' . $item->frecuencia . '">';
+            $dataArray['dosis2'] = '<input type="number" name="dosis2" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="Es la cantidad que debe tomar el paciente" value="' . $item->dosis . '">';
+            $dataArray['duracion_tratamiento2'] = '<input type="number" name="duracion_tratamiento2" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 85%;" title="Poner la cantidad en días" value="' . $item->duracion_tratamiento . '">';
+            $dataArray['autorizacion2'] = '<input type="text" name="autorizacion" id="' . $item->id . '" class="show_detail btn btn-xl bg-warning tooltipsC" style="max-width: 100%;" title="Autorizacion" value="' . $item->autorizacion . '">';
+            $dataArray['mipres2'] = '<input type="text" name="mipres" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="mipres" value="' . $item->mipres . '">';
+            $dataArray['reporte_entrega2'] = '<input type="text" name="reporte" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="Reporte de entrega" value="' . $item->reporte_entrega_nopbs . '">';
+            $dataArray['cuota_moderadora2'] = '<input type="text" name="cuota_moderadora" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 85%;" title="Cuota Moderadora" value="' . $item->cuota_moderadora_sumada . '">';
+    
+            return $dataArray;
+        });
+    
+        // Retornar los datos en formato JSON para DataTable
+        return response()->json($data);
     }
 
     //funcion para actualizar los datos de la factura haciendo la insercion de los datos que se validan en el front
@@ -838,52 +1108,70 @@ class DispensadoApiMedcol6Controller extends Controller
         $request->validate([
             'data.*.id', // Campo 'id' requerido
             'data.*.fecha_orden',
-            'data.*.numero_entrega1',
+            'data.*.numero_entrega',
             'data.*.diagnostico',
             'data.*.ips',
             'data.*.fecha_suministro',
+            'data.*.num_total_entregas',
+            'data.*.numero_orden',
+            'data.*.duracion_tratamiento',
+            //'data.*.plan',
+            'data.*.frecuencia',
+            'data.*.dosis'
         ]);
-
+    
         // Obtener la fecha de suministro y formatearla como objeto Carbon
         $fechaSuministro = Carbon::parse($request->input('fecha_suministro'))->format('Y-m-d');
-
-
+    
         try {
             // Obtener los registros de datos
             $datos = $request->input('data.registros');
-
+    
             // Iterar sobre cada registro
             foreach ($datos as $idd) {
                 // Obtener la fecha de ordenamiento y formatearla como objeto Carbon
                 $fechaOrden = Carbon::parse($idd['fecha_orden'])->format('Y-m-d');
-                //dd($idd);
-
+                
                 // Verificar si la fecha de ordenamiento es menor o igual a la fecha de suministro
-                if (strtotime($fechaOrden) <= strtotime($fechaSuministro)) {
-                    // Actualizar los datos en la base de datos
-                    DispensadoApiMedcol6::where('id', $idd['ID'])
-                        ->update([
-                            'autorizacion' => trim($idd['autorizacion']),
-                            'cuota_moderadora' => trim($idd['cuota_moderadora']),
-                            'copago' => trim($idd['cuota_moderadora']),
-                            'mipres' => trim($idd['mipres']),
-                            'reporte_entrega_nopbs' => trim($idd['reporte_entrega']),
-                            'numero_entrega' => trim($idd['numero_entrega']),
-                            'fecha_ordenamiento' => trim($idd['fecha_orden']),
-                            'dx' => trim($idd['diagnostico']),
-                            'ips' => trim($idd['ips']),
-                            'estado' => trim($idd['estado']),
-                            'user_id' => trim($idd['user_id']),
-                            'updated_at' => now()
-                        ]);
-                } else {
+                if (strtotime($fechaOrden) > strtotime($fechaSuministro)) {
                     // Mostrar mensaje de error si la fecha de ordenamiento es mayor a la fecha de suministro
                     return response()->json([
                         'error' => 'La Fecha de Ordenamiento no puede ser superior a la Fecha de Suministro'
                     ], 422);
                 }
+                
+                // Validación adicional: Verificar si el número de entrega es mayor que el número total de entregas
+                     // Mostrar mensaje de error si el número de entrega es mayor al número total de entregas
+                if ($idd['numero_entrega'] > $idd['num_total_entregas']) {
+                    return response()->json([
+                        'error' => 'El Número de Entrega no puede ser mayor que el Número Total de Entregas'
+                    ], 422);
+                }
+    
+                // Actualizar los datos en la base de datos si pasa todas las validaciones
+                DispensadoApiMedcol6::where('id', $idd['id'])
+                    ->update([
+                        'autorizacion' => trim($idd['autorizacion']),
+                        'cuota_moderadora' => trim($idd['cuota_moderadora']),
+                        'copago' => trim($idd['cuota_moderadora']),
+                        'mipres' => trim($idd['mipres']),
+                        'reporte_entrega_nopbs' => trim($idd['reporte_entrega']),
+                        'numero_entrega' => trim($idd['numero_entrega']),
+                        'fecha_ordenamiento' => trim($idd['fecha_orden']),
+                        'dx' => trim($idd['diagnostico']),
+                        'ips' => trim($idd['ips']),
+                        'estado' => trim($idd['estado']),
+                        'user_id' => trim($idd['user_id']),
+                        'num_total_entregas' => trim($idd['num_total_entregas']),
+                        'numero_orden' => trim($idd['numero_orden']),
+                        'duracion_tratamiento' => trim($idd['duracion_tratamiento']),
+                        'frecuencia' => trim($idd['frecuencia']),
+                        'dosis' => trim($idd['dosis']),
+                        'updated_at' => now()
+                        //'plan' => trim($idd['plan']),
+                    ]);
             }
-
+    
             // Si se completó correctamente, devolver una respuesta JSON de éxito
             return response()->json(['success' => 'Datos actualizados correctamente'], 200);
         } catch (\Exception $e) {
@@ -891,4 +1179,218 @@ class DispensadoApiMedcol6Controller extends Controller
             return response()->json(['error' => 'Error al actualizar los datos'], 500);
         }
     }
+    
+    public function gestionsdis(Request $request)
+    {
+        $i = Auth::user()->drogueria;
+    
+        // Mapeo de droguerías según el usuario
+        $droguerias = [
+            "1" => '',
+            "2" => 'SALUD',
+            "3" => 'DOLOR',
+            "4" => 'PAC',
+            "5" => 'EHU1',
+            "6" => 'BIO1',
+            "8" => 'EM01',
+            "9" => 'FSIO',
+            "10" => 'FSOS',
+            "11" => 'FSAU',
+            "12" => 'EVSO',
+            "13" => 'FRJA',
+        ];
+    
+        $drogueria = $droguerias[$i] ?? null;
+    
+        // Validar fechas y establecer valores por defecto
+        $fechaInicio = $request->filled('fechaini') 
+            ? Carbon::parse($request->fechaini)->startOfDay() 
+            : now()->subMonth()->startOfDay();
+        
+        $fechaFin = $request->filled('fechafin') 
+            ? Carbon::parse($request->fechafin)->endOfDay() 
+            : now()->endOfDay();
+    
+        // Construcción de la consulta con filtros aplicados
+        $queryBase = DispensadoApiMedcol6::select('centroprod', DB::raw('count(*) as total'))
+            ->whereBetween('fecha_suministro', [$fechaInicio, $fechaFin])
+            ->whereNotIn('codigo', ['1010', '1011', '1012'])
+            ->groupBy('centroprod');
+    
+        // Aplicar filtro de droguería si el usuario no es admin (droguería "1")
+        if ($i !== "1" && $drogueria) {
+            $queryBase->where('centroprod', $drogueria);
+        }
+    
+        // Obtener resultados para cada estado
+        $dispensado = (clone $queryBase)->where('estado', 'DISPENSADO')->get();
+        $revisado = (clone $queryBase)->where('estado', 'REVISADO')->get();
+        $anulado = (clone $queryBase)->where('estado', 'ANULADA')->get();
+    
+        return response()->json([
+            'dispensado' => $dispensado,
+            'revisado' => $revisado,
+            'anulado' => $anulado
+        ]);
+    }
+    
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showdis($id)
+    {
+        if (request()->ajax()) {
+            $dispensado = DispensadoApiMedcol6::find($id);
+
+            return response()->json([
+                'dispensado' => $dispensado
+            ]);
+        }
+        return view('menu.Medcol6.indexDispensado');
+    }
+    
+    public function gestionFacturasRevisadas(Request $request)
+    {
+        $i = Auth::user()->drogueria;
+    
+        // Mapeo de droguerías según el usuario
+        $droguerias = [
+            "1" => '',
+            "2" => 'SALUD',
+            "3" => 'DOLOR',
+            "4" => 'PAC',
+            "5" => 'EHU1',
+            "6" => 'BIO1',
+            "8" => 'EM01',
+            "9" => 'FSIO',
+            "10" => 'FSOS',
+            "11" => 'FSAU',
+            "12" => 'EVSO',
+            "13" => 'FRJA',
+        ];
+    
+        $drogueria = $droguerias[$i] ?? null;
+    
+        // Validar fechas y establecer valores por defecto
+        $fechaInicio = $request->filled('fechaini') 
+            ? Carbon::parse($request->fechaini)->startOfDay() 
+            : now()->subMonth()->startOfDay();
+        
+        $fechaFin = $request->filled('fechafin') 
+            ? Carbon::parse($request->fechafin)->endOfDay() 
+            : now()->endOfDay();
+    
+        // Capturar tipo de medicamento enviado desde el frontend
+        $tipoMedicamento = $request->input('tipo_medicamento', '2');
+    
+        // Construcción de la consulta con filtros aplicados
+        $queryBase = DispensadoApiMedcol6::select(DB::raw('COUNT(DISTINCT(factura)) as total'))
+            ->where('tipo_medicamento', $tipoMedicamento)
+            ->whereBetween('fecha_suministro', [$fechaInicio, $fechaFin])
+            ->where('estado', 'REVISADO');
+    
+        // Aplicar filtro de droguería si el usuario no es admin (droguería "1")
+        if ($i !== "1" && $drogueria) {
+            $queryBase->where('centroprod', $drogueria);
+        }
+    
+        // Obtener total de facturas revisadas
+        $totalFacturasRevisadas = $queryBase->first()->total;
+    
+        return response()->json([
+            'total_facturas_revisadas' => $totalFacturasRevisadas
+        ]);
+    }
+    
+    public function gestionForgif(Request $request)
+    {
+        $user = Auth::user();
+        $i = $user->drogueria ?? "1"; // Valor por defecto
+
+        $droguerias = [
+            "1" => '',
+            "2" => 'SALUD',
+            "3" => 'DOLOR',
+            "4" => 'PAC',
+            "5" => 'EHU1',
+            "6" => 'BIO1',
+            "8" => 'EM01',
+            "9" => 'FSIO',
+            "10" => 'FSOS',
+            "11" => 'FSAU',
+            "12" => 'EVSO',
+            "13" => 'FRJA',
+        ];
+
+        $drogueria = $droguerias[$i] ?? null;
+
+        $fechaInicio = $request->filled('fechaini')
+            ? Carbon::parse($request->fechaini)->startOfDay()
+            : now()->subMonth()->startOfDay();
+
+        $fechaFin = $request->filled('fechafin')
+            ? Carbon::parse($request->fechafin)->endOfDay()
+            : now()->endOfDay();
+
+        $contrato = $request->input('contrato', null);
+
+        // Subconsulta para traer solo un registro por código
+        $subquery = DispensadoApiMedcol6::selectRaw('MIN(id) as id')
+            ->where('centroprod', [$contrato])
+            ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
+            ->whereBetween('fecha_suministro', [$fechaInicio, $fechaFin])
+            ->whereNotIn('codigo', ['1010', '1011', '1012'])
+            ->groupBy('codigo');
+
+        $queryBase = DispensadoApiMedcol6::select([
+            'expediente',
+            'codigo',
+            'nombre_generico',
+            'nombre_comercial',
+            'precio_unitario',
+            'cums',
+            'ambito',
+            'cobertura',
+            'forma'
+        ])
+            ->whereIn('id', $subquery)
+            ->orderBy('fecha_suministro', 'asc');
+
+        if ($i !== "1" && $drogueria) {
+            $queryBase->where('centroprod', $drogueria);
+        }
+
+        // Paginación de DataTables
+        $totalRegistros = $queryBase->count();
+        $data = $queryBase->skip($request->start)->take($request->length)->get();
+        //$data = $queryBase->limit($request->length)->offset($request->start)->get();
+
+        // Agregar los valores por defecto
+        $resultados = $data->map(function ($item) {
+            return array_merge($item->toArray(), [
+                'nit_prestador' => 901601000,
+                'razon_social_prestador' => 'SALUD MEDCOL SAS',
+                'registro_sanitario_invima' => 'invima-12345',
+                'unidad_medicamento' => 1,
+                'codigo_generico_eps' => 'NA',
+                'opcion' => 1,
+                'regulado' => 'NA',
+                'categoria_medicamento' => 'M/I',
+                'tarifa_tope_regulado' => 0
+            ]);
+        });
+
+        return response()->json([
+            "draw" => intval($request->draw),
+            "recordsTotal" => $totalRegistros,
+            "recordsFiltered" => $totalRegistros,
+            "data" => $resultados
+        ]);
+    }
+
+    
+
 }

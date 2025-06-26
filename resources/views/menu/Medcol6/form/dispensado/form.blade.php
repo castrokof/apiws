@@ -1,138 +1,220 @@
 <div class="container-fluid">
-    <div class="row mb-3">
-        <div class="col-lg-4">
-            <div class="input-group">
-                <label for="numero_factura" class="input-group-text">Número de Factura</label>
-                <input type="text" name="numero_factura" id="numero_factura" class="form-control" placeholder="Ingrese el número de factura" aria-label="Número de Factura">
-            </div>
+    <!-- Sección de búsqueda optimizada -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Búsqueda de Factura</h5>
         </div>
-        <div class="col-lg-4">
-            <button type="button" class="btn btn-success btn-block" id="buscarFactura" >
-                Buscar
-            </button>
-        </div>
-        <!-- <div class="col-lg-4">
-            <button type="submit" name="reset2" id="reset2" class="btn btn-warning btn-block">Limpiar</button>
-        </div> -->
-    </div>
-
-    <div class="row">
-        <div class="col-lg-4">
-            <div class="form-group">
-                <label for="factura">Número de Factura</label>
-                <input type="text" class="form-control" id="factura" name="factura" readonly>
-            </div>
-
-            <div class="form-group">
-                <label for="paciente">Paciente</label>
-                <input type="text" class="form-control" id="paciente" name="paciente" readonly>
-            </div>
-
-            <div class="form-group">
-                <label for="drogueria">Droguería</label>
-                <input type="text" class="form-control" id="drogueria" name="drogueria" readonly>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="form-group">
-                <label for="regimen">Regimen</label>
-                <input type="text" class="form-control" id="regimen" name="regimen" readonly>
-            </div>
-
-            <div class="form-group">
-                <label for="tipodocument">Tipo de Documento</label>
-                <input type="text" class="form-control" id="tipodocument" name="tipodocument" readonly>
-            </div>
-
-            <div class="form-group">
-                <label for="medico1">Profesional</label>
-                <input type="text" class="form-control" id="medico1" name="medico1" readonly>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="form-group">
-                <label for="fecha_suministro">Fecha Dispensación</label>
-                <input type="date" class="form-control" id="fecha_suministro" name="fecha_suministro" readonly>
-            </div>
-
-            <div class="form-group">
-                <label for="idusuario">Historia</label>
-                <input type="text" class="form-control" id="idusuario" name="idusuario" readonly>
-            </div>
-
-            <div class="form-group">
-                <label for="cajero">Auxiliar Dispenso</label>
-                <input type="text" class="form-control" id="cajero" name="cajero" readonly>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-file-invoice"></i></span>
+                        <input type="text" name="numero_factura" id="numero_factura" class="form-control" placeholder="Ingrese el número de factura" aria-label="Número de Factura">
+                        <button type="button" class="btn btn-primary" id="buscarFactura">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="container-fluid mt-4">
-    <fieldset>
-        <legend style="color: #008080; font-weight: bold; font-size: 20px;">Completar la dispensación de la Fórmula</legend>
-        <!-- Agrega más contenido relacionado con la dispensación aquí -->
-        <div class="row">
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="fecha_orden">Fecha Ordenamiento</label>
-                    <input type="date" class="form-control" id="fecha_orden" name="fecha_orden" placeholder="Ingrese la fecha de la orden">
+    <!-- Información de la factura y paciente en cards -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Información de Factura y Paciente</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label for="factura" class="form-label">Número de Factura</label>
+                        <input type="text" class="form-control bg-light" id="factura" name="factura" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipodocument" class="form-label">Tipo de Documento</label>
+                        <input type="text" class="form-control bg-light" id="tipodocument" name="tipodocument" readonly>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="numero_entrega1">Número de Entrega</label>
-                    <input type="text" class="form-control" id="numero_entrega1" name="numero_entrega1" placeholder="Ejemplo: 1-2">
+
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label for="regimen" class="form-label">Régimen</label>
+                        <input type="text" class="form-control bg-light" id="regimen" name="regimen" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="idusuario" class="form-label">Historia</label>
+                        <input type="text" class="form-control bg-light" id="idusuario" name="idusuario" readonly>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="diagnostico">Diagnóstico</label>
-                    <select name="diagnostico" class="dxcie10 form-control select2bs4" style="width: 100%;" required>
-                        <!-- Agrega opciones de diagnóstico -->
-                    </select>
+
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="fecha_suministro" class="form-label">Fecha Dispensación</label>
+                        <input type="date" class="form-control bg-light" id="fecha_suministro" name="fecha_suministro" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="paciente" class="form-label">Paciente</label>
+                        <input type="text" class="form-control bg-light" id="paciente" name="paciente" readonly>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="ips">IPS Formulación</label>
-                    <select name="ips" class="ipsmul form-control select2bs4" style="width: 100%;" required>
-                        <!-- Agrega opciones de IPS -->
-                    </select>
+
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="drogueria" class="form-label">Droguería - Sede</label>
+                        <input type="text" class="form-control bg-light" id="drogueria" name="drogueria" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cajero" class="form-label">Auxiliar Dispenso</label>
+                        <input type="text" class="form-control bg-light" id="cajero" name="cajero" readonly>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label for="estado2" class="form-label">Estado</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control bg-light" id="estado2" name="estado2" readonly>
+                            <span class="input-group-text" id="estado-indicator">
+                                <i class="fas fa-circle text-success d-none" id="estado-activo"></i>
+                                <i class="fas fa-circle text-danger d-none" id="estado-inactivo"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="facturaelectronica" class="form-label">Factura Electrónica
+                            <i class="fas fa-info-circle text-primary" title="Aquí se muestra la factura electrónica asociada. Solo sí tiene cuota moderadora"></i>
+                        </label>
+                        <input type="text" class="form-control bg-light" id="facturaelectronica" name="facturaelectronica" readonly>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-    </fieldset>
+    <!-- Sección de completar la dispensación de la fórmula -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Completar la dispensación de la Fórmula</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label for="fecha_orden" class="form-label">Fecha Ordenamiento</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                            <input type="date" class="form-control" id="fecha_orden" name="fecha_orden">
+                        </div>
+                    </div>
+                </div>
 
-    <!-- Agrega el contenedor de la tabla DataTable -->
-    <div class="container-fluid mt-4 modal-body" style="max-height: 400px; overflow-y: auto;">
-        <table id="tablaRegistros" class="table table-striped">
-            <caption>Lista de Medicamentos/Insumos</caption>
-            <thead>
-                <tr>
-                    <th><input name="selector" id="selector" type="checkbox" class="select-all checkbox-large tooltipsC" title="Seleccionar todo" /> Acciones </th>
-                    <!-- <th>ID</th> -->
-                    <th>Código</th>
-                    <th>Nombre Genérico</th>
-                    <!-- <th>Tipo de Medicamento</th> -->
-                    <th>Número de Unidades</th>
-                    <th>Precio Unitario</th>
-                    <th>Valor Total</th>
-                    <th>Cuota Moderadora</th>
-                    <th>Autorización</th>
-                    <th>MIPRES</th>
-                    <th>Reporte de Entrega</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="entrega" class="form-label">Entrega</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="numero_entrega1" name="numero_entrega1" placeholder="1" min="1">
+                            <span class="input-group-text">de</span>
+                            <input type="number" class="form-control" id="num_total_entregas" name="num_total_entregas" placeholder="2" min="1">
+                        </div>
+                        <small class="form-text text-muted"><i class="fas fa-info-circle text-primary"></i> Indique el número de esta entrega y el total de entregas.</small>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="diagnostico" class="form-label">Diagnóstico</label>
+                        <select name="diagnostico" class="dxcie10 form-control select2bs4" style="width: 100%;" required>
+                            <option value="" disabled selected>Seleccione diagnóstico</option>
+                            <!-- Opciones se cargarán dinámicamente -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label for="ips" class="form-label">IPS Formulación</label>
+                        <select name="ips" class="ipsmul form-control select2bs4" style="width: 100%;" required>
+                            <option value="" disabled selected>Seleccione IPS</option>
+                            <!-- Opciones se cargarán dinámicamente -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label for="formula1" class="form-label">No. de Formula</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-prescription"></i></span>
+                            <input type="number" class="form-control" id="formula1" name="formula1" required min="1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor de tabla para medicamentos -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Lista de Medicamentos/Insumos</h5>
+            <div>
+                <button type="button" class="btn btn-sm btn-primary" id="btnInvima" onclick="window.open('https://enlinea.invima.gov.co/rs/cum/comprob_cum.jsp', '_blank')">
+                    <i class="fas fa-external-link-alt"></i> Invima
+                </button>
+                <button type="button" class="btn btn-sm btn-success" id="btnBoxalud" onclick="window.open('https://portal.epsdelagente.com.co/Externo/BoxaludExterno/Seguridad/Login.aspx', '_blank')">
+                    <i class="fas fa-external-link-alt"></i> Boxalud
+                </button>
+                <button type="button" class="btn btn-sm btn-warning" id="btnHistorial" onclick="window.open('https://manteliviano.com/public_apiws/medcolcli/dispensado', '_blank')">
+                    <i class="fas fa-history"></i> Ver Historial
+                </button>
+            </div>
+        </div>
+        <div class="card-body table-responsive">
+            <table id="tablaRegistros" class="table table-striped table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selector">
+                                <label class="form-check-label" for="selector">Seleccionar</label>
+                            </div>
+                        </th>
+                        <th>Código</th>
+                        <th>Cums</th>
+                        <th>Nombre Genérico</th>
+                        <th>Cantidad</th>
+                        <th>$ Unitario</th>
+                        <th>$ Total</th>
+                        <th>Frecuencia</th>
+                        <th>Dosis</th>
+                        <th>Duración</th>
+                        <th>Cuota Mod.</th>
+                        <th>Autorización</th>
+                        <th>MIPRES</th>
+                        <th>Reporte Entregado</th>
+                    </tr>
+                </thead>
+                <tbody>
                     <!-- Aquí se agregarán las filas de la tabla dinámicamente -->
-                </tr>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <button type="button" class="btn btn-primary rounded me-2" id="enviarDispensado">
+                        <i class="fas fa-check-circle"></i> Finalizar Dispensación
+                    </button>
+                    <button type="reset" class="btn btn-danger rounded me-2" id="clean">
+                        <i class="fas fa-trash"></i> Limpiar
+                    </button>
+                    <button type="button" class="btn btn-secondary rounded" data-dismiss="modal">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
-

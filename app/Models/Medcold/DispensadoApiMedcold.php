@@ -53,8 +53,10 @@ class DispensadoApiMedcold extends Model
         'estado',
         'centroprod',
         'drogueria',
-        'user_id',
-        'cajero'
+        'cajero',
+        'ips',
+        'documento_origen',
+        'factura_origen'
     ];
 
    /* protected $casts = [

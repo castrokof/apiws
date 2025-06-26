@@ -12,7 +12,7 @@
                     {{-- class="table table-hover table-bordered text-nowrap" --}}
                     <thead>
                         <tr>
-                        <th>Acciones</th>
+                            <th>Acciones</th>
                             <th>Id</th>
                             <th>Tipo Documento</th>
                             <th>Cantidad Entregada</th>

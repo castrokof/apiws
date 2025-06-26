@@ -13,10 +13,8 @@
             <div class="card-body table-responsive p-2">
 
                 <table id="listasCotizaciones" class="table table-hover  text-nowrap">
-
                     <thead>
                         <tr>
-                          
                             <th>Acciones</th>
                             <th>Nombre Archivo</th>
                             <th>Cantidad de Filas</th>
@@ -31,7 +29,6 @@
                 </table>
             </div>
             </form>
-
         </div>
     </div>
 </div>

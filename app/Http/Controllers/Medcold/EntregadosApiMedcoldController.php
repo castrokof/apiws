@@ -18,10 +18,11 @@ class EntregadosApiMedcoldController extends Controller
     {
         /* $this->createapendientespi($request); */
 
+      
         if ($request->ajax()) {
             $entregadosapi = EntregadosApiMedcol3::orderBy('id')->get();
-
-            return DataTables()->of($entregadosapi)
+            
+                return DataTables()->of($entregadosapi)
                 ->addColumn('action', function ($entregado) {
                     $button = '<button type="button" name="resumen" id="' . $entregado->id . '" class="edit_entregado btn btn-app bg-info tooltipsC" title="Editar entregado"  ><span class="badge bg-teal">Editar</span><i class="fas fa-pen"></i> Editar </button>';
 

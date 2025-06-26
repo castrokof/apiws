@@ -1,0 +1,5 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTP_REFERER} !^https://manteliviano\.com [NC]
+  RewriteRule \.(pdf)$ - [F]
+</IfModule>

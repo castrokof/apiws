@@ -33,18 +33,25 @@
                 <input type="radio" id="customRadio2" name="customRadio" class="custom-control-input">
                 <label class="custom-control-label" for="customRadio2">No se entrega</label>
               </div>
+
+            {{-- <label for="SelectEstado">Estado de entrega</label>
+            <select class="form-control" id="EstadoEntrega" required>
+                <option>--Seleccione--</option>
+                <option value="1">Si se entrega</option>
+                <option value="0">No se entrega</option>
+            </select> --}}
           </div>
     </div>
     <div class="form-group">
-          <div class="col-lg-12">
+    <div class="col-lg-12">
 
-                <label for="SelectCausa">Causa No Entrega</label>
-                <select class="form-control" id="CausaNoEntrega">
-                    <option value="">--Ninguna--</option>
-                    <option value="7">No fue posible contactar al paciente</option>
-                    <option value="8">Paciente fallecido</option>
-                    <option value="9">Paciente se niega a recibir el suministro</option>
-                </select>
+            <label for="SelectCausa">Causa No Entrega</label>
+            <select class="form-control" id="CausaNoEntrega">
+                <option value="">--Ninguna--</option>
+                <option value="7">No fue posible contactar al paciente</option>
+                <option value="8">Paciente fallecido</option>
+                <option value="9">Paciente se niega a recibir el suministro</option>
+            </select>
           </div>
     </div>
     <div class="form-group">

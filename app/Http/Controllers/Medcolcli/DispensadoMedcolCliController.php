@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Medcolcli;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+
 use App\Models\MedcolCli\DispensadoCliMedcol;
+use App\Models\Medcol6\DispensadoApiMedcol6;
 
 use Carbon\Carbon;
 
@@ -25,50 +27,63 @@ class DispensadoMedcolCliController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+   public function index()
     {
 
         return view('menu.Medcolcli.indexInformed');
     }
-
-    public function index1(Request $request)
-    {
-
-        $fechaAi = now()->toDateString() . " 00:00:01";
-        $fechaAf = now()->toDateString() . " 23:59:59";
-
-        if ($request->ajax()) {
-
-            if ($request->fechaini != '' && $request->fechafin != '') {
-
-                $fechaini = new Carbon($request->fechaini);
-                $fechaini = $fechaini->toDateString();
-
-                $fechafin = new Carbon($request->fechafin);
-                $fechafin = $fechafin->toDateString();
-
-                $dispensadoapi = DispensadoCliMedcol::whereBetween('fecha_suministro', [$fechaini . ' 00:00:00', $fechafin . ' 23:59:59']);
-                $dispensadoapi->whereIn('estado', ['DISPENSADO', 'REVISADO']);
-
-                $dispensadoapi->where('fecha_suministro', '>', '2023-11-01 00:00:00')->get();
-
-                return DataTables()->of($dispensadoapi)
-                    ->make(true);
-            } else {
-
-                $dispensadoapitoday = DispensadoCliMedcol::whereBetween('fecha_suministro', [$fechaAi, $fechaAf]);
-                $dispensadoapi->whereIn('estado', ['REVISADO', 'DISPENSADO']);
-                $dispensadoapitoday->where([
-                    ['fecha_suministro', '>=', '2023-11-01' . ' 00:00:00']
-                ])->get();
-
-
-                return DataTables()->of($dispensadoapitoday)
-                    ->make(true);
+    
+       public function index1(Request $request)
+        {
+            $fechaAi = now()->toDateString() . " 00:00:01";
+            $fechaAf = now()->toDateString() . " 23:59:59";
+        
+            if ($request->ajax()) {
+                $dispensadoapi = DispensadoCliMedcol::query();
+        
+                if ($request->fechaini != '' && $request->fechafin != '') {
+                    $fechaini = new Carbon($request->fechaini);
+                    $fechaini = $fechaini->toDateString();
+        
+                    $fechafin = new Carbon($request->fechafin);
+                    $fechafin = $fechafin->toDateString();
+        
+                    $dispensadoapi->whereBetween('fecha_suministro', [$fechaini . ' 00:00:00', $fechafin . ' 23:59:59']);
+                    $dispensadoapi->whereIn('estado', ['DISPENSADO', 'REVISADO']);
+                }
+        
+                if ($request->historia != '') {
+                    $historia = preg_replace("/\s+/", "", trim($request->historia));
+                    $historia = explode(',', $historia);
+        
+                    $pc = count($historia);
+                    for ($i = 0; $i < $pc; $i++) {
+                        $dispensadoapi->whereIn('historia', $historia);
+                    }
+                }
+                
+                if ($request->drogueria != '') {
+                    $drogueria = $request->drogueria;
+                    $dispensadoapi->whereIn('drogueria', $drogueria);
+                   
+                }
+        
+                if ($request->fechaini == '' && $request->fechafin == '' && $request->historia == '' && $request->drogueria == '') {
+                    $dispensadoapi->whereBetween('fecha_suministro', [$fechaAi, $fechaAf]);
+                    $dispensadoapi->whereIn('estado', ['REVISADO', 'DISPENSADO']);
+                    $dispensadoapi->where([
+                        ['fecha_suministro', '>=', '2023-11-01' . ' 00:00:00']
+                    ]);
+                }
+        
+                // **Excluir los códigos 1010, 1011 y 1012**
+                $dispensadoapi->whereNotIn('codigo', ['1010', '1011', '1012']);
+        
+                return DataTables()->of($dispensadoapi->get())->make(true);
             }
         }
-    }
 
+    
 
     /**
      * Store a newly created resource in storage.
@@ -76,9 +91,57 @@ class DispensadoMedcolCliController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function drogueria(Request $request)
     {
-        //
+      
+        $array = [];
+
+        $droguerias = [
+            "Biológicos",
+            "Dolor",
+            "Emcali",
+            "Evento",
+            "EVENTO COMFENALCO",
+            "EVENTO SALUD MENTAL",
+            "FARMACIA BIOLOGICOS",
+            "FARMACIA BOLSA COMFENALCO",
+            "FARMACIA DOLOR",
+            "FARMACIA EMCALI",
+            "FARMACIA ENTREGA DE PENDIENTES",
+            "FARMACIA HUERFANAS",
+            "FARMACIA INYECTABLES",
+            "FARMACIA JAMUNDI",
+            "FARMACIA PALIATIVOS",
+            "FARMACIA PCE",
+            "FARMACIA SALUD MENTAL",
+            "FARMACIA SOS AUTOPISTA",
+            "FARMACIA IDEO",
+            "Huérfanas",
+            "Inyectables",
+            "Paliativos",
+            "Plan Complementario",
+            "Salud Mental"
+        ];
+        
+        
+        
+    
+        
+        if ($request->has('q')) {
+        $term = strtolower($request->get('q'));
+        $filtrados = [];
+    
+        foreach ($droguerias as $item) {
+            if (strpos(strtolower($item), $term) !== false) {
+                $filtrados[] = ['drogueria' => $item];
+            }
+        }
+    
+        array_push($array, $filtrados); // metes el array filtrado como un solo elemento dentro de $array
+    
+        return response()->json(['array' => $array]);
+    }
+        
     }
 
     /**

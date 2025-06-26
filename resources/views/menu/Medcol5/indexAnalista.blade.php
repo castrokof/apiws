@@ -12,163 +12,14 @@ Pendientes Medcol Emcali
 <link href="{{asset("assets/lte/plugins/fontawesome-free/css/all.min.css")}}" rel="stylesheet" type="text/css" />
 
 
-
-
-
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.css" rel="stylesheet" type="text/css" />
 
 <link href="{{asset("assets/js/gijgo-combined-1.9.13/css/gijgo.min.css")}}" rel="stylesheet" type="text/css" />
 <link href="{{asset("assets/css/select2-bootstrap.min.css")}}" rel="stylesheet" type="text/css" />
 <link href="{{asset("assets/css/select2.min.css")}}" rel="stylesheet" type="text/css" />
+<link href="{{asset("assets/css/botones.css")}}" rel="stylesheet" type="text/css" />
 
-
-<style>
-    /*btn flotante*/
-    .btn-flotante {
-        font-size: 14px;
-        /* Cambiar el tamaño de la tipografia */
-        text-transform: uppercase;
-        /* Texto en mayusculas */
-        font-weight: bold;
-        /* Fuente en negrita o bold */
-        color: #ffffff;
-        /* Color del texto */
-        border-radius: 40px 40px 40px 40px;
-        border-color: #ffffff;
-        /* Borde del boton */
-        letter-spacing: 2px;
-        /* Espacio entre letras */
-        background: linear-gradient(to right, #0880a8, #56e6ff) !important;
-        /* Color de fondo */
-        /*background-color: #e9321e; /* Color de fondo */
-        padding: 8px 15px;
-        /* Relleno del boton */
-        position: fixed;
-        top: 146px;
-
-        right: 40px;
-        transition: all 300ms ease 0ms;
-        box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.5);
-        z-index: 99;
-        /* border: none;
-    outline: none; */
-    }
-
-    .btn-flotante:hover {
-        background-color: #2c2fa5;
-        /* Color de fondo al pasar el cursor */
-        box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.3);
-        transform: translateY(-5px);
-    }
-
-    @media only screen and (max-width: 300px) {
-        .btn-flotante {
-            font-size: 14px;
-            padding: 12px 20px 0 0;
-            bottom: 20px;
-            right: 20px;
-        }
-    }
-
-    .loaders {
-
-        visibility: hidden;
-        background-color: rgba(255, 253, 253, 0.952);
-        position: absolute;
-        z-index: +100 !important;
-        width: 100%;
-        height: 100%;
-    }
-
-    .loaders img {
-        position: relative;
-        top: 50%;
-        left: 40%;
-        width: 180px;
-        height: 180px;
-    }
-
-    /* // Colores para las tarjetas widget */
-    .card {
-        background-color: #fff;
-        border-radius: 10px;
-        border: none;
-        position: relative;
-        margin-bottom: 30px;
-        box-shadow: 0 0.46875rem 2.1875rem rgba(90, 97, 105, 0.1), 0 0.9375rem 1.40625rem rgba(90, 97, 105, 0.1), 0 0.25rem 0.53125rem rgba(90, 97, 105, 0.12), 0 0.125rem 0.1875rem rgba(90, 97, 105, 0.1);
-    }
-
-    .l-bg-blue-dark-card {
-        background-color: linear-gradient(to right, #b7c7ec, #4286f4) !important;
-        color: #fff;
-    }
-
-
-
-    .l-bg-cherry {
-        background: linear-gradient(to right, #493240, #f09) !important;
-        color: #fff;
-    }
-
-    .l-bg-blue-dark {
-        background: linear-gradient(to right, #06b6cd, #319acb) !important;
-        color: #fff;
-    }
-
-    .l-bg-green-dark {
-        background: linear-gradient(to right, #0a504a, #3866ef) !important;
-        color: #fff;
-    }
-
-    .l-bg-orange-dark {
-        background: linear-gradient(to right, #a86008, #ffba56) !important;
-        color: #fff;
-    }
-
-    .l-bg-red-dark {
-        background: linear-gradient(to right, #a80d08, #ff6756) !important;
-        color: #fff;
-    }
-
-    .card .card-statistic-3 .card-icon-large .fas,
-    .card .card-statistic-3 .card-icon-large .far,
-    .card .card-statistic-3 .card-icon-large .fab,
-    .card .card-statistic-3 .card-icon-large .fal {
-        font-size: 110px;
-    }
-
-    .card .card-statistic-3 .card-icon {
-        text-align: center;
-        line-height: 50px;
-        margin-left: 15px;
-        color: #000;
-        position: absolute;
-        right: -5px;
-        top: 20px;
-        opacity: 0.1;
-    }
-
-    .l-bg-cyan {
-        background: linear-gradient(135deg, #289cf5, #84c0ec) !important;
-        color: #fff;
-    }
-
-    .l-bg-green {
-        background: linear-gradient(135deg, #23bdb8 0%, #43e794 100%) !important;
-        color: #fff;
-    }
-
-    .l-bg-orange {
-        background: linear-gradient(to right, #f9900e, #ffba56) !important;
-        color: #fff;
-    }
-
-    .l-bg-cyan {
-        background: linear-gradient(135deg, #289cf5, #84c0ec) !important;
-        color: #fff;
-    }
-</style>
 
 @endsection
 
@@ -262,7 +113,7 @@ Pendientes Medcol Emcali
                     $("#detalle1").append(
 
 
-                        '<div class="small-box shadow-lg l-bg-orange-dark"><div class="inner">' +
+                        '<div class="small-box shadow-lg l-bg-green-dark"><div class="inner">' +
                         '<h5>TOTAL ENTREGADOS</h5>' +
                         '<p><h5> ' + a +
                         '</h5></p>' +
@@ -280,7 +131,7 @@ Pendientes Medcol Emcali
                     $("#detalle2").append(
 
 
-                        '<div class="small-box shadow-lg l-bg-green-dark"><div class="inner">' +
+                        '<div class="small-box shadow-lg l-bg-orange-dark"><div class="inner">' +
                         '<h5>EN TRAMITE</h5>' +
                         '<p><h5><i class="fas fa-comment-medical"></i> ' + a +
                         '</h5></p>' +
@@ -1236,6 +1087,161 @@ Pendientes Medcol Emcali
 
                         });
 
+                }// aqui va la tabla de los vencidos 
+                else if (tabId === "custom-tabs-one-datos-vencidos-tab") {
+                    // Llamar a la función correspondiente al tab "En Tramite"
+                    /* console.log("Pagos Parciales"); */
+
+                    // Destruir la tabla existente
+                    if ($.fn.DataTable.isDataTable("#tvencidos")) {
+                        $("#tvencidos").DataTable().destroy();
+                    }
+                    // Funcion para pintar con data table la pestaña Lista de pendientes vencidos
+                    var datatable =
+                        $('#tvencidos').DataTable({
+                            language: idioma_espanol,
+                            processing: true,
+                            lengthMenu: [
+                                [25, 50, 100, 500, -1],
+                                [25, 50, 100, 500, "Mostrar Todo"]
+                            ],
+                            processing: true,
+                            serverSide: true,
+                            aaSorting: [
+                                [1, "desc"]
+                            ],
+                            ajax: {
+                                url: "{{route('medcol5.vencidos')}}",
+                                data: {
+                                    _token: "{{ csrf_token() }}"
+                                },
+                                method: 'POST'
+                            },
+                            columns: [{
+                                    data: 'action',
+                                    orderable: false
+                                },
+                                {
+                                    data: 'id'
+                                },
+                                {
+                                    data: 'Tipodocum'
+                                },
+                                {
+                                    data: 'cantdpx'
+                                },
+                                {
+                                    data: 'cantord'
+                                },
+                                {
+                                    data: 'fecha_factura'
+                                },
+                                {
+                                    data: 'fecha'
+                                },
+                                {
+                                    data: 'historia'
+                                },
+                                {
+                                    data: 'apellido1'
+                                },
+                                {
+                                    data: 'apellido2'
+                                },
+                                {
+                                    data: 'nombre1'
+                                },
+                                {
+                                    data: 'nombre2'
+                                },
+                                {
+                                    data: 'cantedad'
+                                },
+                                {
+                                    data: 'direcres'
+                                },
+                                {
+                                    data: 'telefres'
+                                },
+                                {
+                                    data: 'documento'
+                                },
+                                {
+                                    data: 'factura'
+                                },
+                                {
+                                    data: 'codigo'
+                                },
+                                {
+                                    data: 'nombre'
+                                },
+                                {
+                                    data: 'cums'
+                                },
+                                {
+                                    data: 'cantidad'
+                                },
+                                {
+                                    data: 'cajero'
+                                },
+                                {
+                                    data: 'usuario'
+                                },
+                                {
+                                    data: 'estado'
+                                },
+                                {
+                                    data: 'fecha_anulado'
+                                },
+                                {
+                                    data: 'fecha_entrega'
+                                },
+                                {
+                                    data: 'centroproduccion'
+                                }
+                            ],
+
+                            //Botones----------------------------------------------------------------------
+
+                            "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+
+                            buttons: [{
+
+                                    extend: 'copyHtml5',
+                                    titleAttr: 'Copiar Registros',
+                                    title: "Control de horas",
+                                    className: "btn  btn-outline-primary btn-sm"
+
+
+                                },
+                                {
+
+                                    extend: 'excelHtml5',
+                                    titleAttr: 'Exportar Excel',
+                                    title: "Control de horas",
+                                    className: "btn  btn-outline-success btn-sm"
+
+
+                                },
+                                {
+
+                                    extend: 'csvHtml5',
+                                    titleAttr: 'Exportar csv',
+                                    className: "btn  btn-outline-warning btn-sm"
+
+                                },
+                                {
+
+                                    extend: 'pdfHtml5',
+                                    titleAttr: 'Exportar pdf',
+                                    className: "btn  btn-outline-secondary btn-sm"
+
+
+                                }
+                            ],
+
+                        });
+
                 }
             }
 
@@ -1637,7 +1643,7 @@ Pendientes Medcol Emcali
         // Función que envia el id al controlador y cambia el estado del registro
         $(document).on('click', '#syncapi', function() {
 
-            const text = 'De Medcol PCE-Huerfanas-Biologicos';
+            const text = 'De Medcol EMCALI';
 
             Swal.fire({
                 title: "¿Estás por sincronizar pendientes?",
@@ -1678,6 +1684,51 @@ Pendientes Medcol Emcali
 
                     });
                     fill_datatable1_resumen();
+
+                },
+                complete: function() {
+                    $('.loaders').css("visibility", "hidden");
+                }
+            });
+        }
+        
+        //Funcion para sincronizar los pendientes anuladas y actualizar el estado a ANULADO
+        $(document).on('click', '#synanuladospndt', function() {
+
+            const text = 'De Medcol EMCALI';
+
+            Swal.fire({
+                title: "¿Estás por sincronizar los pendientes anulados?",
+                text: text,
+                type: "error",
+                showCancelButton: true,
+                showCloseButton: true,
+                confirmButtonText: 'Aceptar',
+            }).then((result) => {
+                if (result.value) {
+
+                    ajaxRequestSyncAnulados();
+
+                }
+            });
+        });
+
+        function ajaxRequestSyncAnulados() {
+            $.ajax({
+                beforeSend: function() {
+                    $('.loaders').css("visibility", "visible");
+                },
+                url: "{{route('medcol5.pendientesanulados')}}",
+                type: 'GET',
+                success: function(data) {
+                    $('#pendientes').DataTable().ajax.reload();
+
+
+                    $.each(data, function(i, item) {
+                        Apiws.notificaciones(item.respuesta, item.titulo, item.icon, item.position);
+
+                    });
+                    // fill_datatable1_resumen();
 
                 },
                 complete: function() {

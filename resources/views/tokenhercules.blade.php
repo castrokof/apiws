@@ -7,35 +7,33 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-12">
-            <div class="card col-12">
-                <div class="card-header">{{ __('Hercules') }}</div>
+            <div class="card col-l-12">
+                <div class="card-header">{{ __('Medcol') }}</div>
 
                 <div class="card-body">
-                    @if (session("TokenHercules"))
-                    <div class="alert alert-warning alert-dismissible" data-auto-dismiss="3000">
+                    @if (session("mensaje"))
+                    <div class="alert alert-warning alert-dismissible" data-auto-dismiss="6000">
                         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                        <h5><i class="icon fas fa-check"></i> Mensaje Tempus</h5>
-                        <li>{{ session("TokenHercules")}}</li>
+                        <h5><i class="icon fas fa-check"></i> Mensaje Medcol</h5>
+                        <li>{{ session("mensaje")}}</li>
                     </div>
                     @endif
-
-
-                    <form  action="{{route('tokenhercules1')}}" method="post">
+      
+                     
+                    <form  id="formularioTokenHercules">
                     @csrf
                     @include('form-consulta-hercules')
-
+                    
                     <button type="submit" id="consultar" class="btn btn-success">Agregar</button>
-
-                    <button type="button" id="consultar" class="btn btn-warning"><a href="/submenu">Retornar</a> </button>
-
+                    
                     </form>
-
+                    
 
 
                 </div>
+               
 
-
-
+                    
 
                 </div>
             </div>
@@ -56,8 +54,70 @@
 <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
 
 <script>
+     $(document).ready(function() {
+        $('#formularioTokenHercules').submit(function(event) {
+            event.preventDefault(); // Evita la submission tradicional del formulario
+
+            var formData = $(this).serialize(); // Serializa los datos del formulario
+            
+             Swal.fire({
+                    icon: "info",
+                    title: 'Espere por favor !',
+                    html: 'Conectando con el ministerio', // add html attribute if you want or remove
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    willOpen: () => {
+                        Swal.showLoading()
+                    },
+                }),
 
 
+            $.ajax({
+                url: "{{ route('tokenhercules1') }}", // La misma ruta que tenías en el formulario
+                type: "POST",
+                data: formData,
+                dataType: 'json', // Esperamos una respuesta en formato JSON
+                success: function(response) {
+                    if (response.mensaje && response.token) {
+                        Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        html: response.mensaje + '<br><strong>Token:</strong> ' + response.token,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => { // Se ejecuta después de que se cierra el primer modal
+                        Swal.fire({
+                            title: 'Cargando...',
+                            html: 'Redirigiendo a la página Direccionados...',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                                window.location.href = "{{ url('home') }}";
+                            }
+                        });
+                    });
+                    } else if (response.error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '¡Error!',
+                            text: response.error
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error en la petición AJAX:", xhr, status, error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: '¡Error!',
+                        text: 'Ocurrió un error al enviar la información. Por favor, intenta nuevamente.'
+                    });
+                }
+            });
+        });
+    });
 
+  
+       
 </script>
 @endsection

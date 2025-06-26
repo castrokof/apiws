@@ -4,10 +4,7 @@
     Listas Generales
 @endsection
 @section('styles')
-    <style>
-
-
-    </style>
+   
 
     <link href="{{ asset("assets/$theme/plugins/datatables-bs4/css/dataTables.bootstrap4.css") }}" rel="stylesheet"
         type="text/css" />

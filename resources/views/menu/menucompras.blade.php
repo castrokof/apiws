@@ -6,10 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>MEDCOL COMPRAS</title>
+   
+
+
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;600&display=swap" rel="stylesheet">
-
+    <link href="{{asset("assets/css/botones.css")}}" rel="stylesheet" type="text/css" />
     <!-- Styles -->
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ asset('assets/lte/plugins/fontawesome-free/css/all.min.css') }}">
@@ -21,8 +24,8 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <style>
         body {
-            background-color: #2c3e50;
-            color: #ecf0f1;
+            
+            
             font-family: 'Nunito', sans-serif;
         }
         
@@ -87,6 +90,7 @@
 </head>
 
 <body>
+    
     <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
         <div class="container">
             <a class="navbar-logo" href="{{ url('/') }}">
@@ -328,12 +332,13 @@
             </div>
         </div>
     </nav>
+
     <div class="container p-3 pt-3">
         <div class="card-columns">
 
             @if (Route::has('login'))
             @auth
-            @if(Auth::user()->rol == '1' || Auth::user()->rol == '2')
+            @if(Auth::user()->rol == '1' || Auth::user()->rol == '2' || Auth::user()->rol == '5' || Auth::user()->rol == '6')
             <!-- <div class="card bg-primary">
                         <div class="card-body text-center">
                             <div class="card-header"> <i class="fas fa-prescription-bottle-alt"></i> Registrar token</div>
@@ -370,6 +375,16 @@
                     </div>
                 </div>
             </div>
+            <div class="card bg-success">
+                <div class="card-body text-center">
+                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol EMCALI</div>
+                    <div class="list-group">
+                        <a href="{{ route('medcol5.pendientes') }}" class="list-group-item list-group-item-action">
+                            <i class="far fa-share-square"></i> Ordenes de Compra Farmacia Emcali <span class="badge badge-pill badge-primary pull-right">EMCALI</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
 
             <div class="card bg-info">
                 <div class="card-body text-center">
@@ -377,6 +392,17 @@
                     <div class="list-group">
                         <a href="{{ route('compras.medcol4') }}" class="list-group-item list-group-item-action">
                             <i class="far fa-share-square"></i> Ordenes de Compra PCE-Huerfanas-Biologicos <span class="badge badge-pill badge-primary pull-right">PCE-HUE-BIO</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-danger">
+                <div class="card-body text-center">
+                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol New Servidor</div>
+                    <div class="list-group">
+                        <a href="{{ route('compras.medcol3') }}" class="list-group-item list-group-item-action">
+                            <i class="far fa-share-square"></i> Gestionar Ordenes de Compra <span class="badge badge-pill badge-primary pull-right">NEW SRV</span>
                         </a>
                     </div>
                 </div>
@@ -462,6 +488,10 @@
         $(window).on("load", function() {
             $(".loader1").fadeOut("slow");
         });
+        
+
+
+        
     </script>
 </body>
 

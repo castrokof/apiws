@@ -18,8 +18,6 @@
                                 <button type="button" class="btn btn-tool" data-dismiss="modal">
                                     <i class="fas fa-times"></i>
                                 </button>
-
-
                             </div>
                         </div>
                         <div class="card-body">
@@ -30,8 +28,6 @@
                                 @include('includes.boton-form-crear-empresa-empleado-usuario')
 
                             </form>
-
-
                         </div>
                     </div>
                 </div>

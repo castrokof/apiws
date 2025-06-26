@@ -144,10 +144,6 @@
         <label for="fac_entrega" class="col-xs-4 control-label requerido">Comprobante Dispensación</label>
         <input name="fac_entrega" id="fac_entrega" class="form-control" readonly>
     </div>
-    <div class="col-lg-3">
-        <label for="dias_transcurridos" class="col-xs-4 control-label requerido">Tiempo</label>
-        <input type="text" name="dias_transcurridos" id="dias_transcurridos" class="form-control" readonly>
-    </div>
 </div>
 
 <!-- <div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel">

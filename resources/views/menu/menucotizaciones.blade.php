@@ -144,6 +144,8 @@
                                         <a class="dropdown-item text-dark" href="{{ route('register') }}">{{ __('Crear Usuario') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('listasIndex') }}">{{ __('Crear listas') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('documentos') }}">{{ __('Crear documento') }}</a>
+                                          <a class="dropdown-item text-dark" href="{{ route('indexscann') }}">{{ __('Scann documento') }}</a>
+                                        
                                         <div class="dropdown-divider"></div>
 
                                             <!-- Submenú -->

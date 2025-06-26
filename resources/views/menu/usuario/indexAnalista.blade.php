@@ -18,154 +18,7 @@ Pendientes Medcol San Fernando
 <link href="{{asset("assets/js/gijgo-combined-1.9.13/css/gijgo.min.css")}}" rel="stylesheet" type="text/css" />
 <link href="{{asset("assets/css/select2-bootstrap.min.css")}}" rel="stylesheet" type="text/css" />
 <link href="{{asset("assets/css/select2.min.css")}}" rel="stylesheet" type="text/css" />
-
-
-<style>
-    /*btn flotante*/
-    .btn-flotante {
-        font-size: 14px;
-        /* Cambiar el tamaño de la tipografia */
-        text-transform: uppercase;
-        /* Texto en mayusculas */
-        font-weight: bold;
-        /* Fuente en negrita o bold */
-        color: #ffffff;
-        /* Color del texto */
-        border-radius: 40px 40px 40px 40px;
-        border-color: #ffffff;
-        /* Borde del boton */
-        letter-spacing: 2px;
-        /* Espacio entre letras */
-        background: linear-gradient(to right, #0880a8, #56e6ff) !important;
-        /* Color de fondo */
-        /*background-color: #e9321e; /* Color de fondo */
-        padding: 8px 15px;
-        /* Relleno del boton */
-        position: fixed;
-        top: 146px;
-
-        right: 40px;
-        transition: all 300ms ease 0ms;
-        box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.5);
-        z-index: 99;
-        /* border: none;
-    outline: none; */
-    }
-
-    .btn-flotante:hover {
-        background-color: #2c2fa5;
-        /* Color de fondo al pasar el cursor */
-        box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.3);
-        transform: translateY(-5px);
-    }
-
-    @media only screen and (max-width: 300px) {
-        .btn-flotante {
-            font-size: 14px;
-            padding: 12px 20px 0 0;
-            bottom: 20px;
-            right: 20px;
-        }
-    }
-
-    .loaders {
-
-        visibility: hidden;
-        background-color: rgba(255, 253, 253, 0.952);
-        position: absolute;
-        z-index: +100 !important;
-        width: 100%;
-        height: 100%;
-    }
-
-    .loaders img {
-        position: relative;
-        top: 50%;
-        left: 40%;
-        width: 180px;
-        height: 180px;
-    }
-
-    /* // Colores para las tarjetas widget */
-    .card {
-        background-color: #fff;
-        border-radius: 10px;
-        border: none;
-        position: relative;
-        margin-bottom: 30px;
-        box-shadow: 0 0.46875rem 2.1875rem rgba(90, 97, 105, 0.1), 0 0.9375rem 1.40625rem rgba(90, 97, 105, 0.1), 0 0.25rem 0.53125rem rgba(90, 97, 105, 0.12), 0 0.125rem 0.1875rem rgba(90, 97, 105, 0.1);
-    }
-
-    .l-bg-blue-dark-card {
-        background-color: linear-gradient(to right, #b7c7ec, #4286f4) !important;
-        color: #fff;
-    }
-
-
-
-    .l-bg-cherry {
-        background: linear-gradient(to right, #493240, #f09) !important;
-        color: #fff;
-    }
-
-    .l-bg-blue-dark {
-        background: linear-gradient(to right, #06b6cd, #319acb) !important;
-        color: #fff;
-    }
-
-    .l-bg-green-dark {
-        background: linear-gradient(to right, #0a504a, #3866ef) !important;
-        color: #fff;
-    }
-
-    .l-bg-orange-dark {
-        background: linear-gradient(to right, #a86008, #ffba56) !important;
-        color: #fff;
-    }
-
-    .l-bg-red-dark {
-        background: linear-gradient(to right, #a80d08, #ff6756) !important;
-        color: #fff;
-    }
-
-    .card .card-statistic-3 .card-icon-large .fas,
-    .card .card-statistic-3 .card-icon-large .far,
-    .card .card-statistic-3 .card-icon-large .fab,
-    .card .card-statistic-3 .card-icon-large .fal {
-        font-size: 110px;
-    }
-
-    .card .card-statistic-3 .card-icon {
-        text-align: center;
-        line-height: 50px;
-        margin-left: 15px;
-        color: #000;
-        position: absolute;
-        right: -5px;
-        top: 20px;
-        opacity: 0.1;
-    }
-
-    .l-bg-cyan {
-        background: linear-gradient(135deg, #289cf5, #84c0ec) !important;
-        color: #fff;
-    }
-
-    .l-bg-green {
-        background: linear-gradient(135deg, #23bdb8 0%, #43e794 100%) !important;
-        color: #fff;
-    }
-
-    .l-bg-orange {
-        background: linear-gradient(to right, #f9900e, #ffba56) !important;
-        color: #fff;
-    }
-
-    .l-bg-cyan {
-        background: linear-gradient(135deg, #289cf5, #84c0ec) !important;
-        color: #fff;
-    }
-</style>
+<link href="{{asset("assets/css/botones.css")}}" rel="stylesheet" type="text/css" />
 
 @endsection
 
@@ -259,7 +112,7 @@ Pendientes Medcol San Fernando
                     $("#detalle1").append(
 
 
-                        '<div class="small-box shadow-lg l-bg-orange-dark"><div class="inner">' +
+                        '<div class="small-box shadow-lg l-bg-green-dark"><div class="inner">' +
                         '<h5>TOTAL ENTREGADOS</h5>' +
                         '<p><h5> ' + a +
                         '</h5></p>' +
@@ -277,7 +130,7 @@ Pendientes Medcol San Fernando
                     $("#detalle2").append(
 
 
-                        '<div class="small-box shadow-lg l-bg-green-dark"><div class="inner">' +
+                        '<div class="small-box shadow-lg l-bg-orange-dark"><div class="inner">' +
                         '<h5>EN TRAMITE</h5>' +
                         '<p><h5><i class="fas fa-comment-medical"></i> ' + a +
                         '</h5></p>' +
@@ -1403,7 +1256,7 @@ Pendientes Medcol San Fernando
                     $('#usuario').val(data.pendiente.usuario);
                     $('#estado').val(data.pendiente.estado);
                     /* $('#fecha_impresion').val(data.pendiente.fecha_impresion); */
-                    $('#fecha_entrega').val(data.pendiente.fecha_entrega);
+                    $('#fac_entrega').val(data.fac_entrega);
 
 
                     $('#hidden_id').val(id)
@@ -1451,7 +1304,6 @@ Pendientes Medcol San Fernando
                     $('#cantdpx_n').val(data.pendiente.cantdpx);
                     $('#cantord_n').val(data.pendiente.cantord);
                     $('#fecha_factura_n').val(moment(data.pendiente.fecha_factura).format('YYYY-MM-DD'));
-                    $('#fecha_entrega_n').val(moment(data.pendiente.fecha_entrega).format('YYYY-MM-DD'));
                     $('#fecha_n').val(moment(data.pendiente.fecha).format('YYYY-MM-DD'));
                     $('#historia_n').val(data.pendiente.historia);
                     $('#apellido1_n').val(data.pendiente.apellido1);
@@ -1470,7 +1322,6 @@ Pendientes Medcol San Fernando
                     $('#centroproduccion_n').val(data.pendiente.centroproduccion);
                     $('#observ_n').val(data.pendiente.observaciones);
                     $('#fac_entrega').val(data.fac_entrega);
-
                     $('#cantidad_n').val(data.pendiente.cantidad);
                     $('#cajero_n').val(data.pendiente.cajero);
                     $('#usuario_n').val(data.pendiente.usuario);

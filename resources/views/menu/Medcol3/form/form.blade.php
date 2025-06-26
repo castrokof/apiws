@@ -137,18 +137,21 @@
     <div class="col-lg-2">
         <label for="name" class="col-xs-4 control-label ">Usuario que registro</label>
         <input name="name" id="name" class="form-control" value="{{ Auth::user()->name ?? '' }}" readonly>
+
     </div>
     <div class="col-lg-2">
         <label for="doc_entrega" class="col-xs-4 control-label requerido">Doc Entrega</label>
         <input type="text" name="doc_entrega" id="doc_entrega" class="form-control " minlength="6" value="MCD" readonly> </br>
 
         <label for="factura_entrega" class="col-xs-4 control-label requerido">Factura Entrega</label>
-        <input type="text" name="factura_entrega" id="factura_entrega" class="form-control" placeholder="No. Factura Rfast...">
+        <input type="number" name="factura_entrega" id="factura_entrega" class="form-control" placeholder="No. Factura Rfast...">
         <input type="hidden" name="enviar_factura_entrega" id="enviar_factura_entrega" value="false">
+
     </div>
 
     <div class="col-lg-8 col-md-6 col-xs-6">
         <label for="observacion" class="col-xs-8 control-label requerido">Observaciones</label>
         <textarea name="observacion" id="observacion" class="form-control UpperCase" rows="5" placeholder="Ingrese las observaciones ..." required></textarea>
     </div>
+
 </div>

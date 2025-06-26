@@ -24,8 +24,12 @@ class MedcolCotizaciones3 extends Model
             'nombre_sucursal',
             'fecha_inicio',
             'fecha_fin',
-            'estado'
-                           ];
+            'estado',
+            'consumoMes',
+            'consumoYear',
+            'user_id',
+            'listas_id'
+    ];
     
     
          protected function serializeDate(DateTimeInterface $date)

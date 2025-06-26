@@ -53,8 +53,10 @@ class DispensadoApiMedcol4 extends Model
         'estado',
         'centroprod',
         'drogueria',
-        'user_id',
-        'cajero'
+        'cajero',
+        'ips',
+        'documento_origen',
+        'factura_origen'
     ];
 
    /* protected $casts = [
@@ -66,7 +68,4 @@ class DispensadoApiMedcol4 extends Model
     {
         return $date->format('Y-m-d H:i:s');
     }
-
-    
-    
 }

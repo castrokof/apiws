@@ -47,13 +47,18 @@ class LoginController extends Controller
         
         $rol = $user;
         
-        if ($rol->rol == '1' || $rol->rol == '2'  ) {
+        if ($rol->rol == '1' || $rol->rol == '2'  || $rol->rol == '6'  ) {
            
             return redirect(RouteServiceProvider::HOME);
 
-        }else if ($rol->rol == '3') {
+        }else if ($rol->rol == '3' || $rol->rol == '4') {
           
             return redirect('submenu');
+
+        
+        }else if ( $rol->rol == '5') {
+          
+            return redirect(RouteServiceProvider::HOME);
 
         
         }else{
@@ -64,6 +69,7 @@ class LoginController extends Controller
 
     }
     
+
     
     
     

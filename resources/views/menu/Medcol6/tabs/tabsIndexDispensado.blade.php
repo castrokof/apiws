@@ -65,10 +65,10 @@
         </button>
     </div>
 
-    <button type="button" id="syncdis" class="btn-flotante1 tooltipsC" title="Enviar Dispensados">
+    <!--<button type="button" id="syncdis" class="btn-flotante1 tooltipsC" title="Enviar Dispensados">
         <i class="fas fa-capsules fa-2x"></i>
         <span class="badge badge-pill pull-right">Enviar Dispensados</span>
-    </button>
+    </button> -->
 
 
 </div>

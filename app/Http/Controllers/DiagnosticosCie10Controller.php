@@ -22,29 +22,30 @@ class DiagnosticosCie10Controller extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function selectcie10(Request $request)
+      public function selectcie10(Request $request)
     {
 
-        $array = [];
+        $array=[];
 
 
-        if ($request->has('q')) {
+        if($request->has('q'))
+        {
             $term = $request->get('q');
 
 
             $result = DiagnosticosCie10::orderBy('id')
-                ->where('estado', 'ACTIVO')
-                ->where(function ($query) use ($term) {
-                    $query->where('descripcion', 'LIKE', '%' . $term . '%')
-                        ->orWhere('codigo', 'LIKE', '%' . $term . '%');
-                })
-                ->get();
+            ->where('estado', 'ACTIVO')
+            ->where(function ($query) use ($term) {
+                $query->where('descripcion', 'LIKE', '%' . $term . '%')
+                      ->orWhere('codigo', 'LIKE', '%' . $term . '%');
+            })
+            ->get();
 
             array_push($array, $result);
 
-            return response()->json(['array' => $array]);
+            return response()->json(['array'=>$array]);
         }
-
+        
         /*else{
 
 

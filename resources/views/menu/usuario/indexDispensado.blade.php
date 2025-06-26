@@ -21,7 +21,6 @@ Dispensado Medcol Salud Mental
 <link href="{{asset("assets/css/botones.css")}}" rel="stylesheet" type="text/css" />
 
 
-
 @endsection
 
 
@@ -57,20 +56,20 @@ Dispensado Medcol Salud Mental
 
 <script>
     $(document).ready(function() {
-
-
+        
+            
         $("#selectall").on('click', function() {
-            $(".case").prop("checked", this.checked);
-        });
-
-        fill_datatable1_resumen();
-
-
-        function fill_datatable1_resumen() {
+          $(".case").prop("checked", this.checked);
+        });    
+        
+          fill_datatable1_resumen();
+        
+        
+         function fill_datatable1_resumen() {
             $("#detalle").empty();
             $("#detalle1").empty();
             $("#detalle2").empty();
-
+            
             $.ajax({
                 url: "{{ route('medcol2.informedis') }}",
                 // data: {
@@ -79,13 +78,9 @@ Dispensado Medcol Salud Mental
                 // },
                 dataType: "json",
                 success: function(data) {
-                    const {
-                        dispensado,
-                        revisado,
-                        anulado
-                    } = data;
-
-                    $("#detalle").append(`
+                  const { dispensado, revisado, anulado } = data;
+            
+                  $("#detalle").append(`
                     <div class="small-box shadow-lg l-bg-blue-dark">
                       <div class="inner">
                         <h5>PENDIENTES X REVISAR</h5>
@@ -98,9 +93,9 @@ Dispensado Medcol Salud Mental
                       </a>
                     </div>
                   `);
-
-                    $("#detalle1").append(`
-                    <div class="small-box shadow-lg l-bg-orange-dark">
+            
+                  $("#detalle1").append(`
+                    <div class="small-box shadow-lg l-bg-green-dark">
                       <div class="inner">
                         <h5>REVISADAS</h5>
                         <p><h5>${revisado ?? 0}</h5></p>
@@ -110,8 +105,8 @@ Dispensado Medcol Salud Mental
                       </div>
                     </div>
                   `);
-
-                    $("#detalle2").append(`
+            
+                  $("#detalle2").append(`
                     <div class="small-box shadow-lg l-bg-red-dark">
                       <div class="inner">
                         <h5>ANULADAS</h5>
@@ -125,10 +120,11 @@ Dispensado Medcol Salud Mental
                 }
             });
         }
-
+        
 
         var fechaini;
         var fechafin;
+        var contrato;
 
         // Función para llenar la tabla al cargar la página
         fill_datatable_tabla();
@@ -138,19 +134,22 @@ Dispensado Medcol Salud Mental
 
             fechaini = $('#fechaini').val();
             fechafin = $('#fechafin').val();
-            //historia = $('#historia').val();
+            contrato = $('#contrato').val();
 
 
-            if (fechaini != '' && fechafin != '') {
+            if (fechaini != '' && fechafin != '' || contrato != '') {
 
                 $('#dispensados').DataTable().destroy();
+                $('#dispensados').DataTable().destroy();
+                $("#revisados").DataTable().destroy();
+                $("#anulados").DataTable().destroy();
 
-                fill_datatable_tabla(fechaini, fechafin);
+                fill_datatable_tabla(fechaini, fechafin, contrato);
 
             } else {
 
                 Swal.fire({
-                    title: 'Debes digitar fecha inicial y fecha final',
+                    title: 'Debes digitar fecha inicial y fecha final o la Droguería',
                     icon: 'warning',
                     buttons: {
                         cancel: "Cerrar"
@@ -165,13 +164,15 @@ Dispensado Medcol Salud Mental
 
             $('#fechaini').val('');
             $('#fechafin').val('');
-            //$('#historia').val('');
+            $('#contrato').val('');
 
             $('#dispensados').DataTable().destroy();
+            $("#revisados").DataTable().destroy();
+            $("#anulados").DataTable().destroy();
             fill_datatable_tabla();
         });
 
-        function fill_datatable_tabla(fechaini = '', fechafin = '') {
+        function fill_datatable_tabla(fechaini = '', fechafin = '', contrato = '') {
 
             $(function() {
                 // Se llama a la función correspondiente al tab activo al cargar la página
@@ -224,6 +225,7 @@ Dispensado Medcol Salud Mental
                                     data: {
                                         fechaini: fechaini,
                                         fechafin: fechafin,
+                                        contrato: contrato,
                                         _token: "{{ csrf_token() }}"
                                     },
                                     method: 'POST'
@@ -524,7 +526,10 @@ Dispensado Medcol Salud Mental
                                 ajax: {
                                     url: "{{route('medcol2.disrevisado')}}",
                                     data: {
-                                        _token: "{{ csrf_token() }}"
+                                         fechaini: fechaini,
+                                         fechafin: fechafin,
+                                         contrato: contrato,
+                                         _token: "{{ csrf_token() }}"
                                     },
                                     method: 'POST'
                                 },
@@ -710,7 +715,7 @@ Dispensado Medcol Salud Mental
                                         className: "btn  btn-outline-success btn-sm",
                                         customize: function(xlsx) {
                                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
-                                            $('row c[r^="AG"]', sheet).each(function() {
+                                            $('row c[r^="AG"]', sheet).each(function () {
                                                 $(this).attr('t', 's');
                                             });
                                         }
@@ -947,7 +952,7 @@ Dispensado Medcol Salud Mental
                                         className: "btn  btn-outline-success btn-sm",
                                         customize: function(xlsx) {
                                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
-                                            $('row c[r^="AG"]', sheet).each(function() {
+                                            $('row c[r^="AG"]', sheet).each(function () {
                                                 $(this).attr('t', 's');
                                             });
                                         }
@@ -1123,7 +1128,7 @@ Dispensado Medcol Salud Mental
                 }
             });
         }
-
+        
         $(document).on('click', '#synanulados', function() {
 
             const text = 'De Medcol Salud Mental';
@@ -1174,11 +1179,11 @@ Dispensado Medcol Salud Mental
             var dispensado = [];
             var dispensadotrue1 = [];
 
-
-
+          
+            
 
             // Utiliza 'tr' en lugar de 'tbody tr' para recorrer solo la fila específica
-            $("tbody tr").each(function(el) {
+           $("tbody tr").each(function(el){
 
                 var itemdispensado = {};
 
@@ -1202,15 +1207,15 @@ Dispensado Medcol Salud Mental
                 dispensado.push(itemdispensado);
 
             });
-
-
+            
+             
             $.each(dispensado, function(i, items) {
 
                 var dispensadotrue = {};
 
-                if (items.checked == true) {
-
-                    console.log("entra acá");
+                 if(items.checked == true){
+                     
+                      console.log("entra acá");
                     dispensadotrue.ID = items.id;
                     dispensadotrue.copago1 = items.copago1;
                     dispensadotrue.numero_entrega1 = items.numero_entrega1;
@@ -1224,14 +1229,14 @@ Dispensado Medcol Salud Mental
                     dispensadotrue.medico1 = items.medico1;
                     dispensadotrue.estado = items.estado;
                     dispensadotrue.user_id = items.user_id;
-
+                
                     dispensadotrue1.push(dispensadotrue);
+             
+                 }
+               
+                
 
-                }
-
-
-
-
+                
             });
 
             $.each(dispensadotrue1, function(i, items) {
@@ -1305,6 +1310,7 @@ Dispensado Medcol Salud Mental
                         if (data.success == 'ya') {
 
                             Swal.fire({
+                                icon: 'warning',
                                 type: 'warning',
                                 title: "Factura no adicionada",
                                 showConfirmButton: true,
@@ -1316,6 +1322,7 @@ Dispensado Medcol Salud Mental
                         } else if (data.success == 'ok') {
 
                             Swal.fire({
+                                icon: 'success',
                                 type: 'success',
                                 title: "Factura adicionada correctamente",
                                 showConfirmButton: true,
@@ -1326,31 +1333,32 @@ Dispensado Medcol Salud Mental
 
                         }
                     },
-                    error: function(xhr) {
-                        // Manejar errores de validación de la solicitud AJAX
-                        var errorMessage = "Revise los siguientes errores:<br>";
-                        var errorMessage2 = "";
-                        if (xhr.responseJSON && xhr.responseJSON.errors) {
-                            $.each(xhr.responseJSON.errors, function(fieldName, fieldErrors) {
-
-                                errorMessage2 += "<strong>" + fieldName + ":</strong><br>";
-                                $.each(fieldErrors, function(index, error) {
-                                    errorMessage2 += "- " + error + "<br>";
+                            error: function(xhr) {
+                                // Manejar errores de validación de la solicitud AJAX
+                                var errorMessage = "Revise los siguientes errores:<br>";
+                                var errorMessage2 = "";
+                                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                                    $.each(xhr.responseJSON.errors, function(fieldName, fieldErrors) {
+                                        
+                                        errorMessage2 += "<strong>" + fieldName + ":</strong><br>";
+                                        $.each(fieldErrors, function(index, error) {
+                                            errorMessage2 += "- " + error + "<br>";
+                                        });
+                                    });
+                                } else {
+                                    errorMessage += "Error en la solicitud.";
+                                }
+                                Swal.fire({
+                                    icon: 'error',
+                                    type: 'error',
+                                    title: errorMessage,
+                                    showConfirmButton: true,
+                                    html: errorMessage2
                                 });
-                            });
-                        } else {
-                            errorMessage += "Error en la solicitud.";
-                        }
-                        Swal.fire({
-                            type: 'error',
-                            title: errorMessage,
-                            showConfirmButton: true,
-                            html: errorMessage2
-                        });
-                    }
+                            }
                 });
         }
-
+        
         $('.dxcie10').select2({
             language: "es",
             theme: "bootstrap4",
@@ -1685,7 +1693,6 @@ Dispensado Medcol Salud Mental
                 // Limpiar y recargar la DataTable '#tablaRegistros'
                 $('#tablaRegistros').DataTable().clear().draw();
                 // Opcional: Recargar la DataTable desde el origen de datos
-                $('#dispensados').DataTable().ajax.reload();
                 // $('#tablaRegistros').DataTable().ajax.reload();
 
             } catch (error) {
@@ -1699,8 +1706,8 @@ Dispensado Medcol Salud Mental
                 });
             }
         }
-
-
+        
+        
     });
 
     var idioma_espanol = {

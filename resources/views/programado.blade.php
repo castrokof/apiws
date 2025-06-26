@@ -1,7 +1,9 @@
 @extends('layouts.app')
 @section("styles")
 <link href="{{asset("assets/lte/plugins/datatables-bs4/css/dataTables.bootstrap4.css")}}" rel="stylesheet" type="text/css"/>
-<link href="//cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css" rel="stylesheet">
+<link href="{{asset("assets/lte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.css")}}" rel="stylesheet"  type="text/css"/>
+<link href="{{asset("assets/lte/plugins/toastr/toastr.css")}}" rel="stylesheet" type="text/css"/>
+
 
 <style>
     .loader {
@@ -38,16 +40,16 @@
                 <div class="card-header bg-success">{{ __('Programados') }}</div>
 
                 <div class="card-body">
-                    @if (session('status'))
+                  @isset($error)
                         <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
+                           {{ $error }}
                         </div>
-                    @endif
+                   @endisset
 
                     {{-- {{ __('You are logged in!') }} --}}
-                    Estatus Body: {{$statusP ?? $statusF ?? ''}}
+                    
                     <form  action="{{route('programado')}}" method="get">
-                    @include('form-consulta')
+                    @include('form.form-consulta')
                     <button type="submit" id="consultar" class="btn btn-success">Consultar</button><button type="button" id="anular" class="btn btn-danger">Anular</button>
                     </form>
                     
@@ -79,93 +81,7 @@
                        </tr>
                     </thead>
                        <tbody>
-                        @foreach ($medicamentos2 ?? '' as $item3)
-                        @foreach ($item3 as $item)
-                        <tr>
-                            <td><button type="button" name="Dispensar" title="Clic para dispensar" id="{{$item['ID'] ?? ''}}" data-p="{{$item['NoPrescripcion'] ?? ''}}"  data-c="{{$item['CodSerTecAEntregar'] ?? ''}}"  data-e="{{$item['NoEntrega'] ?? ''}}" data-fe="{{$item['FecEntrega'] ?? ''}}" data-td="{{$item['TipoIDPaciente'] ?? ''}}" data-d="{{$item['NoIDPaciente'] ?? ''}}" data-te="{{$item['CantTotAEntregar'] ?? ''}}" class = "dispensar btn-float  bg-gradient-info btn-sm tooltipsC"  title="Clic para dispensar"><i class="fas fa-file-medical"><i class="fa fa-fw fa-plus-circle"></i></i></a></td>
-                            <td><input class="case" type="checkbox" title="Selecciona Orden" value="{{$item['ID'] ?? ''}}"></td>
-                            <td> {{$item['ID'] ?? ''}}</td>
-                            <td> {{$item['IDProgramacion'] ?? ''}}</td>
-                            <td> {{$item['NoPrescripcion'] ?? ''}}</td>
-                            <td> {{$item['TipoTec'] ?? ''}}</td>
-                            <td> {{$item['ConTec'] ?? ''}}</td>
-                            <td>{{$item['TipoIDPaciente'] ?? ''}}</td>
-                            <td>{{$item['NoIDPaciente'] ?? ''}}</td>
-                            <td>{{$item['NoEntrega'] ?? ''}}</td>
-                            <td>{{$item['FecMaxEnt'] ?? ''}}</td>
-                            <td>{{$item['TipoIDSedeProv'] ?? ''}}</td>
-                            <td>{{$item['NoIDSedeProv'] ?? ''}}</td>
-                            <td>{{$item['CodSedeProv'] ?? ''}}</td>
-                            <td>{{$item['CodSerTecAEntregar'] ?? ''}}</td>
-                             @switch($item['CodSerTecAEntregar'])
-                                @case(107)
-                                <td>ASEO PERSONAL (GEL ANTIBACTERIAL, DESODORANTES, PROTECTORES LABIALES, TOALLAS DE PAPEL, TOALLAS HIGIENICAS, MAQUILLAJE, ENTRE OTRAS)</td> 
-                                    @break
-
-                                @case(108)
-                                <td> BLOQUEADORES SOLARES</td>
-                                    @break
-
-                                 @case(109)
-                                <td>CHAMPÚ Y LOCIONES CAPILARES</td> 
-                                    @break
-
-                                @case(112)
-                                <td> CREMAS ANTIPAÑALITIS</td>
-                                    @break
-                                
-                                @case(113)
-                                <td>CREMAS CICATRIZANTES Y REPARADORES DÉRMICOS</td> 
-                                   @break
-    
-                                @case(114)
-                                <td> CREMAS Y LOCIONES HUMECTANTES, HIDRATANTES Y EMOLIENTES</td>
-                                    @break
-                            
-                                @case(121)
-                                <td>HIGIENE ORAL (CEPILLO, CREMA, SEDA DENTAL, ENJUAGUE)</td> 
-                                    @break
-    
-                                @case(127)
-                                <td> JABONES COSMÉTICOS, ANTIALÉRGICOS Y ANTIBACTERIALES</td>
-                                     @break
-                            
-                                @case(130)
-                                <td>LOCIONES REPELENTES DE USO PERSONAL Y DOMÉSTICO</td> 
-                                     @break
-        
-                                @case(133)
-                                <td>MEDICAMENTOS FITOTERAPEÚTICOS</td>
-                                     @break
-
-                                @case(134)
-                                <td>MEDICAMENTOS HOMEOPÁTICOS</td> 
-                                @break
-        
-                                @case(139)
-                                <td>PAÑALES</td> 
-                                 @break
-            
-                                @case(140)
-                                <td> PAÑITOS HÚMEDOS</td>
-                                @break
-         
-                                @case(146)
-                                <td> SUPLEMENTOS DIETARIOS</td>
-                                @break
-                
-
-                                @default
-                                <td>Medicamento</td> 
-                            @endswitch
-                            <td>{{$item['CantTotAEntregar'] ?? ''}}</td>
-                            <td>{{$item['FecProgramacion'] ?? ''}}</td>
-                            <td>{{$item['EstProgramacion'] ?? ''}}</td>
-                            <td>{{$item['FecAnulacion'] ?? ''}}</td>
-                            
-                        </tr>
-                        @endforeach
-                        @endforeach
+                       
                         </tbody>    
                         </table>
                     </div>
@@ -218,6 +134,7 @@
 @endsection
 @section("scriptsPlugins")
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script src="{{asset("assets/lte/plugins/toastr/toastr.min.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/lte/plugins/datatables/jquery.dataTables.js")}}" type="text/javascript"></script>
 <script src="{{asset("assets/lte/plugins/datatables-bs4/js/dataTables.bootstrap4.js")}}" type="text/javascript"></script>
 <script src="https://cdn.datatables.net/plug-ins/1.10.20/api/sum().js"></script>
@@ -256,8 +173,9 @@ $(document).ready(function(){
     
     
 
-    $('#mipres').DataTable({
-
+    var table = $('#mipres').DataTable({
+        
+        lengthMenu: [ [25, 50, 100, 500, -1 ], [25, 50, 100, 500, "Mostrar Todo"] ],
         language: idioma_espanol,
         processing: true,
 
@@ -303,7 +221,178 @@ $(document).ready(function(){
     
                       }
                    ],
+                    "createdRow": function(row, data, dataIndex) { 
+                    if (data[16] == "890303093") { 
+                    $(row).css("background-color", "#90EE90"); 
+                    $(row).addClass("warning");
+                    
+                    }else if(data[16] == "800112806"){
+                    $(row).css("background-color", "#87CEEB"); 
+                    $(row).addClass("warning"); 
+                    }
+        
+                   }
     });
+    
+    function getDescripcionCodSerTec(codigo) {
+    switch(parseInt(codigo)) {
+        case 107:
+            return "ASEO PERSONAL (GEL ANTIBACTERIAL, DESODORANTES, PROTECTORES LABIALES, TOALLAS DE PAPEL, TOALLAS HIGIENICAS, MAQUILLAJE, ENTRE OTRAS)";
+        case 108:
+            return "BLOQUEADORES SOLARES";
+        case 109:
+            return "CHAMPÚ Y LOCIONES CAPILARES";
+        case 112:
+            return "CREMAS ANTIPAÑALITIS";
+        case 113:
+            return "CREMAS CICATRIZANTES Y REPARADORES DÉRMICOS";
+        case 114:
+            return "CREMAS Y LOCIONES HUMECTANTES, HIDRATANTES Y EMOLIENTES";
+        case 121:
+            return "HIGIENE ORAL (CEPILLO, CREMA, SEDA DENTAL, ENJUAGUE)";
+        case 127:
+            return "JABONES COSMÉTICOS, ANTIALÉRGICOS Y ANTIBACTERIALES";
+        case 130:
+            return "LOCIONES REPELENTES DE USO PERSONAL Y DOMÉSTICO";
+        case 133:
+            return "MEDICAMENTOS FITOTERAPEÚTICOS";
+        case 134:
+            return "MEDICAMENTOS HOMEOPÁTICOS";
+        case 139:
+            return "PAÑALES";
+        case 140:
+            return "PAÑITOS HÚMEDOS";
+        case 146:
+            return "SUPLEMENTOS DIETARIOS";
+        default:
+            return "Medicamento";
+    }
+}
+ // Función para cargar datos que puede ser reutilizada
+    function cargarDatos(params = {}) {
+        
+                
+        
+        // Parámetros por defecto para la carga inicial
+        var defaultParams = {
+            cargaInicial: true,
+            "_token": $("meta[name='csrf-token']").attr("content")
+        };
+        
+      
+        // Combinar parámetros por defecto con los proporcionados
+        var requestParams = $.extend({}, defaultParams, params);
+        
+         Swal.fire({
+                    icon: "info",
+                    title: 'Espere por favor !',
+                    html: 'Consultando con el ministerio', // add html attribute if you want or remove
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    willOpen: () => {
+                        Swal.showLoading()
+                    },
+                }),
+
+        
+        $.ajax({
+            url: "{{ route('programado1') }}",
+            method: 'POST',
+            dataType: "json",
+            data: requestParams,
+            success: function(response) {
+               
+                console.log(response); 
+                
+                if (response.success) {
+                    // Limpiamos la tabla existente
+                    table.clear();
+                    
+                    // En tu función success del AJAX
+                    $.each(response.data, function(i, items) {
+                        $.each(items, function(j, item) {
+                           var checkboxCell = '<input class="case" type="checkbox" title="Selecciona Orden" value="' + item.ID + '">';
+                           var checkboxCellP = `<td>
+                                                    <button type="button"
+                                                        name="Dispensar"
+                                                        id="${item.ID}"
+                                                        data-p="${item.NoPrescripcion}"
+                                                        data-c="${item.CodSerTecAEntregar}"
+                                                        data-e="${item.NoEntrega}"
+                                                        data-fe="${item.FecEntrega}"
+                                                        data-td="${item.TipoIDPaciente}"
+                                                        data-d="${item.NoIDPaciente}"
+                                                        class="dispensar btn-float bg-gradient-info btn-sm tooltipsC"
+                                                        title="Clic para dispensar">
+                                                        <i class="fas fa-file-medical"><i class="fa fa-fw fa-plus-circle"></i></i>
+                                                    </button>
+                                                </td>`;
+                            
+                            
+                            table.row.add([
+                                checkboxCellP,
+                                checkboxCell,
+                                item.ID || '',
+                                item.IDProgramacion || '',
+                                item.NoPrescripcion || '',
+                                item.TipoTec || '',
+                                item.ConTec || '',
+                                item.TipoIDPaciente || '',
+                                item.NoIDPaciente || '',
+                                item.NoEntrega || '',
+                                item.FecMaxEnt || '',
+                                item.TipoIDSedeProv || '',
+                                item.NoIDSedeProv || '',
+                                item.CodSedeProv || '',
+                                item.CodSerTecAEntregar || '',
+                                getDescripcionCodSerTec(item.CodSerTecAEntregar),
+                                item.CantTotAEntregar || '',
+                                item.FecProgramacion || '',
+                                item.EstProgramacion || '',
+                                item.FecAnulacion || ''
+                                
+                            ]).draw(false);
+                        });
+                    });
+                    
+                    
+                    toastr.success('Estado: ' + response.message);
+                    
+                } else {
+                toastr.error('Error: ' + response.message);
+            
+             } 
+            
+                
+            },
+                complete: function() {
+                Swal.close(); // Cierra el modal de carga
+            }
+        });
+    }
+    
+    // Cargar datos automáticamente al iniciar la página
+    cargarDatos();
+    
+     // Manejar el evento de clic en el botón "Consultar"
+    $("#consultar").click(function(e) {
+        e.preventDefault(); // Evitar el envío del formulario por defecto
+        
+        // Obtener valores del formulario
+        var fechaini = $("input[name='fechaini']").val();
+        var fechafin = $("input[name='fechafin']").val();
+        var prescripcion = $("textarea[name='prescripcion']").val();
+        
+        // Llamar a la función con los parámetros del formulario
+        cargarDatos({
+            fechaini: fechaini,
+            fechafin: fechafin,
+            prescripcion: prescripcion,
+            cargaInicial: false, // Ya no es carga inicial
+            "_token": $("meta[name='csrf-token']").attr("content")
+        });
+    });
+
 
 //Funcion de envio de datos
 

@@ -19,7 +19,7 @@
                             <th>Tipo Documento</th>
                             <th>Cantidad Entregada</th>
                             <th>Cantidad Pendiente</th>
-                            <th>Fecha Factura</th>
+                            <th>Fecha Pendiente</th>
                             <th>Fecha</th>
                             <th>Historia</th>
                             <th>Primer Apellido</th>
@@ -34,13 +34,14 @@
                             <th>Código</th>
                             <th>Medicamento</th>
                             <th>CUMS</th>
-                            <th>Cantidad</th>
+                            <th>Cantidad Factura</th>
                             <th>Cajero</th>
                             <th>Usuario</th>
                             <th>Estado</th>
                             <th>Fecha de Tramite</th>
                             <th>Fecha de Entrega</th>
                             <th>Servicio</th>
+                            <th>Razon Social</th>
                         </tr>
                     </thead>
                     <tbody>

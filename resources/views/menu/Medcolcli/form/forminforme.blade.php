@@ -29,7 +29,8 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6">
+
+                        <div class="col-md-3">
                             <label>&nbsp;</label>
                             <div class="form-group row">
                                 <button type="submit" name="reset" id="reset"

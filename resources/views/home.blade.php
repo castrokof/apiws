@@ -27,16 +27,17 @@
                 <div class="card-header bg-info">{{ __('Direccionados') }}</div>
 
                 <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
+                        @isset($error)
+                        <div class="alert alert-danger" role="alert">
+                            {{ $error }}
                         </div>
-                    @endif
+                        @endisset
 
                     {{-- {{ __('You are logged in!') }} --}}
-                    Estatus Body: {{$statusP ?? $statusF ?? ''}}
+                   
                     <form  action="{{route('home')}}" method="get">
-                    @include('form-consulta')
+                    @include('form.form-consulta')
+                    
                     <button type="submit" id="consultar" class="btn btn-success">Consultar</button><button type="button" id="enviar" class="btn btn-warning">Programar</button>
                     </form>
                     
@@ -45,14 +46,14 @@
                         
                     <thead>
                         <tr>
-                        <th>Seleccione</th>
+                        <th class="width40"><input name="selectall" id="selectall" type="checkbox" class="select-all" /> Select / Deselect All</th>
                         <th>ID:</th>
                         <th>ID Direccionamiento:</th>
                         <th>Prescripcion:</th>
                         <th>Cons.:</th>
                         <th>Tipo documento:</th>
                         <th>Documento:</th>
-                        <th>Cums:</th>
+                        <th>Tecnologia:</th>
                         <th>Desc Mipres:</th>
                         <th>Cantidad a entregar:</th>
                         <th>Numero entrega:</th>
@@ -66,91 +67,7 @@
                        </tr>
                     </thead>
                        <tbody>
-                        @foreach ($medicamentos2 ?? '' as $item3)
-                        @foreach ($item3 as $item)
-                        <tr>
-                            <td><input class="case" type="checkbox" title="Selecciona Orden" value="{{$item['ID'] ?? ''}}"></td>
-                            <td> {{$item['ID'] ?? ''}}</td>
-                            <td> {{$item['IDDireccionamiento'] ?? ''}}</td>
-                            <td> {{$item['NoPrescripcion'] ?? ''}}</td>
-                            <td> {{$item['ConTec'] ?? ''}}</td>
-                            <td>{{$item['TipoIDPaciente'] ?? ''}}</td>
-                            <td>{{$item['NoIDPaciente'] ?? ''}}</td>
-                            <td>{{$item['CodSerTecAEntregar'] ?? ''}}</td>
-                            @switch($item['CodSerTecAEntregar'])
-                                @case(107)
-                                <td>ASEO PERSONAL (GEL ANTIBACTERIAL, DESODORANTES, PROTECTORES LABIALES, TOALLAS DE PAPEL, TOALLAS HIGIENICAS, MAQUILLAJE, ENTRE OTRAS)</td> 
-                                    @break
-
-                                @case(108)
-                                <td> BLOQUEADORES SOLARES</td>
-                                    @break
-
-                                 @case(109)
-                                <td>CHAMPÚ Y LOCIONES CAPILARES</td> 
-                                    @break
-
-                                @case(112)
-                                <td> CREMAS ANTIPAÑALITIS</td>
-                                    @break
-                                
-                                @case(113)
-                                <td>CREMAS CICATRIZANTES Y REPARADORES DÉRMICOS</td> 
-                                   @break
-    
-                                @case(114)
-                                <td> CREMAS Y LOCIONES HUMECTANTES, HIDRATANTES Y EMOLIENTES</td>
-                                    @break
-                            
-                                @case(121)
-                                <td>HIGIENE ORAL (CEPILLO, CREMA, SEDA DENTAL, ENJUAGUE)</td> 
-                                    @break
-    
-                                @case(127)
-                                <td> JABONES COSMÉTICOS, ANTIALÉRGICOS Y ANTIBACTERIALES</td>
-                                     @break
-                            
-                                @case(130)
-                                <td>LOCIONES REPELENTES DE USO PERSONAL Y DOMÉSTICO</td> 
-                                     @break
-        
-                                @case(133)
-                                <td>MEDICAMENTOS FITOTERAPEÚTICOS</td>
-                                     @break
-
-                                @case(134)
-                                <td>MEDICAMENTOS HOMEOPÁTICOS</td> 
-                                @break
-        
-                                @case(139)
-                                <td>PAÑALES</td> 
-                                 @break
-            
-                                @case(140)
-                                <td> PAÑITOS HÚMEDOS</td>
-                                @break
-         
-                                @case(146)
-                                <td> SUPLEMENTOS DIETARIOS</td>
-                                @break
-                
-
-                                @default
-                                <td>Medicamento</td> 
-                            @endswitch
-                                                    
-                            <td>{{$item['CantTotAEntregar'] ?? ''}}</td>
-                            <td>{{$item['NoEntrega'] ?? ''}}</td>
-                            <td>{{$item['TipoIDProv'] ?? ''}}</td>
-                            <td>{{$item['NoIDProv'] ?? ''}}</td>
-                            <td>{{$item['FecMaxEnt'] ?? ''}}</td>
-                            <td>{{$item['FecDireccionamiento'] ?? ''}}</td>
-                            <td>PROV007788</td>
-                            <td>{{$item['NoIDEPS'] ?? ''}}</td>
-                            <td>{{$item['CodEPS'] ?? ''}}</td>
-                        </tr>
-                        @endforeach
-                        @endforeach
+                       
                         </tbody>    
                         </table>
                     </div>
@@ -182,8 +99,13 @@
 <script>
 
 $(document).ready(function(){
+    
+    
+        $("#selectall").on('click', function() {
+          $(".case").prop("checked", this.checked);
+        });
 
-    $('#mipres').DataTable({
+  var table =  $('#mipres').DataTable({
         
         lengthMenu: [ [25, 50, 100, 500, -1 ], [25, 50, 100, 500, "Mostrar Todo"] ],
         language: idioma_espanol,
@@ -232,22 +154,186 @@ $(document).ready(function(){
     
                       }
                    ],
+                      "createdRow": function(row, data, dataIndex) { 
+                    if (data[16] == "890303093") { 
+                    $(row).css("background-color", "#90EE90"); 
+                    $(row).addClass("warning");
+                    
+                    }else if(data[16] == "800112806"){
+                    $(row).css("background-color", "#87CEEB"); 
+                    $(row).addClass("warning"); 
+                    }
+        
+                   }
+    });
+    
+    function getDescripcionCodSerTec(codigo) {
+    switch(parseInt(codigo)) {
+        case 107:
+            return "ASEO PERSONAL (GEL ANTIBACTERIAL, DESODORANTES, PROTECTORES LABIALES, TOALLAS DE PAPEL, TOALLAS HIGIENICAS, MAQUILLAJE, ENTRE OTRAS)";
+        case 108:
+            return "BLOQUEADORES SOLARES";
+        case 109:
+            return "CHAMPÚ Y LOCIONES CAPILARES";
+        case 112:
+            return "CREMAS ANTIPAÑALITIS";
+        case 113:
+            return "CREMAS CICATRIZANTES Y REPARADORES DÉRMICOS";
+        case 114:
+            return "CREMAS Y LOCIONES HUMECTANTES, HIDRATANTES Y EMOLIENTES";
+        case 121:
+            return "HIGIENE ORAL (CEPILLO, CREMA, SEDA DENTAL, ENJUAGUE)";
+        case 127:
+            return "JABONES COSMÉTICOS, ANTIALÉRGICOS Y ANTIBACTERIALES";
+        case 130:
+            return "LOCIONES REPELENTES DE USO PERSONAL Y DOMÉSTICO";
+        case 133:
+            return "MEDICAMENTOS FITOTERAPEÚTICOS";
+        case 134:
+            return "MEDICAMENTOS HOMEOPÁTICOS";
+        case 139:
+            return "PAÑALES";
+        case 140:
+            return "PAÑITOS HÚMEDOS";
+        case 146:
+            return "SUPLEMENTOS DIETARIOS";
+        default:
+            return "Medicamento";
+    }
+}
+    
+    // Función para cargar datos que puede ser reutilizada
+    function cargarDatos(params = {}) {
+        
+                
+        
+        // Parámetros por defecto para la carga inicial
+        var defaultParams = {
+            cargaInicial: true,
+            "_token": $("meta[name='csrf-token']").attr("content")
+        };
+        
+        // Combinar parámetros por defecto con los proporcionados
+        var requestParams = $.extend({}, defaultParams, params);
+        
+         Swal.fire({
+                    icon: "info",
+                    title: 'Espere por favor !',
+                    html: 'Consultando con el ministerio', // add html attribute if you want or remove
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    willOpen: () => {
+                        Swal.showLoading()
+                    },
+                }),
+
+        
+        $.ajax({
+            url: "{{ route('homeapi') }}",
+            method: 'GET',
+            dataType: "json",
+            data: requestParams,
+            success: function(response) {
+                if (response.success) {
+                    // Limpiamos la tabla existente
+                    table.clear();
+                    
+                    // En tu función success del AJAX
+                    $.each(response.data, function(i, items) {
+                        $.each(items, function(j, item) {
+                            var checkboxCell = '<input class="case" type="checkbox" title="Selecciona Orden" value="' + item.ID + '">';
+                            
+                            table.row.add([
+                                checkboxCell,
+                                item.ID || '',
+                                item.IDDireccionamiento || '',
+                                item.NoPrescripcion || '',
+                                item.ConTec || '',
+                                item.TipoIDPaciente || '',
+                                item.NoIDPaciente || '',
+                                item.CodSerTecAEntregar || '',
+                                getDescripcionCodSerTec(item.CodSerTecAEntregar),
+                                item.CantTotAEntregar || '',
+                                item.NoEntrega || '',
+                                item.TipoIDProv || '',
+                                item.NoIDProv || '',
+                                item.FecMaxEnt || '',
+                                item.FecDireccionamiento || '',
+                                "{{'PROV007788'}}",
+                                item.NoIDEPS || '',
+                                item.CodEPS || ''
+                            ]).draw(false);
+                        });
+                    });
+                    
+                    // Vuelve a aplicar los eventos a los checkboxes
+                    $(".case").on('click', function() {
+                        if ($(".case:checked").length == $(".case").length) {
+                            $("#selectall").prop("checked", true);
+                        } else {
+                            $("#selectall").prop("checked", false);
+                        }
+                    });
+                    
+                    toastr.success('Estado: ' + response.message);
+                    
+                } else if (response.error === 'token') {
+                    // Redirigir al usuario a la página de token
+                    window.location.href = "{{ route('tokenhercules') }}";
+                } else {
+                    toastr.error('Error al cargar los datos: ' + response.error);
+                }
+            },
+            error: function(xhr, status, error) {
+                if (xhr.status === 401 || (xhr.responseJSON && xhr.responseJSON.error === 'token')) {
+                    // Redirigir al usuario a la página de token
+                    window.location.href = "{{ route('tokenhercules') }}";
+                } else {
+                    toastr.error('Error en la petición: ' + error);
+                }
+            }, complete: function() {
+                Swal.close(); // Cierra el modal de carga
+            }
+        });
+    }
+    
+    // Cargar datos automáticamente al iniciar la página
+    cargarDatos();
+    
+    // Manejar el evento de clic en el botón "Consultar"
+    $("#consultar").click(function(e) {
+        e.preventDefault(); // Evitar el envío del formulario por defecto
+        
+        // Obtener valores del formulario
+        var fechaini = $("input[name='fechaini']").val();
+        var fechafin = $("input[name='fechafin']").val();
+        var prescripcion = $("textarea[name='prescripcion']").val();
+        
+        // Llamar a la función con los parámetros del formulario
+        cargarDatos({
+            fechaini: fechaini,
+            fechafin: fechafin,
+            prescripcion: prescripcion,
+            cargaInicial: false, // Ya no es carga inicial
+            "_token": $("meta[name='csrf-token']").attr("content")
+        });
+    });
+    
+    
+     // Filtrar por varios números usando expresión regular
+    $('#filtro-numeros').on('keyup', function() {
+        var filtro = $(this).val();
+        var filtroRegex = filtro.split(' ').join('|'); // Convertir la lista de números en una expresión regular
+        table.column(2) // Aquí usas el índice de la columna que contiene los números (por ejemplo, la columna 1)
+            .search(filtroRegex, true, false) // Aplicar el filtro con la expresión regular
+            .draw();
     });
 
 //Funcion de envio de datos
 
     $(function(){
 
-    //     Swal.fire({
-    //     title: "¿Estás seguro?",
-    //     text: "Estás por programar prescripciones",
-    //     icon: "success",
-    //     showCancelButton: true,
-    //     showCloseButton: true,
-    //     confirmButtonText: 'Aceptar',
-    //     }).then((result)=>{
-    //    if(result.value){      
-        
+   
         $("#enviar").click(function(){
 
             var mipre =[];
@@ -299,19 +385,19 @@ $(document).ready(function(){
 
                 
             });
-         /* Swal.fire({
-                icon: "info",
-                title: 'Espere por favor !',
-                html: 'Realizando la programación..',// add html attribute if you want or remove
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                willOpen: () => {
-                    Swal.showLoading()
-                },
-            }), */   
+            
+             Swal.fire({
+                    icon: "info",
+                    title: 'Espere por favor !',
+                    html: 'Programando con la API del ministerio', // add html attribute if you want or remove
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    willOpen: () => {
+                        Swal.showLoading()
+                    },
+                }),
+        
           $.ajax({
-            beforeSend: function(){ 
-            $('.loader').css("visibility", "visible"); },
            url:"{{route('programar')}}",
            method: 'post',
            data:{data:mipretrue,
@@ -320,55 +406,76 @@ $(document).ready(function(){
            //dataType:"json",
            success:function(data){
             if(data.success == 'ya'){
-             for (var i = 0; i< data.result.length; i++) {
-                $.each(JSON.parse(data.result[i]), function(a, items) {
-
-                    toastr.warning('¡ '+items+ ' !');
-                    // Swal.fire(
-                    //     {
-                    //       icon: 'warning',
-                    //       title: items,
-                    //       showConfirmButton: true,
-                    //       //timer: 1500
-                    //     }
-                    //   )
-
-                });
-                }
-            //$('#mipres').DataTable().destroy(); 
+                                for (var i = 0; i < data.result.length; i++) {
+                        var parsedResult = JSON.parse(data.result[i]);
+                
+                        
+                
+                        // Mostrar advertencias específicas
+                        if (parsedResult.Errors && Array.isArray(parsedResult.Errors)) {
+                            parsedResult.Errors.forEach(function(error) {
+                                toastr.warning('⚠️ ' + error);
+                            });
+                        }
+                    }
+            
             }else if(data.success == 'ok'){
                 
-                for (var i = 0; i< data.result.length; i++) {
+                 for (var i = 0; i< data.result.length; i++) {
 
-                $.each(JSON.parse(data.result[i]), function(a, item) {
-                    console.log(item);
-                   if(Array.isArray(item) == true){
-                    toastr.warning(item + '!');   
-                   }else{
-                       
-                       if(item.IdProgramacion > 0){
-                           
-                           let respuesta = item.IdProgramacion;
-                           let respuesta1 = item.Id;
-                            toastr.success("El ID: " + respuesta1 +"/n"+"Quedo programado con Id de programación: "+ respuesta + '!');  
-                           
-                          
-                           
-                       }
-                       
-                      }
-                    
-                    
-                   });
+        var currentResult = data.result[i];
 
-                      
+        // Verificar si el resultado es un string antes de aplicar JSON.parse
+        if (typeof currentResult === "string") {
+            try {
+                currentResult = JSON.parse(currentResult);
+            } catch (e) {
+                // Si no es un JSON válido, podría ser un mensaje de error en string plano
+                toastr.error("Error en la respuesta: " + currentResult + '!');
+                continue; // Saltar al siguiente resultado
+            }
+        }
 
-                    }
+        $.each(currentResult, function(a, item) {
+            console.log(item);
+            if(Array.isArray(item) == true){
+                toastr.warning(item + '!');
+            } else {
+                // Ahora dentro del 'else' (cuando item NO es un array)
+                if (item && item.success === false) {
+                    toastr.warning("Error al programar el ID: " + item.ID + ". " + (item.error || 'Error desconocido') + '!');
+                } else if (item && item.IdProgramacion > 0) {
+                    let respuesta = item.IdProgramacion;
+                    let respuesta1 = item.ID; // Usamos item.ID (mayúscula) para coincidir con el backend
+                    toastr.success("El ID: " + respuesta1 +"/n"+"Quedó programado con Id de programación: "+ respuesta + '!');
+                } else if (typeof item === 'string') {
+                    toastr.error("Error: " + item + '!');
+                }
+                // Puedes añadir más 'else if' aquí para otros formatos de error
+            }
+        });
+    }
                    
-                } 
+                }else if(data.error == 'ok2'){
+                
+                                       var currentResult = data.result;
+                
+                        // Verificar si el resultado es un string antes de aplicar JSON.parse
+                        if (typeof currentResult === "string") {
+                            try {
+                                currentResult = JSON.parse(currentResult);
+                            } catch (e) {
+                                // Si no es un JSON válido, podría ser un mensaje de error en string plano
+                                toastr.error("Error en la respuesta: " + currentResult + '!');
+                                
+                            }
+                        
+                                    
+                            }
+                     Swal.close();
                     
-            },complete: function(){ 
-                $('.loader').css("visibility", "hidden");
+                }},complete: function(){ 
+                Swal.close(); // Cierra el modal de carga
                 }
 
 
@@ -376,13 +483,15 @@ $(document).ready(function(){
            
         })
 
-    //    }
-    //    });
+    
     });
 
 
  
 });
+
+
+
 
 
 var idioma_espanol =

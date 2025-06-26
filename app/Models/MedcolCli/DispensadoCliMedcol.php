@@ -54,6 +54,7 @@ class DispensadoCliMedcol extends Model
         'centroprod',
         'drogueria',
         'cajero',
+        'ips',
         'created_at',
         'updated_at'
     ];

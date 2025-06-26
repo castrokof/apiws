@@ -15,7 +15,7 @@
         </div>
         <div class="col-lg-3">
             <label for="inputID">TECNOLOGIA ENTREGADA</label>
-            <input type="text" class="form-control" id="C" name="C" placeholder="" >
+            <input type="text" class="form-control" id="C" name="C" placeholder="" required>
         </div>
 </div>
 <div class="form-group row">

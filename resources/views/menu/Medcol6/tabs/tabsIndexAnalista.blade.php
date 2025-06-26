@@ -1,4 +1,4 @@
-<div class="row">
+
     <div class="col-12">
         <div class="card card-primary card-tabs">
             <div class="card-header p-0 pt-1">
@@ -17,6 +17,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="custom-tabs-one-datos-anulado-tab" data-toggle="pill" href="#custom-tabs-one-datos-anulado" role="tab" aria-controls="custom-tabs-one-datos-anulado" aria-selected="false">Anulado</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-one-datos-vencidos-tab" data-toggle="pill" href="#custom-tabs-one-datos-vencidos" role="tab" aria-controls="custom-tabs-one-datos-vencidos" aria-selected="false">Vencidos</a>
                     </li>
 
                     <div class="card-tools pull-right">
@@ -55,6 +58,12 @@
                     <div class="tab-pane fade " id="custom-tabs-one-datos-anulado" role="tabpanel" aria-labelledby="custom-tabs-one-datos-anulado-tab">
                         <div class="card-body">
                             @include('menu.Medcol6.tablas.tablaIndexAnulado')
+                        </div>
+
+                    </div>
+                    <div class="tab-pane fade " id="custom-tabs-one-datos-vencidos" role="tabpanel" aria-labelledby="custom-tabs-one-datos-vencidos-tab">
+                        <div class="card-body">
+                            @include('menu.Medcol6.tablas.tablaIndexVencidos')
                         </div>
 
                     </div>

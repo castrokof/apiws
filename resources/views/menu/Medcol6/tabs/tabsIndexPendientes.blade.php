@@ -6,7 +6,7 @@
                     <li class="nav-item">
                         <a class="nav-link active" id="custom-tabs-one-datos-med-pendiente-tab" data-toggle="pill"
                         href="#custom-tabs-one-datos-med-pendiente" data-target="#custom-tabs-one-datos-med-pendiente"
-                         role="tab" aria-controls="custom-tabs-one-datos-med-pendiente" aria-selected="true">Detalle de la Factura</a>
+                         role="tab" aria-controls="custom-tabs-one-datos-med-pendiente" aria-selected="true">Detalle del Pendiente</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="custom-tabs-one-datos-observaciones-tab" data-toggle="pill"

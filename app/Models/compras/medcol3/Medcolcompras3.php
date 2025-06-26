@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Medcolcompras3 extends Model
 {
     //
-    
 
     protected $table = 'orden_compra_medcol3';
 
@@ -22,6 +21,7 @@ class Medcolcompras3 extends Model
         'codigo',
         'nombre',
         'cums',
+        'presentacion',
         'marca',
         'cantidad',
         'precio',
@@ -30,7 +30,11 @@ class Medcolcompras3 extends Model
         'proveedor_id',
         'contrato',
         'observaciones',
-        'usuario_id'
+        'usuario_id',
+        'estado',
+        'cantidadEntregada',
+        'created_at',
+        'totalParcial'
     ];
     
     /**

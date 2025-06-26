@@ -25,6 +25,7 @@ class CreateOrdenCompraMedcol3Table extends Migration
             $table->decimal('precio', 10, 2);
             $table->decimal('subtotal', 10, 2);
             $table->decimal('iva', 10, 2);
+            $table->text('observaciones')->nullable();
             $table->unsignedBigInteger('proveedor_id');
             $table->foreign('proveedor_id', 'fk_proveedor3')->references('id')->on('terceros_api_medcol3')->onDelete('restrict')->onUpdate('restrict');
             $table->unsignedBigInteger('usuario_id');

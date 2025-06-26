@@ -148,6 +148,7 @@
     background: #1abc9c; /* Verde suave */
     color: #fff;
 }
+.l-bg-teal { background: linear-gradient(135deg, #26e7ad 0%, #0a7a56 100%); }
 
 .l-bg-orange-dark {
     background: #e67e22; /* Naranja sobrio */
@@ -158,6 +159,14 @@
     background: #c0392b; /* Rojo oscuro */
     color: #fff;
 }
+
+.l-bg-purple-dark { background: linear-gradient(135deg, #6f42c1 0%, #3d2670 100%); }
+.l-bg-indigo { background: linear-gradient(135deg, #6610f2 0%, #3a0a8a 100%); }
+.l-bg-yellow-dark { background: linear-gradient(135deg, #ffc107 0%, #b28704 100%); }
+.l-bg-amber { background: linear-gradient(135deg, #fd7e14 0%, #c0540a 100%); }
+.l-bg-gray-dark { background: linear-gradient(135deg, #6c757d 0%, #3d444a 100%); }
+.l-bg-slate { background: linear-gradient(135deg, #495057 0%, #212529 100%); }
+
 
 .card .card-statistic-3 .card-icon-large .fas,
 .card .card-statistic-3 .card-icon-large .far,

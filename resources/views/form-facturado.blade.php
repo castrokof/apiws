@@ -39,7 +39,7 @@
     </div>
     <div class="col-lg-2">
         <label for="inputID">VALOR UNITARIO</label>
-        <input type="text" class="form-control" id="VALU" name="VALU" placeholder="" readonly>
+        <input type="text" class="form-control" id="VALU" name="VALU"  placeholder="" required>
     </div>
 </div>
     <div class="form-group">
@@ -52,15 +52,17 @@
     <div class="col-lg-6">
 
             <label for="SelectCausa">NOIDEPS</label>
-            <input type="number" step="any" min="111111111" max="" name="NoIDEPS" class="form-control" id="NoIDEPS" readonly>
+            <input type="number" step="any" min="111111111" max="" name="NoIDEPS" class="form-control" id="NoIDEPS" required>
     </div>
     <div class="col-lg-6">
 
         <label for="SelectCausa">CodEPS</label>
         <select class="form-control" id="CodEPS" required>
             <option value="">--Seleccione--</option>
-            <option value="EPS012">EPS012 -> Contributivo</option>
-            <option value="EPSS12">EPSS12 -> Subsidiado</option>
+            <option value="EPS012">EPS012 -> Contributivo Comfenalco</option>
+            <option value="EPSS12">EPSS12 -> Subsidiado Comfenalco</option>
+            <option value="EPS018">EPS018 -> Contributivo SOS</option>
+            <option value="EPSS18">EPSS18 -> Subsidiado SOS</option>
         </select>
     </div>
     </div>
@@ -70,6 +72,7 @@
             <label for="CuotaModer">Cuota moderadora</label>
             <input type="number" step="any" min="0" max=""  name="CuotaModer" class="form-control" id="CuotaModer" required>
     </div>
+    <input type="hidden" class="form-control" id="VALU1" name="VALU1"  placeholder="" >
     </div>
 
 

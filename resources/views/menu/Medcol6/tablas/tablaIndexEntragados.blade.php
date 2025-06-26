@@ -15,8 +15,8 @@
                             <th>Id</th>
                             <th>Tipo Documento</th>
                             <th>Cantidad Entregada</th>
-                            <th>Cantidad Ordenada</th>
-                            <th>Fecha Factura</th>
+                            <th>Cantidad Pendiente</th>
+                            <th>Fecha Pendiente</th>
                             <th>Fecha</th>
                             <th>Historia</th>
                             <th>Primer Apellido</th>

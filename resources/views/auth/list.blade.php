@@ -19,6 +19,7 @@ Usuarios APIWS
 @section('content')
 
     @include('auth.tablas.tablaIndexEvolucion')
+     @include('auth.modal.modal-edit-user')
   
 
 @endsection
@@ -56,7 +57,7 @@ var datatable = $('#usuarioapiws').DataTable({
               url:"{{route('usuariosapiws')}}",
                   },
             columns: [
-              {data:'id'},
+              {data:'action'},
               {data:'name'},
               {data:'email'},
               {data:'email_verified_at'},
@@ -106,81 +107,145 @@ var datatable = $('#usuarioapiws').DataTable({
 
 
  });
-
-
-
-$('#form-general').on('submit', function(event){
+        
+        
+          $('#form-general').on('submit', function(event) {
             event.preventDefault();
             var url = '';
             var method = '';
             var text = '';
 
 
-        if($('#action').val() == 'Add')
-        {
-            text = "Estás por crear un usuario"
-            url = "{{route('guardar_usuario')}}";
-            method = 'post';
-        }
-
-        if ($('#surname').val() == '' || $('#fname').val()== '' || $('#type_document').val()== '' || $('#document').val()== '' ||
-        $('#date_birth').val() == '' || $('#municipality').val()== '' || $('#address').val()== '' || $('#celular').val()== '' ||
-         $('#sex').val()== '' || $('#eapb').val()== '' || $('#reason_consultation').val()== '' ||
-         $('#consultation').val()== '' )
-        {
-        Swal.fire({
-            title: "Debes de rellenar todos los campos del formulario",
-            text: "Respuesta Linea Psicologica",
-            icon: "warning",
-            showCloseButton: true,
-            confirmButtonText: 'Aceptar',
-            });
-         }else{
-
+            if ($('#action').val() == 'Edit') {
+                text = "Estás por actualizar un usuario"
+                var updateid = $('#hidden_id').val();
+                url = "usuarioupdate/" + updateid;
+                method = 'put';
+            }
             Swal.fire({
-            title: "¿Estás seguro?",
-            text: text,
-            icon: "success",
-            showCancelButton: true,
-            showCloseButton: true,
-            confirmButtonText: 'Aceptar',
-            }).then((result)=>{
-            if(result.value){
-            $.ajax({
-                url:url,
-                method:method,
-                data: $('#form-general').serialize(),
-                dataType:"json",
-                success:function(data){
-                            if(data.success == 'ok') {
-                            $('#form-general')[0].reset();
-                            $('#modal-evolution').modal('hide');
-                            $('#psicologica').DataTable().ajax.reload();
-                            Swal.fire(
-                                {
-                                icon: 'success',
-                                title: 'diagnostico creado correctamente',
-                                showConfirmButton: false,
-                                timer: 2000
-                                }    )}
-                            else if(data.errors != null) {
-                            Swal.fire(
-                                {
-                                icon: 'error',
-                                title: data.errors,
-                                showConfirmButton: false,
-                                timer: 3000
-                                })
-                            }
-                        }
+                title: "¿Estás seguro?",
+                text: text,
+                type: "info",
+                showCancelButton: true,
+                showCloseButton: true,
+                confirmButtonText: 'Aceptar',
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        url: url,
+                        method: method,
+                        data: $(this).serialize(),
+                        dataType: "json",
+                        success: function(data) {
+                            if (data.status === 'success') {
+                               $('#form-general')[0].reset();
+                                $('#modal-u').modal('hide');
+                                $('#usuarioapiws').DataTable().ajax.reload();
+                                Swal.fire({
+                                    type: 'success',
+                                    title: data.message,
+                                    showConfirmButton: false,
+                                    timer: 1500
 
-                  });
-                            }
-                 });
+                                })
+                                // Manteliviano.notificaciones('cliente creado correctamente', 'Sistema Ventas', 'success');
+
+                            } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: data.message,
+                                    });
+                                }
+                        },
+
+
+                    }).fail(function(jqXHR, textStatus, errorThrown) {
+
+                        if (jqXHR.status === 422) {
+
+                            var error = jqXHR.responseJSON;
+
+                            $.each(error, function(i, items) {
+
+                                var errores = [];
+                                errores.push(items.name + '<br>');
+                                errores.push(items.email + '<br>');
+                                errores.push(items.drogueria + '<br>');
+                                errores.push(items.rol + '<br>');
+                               
+                                console.log(errores);
+
+                                var filtered = errores.filter(function(el) {
+                                    return el != "undefined<br>";
+                                });
+
+                                
+                                Swal.fire({
+                                    icon: 'danger',
+                                    title: 'El formulario contiene errores',
+                                    html: filtered,
+                                    showConfirmButton: true,
+                                    //timer: 1500
+                                })
+
+
+                                //Manteliviano.notificaciones(items, 'Sistema Ventas', 'warning');
+
+                            });
+                        }
+                    });
+                }
+            });
+
+
+        });
+        
+        
+
+      
+      
+      
+        // Edición de cliente
+
+        $(document).on('click', '.edit_user', function() {
+            var id = $(this).attr('id');
+
+            $.ajax({
+                url: "usuario/" + id +"/editar",
+                dataType: "json",
+                success: function(data) {
+                     if (data.status === 'success') {
+                    $('#name').val(data.data.name);
+                    $('#email').val(data.data.email);
+                    $('#drogueria').val(data.data.drogueria);
+                    $('#rol').val(data.data.rol);
+                    $('#password').val('');
+                    $('#password-confirm').val('')
+                    $('#hidden_id').val(id)
+                    $('.card-title').text('Editar usuario');
+                    $('#action_button').val('Edit');
+                    $('#action').val('Edit');
+                    $('#modal-u').modal('show');
+
+                }else {
+                // Maneja cualquier otro estado de éxito no esperado
+                Manteliviano.notificaciones(data.message, 'Apiws Medcol', 'warning');
+            }
+
+                },
+
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+
+                if (jqXHR.status === 403) {
+
+                    Manteliviano.notificaciones('No tienes permisos para realizar esta accion',
+                        'Apiws Medcol', 'warning');
 
                 }
+            });
 
-      });
+        });
 
 
 

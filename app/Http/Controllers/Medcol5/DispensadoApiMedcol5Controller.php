@@ -119,7 +119,7 @@ class DispensadoApiMedcol5Controller extends Controller
                     $dispensado_api_medcol5->where('centroprod', $drogueria);
                 }
         
-                if (!empty($request->fechaini) && !empty($request->fechafin) && $request->contrato != '')
+                if (!empty($request->fechaini) && !empty($request->fechafin) && !empty($request->contrato))
                 
                 {
                     $fechaini = new Carbon($request->fechaini);
@@ -227,28 +227,38 @@ class DispensadoApiMedcol5Controller extends Controller
          try {
         
                 
-            $response = Http::post("http://hgc09j5frwr.sn.mynetname.net:8000/api/acceso", [
+            //$response = Http::post("http://hgc09j5frwr.sn.mynetname.net:8000/api/acceso", [
+                
+            $response = Http::post("http://hed08pf9dxt.sn.mynetname.net:8000/api/acceso", [
+             
             'email' =>  $email,
             'password' => $password,
             ]);
+            
+           
 
             $token = $response->json()["token"];
-                
+            
+           
             if($token) {
             
 
         try {
 
-            $response = Http::post("http://hgc09j5frwr.sn.mynetname.net:8000/api/acceso", [
+            //$response = Http::post("http://hgc09j5frwr.sn.mynetname.net:8000/api/acceso", [
+                
+            $response = Http::post("http://hed08pf9dxt.sn.mynetname.net:8000/api/acceso", [
                 'email' =>  $email,
                 'password' => $password,
             ]);
 
-            //$prueba = $response->json();
+           
             $token = $response->json()["token"];
 
 
-            $responsefacturas = Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/dispensadoapi");
+            //$responsefacturas = Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/dispensadoapi");
+            
+            $responsefacturas = Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8000/api/dispensadoapi");
 
             $facturassapi = $responsefacturas->json()['data'];
     
@@ -321,7 +331,9 @@ class DispensadoApiMedcol5Controller extends Controller
                     } 
             
            
-            Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/closeallacceso");
+           //Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/closeallacceso");
+            
+            Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8000/api/closeallacceso");
             
             Log::info('Desde la web syncapi autopista'.$contador . ' Lineas dispensadas'. ' Usuario: '.$usuario);
             
@@ -636,7 +648,9 @@ class DispensadoApiMedcol5Controller extends Controller
         $usuario = Auth::user()->email;
     
         try {
-            $response = Http::post("http://hgc09j5frwr.sn.mynetname.net:8000/api/acceso", [
+            //$response = Http::post("http://hgc09j5frwr.sn.mynetname.net:8000/api/acceso", [
+            
+            $response = Http::post("http://hed08pf9dxt.sn.mynetname.net:8000/api/acceso", [
                 'email' => $email,
                 'password' => $password,
             ]);
@@ -645,7 +659,9 @@ class DispensadoApiMedcol5Controller extends Controller
     
             if ($token) {
                 try {
-                    $responsefacturas = Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/anuladosapi");
+                    //$responsefacturas = Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/anuladosapi");
+                    
+                    $responsefacturas = Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8000/api/anuladosapi");
                     $facturassapi = $responsefacturas->json()['data'] ?? [];
     
                     $contadorActualizados = 0;
@@ -676,7 +692,9 @@ class DispensadoApiMedcol5Controller extends Controller
                     
                     
     
-                    Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/closeallacceso");
+                    //Http::withToken($token)->get("http://hgc09j5frwr.sn.mynetname.net:8000/api/closeallacceso");
+                    
+                    Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8000/api/closeallacceso");
     
                     Log::info('Desde la web syncapi autopista anulados', [
                         'lineas_actualizadas' => $contadorActualizados,
@@ -807,47 +825,62 @@ class DispensadoApiMedcol5Controller extends Controller
     
     public function buscar($factura)
     {
-        // Crear una instancia de la consulta principal sin ejecutarla de inmediato
+        // Verificar si la factura existe en la base de datos
+        $facturaExistente = DispensadoApiMedcol5::where('factura', $factura)->exists();
+
+        if (!$facturaExistente) {
+            // Si la factura no existe, retornar un mensaje
+            return response()->json(['error' => 'Factura no encontrada, no se ha sincronizado en la API'], 404);
+        }
+
+        // Verificar si la factura está en otro estado como "ANULADA" o "REVISADO"
+        $facturaEstado = DispensadoApiMedcol5::where('factura', $factura)
+            ->whereIn('estado', ['ANULADA', 'REVISADO'])
+            ->first();
+
+        if ($facturaEstado) {
+            // Si la factura está en estado ANULADA o REVISADO, retornar un mensaje
+            return response()->json(['error' => "La factura {$factura} se encuentra en estado {$facturaEstado->estado}."], 200);
+        }
+
+        // Continuar con la consulta de facturas en estado DISPENSADO
         $dispensado_api_medcol5 = DispensadoApiMedcol5::query();
 
-        // Agregar una subconsulta para calcular la suma de la cuota moderadora usando selectRaw
-        $dispensado_api_medcol5->selectRaw('*, 
-        (CASE 
+        // Sumar la cuota moderadora y aplicar los filtros
+        $resultados = $dispensado_api_medcol5->selectRaw('*, 
+            (CASE 
             WHEN ROW_NUMBER() OVER(PARTITION BY factura ORDER BY id) = 1 
                 THEN (SELECT SUM(cuota_moderadora) FROM dispensado_medcol5 AS d2 WHERE d2.factura = dispensado_medcol5.factura) 
             ELSE 0 
-        END) AS cuota_moderadora_sumada');
-
-        // Aplicar condiciones de búsqueda adicionales
-        $resultados = $dispensado_api_medcol5
+            END) AS cuota_moderadora_sumada')
             ->where('factura', $factura)
             ->where('estado', 'DISPENSADO')
             ->orderBy('fecha_suministro')
             ->get();
 
         // Verificar si se encontraron resultados
-        if ($resultados->isNotEmpty()) {
-            // Mapear los resultados a un array asociativo para incluir campos adicionales
-            $data = $resultados->map(function ($item) {
-                // Convertir el modelo a un array asociativo
-                $dataArray = $item->toArray();
-
-                // Agregar campos HTML personalizados a los datos resultantes
-                $dataArray['action'] = '<input class="add_medicamento checkbox-large checkbox2 tooltipsC" type="checkbox" title="Seleccionar" id="' . $item->id . '" value="' . $item->id . '">';
-                $dataArray['autorizacion2'] = '<input type="text" name="autorizacion" id="' . $item->id . '" class="show_detail btn btn-xl bg-warning tooltipsC" style="max-width: 100%;" title="autorizacion" value="' . $item->autorizacion . '">';
-                $dataArray['mipres2'] = '<input type="text" name="mipres" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="mipres">';
-                $dataArray['reporte_entrega2'] = '<input type="text" name="reporte" id="' . $item->id . '" class="show_detail form-control btn bg-info tooltipsC" style="max-width: 100%;" title="Reporte de entrega">';
-                $dataArray['cuota_moderadora2'] = '<input type="text" name="cuota_moderadora" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="cuota_moderadora" value="' . $item->cuota_moderadora_sumada . '">';
-
-                return $dataArray;
-            });
-
-            // Retornar los datos en formato JSON para DataTable
-            return response()->json($data);
-        } else {
-            // Retornar un error si no se encontraron resultados
-            return response()->json(['error' => 'Factura no encontrada o no tiene estado DISPENSADO'], 404);
+        if ($resultados->isEmpty()) {
+            // Si no se encontraron resultados, retornar un mensaje
+            return response()->json(['error' => 'Factura no encontrada en estado DISPENSADO'], 404);
         }
+
+        // Mapear los resultados a un array asociativo para incluir campos adicionales
+        $data = $resultados->map(function ($item) {
+            // Convertir el modelo a un array asociativo
+            $dataArray = $item->toArray();
+
+            // Agregar campos HTML personalizados a los datos resultantes
+            $dataArray['action'] = '<input class="add_medicamento checkbox-large checkbox2 tooltipsC" type="checkbox" title="Seleccionar" id="' . $item->id . '" value="' . $item->id . '">';
+            $dataArray['autorizacion2'] = '<input type="text" name="autorizacion" id="' . $item->id . '" class="show_detail btn btn-xl bg-warning tooltipsC" style="max-width: 100%;" title="autorizacion" value="' . $item->autorizacion . '">';
+            $dataArray['mipres2'] = '<input type="text" name="mipres" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="mipres">';
+            $dataArray['reporte_entrega2'] = '<input type="text" name="reporte" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="Reporte de entrega">';
+            $dataArray['cuota_moderadora2'] = '<input type="text" name="cuota_moderadora" id="' . $item->id . '" class="show_detail btn btn-xl bg-info tooltipsC" style="max-width: 100%;" title="cuota_moderadora" value="' . $item->cuota_moderadora_sumada . '">'; // Corregido cierre de comilla
+
+            return $dataArray;
+        });
+
+        // Retornar los datos en formato JSON para DataTable
+        return response()->json($data);
     }
 
 

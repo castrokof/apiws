@@ -39,16 +39,12 @@
                             <th>Segundo Nombre</th>
                             <th>Cuota Moderadora</th>
                             <th>Copago</th>
-                            <th>Número Entrega</th>
-                            <th>Fecha Ordenamiento</th>
                             <th>Fecha Suministro</th>
-                            <th>DX</th>
-                            <th>ips</th>
-                            <th>Autorización</th>
+                            <th>id_medico</th>
+                            <th>medico</th>
+                            <th>especialidadmedico</th>
                             <th>MIPRES</th>
-                            <th>Reporte Entrega NOPBS</th>
-                            <th>ID Médico</th>
-                            <th>Médico</th>
+                            <th>Autorización</th>
                             <th>Precio Unitario</th>
                             <th>Valor Total</th>
                             <th>Estado</th>
@@ -56,7 +52,6 @@
                             <th>Droguería</th>
                             <th>User_id</th>
                             <th>Cajero</th>
-                            <th><input name="selectall" id="selectall" type="checkbox" class="select-all checkbox-large tooltipsC" title="Seleccionar todo" />  Acciones  </th>
                         </tr>
                     </thead>
                     <tbody>

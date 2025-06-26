@@ -28,6 +28,7 @@ class PendienteApiMedcol6 extends Model
         'factura',
         'orden_externa',
         'codigo',
+        'agrupador',
         'nombre',
         'cums',
         'cantidad',
