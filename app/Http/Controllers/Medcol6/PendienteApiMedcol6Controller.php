@@ -155,7 +155,7 @@ class PendienteApiMedcol6Controller extends Controller
         $usuario = Auth::user()->email;
 
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        //ini_set('memory_limit', '512M');
 
         try {
 
@@ -174,7 +174,7 @@ class PendienteApiMedcol6Controller extends Controller
 
             $facturassapi = $responsefacturas->json()['data'];
 
-            
+            ini_set('memory_limit', count($facturassapi) > 10000 ? '1024M' : '512M');
 
             $contadorei = 0;
             $contador = 0;
@@ -211,7 +211,9 @@ class PendienteApiMedcol6Controller extends Controller
                 $facturasExistentes->map(function ($item) {
                     return trim($item->documento) . '-' . trim($item->factura) . '-' . trim($item->codigo);
                 })->toArray()
+                
             );
+            unset($facturasExistentesFlip);
 
             $pendientes = [];
 
