@@ -211,7 +211,7 @@ class PendienteApiMedcol6Controller extends Controller
                 $facturasExistentes->map(function ($item) {
                     return trim($item->documento) . '-' . trim($item->factura) . '-' . trim($item->codigo);
                 })->toArray()
-                
+
             );
             unset($facturasExistentesFlip);
 
@@ -1661,6 +1661,123 @@ class PendienteApiMedcol6Controller extends Controller
                 'drogueria_filtrada' => $drogueria ?? 'Todas',
                 'filtro_contrato' => $contrato === 'Todos' ? 'Todos los contratos' : ($contrato ?? 'No aplicado')
             ]
+        ]);
+    }
+
+    //Funcion del controlador para obtener los medicamentos por farmacia
+    public function getMedicamentosPorFarmacia(Request $request)
+    {
+        // Validar las fechas de entrada
+        $request->validate([
+            'fechaini' => 'nullable|date',
+            'fechafin' => 'nullable|date|after_or_equal:fechaini',
+            'contrato' => 'nullable|string'
+        ]);
+
+        $i = Auth::user()->drogueria;
+
+        $droguerias = [
+            "1" => '',
+            "2" => 'SALUD',
+            "3" => 'DOLOR',
+            "4" => 'PAC',
+            "5" => 'EHU1',
+            "6" => 'BIO1',
+            "8" => 'EM01',
+            "9" => 'FSIO',
+            "10" => 'FSOS',
+            "11" => 'FSAU',
+            "12" => 'EVSO',
+            "13" => 'FRJA',
+        ];
+
+        $farmacias = [
+            "BIO1",
+            "DLR1",
+            "DPA1",
+            "EM01",
+            "EHU1",
+            "FRJA",
+            "FRIO",
+            "INY",
+            "PAC",
+            "SM01",
+            "BPDT",
+            "EVEN",
+            "EVSM"
+        ];
+
+        $drogueria = $droguerias[$i] ?? null;
+
+        $fechaInicio = $request->filled('fechaini')
+            ? Carbon::parse($request->fechaini)->startOfDay()
+            : now()->subMonth()->startOfDay();
+
+        $fechaFin = $request->filled('fechafin')
+            ? Carbon::parse($request->fechafin)->endOfDay()
+            : now()->endOfDay();
+
+        $contrato = $request->input('contrato', null);
+
+        $queryBase = PendienteApiMedcol6::whereBetween('fecha_factura', [$fechaInicio, $fechaFin])
+            ->whereNotIn('codigo', ['1010', '1011', '1012']);
+
+        if ($contrato && $contrato !== 'Todos') {
+            $queryBase->where('centroproduccion', $contrato);
+        } elseif ($contrato === 'Todos') {
+            $queryBase->whereIn('centroproduccion', $farmacias);
+        }
+
+        if ($i !== "1" && $drogueria) {
+            $queryBase->where('centroproduccion', $drogueria);
+        }
+
+        // Obtener datos por nombre y farmacia
+        $datos = (clone $queryBase)
+            ->where('estado', 'PENDIENTE')
+            ->select('nombre', 'centroproduccion', DB::raw('SUM(cantord) as cantidad'))
+            ->groupBy('nombre', 'centroproduccion')
+            ->orderBy('nombre')
+            ->get();
+
+        // Organizar en matriz: nombre => [farmacia => cantidad]
+        $matriz = [];
+        $totalesPorFarmacia = array_fill_keys($farmacias, 0);
+
+        foreach ($datos as $item) {
+            $nombre = $item->nombre;
+            $centro = $item->centroproduccion;
+            $cantidad = (int) $item->cantidad;
+
+            if (!isset($matriz[$nombre])) {
+                $matriz[$nombre] = array_fill_keys($farmacias, 0);
+            }
+
+            $matriz[$nombre][$centro] = $cantidad;
+            $totalesPorFarmacia[$centro] += $cantidad;
+        }
+
+        // Preparar datos para la respuesta
+        $medicamentos = [];
+        foreach ($matriz as $nombre => $cantidades) {
+            $totalMedicamento = array_sum($cantidades);
+            $medicamentos[] = [
+                'nombre' => $nombre,
+                'cantidades' => $cantidades,
+                'total' => $totalMedicamento
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'medicamentos' => $medicamentos,
+            'totales_por_farmacia' => $totalesPorFarmacia,
+            'farmacias' => $farmacias,
+            'total_registros' => count($matriz),
+            'fecha_inicio' => $fechaInicio->format('Y-m-d'),
+            'fecha_fin' => $fechaFin->format('Y-m-d'),
+            'drogueria' => $drogueria ?? 'Todas',
+            'contrato' => $contrato ?? 'No aplicado'
         ]);
     }
 }

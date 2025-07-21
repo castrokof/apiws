@@ -261,6 +261,11 @@ Route::put('medcol6/pendientes/{id}', 'Medcol6\PendienteApiMedcol6Controller@upd
 Route::post('medcol6/pendientes', 'Medcol6\PendienteApiMedcol6Controller@saveObs')->name('medcol6.crear_observacion')->middleware('verified')->middleware('verifyuser');
 Route::get('medcol6/pendientes/anuladosapi', 'Medcol6\PendienteApiMedcol6Controller@updateanuladosapi')->name('medcol6.pendientesanulados')->middleware('verified')->middleware('verifyuser');
 Route::get('medcol6/pendientes/getreport', 'Medcol6\PendienteApiMedcol6Controller@getreport')->name('medcol6.getreport')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/pendientes/medicamentos-farmacia', 'Medcol6\PendienteApiMedcol6Controller@getMedicamentosPorFarmacia')
+    ->name('medcol6.getMedicamentosPorFarmacia')
+    ->middleware('verified')
+    ->middleware('verifyuser');
+
 
 Route::get('medcol6/observaciones', 'Medcol6\PendienteApiMedcol6Controller@getObservaciones')->name('medcol6.observaciones')->middleware('verified')->middleware('verifyuser');
 

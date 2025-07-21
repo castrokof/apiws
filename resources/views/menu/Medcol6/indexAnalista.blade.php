@@ -1954,6 +1954,7 @@ Pendientes Medcol
 
             // Llamar a la función generadora del informe
             show_report(fechaInicio, fechaFin, contrato || null);
+            cargarDetallePendientes(fechaInicio, fechaFin, contrato || null);
         });
 
         // Función auxiliar para mostrar errores (puedes personalizarla)
@@ -2108,6 +2109,364 @@ Pendientes Medcol
                 </div>
             `);
         }
+
+        // Variables globales para almacenar los parámetros actuales
+        let parametrosActuales = {
+            fechaInicio: null,
+            fechaFin: null,
+            contrato: null
+        };
+
+        function cargarDetallePendientes(fechaInicio, fechaFin, contrato) {
+            // Ocultar botón de Excel al inicio
+            $("#exportar_excel").hide();
+
+            // Limpiar contenedores
+            $("#detalle_medicamentos_farmacia").empty();
+            $("#tablaDetPend tbody").empty();
+
+            // Mostrar loading
+            $("#detalle_medicamentos_farmacia").html('<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>');
+
+            const servicioMap = {
+                "BIO1": "Biológicos",
+                "DLR1": "Dolor",
+                "DPA1": "Paliativos",
+                "EM01": "Emcali",
+                "EHU1": "Huérfanas",
+                "FRJA": "Jamundí",
+                "FRIO": "Ideo",
+                "INY": "Inyectables",
+                "PAC": "PCE",
+                "SM01": "Salud Mental",
+                "BPDT": "Bolsa",
+                "EVEN": "Evento",
+                "EVSM": "Evento SM"
+            };
+
+            $.ajax({
+                url: "{{ route('medcol6.getMedicamentosPorFarmacia') }}",
+                method: 'GET',
+                data: {
+                    fechaini: fechaInicio,
+                    fechafin: fechaFin,
+                    contrato: contrato
+                },
+                dataType: "json",
+                success: function(response) {
+                    console.log("Respuesta del servidor:", response);
+
+                    if (!response.success || !response.medicamentos) {
+                        mostrarError("No se encontraron datos de medicamentos.");
+                        $("#detalle_medicamentos_farmacia").empty();
+                        return;
+                    }
+
+                    const medicamentos = response.medicamentos;
+                    const totalesPorFarmacia = response.totales_por_farmacia;
+                    const farmacias = response.farmacias;
+
+                    // Mostrar resumen por farmacia
+                    mostrarResumenFarmacias(totalesPorFarmacia, servicioMap);
+
+                    // Llenar la tabla detallada
+                    llenarTablaDetallada(medicamentos, farmacias, totalesPorFarmacia);
+
+                    // Mostrar botón de Excel
+                    $("#exportar_excel").show();
+                    $("#resultado_informe_medicamentos").show();
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error al obtener medicamentos por farmacia:", error);
+                    mostrarError("No se pudo cargar el informe de medicamentos por farmacia.");
+                    $("#detalle_medicamentos_farmacia").empty();
+                }
+            });
+        }
+
+        function mostrarResumenFarmacias(totalesPorFarmacia, servicioMap) {
+            const nombresExcluidos = ['FSAU', 'FSIO', 'FSOS', 'ENMP', 'EVSO'];
+
+            let htmlMedicamentos = "<ul class='list-unstyled'>";
+            let totalGeneral = 0;
+
+            Object.entries(totalesPorFarmacia).forEach(([farmacia, total]) => {
+                const nombreFarmacia = servicioMap[farmacia] || farmacia;
+                if (!nombresExcluidos.includes(farmacia) && total > 0) {
+                    htmlMedicamentos += `<li><strong>${nombreFarmacia}:</strong> ${number_format(total)}</li>`;
+                    totalGeneral += total;
+                }
+            });
+
+            htmlMedicamentos += `<li class='border-top pt-2 mt-2'><strong>Total General:</strong> ${number_format(totalGeneral)}</li>`;
+            htmlMedicamentos += "</ul>";
+
+            $("#detalle_medicamentos_farmacia").html(`
+                <div class="small-box shadow-lg l-bg-purple-dark">
+                    <div class="inner text-white">
+                        <h5>TOTAL UNIDADES POR FARMACIA</h5>
+                        ${htmlMedicamentos}
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                </div>
+            `);
+        }
+
+        function llenarTablaDetallada(medicamentos, farmacias, totalesPorFarmacia) {
+            const tbody = $("#tablaDetPend tbody");
+
+            // Llenar filas de medicamentos
+            medicamentos.forEach(item => {
+                let fila = `<tr><td class="text-left">${item.nombre}</td>`;
+
+                farmacias.forEach(farmacia => {
+                    const cantidad = item.cantidades[farmacia] || 0;
+                    fila += `<td>${number_format(cantidad)}</td>`;
+                });
+
+                fila += `<td><strong>${number_format(item.total)}</strong></td></tr>`;
+                tbody.append(fila);
+            });
+
+            // Agregar fila de totales
+            let filaTotales = '<tr class="table-info"><th>TOTALES</th>';
+            farmacias.forEach(farmacia => {
+                const total = totalesPorFarmacia[farmacia] || 0;
+                filaTotales += `<th>${number_format(total)}</th>`;
+            });
+
+            const granTotal = Object.values(totalesPorFarmacia).reduce((sum, val) => sum + val, 0);
+            filaTotales += `<th>${number_format(granTotal)}</th></tr>`;
+            tbody.append(filaTotales);
+        }
+
+        // Función auxiliar para formatear números
+        function number_format(num) {
+            return new Intl.NumberFormat('es-CO').format(num);
+        }
+
+        // Función principal para exportar tabla a Excel
+        $("#exportar_excel").click(function() {
+            exportarTablaAExcel();
+        });
+
+        function exportarTablaAExcel() {
+            // Verificar que hay datos en la tabla
+            if ($("#tablaDetPend tbody tr").length === 0) {
+                mostrarError("No hay datos para exportar. Genere el informe primero.");
+                return;
+            }
+
+            // Mostrar loading en el botón
+            const botonOriginal = $("#exportar_excel").html();
+            $("#exportar_excel").html('<i class="fas fa-spinner fa-spin"></i> Exportando...').prop('disabled', true);
+
+            try {
+                // Obtener información del reporte
+                const fechaInicio = parametrosActuales.fechaInicio ? formatearFecha(parametrosActuales.fechaInicio) : 'N/A';
+                const fechaFin = parametrosActuales.fechaFin ? formatearFecha(parametrosActuales.fechaFin) : 'N/A';
+                const contrato = parametrosActuales.contrato || 'Todos';
+
+                // Crear nombre del archivo
+                const nombreArchivo = `Medicamentos_Farmacia_${fechaInicio.replace(/\//g, '')}_${fechaFin.replace(/\//g, '')}.xls`;
+
+                // Obtener resumen de medicamentos por farmacia
+                const resumenHtml = obtenerResumenFarmacias();
+
+                // Crear contenido del Excel con formato HTML
+                let contenidoExcel = `
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <style>
+                    .encabezado { font-weight: bold; font-size: 16px; text-align: center; }
+                    .info { font-weight: bold; margin: 5px 0; }
+                    .tabla { border-collapse: collapse; width: 100%; margin-top: 20px; }
+                    .tabla th, .tabla td { border: 1px solid #000; padding: 8px; text-align: center; }
+                    .tabla th { background-color: #366092; color: white; font-weight: bold; }
+                    .totales { background-color: #E7E6E6; font-weight: bold; }
+                    .resumen { margin: 20px 0; }
+                    .resumen table { border-collapse: collapse; width: 50%; }
+                    .resumen th, .resumen td { border: 1px solid #000; padding: 5px; }
+                    .resumen th { background-color: #f0f0f0; }
+                </style>
+            </head>
+            <body>
+                <div class="encabezado">REPORTE DE MEDICAMENTOS POR FARMACIA</div>
+                <br>
+                <div class="info">Fecha Inicio: ${fechaInicio}</div>
+                <div class="info">Fecha Fin: ${fechaFin}</div>
+                <div class="info">Contrato: ${contrato}</div>
+                <div class="info">Generado: ${new Date().toLocaleString('es-CO')}</div>
+                
+                <div class="resumen">
+                    <h4>RESUMEN POR FARMACIA:</h4>
+                    ${resumenHtml}
+                </div>
+                
+                <h4>DETALLE COMPLETO:</h4>
+                ${obtenerTablaCompleta()}
+            </body>
+            </html>
+        `;
+
+                // Crear blob y descargar
+                const blob = new Blob([contenidoExcel], {
+                    type: 'application/vnd.ms-excel;charset=utf-8'
+                });
+
+                // Crear enlace temporal para descarga
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = nombreArchivo;
+                link.style.display = 'none';
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Limpiar URL objeto
+                URL.revokeObjectURL(link.href);
+
+                // Mostrar mensaje de éxito
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Excel Generado',
+                        text: 'El archivo Excel se ha descargado correctamente',
+                        timer: 3000
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error al generar Excel:', error);
+                mostrarError('Error al generar el archivo Excel. Intente nuevamente.');
+            } finally {
+                // Restaurar botón
+                setTimeout(() => {
+                    $("#exportar_excel").html(botonOriginal).prop('disabled', false);
+                }, 2000);
+            }
+        }
+
+        // Función para obtener el resumen de farmacias
+        function obtenerResumenFarmacias() {
+            let resumenHtml = '<table class="resumen"><thead><tr><th>Farmacia</th><th>Total Medicamentos</th></tr></thead><tbody>';
+
+            // Extraer totales de la última fila de la tabla
+            const filasTotales = $("#tablaDetPend tbody tr:last");
+            if (filasTotales.length > 0) {
+                const celdas = filasTotales.find('th');
+                const farmacias = ['BIO1', 'DLR1', 'DPA1', 'EM01', 'EHU1', 'FRJA', 'FRIO', 'INY', 'PAC', 'SM01', 'BPDT', 'EVEN', 'EVSM'];
+
+                const servicioMap = {
+                    "BIO1": "Biológicos",
+                    "DLR1": "Dolor",
+                    "DPA1": "Paliativos",
+                    "EM01": "Emcali",
+                    "EHU1": "Huérfanas",
+                    "FRJA": "Jamundí",
+                    "FRIO": "Ideo",
+                    "INY": "Inyectables",
+                    "PAC": "PCE",
+                    "SM01": "Salud Mental",
+                    "BPDT": "Bolsa",
+                    "EVEN": "Evento",
+                    "EVSM": "Evento SM"
+                };
+
+                celdas.each(function(index) {
+                    if (index > 0 && index <= farmacias.length) { // Saltar la primera celda "TOTALES"
+                        const farmacia = farmacias[index - 1];
+                        const total = $(this).text().trim();
+                        const nombreFarmacia = servicioMap[farmacia] || farmacia;
+
+                        if (parseInt(total.replace(/\./g, '')) > 0) { // Solo mostrar si tiene medicamentos
+                            resumenHtml += `<tr><td>${nombreFarmacia}</td><td>${total}</td></tr>`;
+                        }
+                    }
+                });
+            }
+
+            resumenHtml += '</tbody></table>';
+            return resumenHtml;
+        }
+
+        // Función para obtener la tabla completa con formato
+        function obtenerTablaCompleta() {
+            const tabla = $("#tablaDetPend")[0];
+            if (!tabla) return '<p>No hay datos disponibles</p>';
+
+            let tablaHtml = '<table class="tabla">';
+
+            // Procesar encabezados
+            const thead = tabla.querySelector('thead');
+            if (thead) {
+                tablaHtml += '<thead>';
+                $(thead).find('tr').each(function() {
+                    tablaHtml += '<tr>';
+                    $(this).find('th').each(function() {
+                        const rowspan = $(this).attr('rowspan') || 1;
+                        const colspan = $(this).attr('colspan') || 1;
+                        tablaHtml += `<th rowspan="${rowspan}" colspan="${colspan}">${$(this).text()}</th>`;
+                    });
+                    tablaHtml += '</tr>';
+                });
+                tablaHtml += '</thead>';
+            }
+
+            // Procesar cuerpo de la tabla
+            const tbody = tabla.querySelector('tbody');
+            if (tbody) {
+                tablaHtml += '<tbody>';
+                $(tbody).find('tr').each(function() {
+                    const esFilaTotales = $(this).hasClass('table-info') || $(this).find('th').length > 0;
+                    const claseCSS = esFilaTotales ? ' class="totales"' : '';
+                    tablaHtml += `<tr${claseCSS}>`;
+
+                    $(this).find('td, th').each(function() {
+                        const tag = $(this).is('th') ? 'th' : 'td';
+                        tablaHtml += `<${tag}>${$(this).text()}</${tag}>`;
+                    });
+                    tablaHtml += '</tr>';
+                });
+                tablaHtml += '</tbody>';
+            }
+
+            tablaHtml += '</table>';
+            return tablaHtml;
+        }
+
+        // Función auxiliar para formatear fechas
+        function formatearFecha(fecha) {
+            if (!fecha) return 'N/A';
+            const date = new Date(fecha);
+            if (isNaN(date.getTime())) return fecha; // Si no se puede parsear, devolver original
+
+            const dia = String(date.getDate()).padStart(2, '0');
+            const mes = String(date.getMonth() + 1).padStart(2, '0');
+            const año = date.getFullYear();
+
+            return `${dia}/${mes}/${año}`;
+        }
+
+        // Función auxiliar para mostrar errores (ya existente, pero la incluyo por completitud)
+        function mostrarError(mensaje) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: mensaje
+                });
+            } else if (typeof toastr !== 'undefined') {
+                toastr.error(mensaje);
+            } else {
+                alert(mensaje);
+            }
+        }
+
 
     });
 

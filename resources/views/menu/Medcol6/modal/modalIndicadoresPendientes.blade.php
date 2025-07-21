@@ -43,6 +43,7 @@
                                     <option value="EM01">EM01-FARMACIA EMCALI</option>
                                     <option value="EHU1">EHU1-FARMACIA HUERFANAS</option>
                                     <option value="FRJA">FRJA-FARMACIA JAMUNDI</option>
+                                    <option value="FRIO">FRIO-FARMACIA IDEO</option>
                                     <option value="INY">INY-FARMACIA INYECTABLES</option>
                                     <option value="PAC">PAC-FARMACIA PAC</option>
                                     <option value="SM01">SM01-FARMACIA SALUD MENTAL</option>
@@ -61,6 +62,16 @@
                         <li class="nav-item">
                             <a class="nav-link active" id="pendientes-tab" data-toggle="tab" href="#pendientes" role="tab" aria-controls="pendientes" aria-selected="true">
                                 Informe Pendientes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="detallependientes-tab" data-toggle="tab" href="#detallependientes" role="tab" aria-controls="detallependientes" aria-selected="true">
+                                Detalle Pendientes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pendientesconsaldos-tab" data-toggle="tab" href="#pendientesconsaldos" role="tab" aria-controls="pendientesconsaldos" aria-selected="true">
+                                Pendientes vs Saldos
                             </a>
                         </li>
                         <li class="nav-item">
@@ -180,7 +191,54 @@
                             </div>
                         </div>
 
-                        <!-- Pestaña 2: Pendientes vs Saldos -->
+                        <!-- Pestaña 2: Detalle Pendientes -->
+                        <div class="tab-pane fade" id="detallependientes" role="tabpanel" aria-labelledby="detallependientes-tab">
+                            <h5 class="text-center text-dark">Contenido del Informe Detalle Pendientes</h5>
+
+                            <!-- Botón de exportación a Excel -->
+                            <div class="row mb-3">
+                                <div class="col-12 text-right">
+                                    <button type="button" id="exportar_excel" class="btn btn-success" style="display: none;" title="Exportar reporte completo a Excel">
+                                        <i class="fas fa-file-excel"></i> Exportar a Excel
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Contenedor para medicamentos por farmacia -->
+                            <div id="detalle_medicamentos_farmacia" class="mb-3"></div>
+
+                            <div class="card-body table-responsive">
+                                <table id="tablaDetPend" class="table table-bordered table-striped table-hover text-center">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th rowspan="2" class="align-middle">Molecula/Insumo</th>
+                                            <th colspan="13">Cantidad Pendiente por Farmacia</th>
+                                            <th rowspan="2" class="align-middle">Total</th>
+                                        </tr>
+                                        <tr>
+                                            <th>BIO1</th>
+                                            <th>DLR1</th>
+                                            <th>DPA1</th>
+                                            <th>EM01</th>
+                                            <th>EHU1</th>
+                                            <th>FRJA</th>
+                                            <th>FRIO</th>
+                                            <th>INY</th>
+                                            <th>PAC</th>
+                                            <th>SM01</th>
+                                            <th>BPDT</th>
+                                            <th>EVEN</th>
+                                            <th>EVSM</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Filas dinámicas se llenan por JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Pestaña 3: Pendientes vs Saldos -->
                         <div class="tab-pane fade" id="pendientesconsaldos" role="tabpanel" aria-labelledby="pendientesconsaldos-tab">
                             <h5 class="text-center text-dark">Contenido del Informe Pendientes vs Saldos</h5>
                             <div class="card-body table-responsive">
@@ -205,7 +263,7 @@
                                 </table>
                             </div>
                         </div>
-                        <!-- Pestaña 3: Informe ForGif -->
+                        <!-- Pestaña 4: Informe ForGif -->
                         <div class="tab-pane fade" id="forgif" role="tabpanel" aria-labelledby="forgif-tab">
                             <h5 class="text-center text-dark">Contenido del Informe FOR_GIF_003</h5>
                             <div class="card-body table-responsive">
@@ -239,19 +297,19 @@
                             </div>
                         </div>
 
-                        <!-- Pestaña 4: Informe Medicamentos -->
+                        <!-- Pestaña 5: Informe Medicamentos -->
                         <div class="tab-pane fade" id="sicmedic" role="tabpanel" aria-labelledby="sicmedic-tab">
                             <h5 class="text-center text-dark">Contenido del Informe Medicamentos</h5>
                             <p class="text-center">Aquí va el contenido específico del Informe SIC-Medicamentos.</p>
                         </div>
 
-                        <!-- Pestaña 5: Informe Insumos -->
+                        <!-- Pestaña 6: Informe Insumos -->
                         <div class="tab-pane fade" id="insumos" role="tabpanel" aria-labelledby="insumos-tab">
                             <h5 class="text-center text-dark">Contenido del Informe Insumos</h5>
                             <p class="text-center">Aquí va el contenido específico del Informe Insumos.</p>
                         </div>
 
-                        <!-- Pestaña 6: Dispensación Multiple -->
+                        <!-- Pestaña 7: Dispensación Multiple -->
                         <div class="tab-pane fade" id="multiples" role="tabpanel" aria-labelledby="multiples-tab">
                             <h5 class="text-center text-dark">Contenido del Informe Dispensacion Multiple</h5>
                             <p class="text-center">Aquí va el contenido específico del Informe Dispensacion Multiple.</p>
