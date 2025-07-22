@@ -26,6 +26,8 @@ Pendientes Medcol
 
 
 <script src="{{asset("assets/pages/scripts/admin/usuario/crearuser.js")}}" type="text/javascript"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> -->
+
 @endsection
 
 @section('content')
@@ -1952,6 +1954,14 @@ Pendientes Medcol
                 return;
             }
 
+            parametrosActuales = {
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
+                contrato: contrato || null
+            };
+
+            console.log('Parámetros actualizados:', parametrosActuales);
+
             // Llamar a la función generadora del informe
             show_report(fechaInicio, fechaFin, contrato || null);
             cargarDetallePendientes(fechaInicio, fechaFin, contrato || null);
@@ -2294,7 +2304,7 @@ Pendientes Medcol
                 </style>
             </head>
             <body>
-                <div class="encabezado">REPORTE DE MEDICAMENTOS POR FARMACIA</div>
+                <div class="encabezado">REPORTE DE MEDICAMENTOS PENDIENTES POR FARMACIA</div>
                 <br>
                 <div class="info">Fecha Inicio: ${fechaInicio}</div>
                 <div class="info">Fecha Fin: ${fechaFin}</div>
@@ -2351,9 +2361,80 @@ Pendientes Medcol
             }
         }
 
-        // Función para obtener el resumen de farmacias
+        // Función para obtener el resumen de farmacias - MODIFICADA
         function obtenerResumenFarmacias() {
-            let resumenHtml = '<table class="resumen"><thead><tr><th>Farmacia</th><th>Total Medicamentos</th></tr></thead><tbody>';
+            let resumenHtml = '<table class="resumen"><thead><tr><th>Farmacia</th><th>Número de Registros</th></tr></thead><tbody>';
+
+            // Extraer totales de la última fila de la tabla para verificar si > 0
+            const filasTotales = $("#tablaDetPend tbody tr:last");
+            if (filasTotales.length > 0) {
+                const celdas = filasTotales.find('th');
+                const farmacias = ['BIO1', 'DLR1', 'DPA1', 'EM01', 'EHU1', 'FRJA', 'FRIO', 'INY', 'PAC', 'SM01', 'BPDT', 'EVEN', 'EVSM'];
+
+                const servicioMap = {
+                    "BIO1": "Biológicos",
+                    "DLR1": "Dolor",
+                    "DPA1": "Paliativos",
+                    "EM01": "Emcali",
+                    "EHU1": "Huérfanas",
+                    "FRJA": "Jamundí",
+                    "FRIO": "Ideo",
+                    "INY": "Inyectables",
+                    "PAC": "PCE",
+                    "SM01": "Salud Mental",
+                    "BPDT": "Bolsa",
+                    "EVEN": "Evento",
+                    "EVSM": "Evento SM"
+                };
+
+                celdas.each(function(index) {
+                    if (index > 0 && index <= farmacias.length) { // Saltar la primera celda "TOTALES"
+                        const farmacia = farmacias[index - 1];
+                        const total = $(this).text().trim();
+                        const nombreFarmacia = servicioMap[farmacia] || farmacia;
+
+                        // Solo procesar si el total es mayor a cero
+                        if (parseInt(total.replace(/\./g, '')) > 0) {
+                            // Contar filas que tienen datos en esta columna específica (sin contar header y total)
+                            const numeroFilas = contarFilasPorFarmacia(farmacia, index);
+
+                            resumenHtml += `<tr><td>${nombreFarmacia}</td><td>${numeroFilas}</td></tr>`;
+                        }
+                    }
+                });
+            }
+
+            resumenHtml += '</tbody></table>';
+            return resumenHtml;
+        }
+
+        // Función auxiliar para contar filas por farmacia
+        function contarFilasPorFarmacia(codigoFarmacia, indiceColumna) {
+            let contador = 0;
+
+            // Recorrer todas las filas de la tabla (excepto header y última fila de totales)
+            $("#tablaDetPend tbody tr").each(function(index, fila) {
+                // Saltar la primera fila (header) y la última fila (totales)
+                const totalFilas = $("#tablaDetPend tbody tr").length;
+                if (index > 0 && index < totalFilas - 1) {
+                    // Obtener el valor de la celda en la columna de esta farmacia
+                    const celda = $(fila).find('td, th').eq(indiceColumna);
+                    const valor = celda.text().trim();
+
+                    // Si tiene un valor numérico mayor a 0, contar esta fila
+                    const valorNumerico = parseInt(valor.replace(/\./g, '')) || 0;
+                    if (valorNumerico > 0) {
+                        contador++;
+                    }
+                }
+            });
+
+            return contador;
+        }
+
+        // Función alternativa más simple si quieres contar TODAS las filas que tienen datos
+        function obtenerResumenFarmaciasSimple() {
+            let resumenHtml = '<table class="resumen"><thead><tr><th>Farmacia</th><th>Número de Registros</th></tr></thead><tbody>';
 
             // Extraer totales de la última fila de la tabla
             const filasTotales = $("#tablaDetPend tbody tr:last");
@@ -2383,8 +2464,13 @@ Pendientes Medcol
                         const total = $(this).text().trim();
                         const nombreFarmacia = servicioMap[farmacia] || farmacia;
 
-                        if (parseInt(total.replace(/\./g, '')) > 0) { // Solo mostrar si tiene medicamentos
-                            resumenHtml += `<tr><td>${nombreFarmacia}</td><td>${total}</td></tr>`;
+                        // Solo mostrar farmacias con total > 0
+                        if (parseInt(total.replace(/\./g, '')) > 0) {
+                            // Contar filas de datos (total de filas - header - fila de totales)
+                            const totalFilasTabla = $("#tablaDetPend tbody tr").length;
+                            const numeroRegistros = Math.max(0, totalFilasTabla - 2); // Restar header y totales
+
+                            resumenHtml += `<tr><td>${nombreFarmacia}</td><td>${numeroRegistros}</td></tr>`;
                         }
                     }
                 });
@@ -2442,7 +2528,18 @@ Pendientes Medcol
         // Función auxiliar para formatear fechas
         function formatearFecha(fecha) {
             if (!fecha) return 'N/A';
-            const date = new Date(fecha);
+
+            let date;
+
+            // Si la fecha viene en formato ISO (YYYY-MM-DD), procesarla directamente
+            if (typeof fecha === 'string' && fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                // Extraer año, mes, día directamente del string para evitar problemas de zona horaria
+                const [año, mes, dia] = fecha.split('-');
+                return `${dia}/${mes}/${año}`;
+            }
+
+            // Para otros formatos, usar Date normalmente
+            date = new Date(fecha);
             if (isNaN(date.getTime())) return fecha; // Si no se puede parsear, devolver original
 
             const dia = String(date.getDate()).padStart(2, '0');
