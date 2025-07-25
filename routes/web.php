@@ -303,7 +303,14 @@ Route::get('buscar-medcol6/{factura}', 'Medcol6\DispensadoApiMedcol6Controller@b
 
 Route::post('medcol6/exportar-excel', [ExportController::class, 'exportExcel'])->name('exportar.excel');
 
-
+//Rutas para gestión de saldos MEDCOL 6
+Route::get('medcol6/saldos', 'Medcol6\SaldosMedcol6Controller@index')->name('medcol6.saldos')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/saldos/data', 'Medcol6\SaldosMedcol6Controller@getSaldos')->name('medcol6.saldos.data')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/saldos/sincronizar', 'Medcol6\SaldosMedcol6Controller@sincronizarSaldos')->name('medcol6.saldos.sincronizar')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/saldos/probar-api', 'Medcol6\SaldosMedcol6Controller@probarApi')->name('medcol6.saldos.probar-api')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/saldos/estadisticas', 'Medcol6\SaldosMedcol6Controller@getEstadisticas')->name('medcol6.saldos.estadisticas')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/saldos/filtros', 'Medcol6\SaldosMedcol6Controller@getOpcionesFiltros')->name('medcol6.saldos.filtros')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/saldos/{id}', 'Medcol6\SaldosMedcol6Controller@show')->name('medcol6.saldos.show')->middleware('verified')->middleware('verifyuser');
 
 /*
 **

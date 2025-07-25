@@ -18,7 +18,7 @@ Pendientes Medcol
 <link href="{{asset("assets/css/select2-bootstrap.min.css")}}" rel="stylesheet" type="text/css" />
 <link href="{{asset("assets/css/select2.min.css")}}" rel="stylesheet" type="text/css" />
 <link href="{{asset("assets/css/botones.css")}}" rel="stylesheet" type="text/css" />
-
+<link href="{{asset("assets/css/modal-form.css")}}" rel="stylesheet" type="text/css" />
 
 @endsection
 
@@ -191,8 +191,10 @@ Pendientes Medcol
         }
 
         function mostrarOcultarCampos() {
-            var estado_id = $('#estado option:selected');
-            var estado_texto = estado_id.text();
+            // CORREGIDO: Usar .val() en lugar de .text() para obtener el valor del option
+            var estado_valor = $('#estado').val(); // Obtener el valor directamente
+            console.log('🔄 mostrarOcultarCampos() llamada con estado:', estado_valor);
+            
             var futuro1 = $('#futuro1');
             var futuro2 = $('#futuro2');
             var futuro3 = $('#futuro3');
@@ -201,87 +203,102 @@ Pendientes Medcol
             var enviar_fecha_entrega = $('#enviar_fecha_entrega');
             var enviar_fecha_impresion = $('#enviar_fecha_impresion');
             var enviar_fecha_anulado = $('#enviar_fecha_anulado');
+            var enviar_factura_entrega = $('#enviar_factura_entrega');
+            
             var input1 = $('#fecha_entrega');
             var input2 = $('#fecha_impresion');
             var anulado = $('#fecha_anulado');
             var input3 = $('#cantord');
             var input4 = $('#cantdpx');
 
-            if (estado_texto == "TRAMITADO") {
-                futuro2.show();
+            // Ocultar todos los campos primero
+            futuro1.hide().addClass('hidden');
+            futuro2.hide().addClass('hidden');
+            futuro3.hide().addClass('hidden');
+            futuro4.hide().addClass('hidden');
 
-                futuro1.hide();
-                futuro3.hide();
-                futuro4.hide();
+            // Resetear campos ocultos
+            enviar_fecha_entrega.val('false');
+            enviar_fecha_impresion.val('false');
+            enviar_fecha_anulado.val('false');
+            enviar_factura_entrega.val('false');
 
-                enviar_fecha_impresion.val('true');
-                enviar_fecha_entrega.val('false');
-                enviar_fecha_anulado.val('false');
+            // CORREGIDO: Usar el valor en lugar del texto y agregar todos los estados
+            switch (estado_valor) {
+                case "ENTREGADO":
+                    console.log('✅ Mostrando campos para ENTREGADO');
+                    futuro1.show().removeClass('hidden');
+                    enviar_fecha_entrega.val('true');
+                    enviar_factura_entrega.val('true');
+                    
+                    // Limpiar otros campos
+                    input2.val('');
+                    anulado.val('');
+                    
+                    // Auto-completar cantidad entregada con cantidad ordenada
+                    var cant_ordenada = parseInt(input3.val()) || 0;
+                    if (cant_ordenada > 0 && !input4.val()) {
+                        input4.val(cant_ordenada);
+                    }
+                    break;
 
-                //Limpia los inputs de las fechas seleccionadas cuando esrtan en show luego pasan a hide
-                input1.val('');
-                anulado.val('');
+                case "DESABASTECIDO":
+                    console.log('✅ Mostrando campos para DESABASTECIDO');
+                    futuro2.show().removeClass('hidden');
+                    enviar_fecha_impresion.val('true');
+                    
+                    // Limpiar otros campos
+                    input1.val('');
+                    anulado.val('');
+                    break;
 
+                case "ANULADO":
+                    console.log('✅ Mostrando campos para ANULADO');
+                    futuro4.show().removeClass('hidden');
+                    enviar_fecha_anulado.val('true');
+                    
+                    // Limpiar otros campos
+                    input1.val('');
+                    input2.val('');
+                    break;
 
-            } else if (estado_texto == "ENTREGADO") {
-                futuro1.show();
+                case "PENDIENTE":
+                    console.log('✅ Mostrando campos para PENDIENTE');
+                    futuro3.show().removeClass('hidden');
+                    
+                    // Limpiar todos los campos
+                    input1.val('');
+                    input2.val('');
+                    anulado.val('');
+                    break;
 
-                futuro2.hide();
-                futuro3.hide();
-                futuro4.hide();
+                case "TRAMITADO":
+                    console.log('✅ Mostrando campos para TRAMITADO');
+                    futuro2.show().removeClass('hidden');
+                    enviar_fecha_impresion.val('true');
+                    
+                    // Limpiar otros campos
+                    input1.val('');
+                    anulado.val('');
+                    break;
 
-                enviar_fecha_entrega.val('true');
-                enviar_fecha_impresion.val('false');
-                enviar_fecha_anulado.val('false');
+                default:
+                    console.log('⚠️ Estado no reconocido:', estado_valor);
+                    // Limpiar todo
+                    input1.val('');
+                    input2.val('');
+                    anulado.val('');
+                    break;
+            }
 
-                //Limpia los inputs de las fechas seleccionadas cuando esrtan en show luego pasan a hide
-                input2.val('');
-                anulado.val('');
+            // Llamar también al handler del nuevo sistema si existe
+            if (window.pendientesFormStatusHandler) {
+                window.pendientesFormStatusHandler(estado_valor);
+            }
 
-                var cant_entregada = parseInt(input3.val());
-                input4.val(cant_entregada);
-
-            } else if (estado_texto == "ANULADO") {
-                futuro4.show();
-
-                futuro1.hide();
-                futuro2.hide();
-                futuro3.hide();
-
-                enviar_fecha_anulado.val('true');
-                enviar_fecha_entrega.val('false');
-                enviar_fecha_impresion.val('false');
-
-                //Limpia los inputs de las fechas seleccionadas cuando esrtan en show luego pasan a hide
-                input1.val('');
-                input2.val('');
-
-
-            } else if (estado_texto == "PENDIENTE") {
-                futuro3.show();
-
-                futuro1.hide();
-                futuro2.hide();
-                futuro4.hide();
-
-                enviar_fecha_entrega.val('false');
-                enviar_fecha_impresion.val('false');
-                enviar_fecha_anulado.val('false');
-
-                input1.val('');
-                input2.val('');
-                anulado.val('');
-            } else {
-                futuro1.hide();
-                futuro2.hide();
-                futuro3.hide();
-                futuro4.hide();
-                enviar_fecha_entrega.val('false');
-                enviar_fecha_impresion.val('false');
-                enviar_fecha_anulado.val('false');
-                input1.val('');
-                input2.val('');
-                anulado.val('');
+            // Recalcular cantidades pendientes si existe la función
+            if (window.pendientesFormManager && window.pendientesFormManager.calculatePendingQuantity) {
+                window.pendientesFormManager.calculatePendingQuantity();
             }
         }
 
@@ -1479,8 +1496,11 @@ Pendientes Medcol
                         "DLR1": "CDDO",
                         "DPA1": "CDDO",
                         "EM01": "CDEM",
+                        "FRIO": "CDIO",
                         "EHU1": "CDHU",
                         "FRJA": "CDJA",
+                        "FRIO": "CDIO",
+                        "BDNT": "EVIO",
                         "SM01": "CDSM"
                     };
 
@@ -2596,5 +2616,59 @@ Pendientes Medcol
             "colvis": "Visibilidad"
         }
     }
+
+    // Configuración mejorada de Select2 para el formulario de estados
+    $(document).ready(function() {
+        // Configurar Select2 con estilos mejorados
+        if (typeof $.fn.select2 !== 'undefined') {
+            $('#estado').select2({
+                theme: 'bootstrap4',
+                width: '100%',
+                placeholder: '---Seleccione Estado---',
+                allowClear: false,
+                dropdownParent: $('#modal-edit-pendientes'),
+                templateResult: function(option) {
+                    if (!option.id) return option.text;
+                    
+                    // Crear elemento con icono y texto
+                    const $option = $('<span></span>');
+                    $option.html(option.text);
+                    
+                    // Agregar clase CSS según el estado
+                    if (option.id === 'PENDIENTE') {
+                        $option.addClass('select2-option-pendiente');
+                    } else if (option.id === 'ENTREGADO') {
+                        $option.addClass('select2-option-entregado');
+                    } else if (option.id === 'DESABASTECIDO') {
+                        $option.addClass('select2-option-desabastecido');
+                    } else if (option.id === 'ANULADO') {
+                        $option.addClass('select2-option-anulado');
+                    }
+                    
+                    return $option;
+                },
+                templateSelection: function(option) {
+                    if (!option.id) return option.text;
+                    
+                    // Crear elemento para la selección con icono y texto
+                    const $selection = $('<span></span>');
+                    $selection.html(option.text);
+                    
+                    return $selection;
+                }
+            });
+            
+            console.log('✅ Select2 inicializado correctamente para el campo estado');
+        } else {
+            console.warn('⚠️ Select2 no está disponible');
+        }
+    });
 </script>
+
+<!-- Script para gestión del formulario de pendientes -->
+<script src="{{asset("assets/js/pendientes-form.js")}}" type="text/javascript"></script>
+
+<!-- Script de debug (solo para desarrollo) -->
+<script src="{{asset("assets/js/debug-estados.js")}}" type="text/javascript"></script>
+
 @endsection

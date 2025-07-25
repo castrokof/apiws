@@ -1,0 +1,552 @@
+/* ==============================================
+   ESTILOS PARA FORMULARIO MODAL MODERNO
+   ============================================== */
+
+.modal-modern {
+    --primary-color: #007bff;
+    --success-color: #28a745;
+    --warning-color: #f8c102;
+    --danger-color: #dc3545;
+    --secondary-color: #6c757d;
+    --light-bg: #f8f9fa;
+    --border-radius: 8px;
+    --transition: all 0.3s ease;
+}
+
+.modal-modern .modal-content {
+    border-radius: var(--border-radius);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+.modal-modern .modal-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+    color: white;
+    border-bottom: none;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    padding: 1.5rem 2rem;
+}
+
+.modal-modern .modal-title {
+    font-weight: 600;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-modern .modal-title i {
+    font-size: 1.1rem;
+}
+
+.modal-header-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.modal-header-controls .btn-tool {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.modal-header-controls .btn-tool:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.btn-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    transition: var(--transition);
+}
+
+.btn-close:hover {
+    background: var(--danger-color);
+    transform: scale(1.05);
+}
+
+/* ==============================================
+   SECCIONES DEL FORMULARIO
+   ============================================== */
+
+.modal-section {
+    background: white;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    border: 1px solid #e9ecef;
+}
+
+.modal-section-title {
+    background: var(--light-bg);
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-section-title i {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.modal-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    padding: 1.5rem;
+}
+
+.modal-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-form-group.half-width {
+    grid-column: span 2;
+}
+
+.modal-form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.modal-form-group label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.modal-form-group label.required::after {
+    content: " *";
+    color: var(--danger-color);
+    font-weight: bold;
+}
+
+.modal-form-group .form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    background: white;
+}
+
+.modal-form-group .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+    outline: none;
+}
+
+.modal-form-group .form-control:read-only {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #6c757d;
+}
+
+.modal-form-group .form-control.is-invalid {
+    border-color: var(--danger-color);
+}
+
+.modal-form-group .form-control.is-valid {
+    border-color: var(--success-color);
+}
+
+.modal-quantity-badge {
+    background: var(--primary-color);
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    margin-top: 0.25rem;
+    align-self: flex-start;
+    display: inline-block;
+}
+
+/* ==============================================
+   SECCIONES ESPECIALES
+   ============================================== */
+
+.modal-management-section {
+    border-left: 4px solid var(--success-color);
+}
+
+.modal-user-info {
+    border-left: 4px solid var(--primary-color);
+}
+
+.modal-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 0 1.5rem 1.5rem;
+}
+
+.modal-status-item {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Manejo de estados hidden y show para compatibilidad con jQuery */
+.modal-status-item.hidden {
+    display: none !important;
+}
+
+.modal-status-item {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Cuando jQuery aplica display: none */
+.modal-status-item[style*="display: none"] {
+    display: none !important;
+}
+
+/* Cuando jQuery aplica display: block o show */
+.modal-status-item[style*="display: block"],
+.modal-status-item[style*="display: flex"] {
+    display: flex !important;
+    flex-direction: column;
+}
+
+.modal-status-item label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* ==============================================
+   BOTONES DE ACCIÓN
+   ============================================== */
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.5rem 0;
+    background: var(--light-bg);
+    border-top: 1px solid #dee2e6;
+    margin-top: 1rem;
+}
+
+.modal-actions .btn {
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 150px;
+    justify-content: center;
+}
+
+.modal-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.modal-actions .btn-success {
+    background: linear-gradient(135deg, var(--success-color) 0%, #1e7e34 100%);
+}
+
+.modal-actions .btn-secondary {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, #545b62 100%);
+}
+
+.modal-actions .btn-warning {
+    background: linear-gradient(135deg, var(--warning-color) 0%, #e0a800 100%);
+    color: #212529;
+}
+
+/* ==============================================
+   ALERTAS Y MENSAJES
+   ============================================== */
+
+#alert-container {
+    margin-bottom: 1rem;
+}
+
+.alert-modern {
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.alert-modern.alert-success {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+    border-left: 4px solid var(--success-color);
+}
+
+.alert-modern.alert-danger {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+    border-left: 4px solid var(--danger-color);
+}
+
+.alert-modern.alert-warning {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+    color: #856404;
+    border-left: 4px solid var(--warning-color);
+}
+
+/* ==============================================
+   SELECT DE ESTADO MEJORADO
+   ============================================== */
+
+.modal-form-group select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px;
+    padding-right: 2.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* Estilos específicos para Select2 */
+.select2-container--bootstrap4 .select2-selection--single {
+    height: calc(2.25rem + 2px) !important;
+    border: 2px solid #e9ecef !important;
+    border-radius: 6px !important;
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    background: white !important;
+    transition: var(--transition) !important;
+}
+
+.select2-container--bootstrap4 .select2-selection--single:focus-within,
+.select2-container--bootstrap4.select2-container--focus .select2-selection--single {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15) !important;
+    outline: none !important;
+}
+
+.select2-container--bootstrap4 .select2-selection__rendered {
+    color: #495057 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    line-height: 1.5 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+.select2-container--bootstrap4 .select2-selection__arrow {
+    height: calc(2.25rem) !important;
+    right: 0.75rem !important;
+    width: 16px !important;
+}
+
+.select2-container--bootstrap4 .select2-selection__arrow b {
+    border-color: #6c757d transparent transparent transparent !important;
+    border-style: solid !important;
+    border-width: 5px 4px 0 4px !important;
+    height: 0 !important;
+    left: 50% !important;
+    margin-left: -4px !important;
+    margin-top: -2px !important;
+    position: absolute !important;
+    top: 50% !important;
+    width: 0 !important;
+}
+
+/* Dropdown del Select2 mejorado */
+.select2-container--bootstrap4 .select2-dropdown {
+    border: 2px solid var(--primary-color) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    margin-top: 2px !important;
+}
+
+.select2-container--bootstrap4 .select2-results__option {
+    padding: 0.75rem 1rem !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    transition: var(--transition) !important;
+}
+
+.select2-container--bootstrap4 .select2-results__option--highlighted {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.select2-container--bootstrap4 .select2-results__option[aria-selected="true"] {
+    background-color: var(--success-color) !important;
+    color: white !important;
+}
+
+/* Estados específicos con colores mejorados */
+.select2-results__option[data-select2-id*="PENDIENTE"],
+.select2-option-pendiente {
+    border-left: 4px solid #f8c102 !important;
+    background: linear-gradient(90deg, #fff3cd 0%, #ffffff 20%) !important;
+    color: #856404 !important;
+}
+
+.select2-results__option[data-select2-id*="ENTREGADO"],
+.select2-option-entregado {
+    border-left: 4px solid #28a745 !important;
+    background: linear-gradient(90deg, #d4edda 0%, #ffffff 20%) !important;
+    color: #155724 !important;
+}
+
+.select2-results__option[data-select2-id*="DESABASTECIDO"],
+.select2-option-desabastecido {
+    border-left: 4px solid #dc3545 !important;
+    background: linear-gradient(90deg, #f8d7da 0%, #ffffff 20%) !important;
+    color: #721c24 !important;
+}
+
+.select2-results__option[data-select2-id*="ANULADO"],
+.select2-option-anulado {
+    border-left: 4px solid #6c757d !important;
+    background: linear-gradient(90deg, #f8f9fa 0%, #ffffff 20%) !important;
+    color: #495057 !important;
+}
+
+/* Estado seleccionado con estilo visual mejorado */
+.select2-container--bootstrap4 .select2-selection__rendered.estado-pendiente {
+    color: #856404 !important;
+    background: linear-gradient(90deg, #fff3cd 0%, #ffffff 50%);
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+}
+
+.select2-container--bootstrap4 .select2-selection__rendered.estado-entregado {
+    color: #155724 !important;
+    background: linear-gradient(90deg, #d4edda 0%, #ffffff 50%);
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+}
+
+.select2-container--bootstrap4 .select2-selection__rendered.estado-desabastecido {
+    color: #721c24 !important;
+    background: linear-gradient(90deg, #f8d7da 0%, #ffffff 50%);
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+}
+
+.select2-container--bootstrap4 .select2-selection__rendered.estado-anulado {
+    color: #495057 !important;
+    background: linear-gradient(90deg, #f8f9fa 0%, #ffffff 50%);
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+}
+
+/* ==============================================
+   RESPONSIVO
+   ============================================== */
+
+@media (max-width: 768px) {
+    .modal-form-grid {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+    
+    .modal-form-group.half-width,
+    .modal-form-group.full-width {
+        grid-column: 1;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .modal-actions .btn {
+        min-width: 200px;
+    }
+    
+    .modal-status-grid {
+        grid-template-columns: 1fr;
+        padding: 0 1rem 1rem;
+    }
+}
+
+/* ==============================================
+   ANIMACIONES
+   ============================================== */
+
+.modal-modern.show .modal-content {
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.form-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.form-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.form-loading::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 1001;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

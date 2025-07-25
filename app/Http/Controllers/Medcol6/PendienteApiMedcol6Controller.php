@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Medcol6\PendienteApiMedcol6;
 use App\Models\Medcol6\EntregadosApiMedcol6;
 use App\Models\Medcol6\ObservacionesApiMedcol6;
+use App\Services\PendienteService;
+use App\Http\Requests\UpdatePendienteRequest;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
@@ -20,11 +22,12 @@ use stdClass;
 
 class PendienteApiMedcol6Controller extends Controller
 {
+    private $pendienteService;
 
-    public $var1 = null;
-    public $var2 = null;
-    public $ip = null;
-    public $res = false;
+    public function __construct(PendienteService $pendienteService)
+    {
+        $this->pendienteService = $pendienteService;
+    }
 
     /**
      * Display a listing of the resource.
@@ -816,94 +819,74 @@ class PendienteApiMedcol6Controller extends Controller
         return view('menu.Medcol6.indexAnalista');
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \App\Http\Requests\UpdatePendienteRequest  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(UpdatePendienteRequest $request, $id)
     {
-        $rules = array(
-            'estado' => 'required'
-        );
-
-        if ($request->input('enviar_fecha_entrega') == 'true') {
-            $rules['fecha_entrega'] = 'required';
-            $rules['factura_entrega'] = 'required';
-            $rules['cantord'] = 'required|numeric|min:1'; // Mayor a cero
-            $rules['cantdpx'] = 'required|numeric|min:1'; // Mayor a cero
-        }
-
-        if ($request->input('enviar_fecha_impresion') == 'true') {
-            $rules['fecha_impresion'] = 'required';
-        }
-
-        if ($request->input('enviar_fecha_anulado') == 'true') {
-            $rules['fecha_anulado'] = 'required';
-        }
-
-        if ($request->input('enviar_fecha_factura_entrega') == 'true') {
-            $rules['doc_entrega'] = 'required';
-            $rules['factura_entrega'] = 'required';
-        }
-
-        $messages = [
-            'cantord.min' => 'El campo Cantidad Ordenada debe ser mayor a cero',
-            'cantdpx.min' => 'El campo Cantidad Entregada debe ser mayor a cero',
-            'factura_entrega.required' => 'El campo Factura Entrega es requerido',
-        ];
-
-        $error = Validator::make($request->all(), $rules, $messages);
-        if ($error->fails()) {
-            return response()->json(['errors' => $error->errors()->all()]);
-        }
-
-        if (request()->ajax()) {
-            $pendiente_api_medcol6 = PendienteApiMedcol6::findOrFail($id);
-            $pendiente_api_medcol6->fill($request->all());
-            $pendiente_api_medcol6->doc_entrega = $request->doc_entrega;
-            $pendiente_api_medcol6->factura_entrega = $request->factura_entrega;
-            $pendiente_api_medcol6->usuario = $request->name;
-
-            if ($request->input('enviar_fecha_entrega') == 'true') {
-                // Validar que cantord y cantdpx sean mayores a cero
-                if ($request->input('cantord') <= 0) {
-                    return response()->json(['errors' => ['El campo cantord debe ser mayor a cero']]);
-                }
-
-                if ($request->input('cantdpx') <= 0) {
-                    return response()->json(['errors' => ['El campo cantdpx debe ser mayor a cero']]);
-                }
-
-                // Validar rango de fecha
-                if ($request->fecha_entrega < $pendiente_api_medcol6->fecha || $request->fecha_entrega > now()->format('Y-m-d')) {
-                    return response()->json(['errors' => ['La fecha de ENTREGA debe estar entre la fecha de la factura y la fecha actual']]);
-                }
-
-                $pendiente_api_medcol6->fecha_entrega = $request->fecha_entrega;
-            }
-
-            if ($request->input('enviar_fecha_impresion') == 'true') {
-                if ($request->fecha_impresion < $pendiente_api_medcol6->fecha || $request->fecha_impresion > now()->format('Y-m-d')) {
-                    return response()->json(['errors' => ['La fecha de TRAMITE debe estar entre la fecha de la factura y la fecha actual']]);
-                }
-                $pendiente_api_medcol6->fecha_impresion = $request->fecha_impresion;
-            }
-
-            if ($request->input('enviar_fecha_anulado') == 'true') {
-                if ($request->fecha_anulado < $pendiente_api_medcol6->fecha || $request->fecha_anulado > now()->format('Y-m-d')) {
-                    return response()->json(['errors' => ['La fecha de ANULACIÓN debe estar entre la fecha de la factura y la fecha actual']]);
-                }
-                $pendiente_api_medcol6->fecha_anulado = $request->fecha_anulado;
-            }
-
-            $pendiente_api_medcol6->save();
-
-            // Guardar observación en la tabla ObservacionesApiMedcol6
-            ObservacionesApiMedcol6::create([
-                'pendiente_id' => $pendiente_api_medcol6->id,
-                'observacion' => $request->input('observacion'),
-                'usuario' => $request->input('name'),
-                'estado' => $request->input('estado')
+        try {
+            // Los datos ya están validados por el FormRequest
+            $validatedData = $request->validated();
+            
+            Log::info('Attempting to update pendiente', [
+                'pendiente_id' => $id,
+                'user' => Auth::user()->email ?? 'unknown',
+                'validated_data' => $validatedData
             ]);
-        }
 
-        return response()->json(['success' => 'ok1']);
+            $result = $this->pendienteService->updatePendiente($id, $validatedData);
+
+            Log::info('Pendiente updated successfully', [
+                'pendiente_id' => $id,
+                'user' => Auth::user()->email ?? 'unknown'
+            ]);
+
+            return response()->json($result);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            Log::error('Database error updating pendiente: ' . $e->getMessage(), [
+                'pendiente_id' => $id,
+                'user' => Auth::user()->email ?? 'unknown',
+                'sql' => $e->getSql(),
+                'bindings' => $e->getBindings(),
+                'error_code' => $e->getCode()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error en la base de datos: ' . $e->getMessage()
+            ], 500);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation error updating pendiente: ' . $e->getMessage(), [
+                'pendiente_id' => $id,
+                'user' => Auth::user()->email ?? 'unknown',
+                'errors' => $e->errors()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            Log::error('General error updating pendiente: ' . $e->getMessage(), [
+                'pendiente_id' => $id,
+                'user' => Auth::user()->email ?? 'unknown',
+                'data' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
 

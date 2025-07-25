@@ -466,6 +466,9 @@
                         <a href="{{ route('medcol6.pendientes') }}" class="list-group-item list-group-item-action">
                             <i class="far fa-share-square"></i> Gestionar Pendientes Farmacia <span class="badge badge-pill badge-primary pull-right">NEW SRV</span>
                         </a>
+                        <a href="{{ route('medcol6.saldos') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-warehouse"></i> Consultar Saldos de Inventario <span class="badge badge-pill badge-success pull-right">SALDOS</span>
+                        </a>
                     </div>
                 </div>
             </div>

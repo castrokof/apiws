@@ -1,5 +1,10 @@
 <!-- Formulario de Gestión de Documentos Pendientes -->
-<form id="documentManagementForm">
+<div id="alert-container"></div>
+<form id="documentManagementForm" method="POST">
+    @csrf
+    @method('PUT')
+    <input type="hidden" name="action" id="action" value="Edit">
+    <input type="hidden" name="hidden_id" id="hidden_id">
     <!-- Información del Paciente -->
     <div class="modal-section">
         <div class="modal-section-title">
@@ -99,15 +104,15 @@
         <div class="modal-form-grid">
             <div class="modal-form-group">
                 <label for="cantord" class="required">Cantidad Ordenada</label>
-                <input type="number" name="cantord" id="cantord" class="form-control">
+                <input type="number" name="cantord" id="cantord" class="form-control" min="1" step="1" required>
             </div>
             <div class="modal-form-group">
                 <label for="cantdpx" class="required">Cantidad Entregada</label>
-                <input type="number" name="cantdpx" id="cantdpx" class="form-control">
+                <input type="number" name="cantdpx" id="cantdpx" class="form-control" min="1" step="1" required>
             </div>
             <div class="modal-form-group">
                 <label for="cant_pndt" class="required">Cantidad Pendiente</label>
-                <input type="number" name="cant_pndt" id="cant_pndt" class="form-control" readonly>
+                <input type="number" name="cant_pndt" id="cant_pndt" class="form-control" readonly tabindex="-1">
                 <span class="modal-quantity-badge">Auto-calculado</span>
             </div>
             <div class="modal-form-group">
@@ -128,6 +133,14 @@
                 <label for="fecha_entrega">📅 Fecha Entrega</label>
                 <input type="date" name="fecha_entrega" id="fecha_entrega" class="form-control">
                 <input type="hidden" name="enviar_fecha_entrega" id="enviar_fecha_entrega" value="false">
+                
+                <!-- <label for="doc_entrega_inline">📄 Doc Entrega</label>
+                <input type="text" name="doc_entrega_inline" id="doc_entrega_inline" class="form-control" placeholder="Ej: CDDO">
+                
+                <label for="factura_entrega_inline">🧾 Factura Entrega</label>
+                <input type="text" name="factura_entrega_inline" id="factura_entrega_inline" class="form-control" placeholder="No. Factura"> -->
+                
+                <input type="hidden" name="enviar_factura_entrega" id="enviar_factura_entrega" value="false">
             </div>
             <div id="futuro2" class="modal-status-item hidden">
                 <label for="fecha_impresion">📋 Fecha Tramitado</label>
@@ -171,5 +184,18 @@
                 <textarea name="observacion" id="observacion" class="form-control UpperCase" rows="4" placeholder="Ingrese las observaciones..." required></textarea>
             </div>
         </div>
+    </div>
+    
+    <!-- Botones de Acción -->
+    <div class="modal-actions">
+        <button type="submit" class="btn btn-success btn-lg" id="guardar_pendiente">
+            <i class="fas fa-save"></i> Guardar Cambios
+        </button>
+        <button type="button" class="btn btn-secondary btn-lg" data-dismiss="modal">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button type="reset" class="btn btn-warning btn-lg" id="limpiar_form">
+            <i class="fas fa-broom"></i> Limpiar
+        </button>
     </div>
 </form>
