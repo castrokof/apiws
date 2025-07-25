@@ -2363,7 +2363,7 @@ Pendientes Medcol
 
         // Función para obtener el resumen de farmacias - MODIFICADA
         function obtenerResumenFarmacias() {
-            let resumenHtml = '<table class="resumen"><thead><tr><th>Farmacia</th><th>Número de Registros</th></tr></thead><tbody>';
+            let resumenHtml = '<table class="resumen"><thead><tr><th>Farmacia</th><th>Número de Items</th></tr></thead><tbody>';
 
             // Extraer totales de la última fila de la tabla para verificar si > 0
             const filasTotales = $("#tablaDetPend tbody tr:last");
@@ -2432,11 +2432,11 @@ Pendientes Medcol
             return contador;
         }
 
-        // Función alternativa más simple si quieres contar TODAS las filas que tienen datos
+        // Función para contar TODAS las filas que tienen datos y agruparlos por farmacia
         function obtenerResumenFarmaciasSimple() {
-            let resumenHtml = '<table class="resumen"><thead><tr><th>Farmacia</th><th>Número de Registros</th></tr></thead><tbody>';
+            let resumenHtml = '<table class="resumen"><thead><tr><th>Farmacia</th><th>Número de Items</th></tr></thead><tbody>';
 
-            // Extraer totales de la última fila de la tabla
+            // Extrae el numero de filas de la tabla
             const filasTotales = $("#tablaDetPend tbody tr:last");
             if (filasTotales.length > 0) {
                 const celdas = filasTotales.find('th');
@@ -2549,7 +2549,7 @@ Pendientes Medcol
             return `${dia}/${mes}/${año}`;
         }
 
-        // Función auxiliar para mostrar errores (ya existente, pero la incluyo por completitud)
+        // Función auxiliar para mostrar errores (ya existente, pero la incluyo por complementar)
         function mostrarError(mensaje) {
             if (typeof Swal !== 'undefined') {
                 Swal.fire({

@@ -65,20 +65,20 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="detallependientes-tab" data-toggle="tab" href="#detallependientes" role="tab" aria-controls="detallependientes" aria-selected="true">
+                            <a class="nav-link" id="detallependientes-tab" data-toggle="tab" href="#detallependientes" role="tab" aria-controls="detallependientes" aria-selected="false">
                                 Detalle Pendientes
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="pendientesconsaldos-tab" data-toggle="tab" href="#pendientesconsaldos" role="tab" aria-controls="pendientesconsaldos" aria-selected="true">
+                        <!-- <li class="nav-item">
+                            <a class="nav-link" id="pendientesconsaldos-tab" data-toggle="tab" href="#pendientesconsaldos" role="tab" aria-controls="pendientesconsaldos" aria-selected="false">
                                 Pendientes vs Saldos
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="pendientesconsaldos-tab" data-toggle="tab" href="#pendientesconsaldos" role="tab" aria-controls="pendientesconsaldos" aria-selected="true">
+                        </li> -->
+                        <!-- <li class="nav-item">
+                            <a class="nav-link" id="pendientesconsaldos-tab" data-toggle="tab" href="#pendientesconsaldos" role="tab" aria-controls="pendientesconsaldos" aria-selected="false">
                                 Pendientes vs Saldos
                             </a>
-                        </li>
+                        </li> -->
                         <!-- <li class="nav-item">
                             <a class="nav-link" id="forgif-tab" data-toggle="tab" href="#forgif" role="tab" aria-controls="forgif" aria-selected="false">
                                 Informe ForGif
@@ -193,7 +193,7 @@
 
                         <!-- Pestaña 2: Detalle Pendientes -->
                         <div class="tab-pane fade" id="detallependientes" role="tabpanel" aria-labelledby="detallependientes-tab">
-                            <h5 class="text-center text-dark">Contenido del Informe Detalle Pendientes</h5>
+                            <h5 class="text-center text-dark">Informe Detalle Pendientes</h5>
 
                             <!-- Botón de exportación a Excel -->
                             <div class="row mb-3">
@@ -381,3 +381,4 @@
         });
     });
 </script>
+
