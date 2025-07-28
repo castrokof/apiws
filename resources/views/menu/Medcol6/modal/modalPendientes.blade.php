@@ -37,12 +37,6 @@
                 </form>
             </div>
 
-            <!-- Footer del Modal -->
-            <div class="modal-footer">
-                <div class="modal-footer-content">
-                    @include('includes.boton-form-crear-empresa-empleado-usuario')
-                </div>
-            </div>
         </div>
     </div>
 </div>

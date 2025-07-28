@@ -1534,6 +1534,23 @@ Pendientes Medcol
 
                     $('#modal-edit-pendientes').modal('show');
 
+                    // Cargar saldo del medicamento específico después de cargar todos los datos
+                    if (data.pendiente.codigo && data.pendiente.centroproduccion) {
+                        console.log('🔄 Cargando saldo para medicamento:', {
+                            codigo: data.pendiente.codigo,
+                            centroproduccion: data.pendiente.centroproduccion
+                        });
+                        
+                        // Usar función independiente para cargar saldo
+                        loadMedicamentoSaldoIndependiente(data.pendiente.codigo, data.pendiente.centroproduccion);
+                    } else {
+                        console.warn('⚠️ Faltan datos para cargar el saldo:', {
+                            codigo: data.pendiente.codigo,
+                            centroproduccion: data.pendiente.centroproduccion
+                        });
+                        setSaldoFieldIndependiente(0, 'Datos incompletos', 'badge-warning');
+                    }
+
                 },
 
             }).fail(function(jqXHR, textStatus, errorThrown) {
@@ -2817,6 +2834,94 @@ Pendientes Medcol
             console.warn('⚠️ Select2 no está disponible');
         }
     });
+
+    // Función independiente para cargar saldo del medicamento
+    async function loadMedicamentoSaldoIndependiente(codigo, centroproduccion) {
+        try {
+            // Limpiar y validar los parámetros
+            const codigoLimpio = codigo ? codigo.toString().trim() : '';
+            const centroproduccionLimpio = centroproduccion ? centroproduccion.toString().trim() : '';
+            
+            if (!codigoLimpio || !centroproduccionLimpio) {
+                console.warn('⚠️ Parámetros inválidos para cargar saldo:', { codigo: codigoLimpio, centroproduccion: centroproduccionLimpio });
+                setSaldoFieldIndependiente(0, 'Parámetros inválidos', 'badge-warning');
+                return;
+            }
+            
+            console.log('🔍 Cargando saldo para medicamento específico:', {
+                codigo: codigoLimpio, 
+                centroproduccion: centroproduccionLimpio
+            });
+            
+            // Mostrar indicador de carga
+            setSaldoFieldIndependiente('...', 'Consultando...', 'badge-info');
+            
+            const response = await fetch('/medcol6/saldo-medicamento', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                                  document.querySelector('input[name="_token"]')?.value,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    codigo: codigoLimpio,
+                    deposito: centroproduccionLimpio
+                })
+            });
+
+            const result = await response.json();
+            console.log('📊 Respuesta del servidor:', result);
+
+            if (response.ok && result.success) {
+                const saldoValue = parseFloat(result.saldo) || 0;
+                console.log('✅ Saldo cargado exitosamente:', {
+                    saldo: saldoValue,
+                    estado: result.estado,
+                    medicamento: result.nombre_medicamento,
+                    deposito: result.deposito,
+                    fecha: result.fecha_saldo
+                });
+                
+                // Actualizar campo y badge
+                if (saldoValue > 0) {
+                    setSaldoFieldIndependiente(saldoValue, `Disponible: ${saldoValue} unidades`, 'badge-success');
+                } else {
+                    const mensaje = result.estado === 'SIN REGISTRO' ? 'Sin registro en inventario' : 'Sin saldo disponible';
+                    setSaldoFieldIndependiente(0, mensaje, 'badge-danger');
+                }
+                
+            } else {
+                console.warn('⚠️ Error en respuesta del servidor:', result.message || 'Respuesta inválida');
+                setSaldoFieldIndependiente(0, 'Error al consultar', 'badge-warning');
+            }
+            
+        } catch (error) {
+            console.error('❌ Error al cargar saldo del medicamento:', error);
+            setSaldoFieldIndependiente(0, 'Error de conexión', 'badge-danger');
+        }
+    }
+    
+    // Función auxiliar independiente para actualizar el campo de saldo y su badge
+    function setSaldoFieldIndependiente(valor, mensajeBadge, classBadge) {
+        const saldoField = document.getElementById('saldo_medicamento');
+        if (saldoField) {
+            saldoField.value = valor;
+            
+            // Actualizar el badge
+            const saldoBadge = saldoField.parentNode.querySelector('.saldo-badge');
+            if (saldoBadge) {
+                // Limpiar clases anteriores
+                saldoBadge.classList.remove('badge-success', 'badge-warning', 'badge-danger', 'badge-info');
+                
+                // Aplicar nueva clase y mensaje
+                saldoBadge.classList.add(classBadge);
+                saldoBadge.textContent = mensajeBadge;
+            }
+        } else {
+            console.warn('⚠️ Campo saldo_medicamento no encontrado');
+        }
+    }
 </script>
 
 <!-- Script para gestión del formulario de pendientes -->

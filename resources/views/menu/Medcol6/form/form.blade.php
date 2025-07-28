@@ -116,6 +116,11 @@
                 <span class="modal-quantity-badge">Auto-calculado</span>
             </div>
             <div class="modal-form-group">
+                <label for="saldo_medicamento">💊 Saldo Disponible</label>
+                <input type="number" name="saldo_medicamento" id="saldo_medicamento" class="form-control" readonly tabindex="-1">
+                <span class="modal-quantity-badge saldo-badge">Inventario actual</span>
+            </div>
+            <div class="modal-form-group">
                 <label for="estado" class="col-xs-4 control-label requerido">Estado</label>
                 <select name="estado" id="estado" class="form-control select2bs4" style="width: 100%;" required>
                     <option value="">---Seleccione Estado---</option>

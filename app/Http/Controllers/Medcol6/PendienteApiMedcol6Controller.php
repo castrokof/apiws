@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Medcol6\PendienteApiMedcol6;
 use App\Models\Medcol6\EntregadosApiMedcol6;
 use App\Models\Medcol6\ObservacionesApiMedcol6;
+use App\Models\Medcol6\SaldosMedcol6;
 use App\Services\PendienteService;
 use App\Http\Requests\UpdatePendienteRequest;
 use Illuminate\Support\Facades\Log;
@@ -1912,5 +1913,116 @@ class PendienteApiMedcol6Controller extends Controller
             'fecha_fin' => $fechaFin->format('Y-m-d'),
             'contrato' => $contrato ?? 'Todas las farmacias'
         ]);
+    }
+
+    /**
+     * Obtener saldo de medicamento específico por código y depósito
+     * Esta función busca el saldo disponible del medicamento específico
+     * para el depósito donde se generó el pendiente
+     */
+    public function getSaldoMedicamento(Request $request)
+    {
+        $request->validate([
+            'codigo' => 'required|string',
+            'deposito' => 'required|string'
+        ]);
+
+        try {
+            // Mapeo de centros de producción a depósitos exactos
+            $centroToDeposito = [
+                'SM01' => 'SM01',
+                'DLR1' => 'DLR1',
+                'PAC' => 'PAC',
+                'EHU1' => 'EHU1',
+                'BIO1' => 'BIO1',
+                'EM01' => 'EM01',
+                'BPDT' => 'BPDT',
+                'DPA1' => 'DPA1',
+                'EVSM' => 'EVSM',
+                'EVEN' => 'EVEN',
+                'FRJA' => 'FRJA',
+                'FRIO' => 'FRIO',
+                'INY' => 'INY',
+                // Agregar más mapeos según sea necesario
+                'SALUD' => 'SM01',
+                'DOLOR' => 'DLR1',
+                'FSIO' => 'BIO1',
+                'FSOS' => 'DPA1',
+                'FSAU' => 'SM01',
+                'EVSO' => 'EVEN'
+            ];
+
+            $codigo = trim($request->input('codigo'));
+            $centroproduccion = trim($request->input('deposito'));
+            
+            // Obtener el depósito correspondiente
+            $deposito = $centroToDeposito[$centroproduccion] ?? $centroproduccion;
+
+            Log::info('Consultando saldo para medicamento', [
+                'codigo' => $codigo,
+                'centroproduccion' => $centroproduccion, 
+                'deposito_mapeado' => $deposito,
+                'user' => Auth::user()->email ?? 'unknown'
+            ]);
+
+            // Buscar el saldo más reciente para el código específico y depósito
+            $saldo = SaldosMedcol6::where('codigo', $codigo)
+                ->where('deposito', $deposito)
+                ->orderBy('fecha_saldo', 'desc')
+                ->first();
+
+            if ($saldo) {
+                $saldoDisponible = (float) $saldo->saldo;
+                $estadoSaldo = $saldoDisponible > 0 ? 'CON SALDO' : 'SIN SALDO';
+                
+                Log::info('Saldo encontrado', [
+                    'codigo' => $codigo,
+                    'deposito' => $deposito,
+                    'saldo' => $saldoDisponible,
+                    'fecha_saldo' => $saldo->fecha_saldo ? $saldo->fecha_saldo->format('Y-m-d') : null
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'saldo' => $saldoDisponible,
+                    'fecha_saldo' => $saldo->fecha_saldo ? $saldo->fecha_saldo->format('Y-m-d') : null,
+                    'nombre_medicamento' => $saldo->nombre,
+                    'deposito' => $saldo->deposito,
+                    'estado' => $estadoSaldo,
+                    'codigo_consultado' => $codigo,
+                    'centroproduccion' => $centroproduccion
+                ]);
+            } else {
+                Log::warning('No se encontró saldo para el medicamento', [
+                    'codigo' => $codigo,
+                    'deposito' => $deposito,
+                    'centroproduccion' => $centroproduccion
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'saldo' => 0,
+                    'fecha_saldo' => null,
+                    'nombre_medicamento' => null,
+                    'deposito' => $deposito,
+                    'estado' => 'SIN REGISTRO',
+                    'codigo_consultado' => $codigo,
+                    'centroproduccion' => $centroproduccion
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error obteniendo saldo de medicamento específico: ' . $e->getMessage(), [
+                'codigo' => $request->input('codigo'),
+                'deposito' => $request->input('deposito'),
+                'user' => Auth::user()->email ?? 'unknown',
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener el saldo del medicamento: ' . $e->getMessage(),
+                'saldo' => 0
+            ], 500);
+        }
     }
 }

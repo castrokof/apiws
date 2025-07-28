@@ -236,15 +236,6 @@
                         <!-- Pestaña 3: Pendientes vs Saldos -->
                         <div class="tab-pane fade" id="pendientesconsaldos" role="tabpanel" aria-labelledby="pendientesconsaldos-tab">
                             <h5 class="text-center text-dark">Informe Detallado: Medicamentos Pendientes vs Saldos</h5>
-                            
-                            <!-- Botón de exportación a Excel -->
-                            <div class="row mb-3">
-                                <div class="col-12 text-right">
-                                    <button type="button" id="exportar_excel_saldos" class="btn btn-success" style="display: none;" title="Exportar reporte completo a Excel">
-                                        <i class="fas fa-file-excel"></i> Exportar a Excel
-                                    </button>
-                                </div>
-                            </div>
 
                             <!-- Resumen de estadísticas -->
                             <div id="resumen_saldos" class="mb-3" style="display: none;">

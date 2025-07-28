@@ -178,6 +178,32 @@
     display: inline-block;
 }
 
+.modal-quantity-badge.saldo-badge {
+    background: var(--success-color);
+    color: white;
+    transition: var(--transition);
+}
+
+.modal-quantity-badge.saldo-badge.badge-success {
+    background: var(--success-color);
+    color: white;
+}
+
+.modal-quantity-badge.saldo-badge.badge-warning {
+    background: var(--warning-color);
+    color: #212529;
+}
+
+.modal-quantity-badge.saldo-badge.badge-danger {
+    background: var(--danger-color);
+    color: white;
+}
+
+.modal-quantity-badge.saldo-badge.badge-info {
+    background: var(--primary-color);
+    color: white;
+}
+
 /* ==============================================
    SECCIONES ESPECIALES
    ============================================== */
@@ -188,6 +214,16 @@
 
 .modal-user-info {
     border-left: 4px solid var(--primary-color);
+}
+
+.modal-user-info .modal-section-title {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+    color: white;
+    font-weight: 600;
+}
+
+.modal-user-info .modal-section-title i {
+    color: white;
 }
 
 .modal-status-grid {

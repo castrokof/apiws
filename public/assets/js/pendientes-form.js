@@ -489,6 +489,11 @@ class PendientesFormManager {
             hiddenIdField.value = data.id;
         }
 
+        // Cargar saldo del medicamento
+        if (data.codigo && data.centroproduccion) {
+            this.loadMedicamentoSaldo(data.codigo, data.centroproduccion);
+        }
+
         // Recalcular cantidades y manejar estados
         this.calculatePendingQuantity();
         this.handleStatusChange();
@@ -496,6 +501,92 @@ class PendientesFormManager {
         // Aplicar estilos visuales al select si hay estado
         if (data.estado) {
             this.applySelectStyles(data.estado);
+        }
+    }
+
+    // Método para cargar el saldo del medicamento específico
+    async loadMedicamentoSaldo(codigo, centroproduccion) {
+        try {
+            // Limpiar y validar los parámetros
+            const codigoLimpio = codigo ? codigo.toString().trim() : '';
+            const centroproduccionLimpio = centroproduccion ? centroproduccion.toString().trim() : '';
+            
+            if (!codigoLimpio || !centroproduccionLimpio) {
+                console.warn('⚠️ Parámetros inválidos para cargar saldo:', { codigo: codigoLimpio, centroproduccion: centroproduccionLimpio });
+                this.setSaldoField(0, 'Parámetros inválidos', 'badge-warning');
+                return;
+            }
+            
+            console.log('🔍 Cargando saldo para medicamento específico:', {
+                codigo: codigoLimpio, 
+                centroproduccion: centroproduccionLimpio
+            });
+            
+            // Mostrar indicador de carga
+            this.setSaldoField('...', 'Consultando...', 'badge-info');
+            
+            const response = await fetch('/medcol6/saldo-medicamento', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                                  document.querySelector('input[name="_token"]')?.value,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    codigo: codigoLimpio,
+                    deposito: centroproduccionLimpio
+                })
+            });
+
+            const result = await response.json();
+            console.log('📊 Respuesta del servidor:', result);
+
+            if (response.ok && result.success) {
+                const saldoValue = parseFloat(result.saldo) || 0;
+                console.log('✅ Saldo cargado exitosamente:', {
+                    saldo: saldoValue,
+                    estado: result.estado,
+                    medicamento: result.nombre_medicamento,
+                    deposito: result.deposito,
+                    fecha: result.fecha_saldo
+                });
+                
+                // Actualizar campo y badge
+                if (saldoValue > 0) {
+                    this.setSaldoField(saldoValue, `Disponible: ${saldoValue} unidades`, 'badge-success');
+                } else {
+                    const mensaje = result.estado === 'SIN REGISTRO' ? 'Sin registro en inventario' : 'Sin saldo disponible';
+                    this.setSaldoField(0, mensaje, 'badge-danger');
+                }
+                
+            } else {
+                console.warn('⚠️ Error en respuesta del servidor:', result.message || 'Respuesta inválida');
+                this.setSaldoField(0, 'Error al consultar', 'badge-warning');
+            }
+            
+        } catch (error) {
+            console.error('❌ Error al cargar saldo del medicamento:', error);
+            this.setSaldoField(0, 'Error de conexión', 'badge-danger');
+        }
+    }
+    
+    // Método auxiliar para actualizar el campo de saldo y su badge
+    setSaldoField(valor, mensajeBadge, classBadge) {
+        const saldoField = document.getElementById('saldo_medicamento');
+        if (saldoField) {
+            saldoField.value = valor;
+            
+            // Actualizar el badge
+            const saldoBadge = saldoField.parentNode.querySelector('.saldo-badge');
+            if (saldoBadge) {
+                // Limpiar clases anteriores
+                saldoBadge.classList.remove('badge-success', 'badge-warning', 'badge-danger', 'badge-info');
+                
+                // Aplicar nueva clase y mensaje
+                saldoBadge.classList.add(classBadge);
+                saldoBadge.textContent = mensajeBadge;
+            }
         }
     }
 }

@@ -266,6 +266,7 @@ Route::get('medcol6/pendientes/medicamentos-farmacia', 'Medcol6\PendienteApiMedc
     ->name('medcol6.getMedicamentosPorFarmacia')
     ->middleware('verified')
     ->middleware('verifyuser');
+Route::post('medcol6/saldo-medicamento', 'Medcol6\PendienteApiMedcol6Controller@getSaldoMedicamento')->name('medcol6.saldo_medicamento')->middleware('verified')->middleware('verifyuser');
 
 
 Route::get('medcol6/observaciones', 'Medcol6\PendienteApiMedcol6Controller@getObservaciones')->name('medcol6.observaciones')->middleware('verified')->middleware('verifyuser');
