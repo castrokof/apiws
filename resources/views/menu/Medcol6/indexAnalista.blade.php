@@ -1985,6 +1985,7 @@ Pendientes Medcol
             // Llamar a la función generadora del informe
             show_report(fechaInicio, fechaFin, contrato || null);
             cargarDetallePendientes(fechaInicio, fechaFin, contrato || null);
+            cargarPendientesVsSaldos(fechaInicio, fechaFin, contrato || null);
         });
 
         // Función auxiliar para mostrar errores (puedes personalizarla)
@@ -2210,6 +2211,159 @@ Pendientes Medcol
                     console.error("Error al obtener medicamentos por farmacia:", error);
                     mostrarError("No se pudo cargar el informe de medicamentos por farmacia.");
                     $("#detalle_medicamentos_farmacia").empty();
+                }
+            });
+        }
+
+        function cargarPendientesVsSaldos(fechaInicio, fechaFin, contrato) {
+            // Ocultar elementos de la pestaña anterior
+            $("#exportar_excel_saldos").hide();
+            $("#resumen_saldos").hide();
+            
+            // Limpiar tabla
+            $("#tablaPendSald tbody").empty();
+            
+            // Mostrar loading en la tabla
+            $("#tablaPendSald tbody").html(
+                '<tr><td colspan="10" class="text-center">' +
+                '<i class="fas fa-spinner fa-spin"></i> Cargando datos de pendientes vs saldos...' +
+                '</td></tr>'
+            );
+
+            $.ajax({
+                url: "{{ route('medcol6.pendientes_vs_saldos') }}",
+                method: 'GET',
+                data: {
+                    fechaini: fechaInicio,
+                    fechafin: fechaFin,
+                    contrato: contrato
+                },
+                dataType: "json",
+                success: function(response) {
+                    console.log("Respuesta pendientes vs saldos:", response);
+                    
+                    // Limpiar tabla
+                    $("#tablaPendSald tbody").empty();
+                    
+                    if (!response.success || !response.data || response.data.length === 0) {
+                        $("#tablaPendSald tbody").html(
+                            '<tr><td colspan="10" class="text-center text-muted">' +
+                            'No se encontraron datos para el rango de fechas seleccionado.' +
+                            '</td></tr>'
+                        );
+                        return;
+                    }
+
+                    // Contadores para el resumen
+                    let conSaldo = 0;
+                    let saldoParcial = 0;
+                    let sinSaldo = 0;
+                    
+                    // Procesar datos
+                    response.data.forEach(function(item) {
+                        // Determinar clase para el estado del saldo
+                        let estadoClass = '';
+                        let comparacionClass = '';
+                        
+                        if (item.estado === 'CON SALDO') {
+                            estadoClass = 'bg-success text-white';
+                            conSaldo++;
+                        } else {
+                            estadoClass = 'bg-danger text-white';
+                            sinSaldo++;
+                        }
+                        
+                        // Determinar clase para la comparación
+                        if (item.pendiente_vs_saldo === 'SALDO SUFICIENTE') {
+                            comparacionClass = 'bg-success text-white';
+                        } else if (item.pendiente_vs_saldo === 'SALDO PARCIAL') {
+                            comparacionClass = 'bg-warning text-dark';
+                            saldoParcial++;
+                        } else {
+                            comparacionClass = 'bg-danger text-white';
+                        }
+                        
+                        // Crear fila de la tabla
+                        let fila = `
+                            <tr>
+                                <td>${item.fecha_pendiente || '-'}</td>
+                                <td><span class="badge badge-primary">${item.farmacia}</span></td>
+                                <td><code>${item.codigo}</code></td>
+                                <td class="text-left">${item.nombre}</td>
+                                <td><small>${item.cums || '-'}</small></td>
+                                <td class="text-center"><strong>${item.cantidad_pendiente}</strong></td>
+                                <td class="text-center"><strong>${parseFloat(item.saldo).toFixed(0)}</strong></td>
+                                <td class="text-center">
+                                    <span class="badge ${estadoClass}">${item.estado}</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge ${comparacionClass}">${item.pendiente_vs_saldo}</span>
+                                </td>
+                                <td>${item.fecha_saldo || 'N/A'}</td>
+                            </tr>
+                        `;
+                        
+                        $("#tablaPendSald tbody").append(fila);
+                    });
+                    
+                    // Actualizar contadores del resumen
+                    $("#con_saldo_count").text(conSaldo);
+                    $("#saldo_parcial_count").text(saldoParcial);
+                    $("#sin_saldo_count").text(sinSaldo);
+                    $("#total_medicamentos").text(response.data.length);
+                    
+                    // Mostrar resumen y botón de exportar
+                    $("#resumen_saldos").show();
+                    $("#exportar_excel_saldos").show();
+                    
+                    // Inicializar DataTable si no existe
+                    if (!$.fn.DataTable.isDataTable('#tablaPendSald')) {
+                        $('#tablaPendSald').DataTable({
+                            language: idioma_espanol,
+                            pageLength: 25,
+                            lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "Todos"]],
+                            order: [[1, 'asc'], [3, 'asc']],
+                            responsive: true,
+                            dom: 'Bfrtip',
+                            buttons: [
+                                {
+                                    extend: 'excelHtml5',
+                                    text: '<i class="fas fa-file-excel"></i> Excel',
+                                    className: 'btn btn-success btn-sm',
+                                    title: 'Informe Pendientes vs Saldos',
+                                    filename: 'pendientes_vs_saldos_' + new Date().toISOString().slice(0, 10)
+                                },
+                                {
+                                    extend: 'pdfHtml5',
+                                    text: '<i class="fas fa-file-pdf"></i> PDF',
+                                    className: 'btn btn-danger btn-sm',
+                                    title: 'Informe Pendientes vs Saldos',
+                                    filename: 'pendientes_vs_saldos_' + new Date().toISOString().slice(0, 10),
+                                    orientation: 'landscape',
+                                    pageSize: 'A4'
+                                }
+                            ]
+                        });
+                    } else {
+                        // Refrescar tabla existente
+                        $('#tablaPendSald').DataTable().draw();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error al cargar pendientes vs saldos:", error);
+                    $("#tablaPendSald tbody").html(
+                        '<tr><td colspan="10" class="text-center text-danger">' +
+                        '<i class="fas fa-exclamation-triangle"></i> Error al cargar los datos. Intente nuevamente.' +
+                        '</td></tr>'
+                    );
+                    
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error al cargar el informe de pendientes vs saldos'
+                        });
+                    }
                 }
             });
         }

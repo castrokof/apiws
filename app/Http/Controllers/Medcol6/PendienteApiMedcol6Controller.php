@@ -1763,4 +1763,154 @@ class PendienteApiMedcol6Controller extends Controller
             'contrato' => $contrato ?? 'No aplicado'
         ]);
     }
+
+    /**
+     * Obtener informe detallado de medicamentos pendientes vs saldos
+     */
+    public function informePendientesVsSaldos(Request $request)
+    {
+        $i = Auth::user()->drogueria;
+
+        // Mapeo de droguerías según el usuario
+        $droguerias = [
+            "1" => '',
+            "2" => 'SALUD',
+            "3" => 'DOLOR',
+            "4" => 'PAC',
+            "5" => 'EHU1',
+            "6" => 'BIO1',
+            "8" => 'EM01',
+            "9" => 'FSIO',
+            "10" => 'FSOS',
+            "11" => 'FSAU',
+            "12" => 'EVSO',
+            "13" => 'FRJA',
+        ];
+
+        $drogueria = $droguerias[$i] ?? null;
+        
+        // Obtener parámetros de filtros
+        $fechaInicio = $request->get('fechaini');
+        $fechaFin = $request->get('fechafin');
+        $contrato = $request->get('contrato');
+
+        if (!$fechaInicio || !$fechaFin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Debe proporcionar fechas de inicio y fin'
+            ]);
+        }
+
+        try {
+            $fechaInicio = Carbon::parse($fechaInicio);
+            $fechaFin = Carbon::parse($fechaFin);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Formato de fecha inválido'
+            ]);
+        }
+
+        // Query base para pendientes
+        $queryPendientes = PendienteApiMedcol6::whereBetween('fecha', [$fechaInicio, $fechaFin])
+            ->where('estado', 'PENDIENTE');
+
+        // Aplicar filtros de droguería si corresponde
+        if ($drogueria) {
+            $queryPendientes->where('sucursal', $drogueria);
+        }
+
+        // Aplicar filtro de contrato/farmacia si se proporciona
+        if ($contrato && $contrato !== 'Todos') {
+            $queryPendientes->where('centroproduccion', $contrato);
+        }
+
+        // Obtener medicamentos pendientes con sus datos
+        $pendientes = $queryPendientes
+            ->select(
+                'codigo',
+                'nombre',
+                'cums',
+                'centroproduccion as farmacia',
+                DB::raw('SUM(cantord) as cantidad_pendiente'),
+                DB::raw('MIN(fecha) as fecha_pendiente')
+            )
+            ->groupBy('codigo', 'nombre', 'cums', 'centroproduccion')
+            ->get();
+
+        // Mapeo de farmacias a depósitos para consultar saldos
+        $farmaciaToDeposito = [
+            'BIO1' => 'BIO1',
+            'DLR1' => 'DLR1', 
+            'DPA1' => 'DPA1',
+            'EM01' => 'EM01',
+            'EHU1' => 'EHU1',
+            'FRJA' => 'FRJA',
+            'FRIO' => 'FRIO',
+            'INY' => 'INY',
+            'PAC' => 'PAC',
+            'SM01' => 'SM01',
+            'BPDT' => 'BPDT',
+            'EVEN' => 'EVEN',
+            'EVSM' => 'EVSM'
+        ];
+
+        $resultado = [];
+
+        foreach ($pendientes as $pendiente) {
+            // Buscar saldo correspondiente
+            $deposito = $farmaciaToDeposito[$pendiente->farmacia] ?? $pendiente->farmacia;
+            
+            $saldo = \App\Models\Medcol6\SaldosMedcol6::where('codigo', $pendiente->codigo)
+                ->where('deposito', $deposito)
+                ->orderBy('fecha_saldo', 'desc')
+                ->first();
+
+            $saldoDisponible = $saldo ? $saldo->saldo : 0;
+            $fechaSaldo = $saldo ? $saldo->fecha_saldo->format('Y-m-d') : null;
+            
+            // Determinar estado del saldo
+            $estadoSaldo = $saldoDisponible > 0 ? 'CON SALDO' : 'SIN SALDO';
+            
+            // Comparar pendiente vs saldo
+            $pendienteVsSaldo = '';
+            if ($saldoDisponible >= $pendiente->cantidad_pendiente) {
+                $pendienteVsSaldo = 'SALDO SUFICIENTE';
+            } elseif ($saldoDisponible > 0) {
+                $pendienteVsSaldo = 'SALDO PARCIAL';
+            } else {
+                $pendienteVsSaldo = 'SIN SALDO';
+            }
+
+            $resultado[] = [
+                'fecha_pendiente' => $pendiente->fecha_pendiente,
+                'codigo' => $pendiente->codigo,
+                'nombre' => $pendiente->nombre,
+                'cums' => $pendiente->cums,
+                'cantidad_pendiente' => (int) $pendiente->cantidad_pendiente,
+                'saldo' => (float) $saldoDisponible,
+                'pendiente_vs_saldo' => $pendienteVsSaldo,
+                'fecha_saldo' => $fechaSaldo,
+                'farmacia' => $pendiente->farmacia,
+                'estado' => $estadoSaldo
+            ];
+        }
+
+        // Ordenar por farmacia y luego por nombre
+        usort($resultado, function($a, $b) {
+            if ($a['farmacia'] === $b['farmacia']) {
+                return strcmp($a['nombre'], $b['nombre']);
+            }
+            return strcmp($a['farmacia'], $b['farmacia']);
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $resultado,
+            'total_registros' => count($resultado),
+            'fecha_inicio' => $fechaInicio->format('Y-m-d'),
+            'fecha_fin' => $fechaFin->format('Y-m-d'),
+            'contrato' => $contrato ?? 'Todas las farmacias'
+        ]);
+    }
 }

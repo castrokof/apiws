@@ -69,16 +69,11 @@
                                 Detalle Pendientes
                             </a>
                         </li>
-                        <!-- <li class="nav-item">
+                        <li class="nav-item">
                             <a class="nav-link" id="pendientesconsaldos-tab" data-toggle="tab" href="#pendientesconsaldos" role="tab" aria-controls="pendientesconsaldos" aria-selected="false">
                                 Pendientes vs Saldos
                             </a>
-                        </li> -->
-                        <!-- <li class="nav-item">
-                            <a class="nav-link" id="pendientesconsaldos-tab" data-toggle="tab" href="#pendientesconsaldos" role="tab" aria-controls="pendientesconsaldos" aria-selected="false">
-                                Pendientes vs Saldos
-                            </a>
-                        </li> -->
+                        </li>
                         <!-- <li class="nav-item">
                             <a class="nav-link" id="forgif-tab" data-toggle="tab" href="#forgif" role="tab" aria-controls="forgif" aria-selected="false">
                                 Informe ForGif
@@ -240,21 +235,69 @@
 
                         <!-- Pestaña 3: Pendientes vs Saldos -->
                         <div class="tab-pane fade" id="pendientesconsaldos" role="tabpanel" aria-labelledby="pendientesconsaldos-tab">
-                            <h5 class="text-center text-dark">Contenido del Informe Pendientes vs Saldos</h5>
+                            <h5 class="text-center text-dark">Informe Detallado: Medicamentos Pendientes vs Saldos</h5>
+                            
+                            <!-- Botón de exportación a Excel -->
+                            <div class="row mb-3">
+                                <div class="col-12 text-right">
+                                    <button type="button" id="exportar_excel_saldos" class="btn btn-success" style="display: none;" title="Exportar reporte completo a Excel">
+                                        <i class="fas fa-file-excel"></i> Exportar a Excel
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Resumen de estadísticas -->
+                            <div id="resumen_saldos" class="mb-3" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="card bg-success text-white">
+                                            <div class="card-body text-center">
+                                                <h4 id="con_saldo_count">0</h4>
+                                                <p class="mb-0">Con Saldo</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card bg-warning text-white">
+                                            <div class="card-body text-center">
+                                                <h4 id="saldo_parcial_count">0</h4>
+                                                <p class="mb-0">Saldo Parcial</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card bg-danger text-white">
+                                            <div class="card-body text-center">
+                                                <h4 id="sin_saldo_count">0</h4>
+                                                <p class="mb-0">Sin Saldo</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card bg-info text-white">
+                                            <div class="card-body text-center">
+                                                <h4 id="total_medicamentos">0</h4>
+                                                <p class="mb-0">Total Medicamentos</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="card-body table-responsive">
-                                <table id="tablaPendSald" class="table table-striped table-hover">
-                                    <thead class="table-light">
+                                <table id="tablaPendSald" class="table table-striped table-hover table-sm">
+                                    <thead class="table-dark">
                                         <tr>
                                             <th>Fecha Pendiente</th>
-                                            <th>Código</th>
-                                            <th>Nombre</th>
-                                            <th>Cums</th>
-                                            <th>Cantidad Pendiente</th>
-                                            <th>Saldo</th>
-                                            <th>Pendiente vs Saldo</th>
-                                            <th>Fecah Saldo</th>
                                             <th>Farmacia</th>
-                                            <th>Estado</th>
+                                            <th>Código</th>
+                                            <th>Medicamento</th>
+                                            <th>CUMS</th>
+                                            <th class="text-center">Cant. Pendiente</th>
+                                            <th class="text-center">Saldo Disponible</th>
+                                            <th class="text-center">Estado Saldo</th>
+                                            <th class="text-center">Comparación</th>
+                                            <th>Fecha Saldo</th>
                                         </tr>
                                     </thead>
                                     <tbody>
