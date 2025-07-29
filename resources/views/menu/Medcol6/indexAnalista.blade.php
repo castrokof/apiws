@@ -2303,10 +2303,10 @@ Pendientes Medcol
                         // Crear fila de la tabla
                         let fila = `
                             <tr>
-                                <td>${item.fecha_pendiente || '-'}</td>
                                 <td><span class="badge badge-primary">${item.farmacia}</span></td>
                                 <td><code>${item.codigo}</code></td>
                                 <td class="text-left">${item.nombre}</td>
+                                <td class="text-left">${item.marca || '-'}</td>
                                 <td><small>${item.cums || '-'}</small></td>
                                 <td class="text-center"><strong>${item.cantidad_pendiente}</strong></td>
                                 <td class="text-center"><strong>${parseFloat(item.saldo).toFixed(0)}</strong></td>

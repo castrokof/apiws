@@ -235,7 +235,7 @@
 
                         <!-- Pestaña 3: Pendientes vs Saldos -->
                         <div class="tab-pane fade" id="pendientesconsaldos" role="tabpanel" aria-labelledby="pendientesconsaldos-tab">
-                            <h5 class="text-center text-dark">Informe Detallado: Medicamentos Pendientes vs Saldos</h5>
+                            <h5 class="text-center text-dark">Medicamentos Pendientes vs Saldos</h5>
 
                             <!-- Resumen de estadísticas -->
                             <div id="resumen_saldos" class="mb-3" style="display: none;">
@@ -276,13 +276,13 @@
                             </div>
 
                             <div class="card-body table-responsive">
-                                <table id="tablaPendSald" class="table table-striped table-hover table-sm">
-                                    <thead class="table-dark">
+                                <table id="tablaPendSald" class="table table-hover text-nowrap">
+                                    <thead>
                                         <tr>
-                                            <th>Fecha Pendiente</th>
                                             <th>Farmacia</th>
                                             <th>Código</th>
                                             <th>Medicamento</th>
+                                            <th>Marca</th>
                                             <th>CUMS</th>
                                             <th class="text-center">Cant. Pendiente</th>
                                             <th class="text-center">Saldo Disponible</th>

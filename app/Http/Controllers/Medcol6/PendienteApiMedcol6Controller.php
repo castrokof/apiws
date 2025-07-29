@@ -1833,8 +1833,7 @@ class PendienteApiMedcol6Controller extends Controller
                 'nombre',
                 'cums',
                 'centroproduccion as farmacia',
-                DB::raw('SUM(cantord) as cantidad_pendiente'),
-                DB::raw('MIN(fecha) as fecha_pendiente')
+                DB::raw('SUM(cantord) as cantidad_pendiente')
             )
             ->groupBy('codigo', 'nombre', 'cums', 'centroproduccion')
             ->get();
@@ -1869,6 +1868,7 @@ class PendienteApiMedcol6Controller extends Controller
 
             $saldoDisponible = $saldo ? $saldo->saldo : 0;
             $fechaSaldo = $saldo ? $saldo->fecha_saldo->format('Y-m-d') : null;
+            $marca = $saldo ? $saldo->marca : null;
             
             // Determinar estado del saldo
             $estadoSaldo = $saldoDisponible > 0 ? 'CON SALDO' : 'SIN SALDO';
@@ -1884,10 +1884,10 @@ class PendienteApiMedcol6Controller extends Controller
             }
 
             $resultado[] = [
-                'fecha_pendiente' => $pendiente->fecha_pendiente,
                 'codigo' => $pendiente->codigo,
                 'nombre' => $pendiente->nombre,
                 'cums' => $pendiente->cums,
+                'marca' => $marca,
                 'cantidad_pendiente' => (int) $pendiente->cantidad_pendiente,
                 'saldo' => (float) $saldoDisponible,
                 'pendiente_vs_saldo' => $pendienteVsSaldo,
