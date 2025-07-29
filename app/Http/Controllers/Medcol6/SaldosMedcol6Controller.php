@@ -95,13 +95,24 @@ class SaldosMedcol6Controller extends Controller
                 return DataTables::of($saldos)
                     ->addColumn('estado_vencimiento', function ($saldo) {
                         $estado = $saldo->estado_vencimiento;
-                        $class = match ($estado) {
-                            'Vencido' => 'badge-danger',
-                            'Próximo a vencer' => 'badge-warning',
-                            'Vigente (corto plazo)' => 'badge-info',
-                            'Vigente' => 'badge-success',
-                            default => 'badge-secondary'
-                        };
+                        switch ($estado) {
+                            case 'Vencido':
+                                $class = 'badge-danger';
+                                break;
+                            case 'Próximo a vencer':
+                                $class = 'badge-warning';
+                                break;
+                            case 'Vigente (corto plazo)':
+                                $class = 'badge-info';
+                                break;
+                            case 'Vigente':
+                                $class = 'badge-success';
+                                break;
+                            default:
+                                $class = 'badge-secondary';
+                                break;
+                        }
+
                         return "<span class='badge {$class}'>{$estado}</span>";
                     })
                     ->addColumn('saldo_formatted', function ($saldo) {

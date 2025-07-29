@@ -8,14 +8,16 @@
                     <i class="fas fa-file-medical"></i>
                     Gestión de Documentos Pendientes
                 </h5>
-                <div class="modal-header-controls">
-                    <button type="button" class="btn btn-tool" data-card-widget="maximize" title="Maximizar">
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="maximize">
                         <i class="fas fa-expand"></i>
                     </button>
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Minimizar">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
                         <i class="fas fa-minus"></i>
                     </button>
-                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Cerrar"></button>
+                    <button type="button" class="btn btn-tool" data-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </div>
 
@@ -41,3 +43,54 @@
     </div>
 </div>
 
+<!-- CSS adicional para asegurar el correcto funcionamiento -->
+<style>
+    /* Asegurar que la card ocupe todo el espacio del modal */
+    .modal-content .card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-content .card-body {
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    /* Estilos para el modo maximizado */
+    .modal-content .card.maximized-card {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1060;
+        margin: 0;
+        width: 100vw;
+        height: 100vh;
+    }
+</style>
+
+<script>
+    $(document).ready(function() {
+        // Manejar el botón de maximizar
+        $('[data-card-widget="maximize"]').click(function(e) {
+            e.preventDefault();
+            const card = $(this).closest('.card');
+            card.toggleClass('maximized-card');
+
+            // Cambiar ícono
+            $(this).find('i')
+                .toggleClass('fa-expand')
+                .toggleClass('fa-compress');
+        });
+
+        // Asegurar que el modal se cierre correctamente
+        $('#modalIndicadores').on('hidden.bs.modal', function() {
+            $(this).find('.card').removeClass('maximized-card');
+            $(this).find('[data-card-widget="maximize"] i')
+                .removeClass('fa-compress')
+                .addClass('fa-expand');
+        });
+    });
+</script>

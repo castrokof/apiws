@@ -497,3 +497,35 @@ Route::get('medcol6/saldos/{id}', 'Medcol6\SaldosMedcol6Controller@show')->name(
     Route::post('/dataFormulasSos', 'MedcolSos\OrdenesSosController@formulasAfiliado')->name('dataFormulasSos')->middleware('verified')->middleware('verifyuser');
     
     
+    Route::get('/indexScann', [ScannController::class, 'Index'])->name('indexscann')->middleware('verified')->middleware('verifyuser');
+    Route::get('/indexDetalleScann', [ScannController::class, 'detalleScann'])->name('indexDetalleScann')->middleware('verified')->middleware('verifyuser');
+    Route::get('/imagenes', [ScannController::class, 'listarImagenes'])->name('imagenes.listar')->middleware('verified')->middleware('verifyuser');
+    Route::post('/subirImagenes', [ScannController::class, 'subirImagenes'])->name('uploadScann')->middleware('verified')->middleware('verifyuser');
+    Route::post('/mover-imagen', [ScannController::class, 'moverImagen'])->name('mover.imagen')->middleware('verified')->middleware('verifyuser');
+    Route::delete('/ordenes/{id}', [ScannController::class, 'destroy'])->middleware('verified')->middleware('verifyuser');
+    Route::get('/detalleScann/{id}', [ScannController::class, 'detalleScann'])->name('detalleScann')->middleware(['verified', 'verifyuser']);
+    
+    Route::get('/indexScannPdfs', [ScannController::class, 'Index2'])->name('indexscannpdfs')->middleware('verified')->middleware('verifyuser');
+    
+    Route::get('/scann/filtro', [ScannController::class, 'filtrarComprobantes'])->name('scann.filtro');
+    Route::get('/scann/exportar-pdf', [ScannController::class, 'exportarPDF'])->name('exportar.pdf');
+
+    
+     //Compras
+    Route::get('/ordenes', [OrdenCompraApiMedcol6Controller::class, 'index'])->name('ordenes.index');
+    Route::get('/medcol3/ordenes/{id}/detalle', [OrdenCompraApiMedcol6Controller::class, 'detalle'])->name('ordenes.detalle');
+    Route::get('informeTarjetasCompras', [OrdenCompraApiMedcol6Controller::class, 'resumenOrdenesCompra'])->name('ordenes.resumen');
+    Route::get('BuscarOrdenesDeCompra', [OrdenCompraApiMedcol6Controller::class, 'listarOrdenesCompra'])->name('buscar.ordenes.compra');
+    Route::post('/orden/actualizar-detalle', [OrdenCompraApiMedcol6Controller::class, 'actualizarDetalle'])->name('orden.actualizarDetalle');
+    Route::post('/orden/actualizar-estado', [OrdenCompraApiMedcol6Controller::class, 'actualizarEstado'])->name('orden.actualizarEstado');
+    Route::post('/guardar-comentario', [OrdenCompraApiMedcol6Controller::class, 'guardarComentario'])->name('guardar.comentario');
+    Route::get('/ordenes/{orden}/editar', [OrdenCompraApiMedcol6Controller::class, 'edit'])->name('ordenes.editar');
+    Route::put('/ordenes/{orden}', [OrdenCompraApiMedcol6Controller::class, 'update'])->name('ordenes.update');
+    Route::delete('/ordenes/{id}', [OrdenCompraApiMedcol6Controller::class, 'destroy'])->name('ordenes.destroy');
+    Route::delete('/detalleOrdenes/{id}', [OrdenCompraApiMedcol6Controller::class, 'destroyDetalleOrdenes'])->name('detalleOrdenes.destroy');
+    Route::get('/ordenesDetalles/{detalle}/editar', [OrdenCompraApiMedcol6Controller::class, 'editDetalle'])->name('ordenesDetalle.editar');
+    Route::put('/ordenesDetalles/{detalle}', [OrdenCompraApiMedcol6Controller::class, 'updateDetalles'])->name('ordenesDetalle.update');
+    Route::get('/ordenes/{numeroOrden}/pdf', [OrdenCompraApiMedcol6Controller::class, 'exportarPDF'])->name('ordenes.exportar.pdf');
+    Route::delete('/ordenesDetalle/{id}', [OrdenCompraApiMedcol6Controller::class, 'destroyDetallesAjax'])->name('ordenesDetalle.eliminar');
+    Route::post('/guardar-factura', [OrdenCompraApiMedcol6Controller::class, 'guardarFactura'])->name('guardar.factura');
+    Route::post('/guardar-articulo', [OrdenCompraApiMedcol6Controller::class, 'AgregarMolecula'])->name('guardar.articulo');

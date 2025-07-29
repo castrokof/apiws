@@ -169,6 +169,11 @@ class SaldosApiService
                     continue;
                 }
 
+                // Filtrar códigos que no son elementos importantes
+                if (in_array($item['codigo'], ['1010', '1011', '1012'])) {
+                    continue;
+                }
+
                 $saldosParaInsertar[] = [
                     'ips' => trim($item['ips'] ?? ''),
                     'deposito' => trim($item['deposito'] ?? ''),
