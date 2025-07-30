@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>MEDCOL PENDIENTES</title>
+    <title>PENDIENTES</title>
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;600&display=swap" rel="stylesheet">
@@ -464,7 +464,7 @@
                         </div>
                     </div> -->
 
-            <div class="card bg-light">
+            <!-- <div class="card bg-light">
                 <div class="card-body text-center">
                     <div class="card-header"> <i class="fas fa-capsules"></i>MedCol San Fernando</div>
                     <div class="list-group">
@@ -476,8 +476,8 @@
 
                     </div>
                 </div>
-            </div>
-            <div class="card bg-warning">
+            </div> -->
+            <!-- <div class="card bg-warning">
                 <div class="card-body text-center">
                     <div class="card-header"> <i class="fas fa-capsules"></i>MedCol Dolor y Paliativos</div>
                     <div class="list-group">
@@ -486,9 +486,9 @@
                         </a>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
-            <div class="card bg-info">
+            <!-- <div class="card bg-info">
                 <div class="card-body text-center">
                     <div class="card-header"> <i class="fas fa-capsules"></i>MedCol PCE-Huerfanas-Biologicos</div>
                     <div class="list-group">
@@ -497,9 +497,9 @@
                         </a>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
-            <div class="card bg-success">
+            <!-- <div class="card bg-success">
                 <div class="card-body text-center">
                     <div class="card-header"> <i class="fas fa-capsules"></i>MedCol EMCALI</div>
                     <div class="list-group">
@@ -508,18 +508,67 @@
                         </a>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
-            <div class="card bg-danger">
-                <div class="card-body text-center">
-                    <div class="card-header"> <i class="fas fa-capsules"></i>MedCol New Servidor</div>
-                    <div class="list-group">
-                        <a href="{{ route('medcol6.pendientes') }}" class="list-group-item list-group-item-action">
-                            <i class="far fa-share-square"></i> Gestionar Pendientes Farmacia <span class="badge badge-pill badge-primary pull-right">NEW SRV</span>
-                        </a>
-                        <a href="{{ route('medcol6.saldos') }}" class="list-group-item list-group-item-action">
-                            <i class="fas fa-warehouse"></i> Consultar Saldos de Inventario <span class="badge badge-pill badge-success pull-right">SALDOS</span>
-                        </a>
+            <!-- MedCol New Servidor - Diseño Moderno -->
+            <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body p-0">
+                    <!-- Header Principal -->
+                    <div class="text-center py-4 text-white">
+                        <div class="mb-3">
+                            <i class="fas fa-server fa-3x mb-2" style="color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></i>
+                        </div>
+                        <h4 class="font-weight-bold mb-1" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);">MEDCOL API PENDIENTES</h4>
+                        <p class="mb-0 small opacity-75">Sistema de Gestión Farmacéutica Avanzada</p>
+                    </div>
+
+                    <!-- Sección Principal - Destacada -->
+                    <div class="px-4 pb-3">
+                        <div class="card border-0 shadow-sm mb-3" style="background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
+                            <div class="card-body p-3">
+                                <div class="text-center mb-2">
+                                    <i class="fas fa-cogs fa-2x text-primary mb-2"></i>
+                                    <h6 class="font-weight-bold text-dark mb-1">🚀 ACCESO PRINCIPAL</h6>
+                                </div>
+                                <a href="{{ route('medcol6.pendientes') }}" class="btn btn-primary btn-lg btn-block shadow-sm" style="border-radius: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    <i class="fas fa-capsules mr-2"></i>
+                                    Gestionar Pendientes
+                                    <!-- <span class="badge badge-light ml-2">NEW SRV</span> -->
+                                </a>
+                                <small class="text-muted d-block text-center mt-2">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Sistema principal de gestión de medicamentos pendientes
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Sección de Consultas -->
+                        <div class="card border-0" style="background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);">
+                            <div class="card-header bg-transparent border-0 py-2">
+                                <h6 class="mb-0 text-center text-muted font-weight-bold">
+                                    <i class="fas fa-search mr-1"></i>
+                                    HERRAMIENTAS DE CONSULTA
+                                </h6>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="list-group list-group-flush">
+                                    <a href="{{ route('medcol6.saldos') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2" style="background: rgba(248,249,250,0.8);">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0 mr-3">
+                                                <div class="rounded-circle bg-success d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                                    <i class="fas fa-warehouse text-white fa-sm"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-0 font-weight-bold text-dark">Consultar Saldos</h6>
+                                                <small class="text-muted">Inventario y disponibilidad</small>
+                                            </div>
+                                            <span class="badge badge-success">CONSULTA</span>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

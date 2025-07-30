@@ -2333,38 +2333,37 @@ Pendientes Medcol
                     $("#resumen_saldos").show();
                     $("#exportar_excel_saldos").show();
                     
-                    // Inicializar DataTable si no existe
-                    if (!$.fn.DataTable.isDataTable('#tablaPendSald')) {
-                        $('#tablaPendSald').DataTable({
-                            language: idioma_espanol,
-                            pageLength: 25,
-                            lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "Todos"]],
-                            order: [[1, 'asc'], [3, 'asc']],
-                            responsive: true,
-                            dom: 'Bfrtip',
-                            buttons: [
-                                {
-                                    extend: 'excelHtml5',
-                                    text: '<i class="fas fa-file-excel"></i> Excel',
-                                    className: 'btn btn-success btn-sm',
-                                    title: 'Informe Pendientes vs Saldos',
-                                    filename: 'pendientes_vs_saldos_' + new Date().toISOString().slice(0, 10)
-                                },
-                                {
-                                    extend: 'pdfHtml5',
-                                    text: '<i class="fas fa-file-pdf"></i> PDF',
-                                    className: 'btn btn-danger btn-sm',
-                                    title: 'Informe Pendientes vs Saldos',
-                                    filename: 'pendientes_vs_saldos_' + new Date().toISOString().slice(0, 10),
-                                    orientation: 'landscape',
-                                    pageSize: 'A4'
-                                }
-                            ]
-                        });
-                    } else {
-                        // Refrescar tabla existente
-                        $('#tablaPendSald').DataTable().draw();
+                    // Destruir tabla existente si existe
+                    if ($.fn.DataTable.isDataTable('#tablaPendSald')) {
+                        $('#tablaPendSald').DataTable().destroy();
                     }
+                    
+                    // Inicializar DataTable con configuración simplificada
+                    $('#tablaPendSald').DataTable({
+                        language: idioma_espanol,
+                        pageLength: 25,
+                        lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "Todos"]],
+                        dom: '<"row"<"col-md-4"l><"col-md-4"f><"col-md-4"B>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+                        autoWidth: true,
+                        buttons: [
+                            {
+                                extend: 'excelHtml5',
+                                text: '<i class="fas fa-file-excel"></i> Excel',
+                                className: 'btn btn-success btn-sm',
+                                title: 'Informe Pendientes vs Saldos',
+                                filename: 'pendientes_vs_saldos_' + new Date().toISOString().slice(0, 10)
+                            },
+                            {
+                                extend: 'pdfHtml5',
+                                text: '<i class="fas fa-file-pdf"></i> PDF',
+                                className: 'btn btn-danger btn-sm',
+                                title: 'Informe Pendientes vs Saldos',
+                                filename: 'pendientes_vs_saldos_' + new Date().toISOString().slice(0, 10),
+                                orientation: 'landscape',
+                                pageSize: 'A4'
+                            }
+                        ]
+                    });
                 },
                 error: function(xhr, status, error) {
                     console.error("Error al cargar pendientes vs saldos:", error);

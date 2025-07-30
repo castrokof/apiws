@@ -281,7 +281,7 @@
                                         <tr>
                                             <th>Farmacia</th>
                                             <th>Código</th>
-                                            <th>Medicamento</th>
+                                            <th>Descripcion</th>
                                             <th>Marca</th>
                                             <th>CUMS</th>
                                             <th class="text-center">Cant. Pendiente</th>
@@ -390,6 +390,31 @@
         width: 100vw;
         height: 100vh;
     }
+    
+    /* Mejorar responsividad de las tablas */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Ajustes específicos para tablaPendSald */
+    #tablaPendSald {
+        width: 100% !important;
+    }
+    
+    /* Permitir scroll horizontal */
+    .table-responsive {
+        overflow-x: auto !important;
+    }
+    
+    /* Ajustes para DataTables con scroll */
+    .dataTables_wrapper .dataTables_scroll {
+        overflow: auto;
+    }
+    
+    .dataTables_wrapper .dataTables_scrollBody {
+        overflow: auto;
+    }
 </style>
 
 <script>
@@ -404,6 +429,16 @@
             $(this).find('i')
                 .toggleClass('fa-expand')
                 .toggleClass('fa-compress');
+            
+            // Redimensionar DataTables después de cambiar el tamaño
+            setTimeout(function() {
+                if ($.fn.DataTable.isDataTable('#tablaPendSald')) {
+                    $('#tablaPendSald').DataTable().columns.adjust().responsive.recalc();
+                }
+                if ($.fn.DataTable.isDataTable('#tablaDetPend')) {
+                    $('#tablaDetPend').DataTable().columns.adjust().responsive.recalc();
+                }
+            }, 300);
         });
 
         // Asegurar que el modal se cierre correctamente
@@ -412,6 +447,31 @@
             $(this).find('[data-card-widget="maximize"] i')
                 .removeClass('fa-compress')
                 .addClass('fa-expand');
+        });
+        
+        // Event handler simple para ajuste de tablas al cambiar pestañas
+        $('#informeTabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            // Solo ajustar tablas después del cambio de pestaña
+            setTimeout(function() {
+                if ($.fn.DataTable.isDataTable('#tablaPendSald')) {
+                    $('#tablaPendSald').DataTable().columns.adjust().responsive.recalc();
+                }
+                if ($.fn.DataTable.isDataTable('#tablaDetPend')) {
+                    $('#tablaDetPend').DataTable().columns.adjust().responsive.recalc();
+                }
+            }, 100);
+        });
+        
+        // Redimensionar tablas cuando el modal se muestra completamente
+        $('#modalIndicadores').on('shown.bs.modal', function () {
+            setTimeout(function() {
+                if ($.fn.DataTable.isDataTable('#tablaPendSald')) {
+                    $('#tablaPendSald').DataTable().columns.adjust().responsive.recalc();
+                }
+                if ($.fn.DataTable.isDataTable('#tablaDetPend')) {
+                    $('#tablaDetPend').DataTable().columns.adjust().responsive.recalc();
+                }
+            }, 200);
         });
     });
 </script>

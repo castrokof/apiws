@@ -422,7 +422,8 @@ Dispensado Medcol Jamundi
                     {
                         extend: 'excelHtml5',
                         titleAttr: 'Exportar Excel',
-                        className: "btn btn-outline-success btn-sm"
+                        className: "btn btn-outline-success btn-sm",
+                        filename: 'FOR_GIF_003 ' + new Date().toISOString().slice(0, 10)
                     },
                     {
                         extend: 'csvHtml5',
