@@ -15,10 +15,18 @@ class PendientesFormManager {
     }
 
     init() {
-        this.bindEvents();
-        this.setupFormValidation();
-        this.setupQuantityCalculation();
-        this.setupStatusHandling();
+        // Solo inicializar si el formulario existe
+        if (this.form) {
+            this.bindEvents();
+            this.setupFormValidation();
+            this.setupQuantityCalculation();
+            this.setupStatusHandling();
+            console.log('✅ PendientesFormManager inicializado con formulario encontrado');
+        } else {
+            console.warn('⚠️ Formulario #documentManagementForm no encontrado. Inicialización diferida hasta que el modal se abra.');
+            // Configurar inicialización diferida para cuando se abra el modal
+            this.setupDeferredInitialization();
+        }
     }
 
     bindEvents() {
@@ -74,7 +82,36 @@ class PendientesFormManager {
         }
     }
 
+    setupDeferredInitialization() {
+        // Esperar a que el modal se abra para inicializar
+        $(document).on('shown.bs.modal', '#modal-edit-pendientes', () => {
+            console.log('🔄 Modal abierto, intentando inicialización diferida...');
+            
+            // Reintentear obtener el formulario
+            this.form = document.getElementById('documentManagementForm');
+            this.submitButton = document.getElementById('guardar_pendiente');
+            this.resetButton = document.getElementById('limpiar_form');
+            this.alertContainer = document.getElementById('alert-container');
+            
+            if (this.form) {
+                console.log('✅ Formulario encontrado, inicializando...');
+                this.bindEvents();
+                this.setupFormValidation();
+                this.setupQuantityCalculation();
+                this.setupStatusHandling();
+            } else {
+                console.error('❌ Formulario aún no encontrado después de abrir el modal');
+            }
+        });
+    }
+
     setupFormValidation() {
+        // Validación con null check
+        if (!this.form) {
+            console.warn('⚠️ No se puede configurar validación: formulario no encontrado');
+            return;
+        }
+        
         // Validación en tiempo real
         const requiredFields = this.form.querySelectorAll('[required]');
         
@@ -82,10 +119,14 @@ class PendientesFormManager {
             field.addEventListener('blur', () => this.validateField(field));
             field.addEventListener('input', () => this.clearFieldError(field));
         });
+        
+        console.log(`✅ Validación configurada para ${requiredFields.length} campos requeridos`);
     }
 
     setupQuantityCalculation() {
-        this.calculatePendingQuantity();
+        if (this.form) {
+            this.calculatePendingQuantity();
+        }
     }
 
     setupStatusHandling() {
@@ -200,6 +241,11 @@ class PendientesFormManager {
     }
 
     validateForm() {
+        if (!this.form) {
+            console.warn('⚠️ No se puede validar: formulario no encontrado');
+            return false;
+        }
+        
         const requiredFields = this.form.querySelectorAll('[required]');
         let isValid = true;
 
@@ -341,6 +387,11 @@ class PendientesFormManager {
     }
 
     resetForm() {
+        if (!this.form) {
+            console.warn('⚠️ No se puede resetear: formulario no encontrado');
+            return;
+        }
+        
         this.form.reset();
         this.form.querySelectorAll('.is-valid, .is-invalid').forEach(field => {
             field.classList.remove('is-valid', 'is-invalid');
@@ -413,31 +464,46 @@ class PendientesFormManager {
     }
 
     applySelectStyles(estado) {
-        // Obtener el contenedor de Select2
-        const select2Container = document.querySelector('.select2-container--bootstrap4');
-        const select2Rendered = document.querySelector('.select2-selection__rendered');
+        // Obtener los contenedores de Select2 específicos del modal
+        const select2Container = $('#modal-edit-pendientes .select2-selection--single');
+        const select2Rendered = $('#modal-edit-pendientes .select2-selection__rendered');
         
-        if (select2Rendered) {
+        if (select2Container.length && select2Rendered.length) {
             // Limpiar clases anteriores
-            select2Rendered.classList.remove('estado-pendiente', 'estado-entregado', 'estado-desabastecido', 'estado-anulado');
+            const estadoClasses = ['estado-pendiente', 'estado-entregado', 'estado-desabastecido', 'estado-anulado'];
+            select2Container.removeClass(estadoClasses.join(' '));
+            select2Rendered.removeClass(estadoClasses.join(' '));
             
-            // Aplicar clase según el estado
+            // Aplicar clase según el estado con animación
+            const addClass = (className) => {
+                select2Container.addClass(className);
+                select2Rendered.addClass(className);
+                
+                // Micro-interacción: efecto de "bounce"
+                select2Container.css('transform', 'scale(1.02)');
+                setTimeout(() => {
+                    select2Container.css('transform', 'scale(1)');
+                }, 150);
+            };
+            
             switch (estado) {
                 case 'PENDIENTE':
-                    select2Rendered.classList.add('estado-pendiente');
+                    addClass('estado-pendiente');
                     break;
                 case 'ENTREGADO':
-                    select2Rendered.classList.add('estado-entregado');
+                    addClass('estado-entregado');
                     break;
                 case 'DESABASTECIDO':
-                    select2Rendered.classList.add('estado-desabastecido');
+                    addClass('estado-desabastecido');
                     break;
                 case 'ANULADO':
-                    select2Rendered.classList.add('estado-anulado');
+                    addClass('estado-anulado');
                     break;
             }
             
             console.log('🎨 Estilos aplicados para estado:', estado);
+        } else {
+            console.warn('⚠️ Contenedores Select2 no encontrados para aplicar estilos');
         }
     }
 
@@ -476,6 +542,13 @@ class PendientesFormManager {
 
     // Método para poblar el formulario con datos
     populateForm(data) {
+        if (!data) {
+            console.warn('⚠️ No hay datos para poblar el formulario');
+            return;
+        }
+        
+        console.log('📝 Poblando formulario con datos:', data);
+        
         Object.keys(data).forEach(key => {
             const field = document.getElementById(key);
             if (field) {
@@ -502,6 +575,8 @@ class PendientesFormManager {
         if (data.estado) {
             this.applySelectStyles(data.estado);
         }
+        
+        console.log('✅ Formulario poblado exitosamente');
     }
 
     // Método para cargar el saldo del medicamento específico
@@ -571,22 +646,40 @@ class PendientesFormManager {
         }
     }
     
-    // Método auxiliar para actualizar el campo de saldo y su badge
+    // Método auxiliar unificado para actualizar el campo de saldo y su badge
     setSaldoField(valor, mensajeBadge, classBadge) {
         const saldoField = document.getElementById('saldo_medicamento');
         if (saldoField) {
             saldoField.value = valor;
             
-            // Actualizar el badge
-            const saldoBadge = saldoField.parentNode.querySelector('.saldo-badge');
-            if (saldoBadge) {
-                // Limpiar clases anteriores
-                saldoBadge.classList.remove('badge-success', 'badge-warning', 'badge-danger', 'badge-info');
-                
-                // Aplicar nueva clase y mensaje
-                saldoBadge.classList.add(classBadge);
-                saldoBadge.textContent = mensajeBadge;
-            }
+            // Actualizar el badge usando la función unificada
+            this.updateSaldoBadge(saldoField, mensajeBadge, classBadge);
+        }
+    }
+
+    // Función unificada para manejar badges de saldo - disponible globalmente
+    updateSaldoBadge(saldoField, mensajeBadge, classBadge) {
+        if (!saldoField) return;
+        
+        const saldoBadge = saldoField.parentNode.querySelector('.saldo-badge');
+        if (saldoBadge) {
+            // Limpiar todas las clases de estado anteriores
+            const stateClasses = ['badge-success', 'badge-warning', 'badge-danger', 'badge-info'];
+            saldoBadge.classList.remove(...stateClasses);
+            
+            // Aplicar nueva clase y mensaje
+            saldoBadge.classList.add(classBadge);
+            saldoBadge.textContent = mensajeBadge;
+            
+            console.log(`🎨 Badge actualizado: ${classBadge} - ${mensajeBadge}`);
+        }
+    }
+
+    // Hacer la función disponible globalmente para compatibilidad
+    static updateSaldoBadgeGlobal(saldoFieldId, mensajeBadge, classBadge) {
+        const saldoField = document.getElementById(saldoFieldId);
+        if (saldoField && window.pendientesFormManager) {
+            window.pendientesFormManager.updateSaldoBadge(saldoField, mensajeBadge, classBadge);
         }
     }
 }
@@ -595,8 +688,17 @@ class PendientesFormManager {
 document.addEventListener('DOMContentLoaded', function() {
     // Esperar un poco para asegurar que jQuery y otros scripts estén cargados
     setTimeout(() => {
+        // Diagnóstico de elementos del DOM
+        console.log('🔍 Diagnóstico de elementos del DOM:');
+        console.log('- Formulario #documentManagementForm:', document.getElementById('documentManagementForm'));
+        console.log('- Botón #guardar_pendiente:', document.getElementById('guardar_pendiente'));
+        console.log('- Botón #limpiar_form:', document.getElementById('limpiar_form'));
+        console.log('- Container #alert-container:', document.getElementById('alert-container'));
+        console.log('- Select #estado:', document.getElementById('estado'));
+        console.log('- Modal #modal-edit-pendientes:', document.getElementById('modal-edit-pendientes'));
+        
         window.pendientesFormManager = new PendientesFormManager();
-        console.log('✅ PendientesFormManager inicializado correctamente');
+        console.log('✅ PendientesFormManager inicializado');
         
         // Verificar que el sistema de estados funcione
         const estadoSelect = document.getElementById('estado');
@@ -619,12 +721,35 @@ document.addEventListener('DOMContentLoaded', function() {
 window.openPendienteModal = function(data) {
     console.log('🔄 Abriendo modal con datos:', data);
     
-    if (window.pendientesFormManager) {
-        window.pendientesFormManager.populateForm(data);
-        window.pendientesFormManager.clearAlert();
-    }
-    
+    // Abrir el modal primero
     $('#modal-edit-pendientes').modal('show');
+    
+    // Esperar un momento para que el modal se renderice completamente
+    setTimeout(() => {
+        // Reinicializar el manager si es necesario
+        if (window.pendientesFormManager && !window.pendientesFormManager.form) {
+            console.log('🔄 Reintentando inicialización del FormManager...');
+            window.pendientesFormManager.form = document.getElementById('documentManagementForm');
+            window.pendientesFormManager.submitButton = document.getElementById('guardar_pendiente');
+            window.pendientesFormManager.resetButton = document.getElementById('limpiar_form');
+            window.pendientesFormManager.alertContainer = document.getElementById('alert-container');
+            
+            if (window.pendientesFormManager.form) {
+                window.pendientesFormManager.bindEvents();
+                window.pendientesFormManager.setupFormValidation();
+                window.pendientesFormManager.setupQuantityCalculation();
+                window.pendientesFormManager.setupStatusHandling();
+                console.log('✅ FormManager reinicializado exitosamente');
+            }
+        }
+        
+        if (window.pendientesFormManager && window.pendientesFormManager.form) {
+            window.pendientesFormManager.populateForm(data);
+            window.pendientesFormManager.clearAlert();
+        } else {
+            console.warn('⚠️ FormManager no disponible para poblar datos');
+        }
+    }, 100);
     
     // Forzar la evaluación del estado inicial después de abrir el modal
     setTimeout(() => {
@@ -633,15 +758,46 @@ window.openPendienteModal = function(data) {
         // Asegurar que Select2 esté inicializado correctamente
         if (typeof $.fn.select2 !== 'undefined' && $('#estado').length) {
             try {
-                // Si Select2 no está inicializado, inicializarlo
+                // Si Select2 no está inicializado, inicializarlo con configuración completa
                 if (!$('#estado').hasClass('select2-hidden-accessible')) {
                     $('#estado').select2({
                         theme: 'bootstrap4',
                         width: '100%',
                         placeholder: '---Seleccione Estado---',
                         allowClear: false,
-                        dropdownParent: $('#modal-edit-pendientes')
+                        dropdownParent: $('#modal-edit-pendientes'),
+                        templateResult: function(option) {
+                            if (!option.id) return option.text;
+                            
+                            // Crear elemento con icono y texto
+                            const $option = $('<span></span>');
+                            $option.html(option.text);
+                            
+                            // Agregar clase CSS según el estado
+                            if (option.id === 'PENDIENTE') {
+                                $option.addClass('select2-option-pendiente');
+                            } else if (option.id === 'ENTREGADO') {
+                                $option.addClass('select2-option-entregado');
+                            } else if (option.id === 'DESABASTECIDO') {
+                                $option.addClass('select2-option-desabastecido');
+                            } else if (option.id === 'ANULADO') {
+                                $option.addClass('select2-option-anulado');
+                            }
+                            
+                            return $option;
+                        },
+                        templateSelection: function(option) {
+                            if (!option.id) return option.text;
+                            
+                            // Crear elemento para la selección con icono y texto
+                            const $selection = $('<span></span>');
+                            $selection.html(option.text);
+                            
+                            return $selection;
+                        }
                     });
+                    
+                    console.log('✅ Select2 inicializado correctamente desde pendientes-form.js');
                 }
                 
                 // Actualizar la selección
@@ -661,4 +817,25 @@ window.openPendienteModal = function(data) {
             window.pendientesFormManager.applySelectStyles(estado);
         }
     }, 300);
+};
+
+// Función global para compatibilidad con indexAnalista.blade.php
+window.setSaldoFieldIndependiente = function(valor, mensajeBadge, classBadge) {
+    const saldoField = document.getElementById('saldo_medicamento');
+    if (saldoField && window.pendientesFormManager) {
+        window.pendientesFormManager.setSaldoField(valor, mensajeBadge, classBadge);
+    } else {
+        // Fallback si el manager no está disponible
+        console.warn('⚠️ PendientesFormManager no disponible, usando método fallback');
+        if (saldoField) {
+            saldoField.value = valor;
+            const saldoBadge = saldoField.parentNode.querySelector('.saldo-badge');
+            if (saldoBadge) {
+                const stateClasses = ['badge-success', 'badge-warning', 'badge-danger', 'badge-info'];
+                saldoBadge.classList.remove(...stateClasses);
+                saldoBadge.classList.add(classBadge);
+                saldoBadge.textContent = mensajeBadge;
+            }
+        }
+    }
 };

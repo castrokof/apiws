@@ -121,8 +121,8 @@
                 <span class="modal-quantity-badge saldo-badge">Inventario actual</span>
             </div>
             <div class="modal-form-group">
-                <label for="estado" class="col-xs-4 control-label requerido">Estado</label>
-                <select name="estado" id="estado" class="form-control select2bs4" style="width: 100%;" required>
+                <label for="estado" class="col-xs-4 control-label requerido">Estado</label>                
+                <select name="estado" id="estado" class="form-control" style="width: 100%;" required>
                     <option value="">---Seleccione Estado---</option>
                     <option value="PENDIENTE">📋 PENDIENTE</option>
                     <option value="ENTREGADO">✅ ENTREGADO</option>
@@ -168,7 +168,7 @@
     <div class="modal-section modal-user-info">
         <div class="modal-section-title">
             <i class="fas fa-user-edit"></i>
-            Información de Registro
+            Información de la Entrega y Observaciones
         </div>
         <div class="modal-form-grid">
             <div class="modal-form-group">

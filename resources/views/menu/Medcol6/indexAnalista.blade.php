@@ -2806,52 +2806,21 @@ Pendientes Medcol
         }
     }
 
-    // Configuración mejorada de Select2 para el formulario de estados
-    $(document).ready(function() {
-        // Configurar Select2 con estilos mejorados
-        if (typeof $.fn.select2 !== 'undefined') {
-            $('#estado').select2({
-                theme: 'bootstrap4',
-                width: '100%',
-                placeholder: '---Seleccione Estado---',
-                allowClear: false,
-                dropdownParent: $('#modal-edit-pendientes'),
-                templateResult: function(option) {
-                    if (!option.id) return option.text;
-                    
-                    // Crear elemento con icono y texto
-                    const $option = $('<span></span>');
-                    $option.html(option.text);
-                    
-                    // Agregar clase CSS según el estado
-                    if (option.id === 'PENDIENTE') {
-                        $option.addClass('select2-option-pendiente');
-                    } else if (option.id === 'ENTREGADO') {
-                        $option.addClass('select2-option-entregado');
-                    } else if (option.id === 'DESABASTECIDO') {
-                        $option.addClass('select2-option-desabastecido');
-                    } else if (option.id === 'ANULADO') {
-                        $option.addClass('select2-option-anulado');
-                    }
-                    
-                    return $option;
-                },
-                templateSelection: function(option) {
-                    if (!option.id) return option.text;
-                    
-                    // Crear elemento para la selección con icono y texto
-                    const $selection = $('<span></span>');
-                    $selection.html(option.text);
-                    
-                    return $selection;
-                }
-            });
-            
-            console.log('✅ Select2 inicializado correctamente para el campo estado');
-        } else {
-            console.warn('⚠️ Select2 no está disponible');
-        }
-    });
+    // ⚠️ CONFIGURACIÓN UNIFICADA DE SELECT2 ⚠️
+    // La inicialización de Select2 ahora se maneja de forma unificada en pendientes-form.js
+    // para evitar conflictos y duplicaciones. Esta sección se mantiene como comentario para referencia.
+    /*
+    CONFIGURACIÓN MIGRADA A: pendientes-form.js
+    - Inicialización unificada de Select2
+    - Gestión centralizada de eventos
+    - Aplicación consistente de estilos
+    - Prevención de inicializaciones duplicadas
+    
+    TEMPLATES ORIGINALES CONSERVADOS:
+    - templateResult: Agrega clases CSS según el estado seleccionado
+    - templateSelection: Muestra el texto con íconos en la selección
+    - Bootstrap4 theme con dropdown parent correcto
+    */
 
     // Función independiente para cargar saldo del medicamento
     async function loadMedicamentoSaldoIndependiente(codigo, centroproduccion) {
@@ -2920,26 +2889,8 @@ Pendientes Medcol
         }
     }
     
-    // Función auxiliar independiente para actualizar el campo de saldo y su badge
-    function setSaldoFieldIndependiente(valor, mensajeBadge, classBadge) {
-        const saldoField = document.getElementById('saldo_medicamento');
-        if (saldoField) {
-            saldoField.value = valor;
-            
-            // Actualizar el badge
-            const saldoBadge = saldoField.parentNode.querySelector('.saldo-badge');
-            if (saldoBadge) {
-                // Limpiar clases anteriores
-                saldoBadge.classList.remove('badge-success', 'badge-warning', 'badge-danger', 'badge-info');
-                
-                // Aplicar nueva clase y mensaje
-                saldoBadge.classList.add(classBadge);
-                saldoBadge.textContent = mensajeBadge;
-            }
-        } else {
-            console.warn('⚠️ Campo saldo_medicamento no encontrado');
-        }
-    }
+    // NOTA: La función setSaldoFieldIndependiente ahora está unificada en pendientes-form.js
+    // para evitar duplicación y mantener consistencia en el manejo de badges de saldo
 </script>
 
 <!-- Script para gestión del formulario de pendientes -->

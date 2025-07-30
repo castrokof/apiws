@@ -326,16 +326,44 @@
 
 <script>
     $(document).ready(function() {
-        // Manejar el botón de maximizar
-        $('[data-card-widget="maximize"]').click(function(e) {
+        // Manejador específico para este modal solamente
+        $('#modalIndicadores [data-card-widget="maximize"]').off('click').click(function(e) {
             e.preventDefault();
             const card = $(this).closest('.card');
-            card.toggleClass('maximized-card');
+            const isMaximized = card.hasClass('maximized-card');
+            
+            if (isMaximized) {
+                card.removeClass('maximized-card');
+                $(this).find('i').removeClass('fa-compress').addClass('fa-expand');
+            } else {
+                card.addClass('maximized-card');
+                $(this).find('i').removeClass('fa-expand').addClass('fa-compress');
+            }
+            
+            // Redimensionar tablas después de cambiar el tamaño
+            setTimeout(function() {
+                if ($.fn.DataTable.isDataTable('#tablaPendSald')) {
+                    $('#tablaPendSald').DataTable().columns.adjust();
+                }
+                if ($.fn.DataTable.isDataTable('#tablaDetPend')) {
+                    $('#tablaDetPend').DataTable().columns.adjust();
+                }
+            }, 300);
+        });
 
-            // Cambiar ícono
-            $(this).find('i')
-                .toggleClass('fa-expand')
-                .toggleClass('fa-compress');
+        // Manejador específico para collapse de este modal
+        $('#modalIndicadores [data-card-widget="collapse"]').off('click').click(function(e) {
+            e.preventDefault();
+            const cardBody = $(this).closest('.card').find('.card-body');
+            const isCollapsed = cardBody.is(':hidden');
+            
+            if (isCollapsed) {
+                cardBody.show();
+                $(this).find('i').removeClass('fa-plus').addClass('fa-minus');
+            } else {
+                cardBody.hide();
+                $(this).find('i').removeClass('fa-minus').addClass('fa-plus');
+            }
         });
 
         // Event handler simple para ajuste de tablas al cambiar pestañas
@@ -365,10 +393,15 @@
 
         // Asegurar que el modal se cierre correctamente
         $('#modalIndicadores').on('hidden.bs.modal', function() {
-            $(this).find('.card').removeClass('maximized-card');
-            $(this).find('[data-card-widget="maximize"] i')
+            const card = $(this).find('.card');
+            card.removeClass('maximized-card');
+            card.find('.card-body').show();
+            card.find('[data-card-widget="maximize"] i')
                 .removeClass('fa-compress')
                 .addClass('fa-expand');
+            card.find('[data-card-widget="collapse"] i')
+                .removeClass('fa-plus')
+                .addClass('fa-minus');
         });
     });
 </script>
