@@ -93,6 +93,30 @@
                 <input type="text" name="observ" id="observ" class="form-control" readonly>
             </div>
         </div>
+
+        <!-- Nueva sección: Cálculos de Tiempo y Prioridad -->
+        <div class="modal-form-grid">
+            <div class="modal-form-group">
+                <label for="dias_transcurridos">📅 Días Transcurridos</label>
+                <input type="number" name="dias_transcurridos" id="dias_transcurridos" class="form-control" readonly tabindex="-1">
+                <span class="modal-quantity-badge time-badge">Desde fecha pendiente</span>
+            </div>
+            <div class="modal-form-group">
+                <label for="fecha_estimada_entrega">⏰ Fecha Estimada Entrega</label>
+                <input type="datetime-local" name="fecha_estimada_entrega" id="fecha_estimada_entrega" class="form-control" readonly tabindex="-1">
+                <span class="modal-quantity-badge delivery-badge">+48 horas</span>
+            </div>
+            <div class="modal-form-group">
+                <label for="horas_restantes">⏳ Tiempo Restante</label>
+                <input type="text" name="horas_restantes" id="horas_restantes" class="form-control" readonly tabindex="-1">
+                <span class="modal-quantity-badge countdown-badge">Para entrega</span>
+            </div>
+            <div class="modal-form-group">
+                <label for="estado_prioridad">🚨 Estado de Prioridad</label>
+                <input type="text" name="estado_prioridad" id="estado_prioridad" class="form-control" readonly tabindex="-1">
+                <span class="modal-quantity-badge priority-badge">Basado en 48h</span>
+            </div>
+        </div>
     </div>
 
     <!-- Gestión del Documento -->
