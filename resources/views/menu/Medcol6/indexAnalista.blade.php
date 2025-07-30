@@ -1974,10 +1974,18 @@ Pendientes Medcol
         }
 
         $("#generar_informe").click(function() {
+            console.log("=== GENERAR INFORME CLICKED ===");
+            
             // Obtener valores de los campos
             const fechaInicio = $("#modal_fechaini").val().trim();
             const fechaFin = $("#modal_fechafin").val().trim();
             const contrato = $("#modal_contrato").val().trim(); // Opcional
+            
+            console.log("Valores obtenidos del modal:", {
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
+                contrato: contrato
+            });
 
             // Validar campos obligatorios
             if (!fechaInicio || !fechaFin) {
@@ -2233,9 +2241,21 @@ Pendientes Medcol
         }
 
         function cargarPendientesVsSaldos(fechaInicio, fechaFin, contrato) {
+            console.log('cargarPendientesVsSaldos llamada con:', {
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
+                contrato: contrato
+            });
+            
             // Ocultar elementos de la pestaña anterior
             $("#exportar_excel_saldos").hide();
             $("#resumen_saldos").hide();
+            
+            // Destruir tabla existente completamente antes de limpiar
+            if ($.fn.DataTable.isDataTable('#tablaPendSald')) {
+                $('#tablaPendSald').DataTable().destroy();
+                console.log('Tabla tablaPendSald destruida para nueva carga');
+            }
             
             // Limpiar tabla
             $("#tablaPendSald tbody").empty();
@@ -2257,7 +2277,11 @@ Pendientes Medcol
                 },
                 dataType: "json",
                 success: function(response) {
-                    console.log("Respuesta pendientes vs saldos:", response);
+                    console.log("Respuesta pendientes vs saldos recibida:", {
+                        success: response.success,
+                        dataLength: response.data ? response.data.length : 0,
+                        response: response
+                    });
                     
                     // Limpiar tabla
                     $("#tablaPendSald tbody").empty();
@@ -2332,11 +2356,6 @@ Pendientes Medcol
                     // Mostrar resumen y botón de exportar
                     $("#resumen_saldos").show();
                     $("#exportar_excel_saldos").show();
-                    
-                    // Destruir tabla existente si existe
-                    if ($.fn.DataTable.isDataTable('#tablaPendSald')) {
-                        $('#tablaPendSald').DataTable().destroy();
-                    }
                     
                     // Inicializar DataTable con configuración simplificada
                     $('#tablaPendSald').DataTable({

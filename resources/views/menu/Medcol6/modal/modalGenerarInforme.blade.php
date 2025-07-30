@@ -58,27 +58,32 @@
                     <!-- Pestañas -->
                     <ul class="nav nav-tabs mt-4" id="informeTabs" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" id="dispensacion-tab" data-toggle="tab" href="#dispensacion" role="tab" aria-controls="dispensacion" aria-selected="true">
+                            <a class="nav-link active" id="dispensacion-tab" data-toggle="tab" href="#dispensacion" 
+                            role="tab" aria-controls="dispensacion" aria-selected="true">
                                 Informe Dispensación
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="forgif-tab" data-toggle="tab" href="#forgif" role="tab" aria-controls="forgif" aria-selected="false">
+                            <a class="nav-link" id="forgif-tab" data-toggle="tab" href="#forgif" 
+                            role="tab" aria-controls="forgif" aria-selected="false">
                                 Informe ForGif
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="sicmedic-tab" data-toggle="tab" href="#sicmedic" role="tab" aria-controls="sicmedic" aria-selected="false">
+                            <a class="nav-link" id="sicmedic-tab" data-toggle="tab" href="#sicmedic" 
+                            role="tab" aria-controls="sicmedic" aria-selected="false">
                                 Informe Medicamentos
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="insumos-tab" data-toggle="tab" href="#insumos" role="tab" aria-controls="insumos" aria-selected="false">
+                            <a class="nav-link" id="insumos-tab" data-toggle="tab" href="#insumos" 
+                            role="tab" aria-controls="insumos" aria-selected="false">
                                 Informe Insumos
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="multiples-tab" data-toggle="tab" href="#multiples" role="tab" aria-controls="multiples" aria-selected="false">
+                            <a class="nav-link" id="multiples-tab" data-toggle="tab" href="#multiples" 
+                            role="tab" aria-controls="multiples" aria-selected="false">
                                 Dispensación Multiple
                             </a>
                         </li>

@@ -60,45 +60,28 @@
                     <!-- Pestañas -->
                     <ul class="nav nav-tabs mt-4" id="informeTabs" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" id="pendientes-tab" data-toggle="tab" href="#pendientes" role="tab" aria-controls="pendientes" aria-selected="true">
+                            <a class="nav-link active" id="pendientes-tab" data-toggle="tab" href="#pendientes" 
+                            role="tab" aria-controls="pendientes" aria-selected="true">
                                 Informe Pendientes
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="detallependientes-tab" data-toggle="tab" href="#detallependientes" role="tab" aria-controls="detallependientes" aria-selected="false">
+                            <a class="nav-link" id="detallependientes-tab" data-toggle="tab" href="#detallependientes" 
+                            role="tab" aria-controls="detallependientes" aria-selected="false">
                                 Detalle Pendientes
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="pendientesconsaldos-tab" data-toggle="tab" href="#pendientesconsaldos" role="tab" aria-controls="pendientesconsaldos" aria-selected="false">
+                            <a class="nav-link" id="pendientesconsaldos-tab" data-toggle="tab" href="#pendientesconsaldos" 
+                            role="tab" aria-controls="pendientesconsaldos" aria-selected="false">
                                 Pendientes vs Saldos
                             </a>
                         </li>
-                        <!-- <li class="nav-item">
-                            <a class="nav-link" id="forgif-tab" data-toggle="tab" href="#forgif" role="tab" aria-controls="forgif" aria-selected="false">
-                                Informe ForGif
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="sicmedic-tab" data-toggle="tab" href="#sicmedic" role="tab" aria-controls="sicmedic" aria-selected="false">
-                                Informe Medicamentos
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="insumos-tab" data-toggle="tab" href="#insumos" role="tab" aria-controls="insumos" aria-selected="false">
-                                Informe Insumos
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="multiples-tab" data-toggle="tab" href="#multiples" role="tab" aria-controls="multiples" aria-selected="false">
-                                Dispensación Multiple
-                            </a>
-                        </li> -->
                     </ul>
 
                     <!-- Contenido de las pestañas -->
                     <div class="tab-content mt-3" id="informeTabsContent">
-                        <!-- Pestaña 1: Informe Dispensación -->
+                        <!-- Pestaña 1: Informe Pendientes -->
                         <div class="tab-pane fade show active" id="pendientes" role="tabpanel" aria-labelledby="pendientes-tab">
                             <div id="resultado_informe" class="mt-4" style="display: none;">
                                 <h4 class="mb-4 text-center font-weight-bold">Resumen Indicador Pendientes</h4>
@@ -281,7 +264,7 @@
                                         <tr>
                                             <th>Farmacia</th>
                                             <th>Código</th>
-                                            <th>Descripcion</th>
+                                            <th>Molecula/Insumo</th>
                                             <th>Marca</th>
                                             <th>CUMS</th>
                                             <th class="text-center">Cant. Pendiente</th>
@@ -296,57 +279,6 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
-                        <!-- Pestaña 4: Informe ForGif -->
-                        <div class="tab-pane fade" id="forgif" role="tabpanel" aria-labelledby="forgif-tab">
-                            <h5 class="text-center text-dark">Contenido del Informe FOR_GIF_003</h5>
-                            <div class="card-body table-responsive">
-                                <table id="tablaForgif" class="table table-striped table-hover">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>NIT del prestador</th>
-                                            <th>Prestador</th>
-                                            <th>Código Genérico EPS Comfenalco</th>
-                                            <th>Código Expediente</th>
-                                            <th>Código comercial proveedor</th>
-                                            <th>Nombre genérico</th>
-                                            <th>Nombre comercial</th>
-                                            <th>Unidad mínima de dispensación</th>
-                                            <th>Valor Unitario</th>
-                                            <th>CUM</th>
-                                            <th>Modalidad de contratación</th>
-                                            <th>Registro Sanitario (INVIMA)</th>
-                                            <th>OPCIÓN</th>
-                                            <th>PBS/ NO PBS/ PBS Condicionado</th>
-                                            <th>REGULADO</th>
-                                            <th>Categoría / Medicamento / Insumo / Alimento</th>
-                                            <th>Forma Farmacéutica</th>
-                                            <th>Tarifa Tope de regulado</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Aquí se agregarán las filas de la tabla dinámicamente -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Pestaña 5: Informe Medicamentos -->
-                        <div class="tab-pane fade" id="sicmedic" role="tabpanel" aria-labelledby="sicmedic-tab">
-                            <h5 class="text-center text-dark">Contenido del Informe Medicamentos</h5>
-                            <p class="text-center">Aquí va el contenido específico del Informe SIC-Medicamentos.</p>
-                        </div>
-
-                        <!-- Pestaña 6: Informe Insumos -->
-                        <div class="tab-pane fade" id="insumos" role="tabpanel" aria-labelledby="insumos-tab">
-                            <h5 class="text-center text-dark">Contenido del Informe Insumos</h5>
-                            <p class="text-center">Aquí va el contenido específico del Informe Insumos.</p>
-                        </div>
-
-                        <!-- Pestaña 7: Dispensación Multiple -->
-                        <div class="tab-pane fade" id="multiples" role="tabpanel" aria-labelledby="multiples-tab">
-                            <h5 class="text-center text-dark">Contenido del Informe Dispensacion Multiple</h5>
-                            <p class="text-center">Aquí va el contenido específico del Informe Dispensacion Multiple.</p>
                         </div>
                     </div>
                 </div>
@@ -390,31 +322,6 @@
         width: 100vw;
         height: 100vh;
     }
-    
-    /* Mejorar responsividad de las tablas */
-    .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    /* Ajustes específicos para tablaPendSald */
-    #tablaPendSald {
-        width: 100% !important;
-    }
-    
-    /* Permitir scroll horizontal */
-    .table-responsive {
-        overflow-x: auto !important;
-    }
-    
-    /* Ajustes para DataTables con scroll */
-    .dataTables_wrapper .dataTables_scroll {
-        overflow: auto;
-    }
-    
-    .dataTables_wrapper .dataTables_scrollBody {
-        overflow: auto;
-    }
 </style>
 
 <script>
@@ -429,35 +336,17 @@
             $(this).find('i')
                 .toggleClass('fa-expand')
                 .toggleClass('fa-compress');
-            
-            // Redimensionar DataTables después de cambiar el tamaño
-            setTimeout(function() {
-                if ($.fn.DataTable.isDataTable('#tablaPendSald')) {
-                    $('#tablaPendSald').DataTable().columns.adjust().responsive.recalc();
-                }
-                if ($.fn.DataTable.isDataTable('#tablaDetPend')) {
-                    $('#tablaDetPend').DataTable().columns.adjust().responsive.recalc();
-                }
-            }, 300);
         });
 
-        // Asegurar que el modal se cierre correctamente
-        $('#modalIndicadores').on('hidden.bs.modal', function() {
-            $(this).find('.card').removeClass('maximized-card');
-            $(this).find('[data-card-widget="maximize"] i')
-                .removeClass('fa-compress')
-                .addClass('fa-expand');
-        });
-        
         // Event handler simple para ajuste de tablas al cambiar pestañas
         $('#informeTabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             // Solo ajustar tablas después del cambio de pestaña
             setTimeout(function() {
                 if ($.fn.DataTable.isDataTable('#tablaPendSald')) {
-                    $('#tablaPendSald').DataTable().columns.adjust().responsive.recalc();
+                    $('#tablaPendSald').DataTable().columns.adjust();
                 }
                 if ($.fn.DataTable.isDataTable('#tablaDetPend')) {
-                    $('#tablaDetPend').DataTable().columns.adjust().responsive.recalc();
+                    $('#tablaDetPend').DataTable().columns.adjust();
                 }
             }, 100);
         });
@@ -466,12 +355,20 @@
         $('#modalIndicadores').on('shown.bs.modal', function () {
             setTimeout(function() {
                 if ($.fn.DataTable.isDataTable('#tablaPendSald')) {
-                    $('#tablaPendSald').DataTable().columns.adjust().responsive.recalc();
+                    $('#tablaPendSald').DataTable().columns.adjust();
                 }
                 if ($.fn.DataTable.isDataTable('#tablaDetPend')) {
-                    $('#tablaDetPend').DataTable().columns.adjust().responsive.recalc();
+                    $('#tablaDetPend').DataTable().columns.adjust();
                 }
             }, 200);
+        });
+
+        // Asegurar que el modal se cierre correctamente
+        $('#modalIndicadores').on('hidden.bs.modal', function() {
+            $(this).find('.card').removeClass('maximized-card');
+            $(this).find('[data-card-widget="maximize"] i')
+                .removeClass('fa-compress')
+                .addClass('fa-expand');
         });
     });
 </script>
