@@ -228,3 +228,113 @@
         </button>
     </div>
 </form>
+
+<script>
+function calcularMetricasEntrega() {
+    const fechaFacturaElement = document.getElementById('fecha_factura');
+    if (!fechaFacturaElement || !fechaFacturaElement.value) {
+        // Limpiar campos si no hay fecha
+        document.getElementById('dias_transcurridos').value = 0;
+        document.getElementById('fecha_estimada_entrega').value = '';
+        document.getElementById('horas_restantes').value = 'N/A';
+        document.getElementById('estado_prioridad').value = 'SIN FECHA';
+        
+        // Aplicar estilos por defecto
+        const estadoPrioridadElement = document.getElementById('estado_prioridad');
+        estadoPrioridadElement.className = 'form-control text-muted';
+        return;
+    }
+
+    const fechaFactura = new Date(fechaFacturaElement.value);
+    const hoy = new Date();
+    
+    // Calcular tiempo transcurrido
+    const tiempoTranscurrido = hoy - fechaFactura;
+    const diasTranscurridos = Math.floor(tiempoTranscurrido / (1000 * 60 * 60 * 24));
+    const horasTranscurridas = tiempoTranscurrido / (1000 * 60 * 60);
+    
+    // Calcular fecha estimada de entrega (48 horas después)
+    const fechaEstimada = new Date(fechaFactura);
+    fechaEstimada.setHours(fechaEstimada.getHours() + 48);
+    
+    // Formatear fecha estimada para datetime-local input
+    const year = fechaEstimada.getFullYear();
+    const month = String(fechaEstimada.getMonth() + 1).padStart(2, '0');
+    const day = String(fechaEstimada.getDate()).padStart(2, '0');
+    const hours = String(fechaEstimada.getHours()).padStart(2, '0');
+    const minutes = String(fechaEstimada.getMinutes()).padStart(2, '0');
+    const fechaEstimadaFormatted = `${year}-${month}-${day}T${hours}:${minutes}`;
+    
+    // Calcular tiempo restante hasta las 48 horas
+    const tiempoRestante = (48 * 60 * 60 * 1000) - tiempoTranscurrido;
+    const horasRestantes = Math.ceil(tiempoRestante / (1000 * 60 * 60));
+    
+    let tiempoRestanteTexto;
+    if (horasRestantes > 0) {
+        if (horasRestantes > 24) {
+            const diasRestantes = Math.ceil(horasRestantes / 24);
+            tiempoRestanteTexto = `${diasRestantes} día(s)`;
+        } else {
+            tiempoRestanteTexto = `${horasRestantes} hora(s)`;
+        }
+    } else {
+        const horasExcedidas = Math.abs(horasRestantes);
+        if (horasExcedidas > 24) {
+            const diasExcedidos = Math.ceil(horasExcedidas / 24);
+            tiempoRestanteTexto = `${diasExcedidos} día(s) vencido`;
+        } else {
+            tiempoRestanteTexto = `${horasExcedidas} hora(s) vencido`;
+        }
+    }
+    
+    // Determinar estado y estilos
+    let estado, claseCSS;
+    
+    if (horasTranscurridas <= 24) {
+        estado = '🟢 EN TIEMPO';
+        claseCSS = 'form-control text-success font-weight-bold';
+    } else if (horasTranscurridas <= 48) {
+        estado = '🟡 PRIORIDAD';
+        claseCSS = 'form-control text-warning font-weight-bold';
+    } else if (horasTranscurridas <= 72) {
+        estado = '🔴 CRÍTICO';
+        claseCSS = 'form-control text-danger font-weight-bold';
+    } else {
+        estado = '🚨 URGENTE';
+        claseCSS = 'form-control text-danger font-weight-bold border-danger';
+    }
+    
+    // Actualizar los campos en el formulario
+    document.getElementById('dias_transcurridos').value = diasTranscurridos;
+    document.getElementById('fecha_estimada_entrega').value = fechaEstimadaFormatted;
+    document.getElementById('horas_restantes').value = tiempoRestanteTexto;
+    
+    const estadoPrioridadElement = document.getElementById('estado_prioridad');
+    estadoPrioridadElement.value = estado;
+    estadoPrioridadElement.className = claseCSS;
+}
+
+// Función para auto-actualizar cada minuto
+function iniciarActualizacionAutomatica() {
+    calcularMetricasEntrega();
+    setInterval(calcularMetricasEntrega, 60000); // Actualizar cada minuto
+}
+
+// Ejecutar al cargar la página y configurar eventos
+document.addEventListener('DOMContentLoaded', function() {
+    iniciarActualizacionAutomatica();
+    
+    const fechaFacturaElement = document.getElementById('fecha_factura');
+    if (fechaFacturaElement) {
+        fechaFacturaElement.addEventListener('change', calcularMetricasEntrega);
+    }
+    
+    // También calcular cuando se abra/cargue el modal
+    if (typeof window.modalOpened !== 'undefined') {
+        calcularMetricasEntrega();
+    }
+});
+
+// Función global para recalcular métricas (puede ser llamada desde otros scripts)
+window.recalcularMetricasEntrega = calcularMetricasEntrega;
+</script>

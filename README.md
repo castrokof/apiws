@@ -1,61 +1,161 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Sistema de Gestión de Medicamentos Pendientes
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+Sistema web desarrollado en Laravel 7.x para la gestión de dispensación de medicamentos y seguimiento de pendientes farmacéuticos a través de múltiples entidades (Medcol2, Medcol3, Medcol5, Medcol6, Medcold).
 
-## About Laravel
+## Características Principales
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Gestión Multi-Entidad**: Soporte para múltiples entidades farmacéuticas
+- **Seguimiento de Prescripciones**: Control completo del flujo de medicamentos
+- **Métricas de Entrega en Tiempo Real**: Sistema de priorización basado en límites de tiempo
+- **Integración API**: Sincronización con sistemas externos
+- **Reportes Avanzados**: Generación de informes detallados
+- **Gestión de Inventario**: Control de saldos y desabastecimientos
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🚀 Nueva Funcionalidad: Métricas de Entrega
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Descripción
+Sistema automatizado de cálculo y visualización de métricas de entrega que permite priorizar pendientes según el límite crítico de 48 horas desde la fecha de facturación.
 
-## Learning Laravel
+### Características Implementadas
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+#### 📊 Cálculos Automáticos
+- **Días Transcurridos**: Diferencia en días entre fecha de factura y fecha actual
+- **Fecha Estimada de Entrega**: Cálculo de 48 horas posteriores a la fecha de factura
+- **Tiempo Restante**: Cuenta regresiva hasta el límite de 48 horas
+- **Estado de Prioridad**: Clasificación automática basada en tiempo transcurrido
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+#### 🚨 Estados de Prioridad
+| Estado | Tiempo | Color | Descripción |
+|--------|--------|-------|-------------|
+| 🟢 **EN TIEMPO** | ≤ 24 horas | Verde | Entrega en tiempo óptimo |
+| 🟡 **PRIORIDAD** | 25-48 horas | Amarillo | Requiere atención prioritaria |
+| 🔴 **CRÍTICO** | 49-72 horas | Rojo | Estado crítico - Límite superado |
+| 🚨 **URGENTE** | > 72 horas | Rojo + Borde | Requiere acción inmediata |
 
-## Laravel Sponsors
+#### ⚡ Funcionalidades Avanzadas
+- **Actualización en Tiempo Real**: Recálculo automático cada minuto
+- **Interfaz Visual Intuitiva**: Campos con colores dinámicos y emojis
+- **Formato Optimizado**: Compatibilidad con inputs HTML5 datetime-local
+- **Función Global**: `window.recalcularMetricasEntrega()` para integración
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+### Archivos Modificados
 
-### Premium Partners
+#### Componentes Backend
+```
+app/Helpers/DeliveryMetricsHelper.php (NUEVO)
+├── calcularDiasTranscurridos()
+├── calcularFechaEstimadaEntrega()
+├── calcularEstadoPrioridad()
+└── obtenerTodasLasMetricas()
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[OP.GG](https://op.gg)**
+#### Componentes Frontend
+```
+resources/views/menu/Medcol6/form/form.blade.php
+├── Sección: "Información del Medicamento - Métricas de Entrega"
+├── Campos: dias_transcurridos, fecha_estimada_entrega, 
+│           horas_restantes, estado_prioridad
+└── JavaScript: calcularMetricasEntrega() con auto-actualización
+```
 
-## Contributing
+### Ejemplo de Uso
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```php
+use App\Helpers\DeliveryMetricsHelper;
 
-## Code of Conduct
+// Obtener todas las métricas para una fecha
+$metricas = DeliveryMetricsHelper::obtenerTodasLasMetricas('2025-07-29');
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+echo $metricas['dias_transcurridos']; // 2
+echo $metricas['estado_prioridad']['estado']; // CRITICO
+echo $metricas['fecha_estimada_entrega']; // 2025-07-31 00:00
+```
 
-## Security Vulnerabilities
+## Instalación y Configuración
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Requisitos
+- PHP 7.2.5+ o 8.0+
+- Laravel 7.x
+- XAMPP (Windows)
+- Composer
+- NPM
 
-## License
+### Comandos de Desarrollo
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+# Instalación de dependencias
+composer install
+npm install
+
+# Compilación de assets
+npm run dev              # Desarrollo
+npm run watch            # Vigilancia de cambios
+npm run production       # Producción
+
+# Base de datos
+php artisan migrate
+php artisan db:seed
+
+# Servidor de desarrollo
+php artisan serve
+```
+
+### Comandos de Testing
+
+```bash
+# Ejecutar pruebas
+vendor/bin/phpunit
+
+# Regenerar autoloader (después de agregar helpers)
+composer dump-autoload
+```
+
+## Arquitectura del Sistema
+
+### Estructura Multi-Entidad
+- **Medcol2**: Gestión base de medicamentos
+- **Medcol3**: Entidad secundaria
+- **Medcol5**: Implementación EMCALI
+- **Medcol6**: Entidades SOS y JAMUNDI
+- **Medcold**: Gestión de medicamentos para dolor
+- **MedcolCli**: Vistas específicas de cliente
+
+### Flujo de Trabajo
+```
+Direccionado → Programado → Dispensado → Entregado → Facturado
+```
+
+### Modelos Principales
+- `PendienteApi[Entity]`: Pendientes por entidad
+- `DispensadoApi[Entity]`: Medicamentos dispensados
+- `EntregadosApi[Entity]`: Entregas realizadas
+- `ObservacionesApi[Entity]`: Observaciones del proceso
+
+## Integraciones
+
+- **SOS Web Services**: Servicios SOAP y REST
+- **APIs Externas**: Sincronización con sistemas farmacéuticos
+- **Excel Import/Export**: Maatwebsite Excel
+- **Sistema Hercules**: Autenticación externa
+
+## Tecnologías Utilizadas
+
+- **Backend**: Laravel 7.x, PHP 8.0
+- **Frontend**: AdminLTE, Bootstrap 4, jQuery
+- **Base de Datos**: MySQL con Eloquent ORM
+- **APIs**: Guzzle HTTP Client
+- **Reportes**: DataTables, Excel export
+
+## Contribución
+
+Para contribuir al proyecto:
+
+1. Fork el repositorio
+2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit tus cambios (`git commit -am 'Agregar nueva funcionalidad'`)
+4. Push a tu rama (`git push origin feature/nueva-funcionalidad`)
+5. Crea un Pull Request
+
+## Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
