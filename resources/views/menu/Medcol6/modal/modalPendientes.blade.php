@@ -77,7 +77,7 @@
             e.preventDefault();
             const card = $(this).closest('.card');
             const isMaximized = card.hasClass('maximized-card');
-            
+
             if (isMaximized) {
                 card.removeClass('maximized-card');
                 $(this).find('i').removeClass('fa-compress').addClass('fa-expand');
@@ -92,7 +92,7 @@
             e.preventDefault();
             const cardBody = $(this).closest('.card').find('.card-body');
             const isCollapsed = cardBody.is(':hidden');
-            
+
             if (isCollapsed) {
                 cardBody.show();
                 $(this).find('i').removeClass('fa-plus').addClass('fa-minus');
@@ -101,6 +101,9 @@
                 $(this).find('i').removeClass('fa-minus').addClass('fa-plus');
             }
         });
+
+        // Evitamos cerrar el modal automáticamente para prevenir conflictos aria-hidden
+        // En su lugar, implementamos limpieza visual de campos
 
         // Asegurar que el modal se cierre correctamente
         $('#modal-edit-pendientes').on('hidden.bs.modal', function() {
@@ -124,7 +127,7 @@
             // Delegamos al sistema unificado si está disponible
             if (window.pendientesFormManager && typeof window.pendientesFormManager.applySelectStyles === 'function') {
                 window.pendientesFormManager.applySelectStyles(estado);
-                
+
                 // Agregar notificaciones adicionales
                 switch (estado) {
                     case 'ENTREGADO':
@@ -203,11 +206,16 @@
 
         function getToastGradient(tipo) {
             switch (tipo) {
-                case 'success': return '#10b981, #059669';
-                case 'warning': return '#f59e0b, #d97706';
-                case 'info': return '#3b82f6, #2563eb';
-                case 'error': return '#ef4444, #dc2626';
-                default: return '#6b7280, #4b5563';
+                case 'success':
+                    return '#10b981, #059669';
+                case 'warning':
+                    return '#f59e0b, #d97706';
+                case 'info':
+                    return '#3b82f6, #2563eb';
+                case 'error':
+                    return '#ef4444, #dc2626';
+                default:
+                    return '#6b7280, #4b5563';
             }
         }
 
@@ -222,7 +230,7 @@
             $('.modal-form-group input, .modal-form-group textarea, .modal-form-group select').each(function() {
                 const $input = $(this);
                 const $group = $input.closest('.modal-form-group');
-                
+
                 $input.on('focus', function() {
                     $group.addClass('focused');
                     showFormProgress(25);
@@ -244,7 +252,7 @@
                 if ($btn.attr('type') === 'submit') {
                     $btn.addClass('loading');
                     showFormProgress(100);
-                    
+
                     // Remove loading state after form processing
                     setTimeout(() => {
                         $btn.removeClass('loading');
@@ -257,7 +265,7 @@
         function updateFieldState($input, $group) {
             const hasValue = $input.val() && $input.val().toString().trim() !== '';
             $group.toggleClass('has-value', hasValue);
-            
+
             // Add visual feedback for required fields
             const isRequired = $input.prop('required') || $input.closest('.modal-form-group').find('label').hasClass('required');
             if (isRequired && hasValue) {
@@ -272,7 +280,7 @@
             const isRequired = $input.prop('required') || $group.find('label').hasClass('required');
             const minLength = $input.attr('minlength');
             const type = $input.attr('type');
-            
+
             let isValid = true;
             let errorMessage = '';
 
@@ -315,9 +323,9 @@
             const ordered = parseFloat($('#cantord').val()) || 0;
             const delivered = parseFloat($('#cantdpx').val()) || 0;
             const pending = Math.max(0, ordered - delivered);
-            
+
             $('#cant_pndt').val(pending);
-            
+
             // Visual feedback for calculations
             const $pendingGroup = $('#cant_pndt').closest('.modal-form-group');
             if (pending > 0) {

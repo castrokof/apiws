@@ -1721,53 +1721,58 @@ Pendientes Medcol
                         success: function(data) {
                             var html = '';
                             if (data.errors) {
-
-                                html =
-                                    '<div class="alert alert-danger alert-dismissible">' +
-                                    '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' +
-                                    '<h5><i class="icon fas fa-ban"></i> Alerta! Verifica los siguientes datos: </h5>';
-
+                                // Usar Swal.fire directamente para errores
+                                let erroresTexto = '';
                                 for (var count = 0; count < data.errors.length; count++) {
-                                    html += '<p>' + data.errors[count] + '<p>';
+                                    erroresTexto += '• ' + data.errors[count] + '\n';
                                 }
-                                html += '</div>';
+                                
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Errores de Validación',
+                                    text: erroresTexto,
+                                    confirmButtonText: 'Entendido',
+                                    confirmButtonColor: '#dc3545'
+                                });
                             }
 
                             if (data.success == 'ok') {
-                                $('#form-general1')[0].reset();
-                                $('#modal-edit-pendientes').modal('hide');
-                                /* limpiarModal(); */
-                                $('#pendientes').DataTable().ajax.reload();
-                                // $('#tobservaciones').DataTable().ajax.reload();
-                                // $('#porentregar').DataTable().ajax.reload();
-                                // $('#entregados').DataTable().ajax.reload();
-                                // $('#tanulados').DataTable().ajax.reload();
-                                // $('#tdesabastecidos').DataTable().ajax.reload();
+                                // Usar Swal.fire directamente para éxito
                                 Swal.fire({
-                                    type: 'success',
-                                    title: 'Cuenta por pagar creada correctamente',
+                                    icon: 'success',
+                                    title: '¡Éxito!',
+                                    text: 'Cuenta por pagar creada correctamente',
                                     showConfirmButton: false,
-                                    timer: 1500
-
-                                })
-
+                                    timer: 2000,
+                                    timerProgressBar: true
+                                });
+                                
+                                // Limpiar campos y recargar tabla
+                                setTimeout(() => {
+                                    if (typeof limpiarCamposEditables === 'function') {
+                                        limpiarCamposEditables();
+                                    }
+                                    $('#pendientes').DataTable().ajax.reload();
+                                }, 500);
 
                             } else if (data.success == 'ok1') {
-                                $('#form-general1')[0].reset();
-                                $('#modal-edit-pendientes').modal('hide');
-                                $('#pendientes').DataTable().ajax.reload();
-                                // $('#tobservaciones').DataTable().ajax.reload();
-                                // $('#porentregar').DataTable().ajax.reload();
-                                // $('#entregados').DataTable().ajax.reload();
-                                // $('#tanulados').DataTable().ajax.reload();
-                                // $('#tdesabastecidos').DataTable().ajax.reload();
+                                // Usar Swal.fire directamente para éxito
                                 Swal.fire({
-                                    icon: 'warning',
-                                    title: 'Documento pendiente actualizado correctamente',
+                                    icon: 'success',
+                                    title: '¡Éxito!',
+                                    text: 'Documento pendiente actualizado correctamente',
                                     showConfirmButton: false,
-                                    timer: 1500
-
-                                })
+                                    timer: 2000,
+                                    timerProgressBar: true
+                                });
+                                
+                                // Limpiar campos y recargar tabla
+                                setTimeout(() => {
+                                    if (typeof limpiarCamposEditables === 'function') {
+                                        limpiarCamposEditables();
+                                    }
+                                    $('#pendientes').DataTable().ajax.reload();
+                                }, 500);
 
 
                             }

@@ -210,6 +210,17 @@
 
         // Auto-refresh every 5 minutes
         setInterval(loadStatistics, 300000);
+
+        // Handle modal events to prevent conflicts
+        $(document).on('show.bs.modal', '[id^="medicamentos-modal-"]', function() {
+            // Add modal-open class to prevent page scrolling
+            $('body').addClass('modal-medication-open');
+        });
+
+        $(document).on('hidden.bs.modal', '[id^="medicamentos-modal-"]', function() {
+            // Remove modal-open class to restore page functionality
+            $('body').removeClass('modal-medication-open');
+        });
     });
 
     // Initialize DataTable with server-side processing
@@ -412,21 +423,27 @@
         return Math.floor(timeDifference / (1000 * 60 * 60 * 24));
     }
 
-    // Helper function to get medication details dropdown with enhanced information
-    function getMedicationDetailsDropdown(medicamentosString, fechaAntigua, fechaReciente, index) {
+    // Helper function to get medication details with improved collapsible design
+    function getMedicationDetailsAccordion(medicamentosString, fechaAntigua, fechaReciente, index) {
         if (!medicamentosString) return '';
         
         const medicamentos = medicamentosString.split(' | ');
-        const dropdownId = `medicamentos-dropdown-${index}`;
+        const accordionId = `medicamentos-accordion-${index}`;
+        const collapseId = `collapse-medicamentos-${index}`;
         
         // Calculate days for oldest and newest medications
         const diasAntigua = fechaAntigua ? calculateDaysBetween(fechaAntigua) : 0;
         const diasReciente = fechaReciente ? calculateDaysBetween(fechaReciente) : 0;
         
-        let dropdownOptions = '';
+        // Determine if we should show as expanded list or modal for many items
+        const showAsModal = medicamentos.length > 6;
+        
+        if (showAsModal) {
+            return getMedicationDetailsModal(medicamentosString, fechaAntigua, fechaReciente, index);
+        }
+        
+        let medicationItems = '';
         medicamentos.forEach((medicamento, medIndex) => {
-            // For demonstration, we'll distribute the days range across medications
-            // In a real scenario, this would come from the backend with individual dates
             const estimatedDays = medIndex === 0 ? diasAntigua : 
                                  medIndex === medicamentos.length - 1 ? diasReciente : 
                                  Math.round((diasAntigua + diasReciente) / 2);
@@ -434,30 +451,22 @@
             const daysBadgeClass = estimatedDays >= 2 ? 'danger' : 
                                   estimatedDays >= 1 ? 'warning' : 'success';
             
-            dropdownOptions += `
-                <div class="dropdown-item py-2 border-bottom">
+            medicationItems += `
+                <div class="medication-item border-left border-${daysBadgeClass} pl-3 py-2 mb-2">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
                             <div class="d-flex align-items-center mb-1">
                                 <i class="fas fa-pills text-primary mr-2"></i>
-                                <strong class="text-primary">${medicamento}</strong>
+                                <strong class="text-primary" style="font-size: 0.9rem;">${medicamento}</strong>
                             </div>
-                            <div class="row small text-muted">
-                                <div class="col-6">
+                            <div class="d-flex align-items-center">
+                                <small class="text-muted mr-2">
                                     <i class="fas fa-calendar-alt mr-1"></i>
-                                    <span>Días pendientes:</span>
-                                </div>
-                                <div class="col-6">
-                                    <span class="badge badge-${daysBadgeClass} badge-sm">
-                                        ${estimatedDays} día${estimatedDays !== 1 ? 's' : ''}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="row small text-muted mt-1">
-                                <div class="col-12">
-                                    <i class="fas fa-info-circle mr-1"></i>
-                                    <em>Los detalles específicos de cada medicamento se cargarán desde el backend</em>
-                                </div>
+                                    Días pendientes:
+                                </small>
+                                <span class="badge badge-${daysBadgeClass} badge-sm">
+                                    ${estimatedDays} día${estimatedDays !== 1 ? 's' : ''}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -466,25 +475,122 @@
         });
 
         return `
-            <div class="dropdown">
-                <button class="btn btn-outline-info btn-sm dropdown-toggle w-100" type="button" 
-                        id="${dropdownId}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-pills mr-1"></i>
-                    Ver ${medicamentos.length} Medicamento${medicamentos.length > 1 ? 's' : ''} Pendiente${medicamentos.length > 1 ? 's' : ''}
-                </button>
-                <div class="dropdown-menu w-100" aria-labelledby="${dropdownId}" style="max-height: 400px; overflow-y: auto; min-width: 350px;">
-                    <div class="dropdown-header bg-light">
-                        <strong><i class="fas fa-list mr-2"></i>Medicamentos Pendientes</strong>
-                        <br>
-                        <small class="text-muted">Total: ${medicamentos.length} medicamento${medicamentos.length > 1 ? 's' : ''}</small>
+            <div class="medication-accordion">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light p-2" id="heading-${accordionId}">
+                        <button class="btn btn-link text-left w-100 p-0 text-decoration-none collapsed" 
+                                type="button" data-toggle="collapse" data-target="#${collapseId}" 
+                                aria-expanded="false" aria-controls="${collapseId}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-pills text-info mr-2"></i>
+                                    <span class="font-weight-medium text-dark">
+                                        ${medicamentos.length} Medicamento${medicamentos.length > 1 ? 's' : ''} Pendiente${medicamentos.length > 1 ? 's' : ''}
+                                    </span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <small class="text-muted mr-2">${diasReciente} - ${diasAntigua} días</small>
+                                    <i class="fas fa-chevron-down transition-icon"></i>
+                                </div>
+                            </div>
+                        </button>
                     </div>
-                    ${dropdownOptions}
-                    <div class="dropdown-divider"></div>
-                    <div class="dropdown-item-text">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            Rango de días: ${diasReciente} - ${diasAntigua} días
-                        </small>
+                    <div id="${collapseId}" class="collapse" aria-labelledby="heading-${accordionId}">
+                        <div class="card-body p-3">
+                            <div class="medication-list">
+                                ${medicationItems}
+                            </div>
+                            <div class="mt-2 pt-2 border-top">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Rango de días calculado entre el medicamento más antiguo y el más reciente
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Helper function for modal approach when there are many medications
+    function getMedicationDetailsModal(medicamentosString, fechaAntigua, fechaReciente, index) {
+        const medicamentos = medicamentosString.split(' | ');
+        const modalId = `medicamentos-modal-${index}`;
+        
+        // Calculate days for oldest and newest medications
+        const diasAntigua = fechaAntigua ? calculateDaysBetween(fechaAntigua) : 0;
+        const diasReciente = fechaReciente ? calculateDaysBetween(fechaReciente) : 0;
+
+        // Build medication cards separately to avoid template string issues
+        let medicationCards = '';
+        medicamentos.forEach((medicamento, medIndex) => {
+            const estimatedDays = medIndex === 0 ? diasAntigua : 
+                                 medIndex === medicamentos.length - 1 ? diasReciente : 
+                                 Math.round((diasAntigua + diasReciente) / 2);
+            const daysBadgeClass = estimatedDays >= 2 ? 'danger' : 
+                                  estimatedDays >= 1 ? 'warning' : 'success';
+            
+            medicationCards += `
+                <div class="col-md-6 mb-3">
+                    <div class="card border-left-${daysBadgeClass} h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-pills text-primary mr-2"></i>
+                                <strong class="text-primary">${medicamento}</strong>
+                            </div>
+                            <span class="badge badge-${daysBadgeClass}">
+                                ${estimatedDays} día${estimatedDays !== 1 ? 's' : ''} pendiente${estimatedDays !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        return `
+            <div class="medication-summary">
+                <button type="button" class="btn btn-outline-info btn-block medication-modal-btn" data-toggle="modal" data-target="#${modalId}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-pills mr-2"></i>
+                            <span>${medicamentos.length} Medicamentos Pendientes</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <small class="text-muted mr-2">${diasReciente} - ${diasAntigua} días</small>
+                            <i class="fas fa-external-link-alt"></i>
+                        </div>
+                    </div>
+                </button>
+                
+                <!-- Modal -->
+                <div class="modal fade" id="${modalId}" tabindex="-1" role="dialog" aria-labelledby="${modalId}Label" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header bg-info text-white">
+                                <h5 class="modal-title" id="${modalId}Label">
+                                    <i class="fas fa-pills mr-2"></i>
+                                    Medicamentos Pendientes Detallados
+                                </h5>
+                                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    <strong>Total:</strong> ${medicamentos.length} medicamentos pendientes
+                                    <br>
+                                    <strong>Rango de días:</strong> ${diasReciente} - ${diasAntigua} días
+                                </div>
+                                <div class="row">
+                                    ${medicationCards}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -553,7 +659,7 @@
                                     <i class="fas fa-list mr-1"></i>
                                     Medicamentos Pendientes:
                                 </label>
-                                ${getMedicationDetailsDropdown(suggestion.medicamentos, suggestion.fecha_mas_antigua, suggestion.fecha_mas_reciente, index)}
+                                ${getMedicationDetailsAccordion(suggestion.medicamentos, suggestion.fecha_mas_antigua, suggestion.fecha_mas_reciente, index)}
                             </div>
 
                             <div class="mb-3">
@@ -822,6 +928,189 @@
 
     .dt-button {
         margin-right: 5px !important;
+    }
+
+    /* Enhanced Medication Accordion Styles */
+    .medication-accordion .card {
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 0;
+    }
+
+    .medication-accordion .card-header {
+        border-bottom: 1px solid #e9ecef;
+        background-color: #f8f9fa !important;
+    }
+
+    .medication-accordion .btn-link {
+        color: #495057 !important;
+        text-decoration: none !important;
+        font-size: 0.95rem;
+    }
+
+    .medication-accordion .btn-link:hover {
+        color: #007bff !important;
+        text-decoration: none !important;
+    }
+
+    .medication-accordion .btn-link:focus {
+        box-shadow: none;
+        text-decoration: none !important;
+    }
+
+    .medication-accordion .transition-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .medication-accordion .btn-link:not(.collapsed) .transition-icon {
+        transform: rotate(180deg);
+    }
+
+    .medication-item {
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .medication-item:hover {
+        background-color: #e9ecef;
+        transform: translateX(3px);
+    }
+
+    .medication-item.border-left {
+        border-left-width: 4px !important;
+    }
+
+    /* Modal enhancements for many medications */
+    .medication-summary .medication-modal-btn {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative;
+        z-index: 1;
+    }
+
+    .medication-summary .medication-modal-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .medication-summary .medication-modal-btn:focus {
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+
+    .border-left-success {
+        border-left: 4px solid #28a745 !important;
+    }
+
+    .border-left-warning {
+        border-left: 4px solid #ffc107 !important;
+    }
+
+    .border-left-danger {
+        border-left: 4px solid #dc3545 !important;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .medication-accordion .card-header {
+            padding: 0.75rem;
+        }
+        
+        .medication-item {
+            padding: 0.75rem !important;
+        }
+        
+        .medication-accordion .btn-link {
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Animation for collapse */
+    .medication-accordion .collapse {
+        transition: all 0.3s ease;
+    }
+
+    .medication-accordion .collapsing {
+        transition: height 0.3s ease;
+    }
+
+    /* Enhanced badge styles */
+    .badge-sm {
+        font-size: 0.75rem;
+        padding: 0.25em 0.5em;
+    }
+
+    /* Modal improvements */
+    .modal-lg .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .modal-header.bg-info {
+        border-bottom: none;
+    }
+
+    /* Card hover effects in modal - specific scope to avoid conflicts */
+    .medication-summary .modal-body .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 8px;
+    }
+
+    .medication-summary .modal-body .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Improved spacing for medication items */
+    .medication-list {
+        max-height: 300px;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
+    .medication-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .medication-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .medication-list::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+
+    .medication-list::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    /* Prevent interference with page elements when modal is open */
+    body.modal-medication-open {
+        overflow: hidden;
+    }
+
+    body.modal-medication-open .medication-summary .medication-modal-btn {
+        pointer-events: none;
+    }
+
+    /* Ensure modals have proper z-index to avoid conflicts */
+    .medication-summary .modal {
+        z-index: 1055;
+    }
+
+    .medication-summary .modal-backdrop {
+        z-index: 1050;
+    }
+
+    /* Prevent hover effects on disabled elements */
+    .medication-summary .medication-modal-btn:disabled,
+    .medication-summary .medication-modal-btn[disabled] {
+        pointer-events: none;
+        opacity: 0.6;
+        transform: none !important;
+        box-shadow: none !important;
     }
 </style>
 @endsection

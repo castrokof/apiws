@@ -544,235 +544,101 @@ function mostrarCamposSegunEstado(estado) {
 
 function actualizarEstilosValidacion() {
     const inputs = document.querySelectorAll('#documentManagementForm input[required], #documentManagementForm textarea[required]');
-    inputs.forEach(input => {
+    inputs.forEach(input => 
+    {
         input.style.borderColor = '#dc3545';
         input.style.boxShadow = '0 0 0 0.2rem rgba(220, 53, 69, 0.25)';
     });
 }
 
-// Manejo del envío del formulario con alertas mejoradas
-function configurarEnvioFormulario() {
-    const form = document.getElementById('documentManagementForm');
-    const guardarBtn = document.getElementById('guardar_pendiente');
-    
-    if (!form || !guardarBtn) return;
-    
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(form);
-        const pendienteId = document.getElementById('hidden_id')?.value;
-        
-        if (!pendienteId) {
-            mostrarAlerta('error', 'Error', 'ID del pendiente no encontrado', 5000);
-            return;
-        }
-        
-        // Construir URL correcta para la actualización
-        const baseUrl = window.location.origin;
-        const updateUrl = `${baseUrl}/pendientes-medcol6/${pendienteId}`;
-        
-        // Mostrar loading
-        guardarBtn.disabled = true;
-        guardarBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-        
-        // Agregar método PUT al FormData
-        formData.append('_method', 'PUT');
-        
-        fetch(updateUrl, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || formData.get('_token'),
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: formData
-        })
-        .then(async response => {
-            const data = await response.json();
-            console.log('Respuesta del servidor:', data); // Debug
-            
-            if (response.ok && data.success) {
-                mostrarAlerta('success', '✅ Éxito', data.message || 'Pendiente actualizado correctamente', 2000);
-                
-                // Limpiar y resetear formulario
-                limpiarFormulario();
-                
-                // Cerrar modal y recargar tabla inmediatamente
-                setTimeout(() => {
-                    cerrarModalYRecargar();
-                }, 1500);
-                
-            } else {
-                // Manejar errores de validación o del servidor
-                if (data.formatted_message) {
-                    mostrarAlerta('error', 'Errores de Validación', data.formatted_message, 8000);
-                } else if (data.errors && data.errors.length > 0) {
-                    const erroresTexto = data.errors.join('\n• ');
-                    mostrarAlerta('error', 'Errores de Validación', '• ' + erroresTexto, 8000);
-                } else {
-                    mostrarAlerta('error', 'Error', data.message || 'Error al actualizar el pendiente', 5000);
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error en la petición:', error);
-            mostrarAlerta('error', 'Error de Conexión', 'No se pudo conectar con el servidor. Intente nuevamente.', 5000);
-        })
-        .finally(() => {
-            // Restaurar botón
-            guardarBtn.disabled = false;
-            guardarBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
-        });
+// Función simplificada para éxito con Swal.fire directo
+function mostrarExitoYLimpiarCampos(mensaje = 'Operación completada exitosamente') {
+    // Mostrar alerta de éxito usando Swal.fire directamente
+    Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: mensaje,
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
     });
+    
+    // Limpiar campos y recargar tabla después de un pequeño delay
+    setTimeout(() => {
+        limpiarCamposEditables();
+        recargarTablaPendientes();
+    }, 500);
 }
 
-function cerrarModalYRecargar() {
+// Función para limpiar solo campos editables (no readonly)
+function limpiarCamposEditables() {
     try {
-        console.log('Iniciando cierre de modal y recarga...');
+        const form = document.getElementById('form-general1'); // Usar el formulario correcto
+        if (!form) return;
         
-        // Método 1: Intentar cerrar usando Bootstrap 5
-        const modalElement = document.querySelector('.modal.show');
-        if (modalElement) {
-            console.log('Modal encontrado, cerrando...');
-            
-            // Intentar con Bootstrap 5
-            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-                const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                if (modalInstance) {
-                    modalInstance.hide();
-                    console.log('Modal cerrado con Bootstrap 5');
+        // Solo limpiar campos que el usuario puede editar
+        const camposEditables = [
+            'cantord', 'cantdpx', 'estado', 'fecha_entrega', 
+            'fecha_impresion', 'fecha_anulado', 'factura_entrega', 'observacion'
+        ];
+        
+        camposEditables.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field && !field.readOnly && !field.disabled) {
+                if (field.tagName === 'SELECT') {
+                    field.selectedIndex = 0;
+                    // Triggear evento para Select2 si existe
+                    if (typeof $ !== 'undefined' && $.fn.select2) {
+                        $('#' + fieldId).trigger('change');
+                    }
+                } else if (field.type === 'checkbox' || field.type === 'radio') {
+                    field.checked = false;
                 } else {
-                    // Crear nueva instancia si no existe
-                    const newModal = new bootstrap.Modal(modalElement);
-                    newModal.hide();
-                    console.log('Modal cerrado con nueva instancia Bootstrap 5');
+                    field.value = '';
                 }
-            }
-            // Intentar con Bootstrap 4 (fallback)
-            else if (typeof $ !== 'undefined' && $.fn.modal) {
-                $(modalElement).modal('hide');
-                console.log('Modal cerrado con Bootstrap 4/jQuery');
-            }
-            // Método manual
-            else {
-                modalElement.style.display = 'none';
-                modalElement.classList.remove('show');
-                document.body.classList.remove('modal-open');
                 
-                // Remover backdrop si existe
-                const backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) {
-                    backdrop.remove();
-                }
-                console.log('Modal cerrado manualmente');
-            }
-        }
-        
-        // Método 2: Intentar cerrar por ID específico del modal
-        const specificModal = document.getElementById('modalEditarPendiente') || 
-                            document.getElementById('modal-edit-pendiente') ||
-                            document.querySelector('[id*="modal"][id*="pendiente"]');
-        
-        if (specificModal && specificModal !== modalElement) {
-            console.log('Modal específico encontrado, cerrando...');
-            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-                const modalInstance = bootstrap.Modal.getInstance(specificModal);
-                if (modalInstance) {
-                    modalInstance.hide();
-                }
-            } else if (typeof $ !== 'undefined' && $.fn.modal) {
-                $(specificModal).modal('hide');
-            }
-        }
-        
-        // Método 3: Recargar tabla
-        setTimeout(() => {
-            console.log('Intentando recargar tabla...');
-            
-            // Buscar diferentes nombres de funciones de recarga
-            const recargarFunciones = [
-                'recargarTablaPendientes',
-                'recargarTabla', 
-                'refreshTable',
-                'loadPendientes',
-                'actualizarTabla'
-            ];
-            
-            let funcionEncontrada = false;
-            for (const nombreFuncion of recargarFunciones) {
-                if (typeof window[nombreFuncion] === 'function') {
-                    console.log(`Ejecutando función: ${nombreFuncion}`);
-                    window[nombreFuncion]();
-                    funcionEncontrada = true;
-                    break;
-                }
-            }
-            
-            // Si hay DataTable, intentar recargar
-            if (!funcionEncontrada && typeof $ !== 'undefined' && $.fn.DataTable) {
-                const table = $('.dataTable').DataTable();
-                if (table) {
-                    console.log('Recargando DataTable...');
-                    table.ajax.reload(null, false);
-                    funcionEncontrada = true;
-                }
-            }
-            
-            // Último recurso: recargar página
-            if (!funcionEncontrada) {
-                console.log('Recargando página completa...');
+                // Añadir efecto visual de limpieza
+                field.style.transition = 'all 0.3s ease';
+                field.style.backgroundColor = '#d4edda'; // Verde claro
                 setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
+                    field.style.backgroundColor = '';
+                }, 1500);
             }
-        }, 500);
+        });
+        
+        // Recalcular campos dependientes
+        calcularMetricasEntrega();
+        
+        console.log('Campos editables limpiados con feedback visual');
         
     } catch (error) {
-        console.error('Error al cerrar modal:', error);
-        // Fallback: recargar página
-        setTimeout(() => {
-            window.location.reload();
-        }, 1000);
+        console.error('Error al limpiar campos:', error);
     }
 }
 
-// Función para limpiar formulario después del éxito
-function limpiarFormulario() {
+// Función para recargar tabla sin cerrar modal
+function recargarTablaPendientes() {
     try {
-        const form = document.getElementById('documentManagementForm');
-        if (form) {
-            console.log('Limpiando formulario...');
-            
-            // Resetear campos no readonly
-            const inputs = form.querySelectorAll('input:not([readonly]), textarea:not([readonly]), select');
-            inputs.forEach(input => {
-                if (input.type === 'checkbox' || input.type === 'radio') {
-                    input.checked = false;
-                } else if (input.tagName === 'SELECT') {
-                    input.selectedIndex = 0;
-                } else {
-                    input.value = '';
-                }
-            });
-            
-            // Limpiar campos específicos de métricas
-            document.getElementById('dias_transcurridos').value = '0';
-            document.getElementById('fecha_estimada_entrega').value = '';
-            document.getElementById('horas_restantes').value = 'N/A';
-            document.getElementById('estado_prioridad').value = 'SIN FECHA';
-            
-            // Ocultar campos de fecha específicos
-            document.getElementById('futuro1').style.display = 'none';
-            document.getElementById('futuro2').style.display = 'none';
-            document.getElementById('futuro3').style.display = 'none';
-            document.getElementById('futuro4').style.display = 'none';
-            
-            console.log('Formulario limpiado correctamente');
+        if (typeof $ !== 'undefined' && $('#pendientes').length) {
+            if ($.fn.DataTable.isDataTable('#pendientes')) {
+                $('#pendientes').DataTable().ajax.reload(null, false);
+                console.log('Tabla de pendientes recargada exitosamente');
+            }
         }
     } catch (error) {
-        console.error('Error al limpiar formulario:', error);
+        console.error('Error al recargar tabla:', error);
     }
+}
+
+// Función simplificada para errores con Swal.fire directo
+function mostrarErrorSweetAlert(titulo, mensaje) {
+    Swal.fire({
+        icon: 'error',
+        title: titulo,
+        text: mensaje,
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#dc3545'
+    });
 }
 
 // Función de debug para el estado del modal
@@ -782,18 +648,22 @@ function debugModal() {
     console.log('Modales con clase show:', document.querySelectorAll('.modal.show').length);
     console.log('Bootstrap disponible:', typeof bootstrap !== 'undefined');
     console.log('jQuery disponible:', typeof $ !== 'undefined');
-    console.log('DataTable disponible:', typeof $.fn?.DataTable !== 'undefined');
-    
-    const modal = document.querySelector('.modal.show');
-    if (modal) {
-        console.log('Modal activo ID:', modal.id || 'sin ID');
-        console.log('Modal activo clases:', modal.className);
-    }
-    console.log('==================');
+}
+
+// Función de prueba para SweetAlert2 (puedes llamarla desde consola)
+function testSwal() {
+    console.log('Probando SweetAlert2...');
+    Swal.fire({
+        icon: 'info',
+        title: 'Test SweetAlert2',
+        text: 'SweetAlert2 está funcionando correctamente!',
+        confirmButtonText: 'Perfecto!'
+    });
 }
 
 // Función global para debug (puede ser llamada desde consola)
 window.debugModal = debugModal;
+window.testSwal = testSwal;
 
 // Inicializar todas las funcionalidades al cargar
 document.addEventListener('DOMContentLoaded', function() {
@@ -812,8 +682,13 @@ document.addEventListener('DOMContentLoaded', function() {
         actualizarValidacionesPorEstado();
     }
     
-    // Configurar envío de formulario
-    configurarEnvioFormulario();
+    // Las funciones de envío de formulario se manejan desde indexAnalista.blade.php
+    // Hacer las funciones disponibles globalmente
+    window.mostrarExitoYLimpiarCampos = mostrarExitoYLimpiarCampos;
+    window.mostrarErrorSweetAlert = mostrarErrorSweetAlert;
+    
+    // Test de SweetAlert2 disponibilidad
+    console.log('SweetAlert2 disponible:', typeof Swal !== 'undefined');
     
     // También calcular cuando se abra/cargue el modal
     if (typeof window.modalOpened !== 'undefined') {
