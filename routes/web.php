@@ -529,3 +529,10 @@ Route::get('medcol6/saldos/{id}', 'Medcol6\SaldosMedcol6Controller@show')->name(
     Route::delete('/ordenesDetalle/{id}', [OrdenCompraApiMedcol6Controller::class, 'destroyDetallesAjax'])->name('ordenesDetalle.eliminar');
     Route::post('/guardar-factura', [OrdenCompraApiMedcol6Controller::class, 'guardarFactura'])->name('guardar.factura');
     Route::post('/guardar-articulo', [OrdenCompraApiMedcol6Controller::class, 'AgregarMolecula'])->name('guardar.articulo');
+
+    // Smart Pendi Routes - Predictive Analysis Module
+    Route::get('/smart/pendi', 'SmartPendiController@index')->name('smart.pendi')->middleware('verified')->middleware('verifyuser');
+    Route::get('/smart/pendi/analysis', 'SmartPendiController@getPendientesAnalysis')->name('smart.pendi.analysis')->middleware('verified')->middleware('verifyuser');
+    Route::get('/smart/pendi/suggestions', 'SmartPendiController@getPredictiveSuggestions')->name('smart.pendi.suggestions')->middleware('verified')->middleware('verifyuser');
+    Route::get('/smart/pendi/statistics', 'SmartPendiController@getStatistics')->name('smart.pendi.statistics')->middleware('verified')->middleware('verifyuser');
+    Route::get('/smart/pendi/summary', 'SmartPendiController@getSummary')->name('smart.pendi.summary')->middleware('verified')->middleware('verifyuser');

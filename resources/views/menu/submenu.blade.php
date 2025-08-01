@@ -223,13 +223,16 @@
 
                     @else
 
+                    @if(Auth::user()->rol == '1' || Auth::user()->rol == '5' || Auth::user()->rol == '6')
+
+                    {{-- ROL 1: ADMINISTRADOR (Menú completo) --}}
                     @if(Auth::user()->rol == '1')
                     <nav class="navbar navbar-expand-lg navbar-dark bg-info rounded-lg">
-                        <!-- <a class="navbar-brand" href="#">Aplicación</a> -->
                         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
                         </button>
                         <div class="collapse navbar-collapse" id="navbarNav">
+                            {{-- Menú principal izquierdo para Rol 1 --}}
                             <ul class="navbar-nav mr-auto">
                                 <li class="nav-item">
                                     <a class="nav-link text-white" href="{{ url('/usuariosapi') }}">Usuarios API</a>
@@ -244,6 +247,7 @@
                                     <a class="nav-link text-white" href="{{ route('indexscann') }}">Scann documento</a>
                                 </li>
                             </ul>
+                            {{-- Menú desplegable derecho para Rol 1 --}}
                             <ul class="navbar-nav">
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -253,7 +257,6 @@
                                         <a class="dropdown-item text-dark" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                             {{ __('Logout') }}
                                         </a>
-
                                         <a class="dropdown-item text-dark" href="{{ route('tokenhercules') }}">{{ __('Mipres 2.0') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('submenu') }}">{{ __('Pendientes') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('dismenu') }}">{{ __('Dispensado') }}</a>
@@ -264,15 +267,15 @@
 
                                         <div class="dropdown-divider"></div>
 
-                                        <!-- Submenú -->
+                                        <!-- Submenú Compras -->
                                         <div class="dropdown-submenu">
                                             <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Compras') }}</a>
                                             <div class="dropdown-menu">
                                                 <a class="dropdown-item text-dark" href="{{ route('menucotizaciones') }}">{{ __('Cotizaciones') }}</a>
-                                                <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
+                                                <a class="dropdown-item text-dark" href="{{ route('compras.medcol3') }}">{{ __('Ordenes de Compra') }}</a>
                                             </div>
                                         </div>
-                                        <!-- Submenú -->
+                                        <!-- Submenú SOS -->
                                         <div class="dropdown-submenu">
                                             <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('SOS') }}</a>
                                             <div class="dropdown-menu">
@@ -280,24 +283,66 @@
                                                 <a class="dropdown-item text-dark" href="{{ route('indexformulas') }}">{{ __('Formulas SOS') }}</a>
                                             </div>
                                         </div>
-                                        <!-- Submenú -->
+                                        <!-- Submenú Scann -->
                                         <div class="dropdown-submenu">
                                             <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Scann') }}</a>
                                             <div class="dropdown-menu">
                                                 <a class="dropdown-item text-dark" href="{{ route('indexscannpdfs') }}">{{ __('Generar PDFS') }}</a>
-
                                             </div>
                                         </div>
                                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                             @csrf
                                         </form>
                                     </div>
-
-
                                 </li>
                             </ul>
                         </div>
                     </nav>
+
+                    {{-- ROLES 5 y 6: COMPRAS (Menú restringido) --}}
+                    @elseif(Auth::user()->rol == '5' || Auth::user()->rol == '6')
+                    <nav class="navbar navbar-expand-lg navbar-dark bg-info rounded-lg">
+                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarNav">
+                            {{-- Menú principal izquierdo (vacío para estos roles) --}}
+                            <ul class="navbar-nav mr-auto">
+                            </ul>
+
+                            {{-- Menú desplegable derecho para Roles 5 y 6 --}}
+                            <ul class="navbar-nav">
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        {{ Auth::user()->name }}
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right rounded-lg" aria-labelledby="navbarDropdown">
+                                        <a class="dropdown-item text-dark" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                            {{ __('Logout') }}
+                                        </a>
+
+                                        <div class="dropdown-divider"></div>
+
+                                        <!-- Submenú Compras -->
+                                        <div class="dropdown-submenu">
+                                            <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Compras') }}</a>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item text-dark" href="{{ route('menucotizaciones') }}">{{ __('Cotizaciones') }}</a>
+                                                <a class="dropdown-item text-dark" href="{{ route('compras.medcol3') }}">{{ __('Ordenes de Compra') }}</a>
+                                            </div>
+                                        </div>
+
+                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                            @csrf
+                                        </form>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
+                    @endif
+
+
                     @elseif(Auth::user()->rol == '2' || Auth::user()->rol == '4' )
                     <nav class="navbar navbar-expand-lg navbar-dark bg-info rounded-lg">
                         <!-- <a class="navbar-brand" href="#">Aplicación</a> -->
@@ -564,6 +609,21 @@
                                                 <small class="text-muted">Inventario y disponibilidad</small>
                                             </div>
                                             <span class="badge badge-success">CONSULTA</span>
+                                        </div>
+                                    </a>
+                                    
+                                    <a href="{{ route('smart.pendi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2" style="background: rgba(248,249,250,0.8);">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0 mr-3">
+                                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                                    <i class="fas fa-brain text-white fa-sm"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-0 font-weight-bold text-dark">Smart Pendi</h6>
+                                                <small class="text-muted">Análisis inteligente de pendientes</small>
+                                            </div>
+                                            <span class="badge badge-primary">SMART</span>
                                         </div>
                                     </a>
                                 </div>

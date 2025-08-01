@@ -236,7 +236,7 @@
                                                 <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Compras') }}</a>
                                                 <div class="dropdown-menu">
                                                     <a class="dropdown-item text-dark" href="{{ route('menucotizaciones') }}">{{ __('Cotizaciones') }}</a>
-                                                    <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
+                                                    <a class="dropdown-item text-dark" href="{{ route('compras.medcol3') }}">{{ __('Ordenes de Compra') }}</a>
                                                 </div>
                                             </div>
                                             <!-- Submenú -->
@@ -255,7 +255,52 @@
                             </ul>
                         </div>
                     </nav>
-                    @elseif(Auth::user()->rol == '2' )
+
+                    {{-- ROLES 5 y 6: COMPRAS (Menú restringido) --}}
+                    @elseif(Auth::user()->rol == '5' || Auth::user()->rol == '6')
+                    <nav class="navbar navbar-expand-lg navbar-dark bg-info rounded-lg">
+                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarNav">
+                            {{-- Menú principal izquierdo (vacío para estos roles) --}}
+                            <ul class="navbar-nav mr-auto">
+                            </ul>
+
+                            {{-- Menú desplegable derecho para Roles 5 y 6 --}}
+                            <ul class="navbar-nav">
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        {{ Auth::user()->name }}
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right rounded-lg" aria-labelledby="navbarDropdown">
+                                        <a class="dropdown-item text-dark" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                            {{ __('Logout') }}
+                                        </a>
+
+                                        <div class="dropdown-divider"></div>
+
+                                        <!-- Submenú Compras -->
+                                        <div class="dropdown-submenu">
+                                            <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Compras') }}</a>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item text-dark" href="{{ route('menucotizaciones') }}">{{ __('Cotizaciones') }}</a>
+                                                <a class="dropdown-item text-dark" href="{{ route('compras.medcol3') }}">{{ __('Ordenes de Compra') }}</a>
+                                            </div>
+                                        </div>
+
+                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                            @csrf
+                                        </form>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
+                    {{-- FIN ROLES 5 y 6 --}}
+
+                    {{-- ROL 4: ADMINISTRADOR --}}
+                    @elseif(Auth::user()->rol == '2'|| Auth::user()->rol == '4')
                     <nav class="navbar navbar-expand-lg navbar-dark bg-success rounded-lg">
                         <!-- <a class="navbar-brand" href="#">Aplicación</a> -->
                         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -293,7 +338,7 @@
                                                 <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Compras') }}</a>
                                                 <div class="dropdown-menu">
                                                     <a class="dropdown-item text-dark" href="{{ route('menucotizaciones') }}">{{ __('Cotizaciones') }}</a>
-                                                    <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
+                                                    <a class="dropdown-item text-dark" href="{{ route('compras.medcol3') }}">{{ __('Ordenes de Compra') }}</a>
                                                 </div>
                                             </div>
                                             <!-- Submenú -->
@@ -349,7 +394,7 @@
                                                 <a class="dropdown-item dropdown-toggle text-dark" href="#">{{ __('Compras') }}</a>
                                                 <div class="dropdown-menu">
                                                     <a class="dropdown-item text-dark" href="{{ route('menucotizaciones') }}">{{ __('Cotizaciones') }}</a>
-                                                    <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Ordenes de Compra') }}</a>
+                                                    <a class="dropdown-item text-dark" href="{{ route('compras.medcol3') }}">{{ __('Ordenes de Compra') }}</a>
                                                 </div>
                                             </div>
                                             <!-- Submenú -->

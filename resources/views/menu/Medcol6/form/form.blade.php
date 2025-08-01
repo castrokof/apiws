@@ -1,5 +1,65 @@
 <!-- Formulario de Gestión de Documentos Pendientes -->
-<div id="alert-container"></div>
+<style>
+    #alert-container {
+        position: sticky;
+        top: 0;
+        z-index: 1050;
+        margin-bottom: 15px;
+    }
+    
+    .alert {
+        border-radius: 8px;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .alert-success {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border-left: 4px solid #28a745;
+    }
+    
+    .alert-danger {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        border-left: 4px solid #dc3545;
+    }
+    
+    .alert-warning {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        border-left: 4px solid #ffc107;
+    }
+    
+    .alert-info {
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+        border-left: 4px solid #17a2b8;
+    }
+    
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.2em;
+        cursor: pointer;
+        opacity: 0.7;
+    }
+    
+    .btn-close:hover {
+        opacity: 1;
+    }
+    
+    .modal-status-item.hidden {
+        display: none !important;
+    }
+    
+    .form-control[required] {
+        border-left: 3px solid #dc3545;
+    }
+    
+    .form-control[required]:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+</style>
+
+<div id="alert-container" class="mb-3"></div>
 <form id="documentManagementForm" method="POST">
     @csrf
     @method('PUT')
@@ -295,7 +355,7 @@ function calcularMetricasEntrega() {
         claseCSS = 'form-control text-success font-weight-bold';
     } else if (horasTranscurridas <= 48) {
         estado = '🟡 PRIORIDAD';
-        claseCSS = 'form-control text-warning font-weight-bold';
+        claseCSS = 'form-control text-info font-weight-bold';
     } else if (horasTranscurridas <= 72) {
         estado = '🔴 CRÍTICO';
         claseCSS = 'form-control text-danger font-weight-bold';
@@ -317,7 +377,7 @@ function calcularMetricasEntrega() {
 // Función para auto-actualizar cada minuto
 function iniciarActualizacionAutomatica() {
     calcularMetricasEntrega();
-    setInterval(calcularMetricasEntrega, 60000); // Actualizar cada minuto
+    setInterval(calcularMetricasEntrega, 6000); // Actualizar cada minuto
 }
 
 // Ejecutar al cargar la página y configurar eventos
@@ -337,4 +397,427 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Función global para recalcular métricas (puede ser llamada desde otros scripts)
 window.recalcularMetricasEntrega = calcularMetricasEntrega;
+
+// ===== SISTEMA DE VALIDACIONES DINÁMICAS Y ALERTAS =====
+
+// Función para mostrar alertas mejoradas
+function mostrarAlerta(tipo, titulo, mensaje, duracion = 5000) {
+    const alertContainer = document.getElementById('alert-container');
+    if (!alertContainer) {
+        console.error('Contenedor de alertas no encontrado');
+        return;
+    }
+
+    const alertId = 'alert-' + Date.now();
+    const iconos = {
+        'success': 'fas fa-check-circle',
+        'error': 'fas fa-exclamation-triangle',
+        'warning': 'fas fa-exclamation-circle',
+        'info': 'fas fa-info-circle'
+    };
+
+    const colores = {
+        'success': 'alert-success',
+        'error': 'alert-danger',
+        'warning': 'alert-warning',
+        'info': 'alert-info'
+    };
+
+    const alertHTML = `
+        <div id="${alertId}" class="alert ${colores[tipo]} alert-dismissible fade show shadow-sm" role="alert" style="margin-bottom: 15px;">
+            <div class="d-flex align-items-center">
+                <i class="${iconos[tipo]} me-2" style="font-size: 1.2em;"></i>
+                <div class="flex-grow-1">
+                    <strong>${titulo}</strong>
+                    <div style="white-space: pre-line; margin-top: 5px;">${mensaje}</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" onclick="cerrarAlerta('${alertId}')" style="margin-left: 10px;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `;
+
+    alertContainer.innerHTML = alertHTML + alertContainer.innerHTML;
+    
+    // Auto-ocultar después del tiempo especificado
+    if (duracion > 0) {
+        setTimeout(() => cerrarAlerta(alertId), duracion);
+    }
+    
+    // Scroll hacia la alerta
+    alertContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function cerrarAlerta(alertId) {
+    const alert = document.getElementById(alertId);
+    if (alert) {
+        alert.classList.remove('show');
+        setTimeout(() => alert.remove(), 300);
+    }
+}
+
+// Función para validar campos según el estado seleccionado
+function actualizarValidacionesPorEstado() {
+    const estadoSelect = document.getElementById('estado');
+    const cantdpxInput = document.getElementById('cantdpx');
+    const facturaEntregaInput = document.getElementById('factura_entrega');
+    const observacionTextarea = document.getElementById('observacion');
+    
+    if (!estadoSelect) return;
+    
+    const estado = estadoSelect.value;
+    
+    // Resetear validaciones
+    cantdpxInput.removeAttribute('required');
+    facturaEntregaInput.removeAttribute('required');
+    observacionTextarea.removeAttribute('required');
+    
+    // Aplicar validaciones según el estado
+    switch (estado) {
+        case 'ENTREGADO':
+            cantdpxInput.setAttribute('required', 'required');
+            cantdpxInput.setAttribute('min', '1');
+            facturaEntregaInput.setAttribute('required', 'required');
+            observacionTextarea.setAttribute('required', 'required');
+            
+            // Mostrar campos obligatorios
+            mostrarCamposSegunEstado('ENTREGADO');
+            break;
+            
+        case 'DESABASTECIDO':
+            cantdpxInput.removeAttribute('required');
+            cantdpxInput.setAttribute('min', '0');
+            facturaEntregaInput.removeAttribute('required');
+            observacionTextarea.removeAttribute('required');
+            
+            mostrarCamposSegunEstado('DESABASTECIDO');
+            break;
+            
+        case 'ANULADO':
+            cantdpxInput.removeAttribute('required');
+            cantdpxInput.setAttribute('min', '0');
+            facturaEntregaInput.removeAttribute('required');
+            observacionTextarea.removeAttribute('required');
+            
+            mostrarCamposSegunEstado('ANULADO');
+            break;
+            
+        case 'PENDIENTE':
+        default:
+            cantdpxInput.removeAttribute('required');
+            cantdpxInput.setAttribute('min', '0');
+            facturaEntregaInput.removeAttribute('required');
+            observacionTextarea.removeAttribute('required');
+            
+            mostrarCamposSegunEstado('PENDIENTE');
+            break;
+    }
+    
+    // Actualizar estilos visuales
+    actualizarEstilosValidacion();
+}
+
+function mostrarCamposSegunEstado(estado) {
+    // Ocultar todos los campos de fecha específicos
+    document.getElementById('futuro1').style.display = 'none'; // fecha_entrega
+    document.getElementById('futuro2').style.display = 'none'; // fecha_impresion
+    document.getElementById('futuro3').style.display = 'none'; // fecha (pendiente)
+    document.getElementById('futuro4').style.display = 'none'; // fecha_anulado
+    
+    // Mostrar campos según el estado
+    switch (estado) {
+        case 'ENTREGADO':
+            document.getElementById('futuro1').style.display = 'block';
+            break;
+        case 'DESABASTECIDO':
+            document.getElementById('futuro2').style.display = 'block';
+            break;
+        case 'ANULADO':
+            document.getElementById('futuro4').style.display = 'block';
+            break;
+        case 'PENDIENTE':
+            document.getElementById('futuro3').style.display = 'block';
+            break;
+    }
+}
+
+function actualizarEstilosValidacion() {
+    const inputs = document.querySelectorAll('#documentManagementForm input[required], #documentManagementForm textarea[required]');
+    inputs.forEach(input => {
+        input.style.borderColor = '#dc3545';
+        input.style.boxShadow = '0 0 0 0.2rem rgba(220, 53, 69, 0.25)';
+    });
+}
+
+// Manejo del envío del formulario con alertas mejoradas
+function configurarEnvioFormulario() {
+    const form = document.getElementById('documentManagementForm');
+    const guardarBtn = document.getElementById('guardar_pendiente');
+    
+    if (!form || !guardarBtn) return;
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const pendienteId = document.getElementById('hidden_id')?.value;
+        
+        if (!pendienteId) {
+            mostrarAlerta('error', 'Error', 'ID del pendiente no encontrado', 5000);
+            return;
+        }
+        
+        // Construir URL correcta para la actualización
+        const baseUrl = window.location.origin;
+        const updateUrl = `${baseUrl}/pendientes-medcol6/${pendienteId}`;
+        
+        // Mostrar loading
+        guardarBtn.disabled = true;
+        guardarBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        
+        // Agregar método PUT al FormData
+        formData.append('_method', 'PUT');
+        
+        fetch(updateUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || formData.get('_token'),
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(async response => {
+            const data = await response.json();
+            console.log('Respuesta del servidor:', data); // Debug
+            
+            if (response.ok && data.success) {
+                mostrarAlerta('success', '✅ Éxito', data.message || 'Pendiente actualizado correctamente', 2000);
+                
+                // Limpiar y resetear formulario
+                limpiarFormulario();
+                
+                // Cerrar modal y recargar tabla inmediatamente
+                setTimeout(() => {
+                    cerrarModalYRecargar();
+                }, 1500);
+                
+            } else {
+                // Manejar errores de validación o del servidor
+                if (data.formatted_message) {
+                    mostrarAlerta('error', 'Errores de Validación', data.formatted_message, 8000);
+                } else if (data.errors && data.errors.length > 0) {
+                    const erroresTexto = data.errors.join('\n• ');
+                    mostrarAlerta('error', 'Errores de Validación', '• ' + erroresTexto, 8000);
+                } else {
+                    mostrarAlerta('error', 'Error', data.message || 'Error al actualizar el pendiente', 5000);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error en la petición:', error);
+            mostrarAlerta('error', 'Error de Conexión', 'No se pudo conectar con el servidor. Intente nuevamente.', 5000);
+        })
+        .finally(() => {
+            // Restaurar botón
+            guardarBtn.disabled = false;
+            guardarBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
+        });
+    });
+}
+
+function cerrarModalYRecargar() {
+    try {
+        console.log('Iniciando cierre de modal y recarga...');
+        
+        // Método 1: Intentar cerrar usando Bootstrap 5
+        const modalElement = document.querySelector('.modal.show');
+        if (modalElement) {
+            console.log('Modal encontrado, cerrando...');
+            
+            // Intentar con Bootstrap 5
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                if (modalInstance) {
+                    modalInstance.hide();
+                    console.log('Modal cerrado con Bootstrap 5');
+                } else {
+                    // Crear nueva instancia si no existe
+                    const newModal = new bootstrap.Modal(modalElement);
+                    newModal.hide();
+                    console.log('Modal cerrado con nueva instancia Bootstrap 5');
+                }
+            }
+            // Intentar con Bootstrap 4 (fallback)
+            else if (typeof $ !== 'undefined' && $.fn.modal) {
+                $(modalElement).modal('hide');
+                console.log('Modal cerrado con Bootstrap 4/jQuery');
+            }
+            // Método manual
+            else {
+                modalElement.style.display = 'none';
+                modalElement.classList.remove('show');
+                document.body.classList.remove('modal-open');
+                
+                // Remover backdrop si existe
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                console.log('Modal cerrado manualmente');
+            }
+        }
+        
+        // Método 2: Intentar cerrar por ID específico del modal
+        const specificModal = document.getElementById('modalEditarPendiente') || 
+                            document.getElementById('modal-edit-pendiente') ||
+                            document.querySelector('[id*="modal"][id*="pendiente"]');
+        
+        if (specificModal && specificModal !== modalElement) {
+            console.log('Modal específico encontrado, cerrando...');
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                const modalInstance = bootstrap.Modal.getInstance(specificModal);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+            } else if (typeof $ !== 'undefined' && $.fn.modal) {
+                $(specificModal).modal('hide');
+            }
+        }
+        
+        // Método 3: Recargar tabla
+        setTimeout(() => {
+            console.log('Intentando recargar tabla...');
+            
+            // Buscar diferentes nombres de funciones de recarga
+            const recargarFunciones = [
+                'recargarTablaPendientes',
+                'recargarTabla', 
+                'refreshTable',
+                'loadPendientes',
+                'actualizarTabla'
+            ];
+            
+            let funcionEncontrada = false;
+            for (const nombreFuncion of recargarFunciones) {
+                if (typeof window[nombreFuncion] === 'function') {
+                    console.log(`Ejecutando función: ${nombreFuncion}`);
+                    window[nombreFuncion]();
+                    funcionEncontrada = true;
+                    break;
+                }
+            }
+            
+            // Si hay DataTable, intentar recargar
+            if (!funcionEncontrada && typeof $ !== 'undefined' && $.fn.DataTable) {
+                const table = $('.dataTable').DataTable();
+                if (table) {
+                    console.log('Recargando DataTable...');
+                    table.ajax.reload(null, false);
+                    funcionEncontrada = true;
+                }
+            }
+            
+            // Último recurso: recargar página
+            if (!funcionEncontrada) {
+                console.log('Recargando página completa...');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            }
+        }, 500);
+        
+    } catch (error) {
+        console.error('Error al cerrar modal:', error);
+        // Fallback: recargar página
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    }
+}
+
+// Función para limpiar formulario después del éxito
+function limpiarFormulario() {
+    try {
+        const form = document.getElementById('documentManagementForm');
+        if (form) {
+            console.log('Limpiando formulario...');
+            
+            // Resetear campos no readonly
+            const inputs = form.querySelectorAll('input:not([readonly]), textarea:not([readonly]), select');
+            inputs.forEach(input => {
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    input.checked = false;
+                } else if (input.tagName === 'SELECT') {
+                    input.selectedIndex = 0;
+                } else {
+                    input.value = '';
+                }
+            });
+            
+            // Limpiar campos específicos de métricas
+            document.getElementById('dias_transcurridos').value = '0';
+            document.getElementById('fecha_estimada_entrega').value = '';
+            document.getElementById('horas_restantes').value = 'N/A';
+            document.getElementById('estado_prioridad').value = 'SIN FECHA';
+            
+            // Ocultar campos de fecha específicos
+            document.getElementById('futuro1').style.display = 'none';
+            document.getElementById('futuro2').style.display = 'none';
+            document.getElementById('futuro3').style.display = 'none';
+            document.getElementById('futuro4').style.display = 'none';
+            
+            console.log('Formulario limpiado correctamente');
+        }
+    } catch (error) {
+        console.error('Error al limpiar formulario:', error);
+    }
+}
+
+// Función de debug para el estado del modal
+function debugModal() {
+    console.log('=== DEBUG MODAL ===');
+    console.log('Modales encontrados:', document.querySelectorAll('.modal').length);
+    console.log('Modales con clase show:', document.querySelectorAll('.modal.show').length);
+    console.log('Bootstrap disponible:', typeof bootstrap !== 'undefined');
+    console.log('jQuery disponible:', typeof $ !== 'undefined');
+    console.log('DataTable disponible:', typeof $.fn?.DataTable !== 'undefined');
+    
+    const modal = document.querySelector('.modal.show');
+    if (modal) {
+        console.log('Modal activo ID:', modal.id || 'sin ID');
+        console.log('Modal activo clases:', modal.className);
+    }
+    console.log('==================');
+}
+
+// Función global para debug (puede ser llamada desde consola)
+window.debugModal = debugModal;
+
+// Inicializar todas las funcionalidades al cargar
+document.addEventListener('DOMContentLoaded', function() {
+    iniciarActualizacionAutomatica();
+    
+    const fechaFacturaElement = document.getElementById('fecha_factura');
+    if (fechaFacturaElement) {
+        fechaFacturaElement.addEventListener('change', calcularMetricasEntrega);
+    }
+    
+    // Configurar validaciones dinámicas
+    const estadoSelect = document.getElementById('estado');
+    if (estadoSelect) {
+        estadoSelect.addEventListener('change', actualizarValidacionesPorEstado);
+        // Ejecutar una vez al cargar
+        actualizarValidacionesPorEstado();
+    }
+    
+    // Configurar envío de formulario
+    configurarEnvioFormulario();
+    
+    // También calcular cuando se abra/cargue el modal
+    if (typeof window.modalOpened !== 'undefined') {
+        calcularMetricasEntrega();
+    }
+});
 </script>

@@ -31,32 +31,47 @@ class UpdatePendienteRequest extends FormRequest
      */
     public function rules()
     {
+        $estado = $this->input('estado');
+        
+        // Reglas base que siempre aplican
         $rules = [
             'estado' => 'required|in:PENDIENTE,ENTREGADO,DESABASTECIDO,ANULADO',
-            'observacion' => 'required|string|min:3|max:500'
+            'cantord' => 'required|numeric|min:1'
         ];
 
         // Reglas específicas por estado
-        switch ($this->input('estado')) {
+        switch ($estado) {
             case 'ENTREGADO':
                 $rules = array_merge($rules, [
-                    'cantord' => 'required|numeric|min:1',
                     'cantdpx' => 'required|numeric|min:1|lte:cantord',
-                    'fecha_entrega' => 'required|date|before_or_equal:today',
+                    'fecha_entrega' => 'required|date|after_or_equal:fecha_factura',
                     'factura_entrega' => 'required|string|max:50',
-                    'doc_entrega' => 'required|string|max:50'
+                    'doc_entrega' => 'required|string|max:50',
+                    'observacion' => 'required|string|min:3|max:500'
                 ]);
                 break;
 
             case 'DESABASTECIDO':
                 $rules = array_merge($rules, [
-                    'fecha_impresion' => 'required|date|after_or_equal:fecha_factura|before_or_equal:today'
+                    'cantdpx' => 'nullable|numeric|min:0|lte:cantord',
+                    'fecha_impresion' => 'required|date|after_or_equal:fecha_factura',
+                    'observacion' => 'nullable|string|max:500'
                 ]);
                 break;
 
             case 'ANULADO':
                 $rules = array_merge($rules, [
-                    'fecha_anulado' => 'required|date|after_or_equal:fecha_factura|before_or_equal:today'
+                    'cantdpx' => 'nullable|numeric|min:0|lte:cantord',
+                    'fecha_anulado' => 'required|date|after_or_equal:fecha_factura',
+                    'observacion' => 'nullable|string|max:500'
+                ]);
+                break;
+
+            case 'PENDIENTE':
+            default:
+                $rules = array_merge($rules, [
+                    'cantdpx' => 'nullable|numeric|min:0|lte:cantord',
+                    'observacion' => 'nullable|string|max:500'
                 ]);
                 break;
         }
@@ -91,9 +106,8 @@ class UpdatePendienteRequest extends FormRequest
             
             'fecha_entrega.required' => 'La fecha de entrega es requerida',
             'fecha_entrega.date' => 'La fecha de entrega debe ser una fecha válida',
-            'fecha_entrega.after_or_equal' => 'La fecha de entrega debe ser posterior o igual a la fecha de la factura',
-            'fecha_entrega.before_or_equal' => 'La fecha de entrega no puede ser futura',
-            
+            'fecha_entrega.after_or_equal:fecha_factura' => 'La fecha de entrega debe ser posterior o igual a la fecha de la factura',
+
             'factura_entrega.required' => 'La factura de entrega es requerida',
             'factura_entrega.max' => 'La factura de entrega no puede exceder 50 caracteres',
             
@@ -164,11 +178,24 @@ class UpdatePendienteRequest extends FormRequest
      */
     protected function failedValidation(Validator $validator)
     {
+        $errors = $validator->errors();
+        $errorMessages = $errors->all();
+        
+        // Crear mensaje estructurado para mejor visualización
+        $formattedMessage = "❌ Errores de validación:\n\n";
+        foreach ($errorMessages as $index => $error) {
+            $formattedMessage .= "• " . $error . "\n";
+        }
+        
         throw new HttpResponseException(
             response()->json([
                 'success' => false,
                 'message' => 'Error de validación',
-                'errors' => $validator->errors()->all()
+                'formatted_message' => $formattedMessage,
+                'errors' => $errorMessages,
+                'errors_by_field' => $errors->toArray(),
+                'alert_type' => 'error',
+                'show_alert' => true
             ], 422)
         );
     }
