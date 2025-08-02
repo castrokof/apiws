@@ -57,7 +57,7 @@ class PendienteService
             DB::commit();
 
             return [
-                'success' => true,
+                'success' => 'ok1',
                 'message' => 'Pendiente actualizado exitosamente',
                 'data' => $pendiente->fresh()
             ];

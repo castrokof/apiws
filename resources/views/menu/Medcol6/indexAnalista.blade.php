@@ -194,7 +194,7 @@ Pendientes Medcol
             // CORREGIDO: Usar .val() en lugar de .text() para obtener el valor del option
             var estado_valor = $('#estado').val(); // Obtener el valor directamente
             console.log('🔄 mostrarOcultarCampos() llamada con estado:', estado_valor);
-            
+
             var futuro1 = $('#futuro1');
             var futuro2 = $('#futuro2');
             var futuro3 = $('#futuro3');
@@ -204,7 +204,7 @@ Pendientes Medcol
             var enviar_fecha_impresion = $('#enviar_fecha_impresion');
             var enviar_fecha_anulado = $('#enviar_fecha_anulado');
             var enviar_factura_entrega = $('#enviar_factura_entrega');
-            
+
             var input1 = $('#fecha_entrega');
             var input2 = $('#fecha_impresion');
             var anulado = $('#fecha_anulado');
@@ -230,11 +230,11 @@ Pendientes Medcol
                     futuro1.show().removeClass('hidden');
                     enviar_fecha_entrega.val('true');
                     enviar_factura_entrega.val('true');
-                    
+
                     // Limpiar otros campos
                     input2.val('');
                     anulado.val('');
-                    
+
                     // Auto-completar cantidad entregada con cantidad ordenada
                     var cant_ordenada = parseInt(input3.val()) || 0;
                     if (cant_ordenada > 0 && !input4.val()) {
@@ -246,7 +246,7 @@ Pendientes Medcol
                     console.log('✅ Mostrando campos para DESABASTECIDO');
                     futuro2.show().removeClass('hidden');
                     enviar_fecha_impresion.val('true');
-                    
+
                     // Limpiar otros campos
                     input1.val('');
                     anulado.val('');
@@ -256,7 +256,7 @@ Pendientes Medcol
                     console.log('✅ Mostrando campos para ANULADO');
                     futuro4.show().removeClass('hidden');
                     enviar_fecha_anulado.val('true');
-                    
+
                     // Limpiar otros campos
                     input1.val('');
                     input2.val('');
@@ -265,7 +265,7 @@ Pendientes Medcol
                 case "PENDIENTE":
                     console.log('✅ Mostrando campos para PENDIENTE');
                     futuro3.show().removeClass('hidden');
-                    
+
                     // Limpiar todos los campos
                     input1.val('');
                     input2.val('');
@@ -276,7 +276,7 @@ Pendientes Medcol
                     console.log('✅ Mostrando campos para TRAMITADO');
                     futuro2.show().removeClass('hidden');
                     enviar_fecha_impresion.val('true');
-                    
+
                     // Limpiar otros campos
                     input1.val('');
                     anulado.val('');
@@ -1540,7 +1540,7 @@ Pendientes Medcol
                             codigo: data.pendiente.codigo,
                             centroproduccion: data.pendiente.centroproduccion
                         });
-                        
+
                         // Usar función independiente para cargar saldo
                         loadMedicamentoSaldoIndependiente(data.pendiente.codigo, data.pendiente.centroproduccion);
                     } else {
@@ -1691,12 +1691,6 @@ Pendientes Medcol
             var method = '';
             var text = '';
 
-            /* if ($('#action').val() == 'Add') {
-                text = "Estás por crear una factura o cuenta por pagar"
-                url = "{{route('crear_observacion')}}";
-                method = 'post';
-            } */
-
             if ($('#action').val() == 'Edit') {
                 text = "Estás por entregar o despachar medicamentos pendientes"
                 var updateid = $('#hidden_id').val();
@@ -1708,6 +1702,7 @@ Pendientes Medcol
                 title: "¿Estás seguro?",
                 text: text,
                 type: "warning",
+                icon: "warning",
                 showCancelButton: true,
                 showCloseButton: true,
                 confirmButtonText: 'Aceptar',
@@ -1726,7 +1721,7 @@ Pendientes Medcol
                                 for (var count = 0; count < data.errors.length; count++) {
                                     erroresTexto += '• ' + data.errors[count] + '\n';
                                 }
-                                
+
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Errores de Validación',
@@ -1746,7 +1741,7 @@ Pendientes Medcol
                                     timer: 2000,
                                     timerProgressBar: true
                                 });
-                                
+
                                 // Limpiar campos y recargar tabla
                                 setTimeout(() => {
                                     if (typeof limpiarCamposEditables === 'function') {
@@ -1756,6 +1751,9 @@ Pendientes Medcol
                                 }, 500);
 
                             } else if (data.success == 'ok1') {
+                                $('#form-general1')[0].reset();
+                                $('#modal-edit-pendientes').modal('hide');
+                                $('#pendientes').DataTable().ajax.reload();
                                 // Usar Swal.fire directamente para éxito
                                 Swal.fire({
                                     icon: 'success',
@@ -1765,16 +1763,6 @@ Pendientes Medcol
                                     timer: 2000,
                                     timerProgressBar: true
                                 });
-                                
-                                // Limpiar campos y recargar tabla
-                                setTimeout(() => {
-                                    if (typeof limpiarCamposEditables === 'function') {
-                                        limpiarCamposEditables();
-                                    }
-                                    $('#pendientes').DataTable().ajax.reload();
-                                }, 500);
-
-
                             }
                             $('#form_result').html(html)
                         }
@@ -1980,12 +1968,12 @@ Pendientes Medcol
 
         $("#generar_informe").click(function() {
             console.log("=== GENERAR INFORME CLICKED ===");
-            
+
             // Obtener valores de los campos
             const fechaInicio = $("#modal_fechaini").val().trim();
             const fechaFin = $("#modal_fechafin").val().trim();
             const contrato = $("#modal_contrato").val().trim(); // Opcional
-            
+
             console.log("Valores obtenidos del modal:", {
                 fechaInicio: fechaInicio,
                 fechaFin: fechaFin,
@@ -2251,20 +2239,20 @@ Pendientes Medcol
                 fechaFin: fechaFin,
                 contrato: contrato
             });
-            
+
             // Ocultar elementos de la pestaña anterior
             $("#exportar_excel_saldos").hide();
             $("#resumen_saldos").hide();
-            
+
             // Destruir tabla existente completamente antes de limpiar
             if ($.fn.DataTable.isDataTable('#tablaPendSald')) {
                 $('#tablaPendSald').DataTable().destroy();
                 console.log('Tabla tablaPendSald destruida para nueva carga');
             }
-            
+
             // Limpiar tabla
             $("#tablaPendSald tbody").empty();
-            
+
             // Mostrar loading en la tabla
             $("#tablaPendSald tbody").html(
                 '<tr><td colspan="10" class="text-center">' +
@@ -2287,10 +2275,10 @@ Pendientes Medcol
                         dataLength: response.data ? response.data.length : 0,
                         response: response
                     });
-                    
+
                     // Limpiar tabla
                     $("#tablaPendSald tbody").empty();
-                    
+
                     if (!response.success || !response.data || response.data.length === 0) {
                         $("#tablaPendSald tbody").html(
                             '<tr><td colspan="10" class="text-center text-muted">' +
@@ -2304,13 +2292,13 @@ Pendientes Medcol
                     let conSaldo = 0;
                     let saldoParcial = 0;
                     let sinSaldo = 0;
-                    
+
                     // Procesar datos
                     response.data.forEach(function(item) {
                         // Determinar clase para el estado del saldo
                         let estadoClass = '';
                         let comparacionClass = '';
-                        
+
                         if (item.estado === 'CON SALDO') {
                             estadoClass = 'bg-success text-white';
                             conSaldo++;
@@ -2318,7 +2306,7 @@ Pendientes Medcol
                             estadoClass = 'bg-danger text-white';
                             sinSaldo++;
                         }
-                        
+
                         // Determinar clase para la comparación
                         if (item.pendiente_vs_saldo === 'SALDO SUFICIENTE') {
                             comparacionClass = 'bg-success text-white';
@@ -2328,7 +2316,7 @@ Pendientes Medcol
                         } else {
                             comparacionClass = 'bg-danger text-white';
                         }
-                        
+
                         // Crear fila de la tabla
                         let fila = `
                             <tr>
@@ -2348,29 +2336,31 @@ Pendientes Medcol
                                 <td>${item.fecha_saldo || 'N/A'}</td>
                             </tr>
                         `;
-                        
+
                         $("#tablaPendSald tbody").append(fila);
                     });
-                    
+
                     // Actualizar contadores del resumen
                     $("#con_saldo_count").text(conSaldo);
                     $("#saldo_parcial_count").text(saldoParcial);
                     $("#sin_saldo_count").text(sinSaldo);
                     $("#total_medicamentos").text(response.data.length);
-                    
+
                     // Mostrar resumen y botón de exportar
                     $("#resumen_saldos").show();
                     $("#exportar_excel_saldos").show();
-                    
+
                     // Inicializar DataTable con configuración simplificada
                     $('#tablaPendSald').DataTable({
                         language: idioma_espanol,
                         pageLength: 25,
-                        lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "Todos"]],
+                        lengthMenu: [
+                            [25, 50, 100, -1],
+                            [25, 50, 100, "Todos"]
+                        ],
                         dom: '<"row"<"col-md-4"l><"col-md-4"f><"col-md-4"B>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
                         autoWidth: true,
-                        buttons: [
-                            {
+                        buttons: [{
                                 extend: 'excelHtml5',
                                 text: '<i class="fas fa-file-excel"></i> Excel',
                                 className: 'btn btn-success btn-sm',
@@ -2396,7 +2386,7 @@ Pendientes Medcol
                         '<i class="fas fa-exclamation-triangle"></i> Error al cargar los datos. Intente nuevamente.' +
                         '</td></tr>'
                     );
-                    
+
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             icon: 'error',
@@ -2833,27 +2823,30 @@ Pendientes Medcol
             // Limpiar y validar los parámetros
             const codigoLimpio = codigo ? codigo.toString().trim() : '';
             const centroproduccionLimpio = centroproduccion ? centroproduccion.toString().trim() : '';
-            
+
             if (!codigoLimpio || !centroproduccionLimpio) {
-                console.warn('⚠️ Parámetros inválidos para cargar saldo:', { codigo: codigoLimpio, centroproduccion: centroproduccionLimpio });
+                console.warn('⚠️ Parámetros inválidos para cargar saldo:', {
+                    codigo: codigoLimpio,
+                    centroproduccion: centroproduccionLimpio
+                });
                 setSaldoFieldIndependiente(0, 'Parámetros inválidos', 'badge-warning');
                 return;
             }
-            
+
             console.log('🔍 Cargando saldo para medicamento específico:', {
-                codigo: codigoLimpio, 
+                codigo: codigoLimpio,
                 centroproduccion: centroproduccionLimpio
             });
-            
+
             // Mostrar indicador de carga
             setSaldoFieldIndependiente('...', 'Consultando...', 'badge-info');
-            
+
             const response = await fetch('/medcol6/saldo-medicamento', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                                  document.querySelector('input[name="_token"]')?.value,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                        document.querySelector('input[name="_token"]')?.value,
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
@@ -2874,7 +2867,7 @@ Pendientes Medcol
                     deposito: result.deposito,
                     fecha: result.fecha_saldo
                 });
-                
+
                 // Actualizar campo y badge
                 if (saldoValue > 0) {
                     setSaldoFieldIndependiente(saldoValue, `Disponible: ${saldoValue} unidades`, 'badge-success');
@@ -2882,18 +2875,18 @@ Pendientes Medcol
                     const mensaje = result.estado === 'SIN REGISTRO' ? 'Sin registro en inventario' : 'Sin saldo disponible';
                     setSaldoFieldIndependiente(0, mensaje, 'badge-danger');
                 }
-                
+
             } else {
                 console.warn('⚠️ Error en respuesta del servidor:', result.message || 'Respuesta inválida');
                 setSaldoFieldIndependiente(0, 'Error al consultar', 'badge-warning');
             }
-            
+
         } catch (error) {
             console.error('❌ Error al cargar saldo del medicamento:', error);
             setSaldoFieldIndependiente(0, 'Error de conexión', 'badge-danger');
         }
     }
-    
+
     // NOTA: La función setSaldoFieldIndependiente ahora está unificada en pendientes-form.js
     // para evitar duplicación y mantener consistencia en el manejo de badges de saldo
 </script>

@@ -551,24 +551,7 @@ function actualizarEstilosValidacion() {
     });
 }
 
-// Función simplificada para éxito con Swal.fire directo
-function mostrarExitoYLimpiarCampos(mensaje = 'Operación completada exitosamente') {
-    // Mostrar alerta de éxito usando Swal.fire directamente
-    Swal.fire({
-        icon: 'success',
-        title: '¡Éxito!',
-        text: mensaje,
-        showConfirmButton: false,
-        timer: 2000,
-        timerProgressBar: true
-    });
-    
-    // Limpiar campos y recargar tabla después de un pequeño delay
-    setTimeout(() => {
-        limpiarCamposEditables();
-        recargarTablaPendientes();
-    }, 500);
-}
+
 
 // Función para limpiar solo campos editables (no readonly)
 function limpiarCamposEditables() {
