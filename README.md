@@ -13,6 +13,24 @@ Sistema web desarrollado en Laravel 7.x para la gestión de dispensación de med
 
 ## 📋 Changelog
 
+### v2.2 (Agosto 2025) - Validaciones de Entrega y Filtros Avanzados
+
+**🚀 Nuevas Funcionalidades:**
+- Validación de fecha de entrega vs fecha de factura en actualizaciones masivas
+- Filtro de búsqueda por documento/historia en gestión de pacientes
+- Modal mejorado de gestión de pacientes con filtros personalizados
+
+**🔧 Mejoras Técnicas:**
+- Validación backend que previene fechas de entrega anteriores a fecha de factura
+- Sistema de filtros más granular para búsquedas de pacientes
+- Interfaz optimizada para gestión personalizada de pendientes
+
+**🐛 Correcciones:**
+- Control de integridad temporal en actualizaciones de pendientes
+- Validación robusta de fechas en función `updateMultiplesPendientes`
+
+---
+
 ### v2.1 (Enero 2025) - Optimización de Entregas Consolidadas
 
 **🚀 Nuevas Funcionalidades:**
@@ -36,7 +54,72 @@ Sistema web desarrollado en Laravel 7.x para la gestión de dispensación de med
 
 ## 🚀 Funcionalidades Recientes
 
-### 🆕 Últimas Actualizaciones (v2.1)
+### 🆕 Últimas Actualizaciones (v2.2)
+
+#### 🔒 Sistema de Validación de Fechas de Entrega
+
+##### ✨ Validación de Integridad Temporal
+El sistema `updateMultiplesPendientes()` ahora incluye validación robusta para mantener la coherencia temporal:
+
+- **Control de Fechas**: Previene que `fecha_entrega` sea anterior a `fecha_factura`
+- **Validación Automática**: Verificación en tiempo real durante actualizaciones masivas
+- **Mensajes Descriptivos**: Errores informativos que incluyen la fecha de factura como referencia
+
+##### 🛡️ Implementación Técnica
+```php
+// Validación agregada en PendienteApiMedcol6Controller.php:2274-2283
+if (!empty($pendienteData['fecha_entrega']) && !empty($pendiente->fecha_factura)) {
+    $fechaEntrega = Carbon::parse($pendienteData['fecha_entrega']);
+    $fechaFactura = Carbon::parse($pendiente->fecha_factura);
+    
+    if ($fechaEntrega->lt($fechaFactura)) {
+        $errores[] = "ID {$pendienteData['id']}: Fecha de entrega no puede ser menor a fecha de factura ({$fechaFactura->format('d/m/Y')})";
+        continue;
+    }
+}
+```
+
+##### 📋 Reglas de Negocio
+- ✅ **Permitido**: `fecha_entrega` igual o posterior a `fecha_factura`
+- ❌ **Bloqueado**: `fecha_entrega` anterior a `fecha_factura`
+- ⚠️ **Comportamiento**: Continúa procesando otros registros en caso de error
+
+#### 🔍 Sistema de Filtros Avanzados para Gestión de Pacientes
+
+##### ✨ Nuevo Filtro de Documento/Historia
+Mejora significativa en el modal de gestión de pacientes (`modalGestionPacientes.blade.php`):
+
+- **Campo Personalizado**: Input dedicado para búsqueda por documento o historia clínica
+- **Búsqueda Precisa**: Permite localizar pacientes específicos de manera directa
+- **Interfaz Optimizada**: Diseño responsive con distribución equilibrada de columnas
+
+##### 🎨 Estructura Mejorada de Filtros
+```html
+<!-- Antes: Solo fechas y farmacia -->
+<div class="row">
+    <div class="col-md-3">Fecha Inicial</div>
+    <div class="col-md-3">Fecha Final</div>
+    <div class="col-md-4">Farmacia</div>
+    <div class="col-md-2">Buscar</div>
+</div>
+
+<!-- Después: Incluye filtro de documento -->
+<div class="row">
+    <div class="col-md-2">Fecha Inicial</div>
+    <div class="col-md-2">Fecha Final</div>
+    <div class="col-md-3">Documento / Historia</div>  <!-- NUEVO -->
+    <div class="col-md-3">Farmacia</div>
+    <div class="col-md-2">Buscar</div>
+</div>
+```
+
+##### 📊 Beneficios Operativos
+- **Búsqueda Directa**: Acceso inmediato a pacientes específicos por documento
+- **Eficiencia Mejorada**: Reducción del tiempo de búsqueda manual
+- **Experiencia de Usuario**: Interface más intuitiva y funcional
+- **Compatibilidad**: Funciona en conjunto con filtros existentes
+
+### 🆕 Actualizaciones Anteriores (v2.1)
 
 #### 🔧 Refactorización del Sistema de Sugerencias Predictivas
 
@@ -432,6 +515,19 @@ Direccionado → Programado → Dispensado → Entregado → Facturado
 - `DispensadoApi[Entity]`: Medicamentos dispensados
 - `EntregadosApi[Entity]`: Entregas realizadas
 - `ObservacionesApi[Entity]`: Observaciones del proceso
+
+### Archivos Modificados Recientemente (v2.2)
+
+#### Backend
+- `app/Http/Controllers/Medcol6/PendienteApiMedcol6Controller.php`
+  - Función `updateMultiplesPendientes()` con validación de fechas mejorada
+  - Control de integridad temporal entre `fecha_entrega` y `fecha_factura`
+
+#### Frontend
+- `resources/views/menu/Medcol6/modal/modalGestionPacientes.blade.php`
+  - Nuevo filtro de búsqueda por documento/historia
+  - Reorganización de columnas para mejor distribución visual
+  - Campo de entrada con placeholder informativo
 
 ## Integraciones
 
