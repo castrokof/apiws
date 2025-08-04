@@ -41,6 +41,7 @@ Pendientes Medcol
 
 @include('menu.Medcol6.modal.modalindexresumenpendientes')
 @include('menu.Medcol6.modal.modalIndicadoresPendientes')
+@include('menu.Medcol6.modal.modalGestionPacientes')
 
 
 @endsection
@@ -1758,7 +1759,7 @@ Pendientes Medcol
                                 Swal.fire({
                                     icon: 'success',
                                     title: '¡Éxito!',
-                                    text: 'Documento pendiente actualizado correctamente',
+                                    text: 'Medicamento pendiente entregado correctamente',
                                     showConfirmButton: false,
                                     timer: 2000,
                                     timerProgressBar: true
@@ -1766,8 +1767,6 @@ Pendientes Medcol
                             }
                             $('#form_result').html(html)
                         }
-
-
                     });
                 }
             });
@@ -2896,5 +2895,455 @@ Pendientes Medcol
 
 <!-- Script de debug (solo para desarrollo) -->
 <script src="{{asset("assets/js/debug-estados.js")}}" type="text/javascript"></script>
+
+<!-- Script para gestión de pacientes por documento -->
+<script>
+    $(document).ready(function() {
+        let tablaPacientes;
+        let tablaPendientesPaciente;
+        let pendientesSeleccionados = [];
+
+        // Inicializar modal de gestión de pacientes
+        $('#modalGestionPacientes').on('shown.bs.modal', function() {
+            // Configurar fechas por defecto
+            $('#paciente_fechaini').val(moment().subtract(30, 'days').format('YYYY-MM-DD'));
+            $('#paciente_fechafin').val(moment().format('YYYY-MM-DD'));
+
+            // Inicializar tabla de pacientes
+            inicializarTablaPacientes();
+        });
+
+        // Inicializar DataTable de pacientes
+        function inicializarTablaPacientes() {
+            if ($.fn.DataTable.isDataTable('#tablaPacientes')) {
+                $('#tablaPacientes').DataTable().destroy();
+            }
+
+            tablaPacientes = $('#tablaPacientes').DataTable({
+                language: idioma_espanol,
+                processing: true,
+                serverSide: true,
+                lengthMenu: [
+                    [25, 50, 100, -1],
+                    [25, 50, 100, "Todos"]
+                ],
+                ajax: {
+                    url: "{{ route('medcol6.pendientes_por_paciente') }}",
+                    type: 'POST',
+                    data: function(d) {
+                        d._token = "{{ csrf_token() }}";
+                        d.fechaini = $('#paciente_fechaini').val();
+                        d.fechafin = $('#paciente_fechafin').val();
+                        d.contrato = $('#paciente_contrato').val();
+                        d.historia = $('#paciente_documento').val();
+                    }
+                },
+                columns: [{
+                        data: 'historia_documento',
+                        name: 'historia_documento'
+                    },
+                    {
+                        data: 'nombre_completo',
+                        name: 'nombre_completo'
+                    },
+                    {
+                        data: 'telefres',
+                        name: 'telefres'
+                    },
+                    {
+                        data: 'total_pendientes',
+                        name: 'total_pendientes',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'pendientes_activos',
+                        name: 'pendientes_activos',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'ultima_factura_formatted',
+                        name: 'ultima_factura_formatted',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-center'
+                    }
+                ],
+                order: [
+                    [5, 'desc']
+                ]
+            });
+        }
+
+        // Buscar pacientes
+        $('#buscar_pacientes').click(function() {
+            if (tablaPacientes) {
+                tablaPacientes.ajax.reload();
+            }
+        });
+
+        // Ver pendientes del paciente
+        $(document).on('click', '.ver_pendientes_paciente', function() {
+            const historia = $(this).data('historia');
+            cargarPendientesPaciente(historia);
+        });
+
+        // Cargar pendientes específicos del paciente
+        function cargarPendientesPaciente(historia) {
+            $.ajax({
+                url: "{{ route('medcol6.pendientes_paciente_detalle') }}",
+                method: 'GET',
+                data: {
+                    historia: historia
+                },
+                beforeSend: function() {
+                    $('.loaders').show();
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Mostrar información del paciente
+                        $('#paciente-historia').text(response.paciente.historia);
+                        $('#paciente-documento').text(response.paciente.documento);
+                        $('#paciente-nombre').text(response.paciente.nombre_completo);
+                        $('#paciente-edad').text(response.paciente.edad || 'N/A');
+                        $('#paciente-telefono').text(response.paciente.telefono || 'N/A');
+                        $('#paciente-direccion').text(response.paciente.direccion || 'N/A');
+
+                        $('#info-paciente').show();
+                        $('#info-seleccion').show();
+
+                        // Cambiar a la pestaña de detalle
+                        $('#detalle-paciente-tab').tab('show');
+
+                        // Mostrar botones de navegación y gestión
+                        $('#volver_lista_pacientes').show();
+                        $('#actualizar_lista_pacientes').show();
+                        $('#limpiar_seleccion').show();
+                        $('#aplicar_cambios_masivos').show();
+
+                        // Cargar tabla de pendientes
+                        cargarTablaPendientesPaciente(response.pendientes);
+                    } else {
+                        Swal.fire('Error', response.message || 'Error al cargar pendientes del paciente', 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error', 'Error de conexión al cargar pendientes del paciente', 'error');
+                },
+                complete: function() {
+                    $('.loaders').hide();
+                }
+            });
+        }
+
+        // Cargar tabla de pendientes del paciente
+        function cargarTablaPendientesPaciente(pendientes) {
+            if ($.fn.DataTable.isDataTable('#tablaPendientesPaciente')) {
+                $('#tablaPendientesPaciente').DataTable().destroy();
+            }
+
+            const data = pendientes.map(pendiente => [
+                `<input type="checkbox" class="pendiente-checkbox" value="${pendiente.id}" data-cantord="${pendiente.cantord}">`,
+                pendiente.factura,
+                pendiente.fecha_factura,
+                pendiente.codigo,
+                pendiente.nombre,
+                pendiente.cums,
+                pendiente.cantord,
+                `<input type="number" class="form-control form-control-sm cantidad-entregada" 
+                    value="${pendiente.cantdpx}" min="0" max="${pendiente.cantord}" 
+                    data-id="${pendiente.id}" step="0.01">`,
+                `<input type="date" class="form-control form-control-sm fecha-entrega" 
+                    value="${pendiente.fecha_entrega ? pendiente.fecha_entrega : ''}" 
+                    data-id="${pendiente.id}">`,
+                pendiente.saldo_pendiente,
+                `<span class="badge badge-${getEstadoBadgeClass(pendiente.estado)}">${pendiente.estado}</span>`,
+                pendiente.centroproduccion,
+                `<select class="form-control form-control-sm estado-select" data-id="${pendiente.id}">
+                <option value="PENDIENTE" ${pendiente.estado === 'PENDIENTE' ? 'selected' : ''}>PENDIENTE</option>
+                <option value="ENTREGADO" ${pendiente.estado === 'ENTREGADO' ? 'selected' : ''}>ENTREGADO</option>
+                <option value="TRAMITADO" ${pendiente.estado === 'TRAMITADO' ? 'selected' : ''}>TRAMITADO</option>
+                <option value="DESABASTECIDO" ${pendiente.estado === 'DESABASTECIDO' ? 'selected' : ''}>DESABASTECIDO</option>
+                <option value="ANULADO" ${pendiente.estado === 'ANULADO' ? 'selected' : ''}>ANULADO</option>
+                <option value="VENCIDO" ${pendiente.estado === 'VENCIDO' ? 'selected' : ''}>VENCIDO</option>
+            </select>`
+            ]);
+
+            tablaPendientesPaciente = $('#tablaPendientesPaciente').DataTable({
+                language: idioma_espanol,
+                data: data,
+                lengthMenu: [
+                    [25, 50, 100, -1],
+                    [25, 50, 100, "Todos"]
+                ],
+                columnDefs: [{
+                        orderable: false,
+                        targets: [0, 7, 8, 12]
+                    }, // checkbox, cantidad entregada, fecha entrega, nuevo estado
+                    {
+                        className: 'text-center',
+                        targets: [0, 6, 7, 8, 9, 10]
+                    }
+                ],
+                drawCallback: function() {
+                    actualizarContadorSeleccionados();
+                }
+            });
+        }
+
+        // Función para obtener clase de badge según estado
+        function getEstadoBadgeClass(estado) {
+            const clases = {
+                'PENDIENTE': 'pendiente',
+                'ENTREGADO': 'entregado',
+                'TRAMITADO': 'tramitado',
+                'DESABASTECIDO': 'desabastecido',
+                'ANULADO': 'anulado',
+                'VENCIDO': 'vencido'
+            };
+            return clases[estado] || 'secondary';
+        }
+
+        // Manejar selección de checkboxes individuales
+        $(document).on('change', '.pendiente-checkbox', function() {
+            const fila = $(this).closest('tr');
+            if ($(this).is(':checked')) {
+                fila.addClass('pendiente-selected');
+                pendientesSeleccionados.push($(this).val());
+            } else {
+                fila.removeClass('pendiente-selected');
+                pendientesSeleccionados = pendientesSeleccionados.filter(id => id !== $(this).val());
+            }
+            actualizarContadorSeleccionados();
+        });
+
+        // Seleccionar todos
+        $('#seleccionar_todos, #check_all_pendientes').click(function() {
+            $('.pendiente-checkbox').prop('checked', true).trigger('change');
+        });
+
+        // Deseleccionar todos
+        $('#deseleccionar_todos').click(function() {
+            $('.pendiente-checkbox').prop('checked', false).trigger('change');
+        });
+
+        // Limpiar selección
+        $('#limpiar_seleccion').click(function() {
+            $('#deseleccionar_todos').trigger('click');
+            $('#estado_masivo').val('');
+            $('#cantidad_masiva').val('');
+        });
+
+        // Actualizar contador de seleccionados
+        function actualizarContadorSeleccionados() {
+            const seleccionados = $('.pendiente-checkbox:checked').length;
+            $('#items-seleccionados').text(seleccionados);
+            pendientesSeleccionados = $('.pendiente-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
+        }
+
+        // Aplicar cambios masivos
+        $('#aplicar_cambios_masivos').click(function() {
+            if (pendientesSeleccionados.length === 0) {
+                Swal.fire('Advertencia', 'Debe seleccionar al menos un pendiente', 'warning');
+                return;
+            }
+
+            // Validar que todos los pendientes seleccionados tengan estado y cantidad
+            let erroresValidacion = [];
+            pendientesSeleccionados.forEach(id => {
+                const estado = $(`.estado-select[data-id="${id}"]`).val();
+                const cantidad = $(`.cantidad-entregada[data-id="${id}"]`).val();
+                const fecha = $(`.fecha-entrega[data-id="${id}"]`).val();
+
+                if (!estado) {
+                    erroresValidacion.push(`Pendiente ID ${id}: Debe seleccionar un estado`);
+                }
+                if (!cantidad || cantidad < 0) {
+                    erroresValidacion.push(`Pendiente ID ${id}: Debe ingresar una cantidad válida`);
+                }
+                if (!fecha) {
+                    erroresValidacion.push(`Pendiente ID ${id}: Debe seleccionar una fecha de entrega`);
+                }
+            });
+
+            if (erroresValidacion.length > 0) {
+                Swal.fire({
+                    title: 'Errores de validación',
+                    html: erroresValidacion.join('<br>'),
+                    icon: 'error'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Confirmar cambios',
+                text: `¿Está seguro de aplicar estos cambios a ${pendientesSeleccionados.length} pendientes seleccionados?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, aplicar cambios',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    aplicarCambiosSeleccionados();
+                }
+            });
+        });
+
+        // Aplicar cambios seleccionados
+        function aplicarCambiosSeleccionados() {
+            const pendientesData = pendientesSeleccionados.map(id => {
+                const estado = $(`.estado-select[data-id="${id}"]`).val();
+                const cantidad = $(`.cantidad-entregada[data-id="${id}"]`).val();
+                const fechaEntrega = $(`.fecha-entrega[data-id="${id}"]`).val();
+
+                return {
+                    id: parseInt(id),
+                    cantdpx: parseFloat(cantidad) || 0,
+                    estado: estado,
+                    fecha_entrega: fechaEntrega
+                };
+            });
+
+            $.ajax({
+                url: "{{ route('medcol6.update_multiples_pendientes') }}",
+                method: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    pendientes: pendientesData
+                },
+                beforeSend: function() {
+                    $('.loaders').show();
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Éxito', response.message, 'success');
+
+                        if (response.errores && response.errores.length > 0) {
+                            console.warn('Errores en algunos items:', response.errores);
+
+                            // Mostrar errores específicos si los hay
+                            if (response.errores.length > 0) {
+                                Swal.fire({
+                                    title: 'Algunos items tuvieron errores',
+                                    html: response.errores.join('<br>'),
+                                    icon: 'warning'
+                                });
+                            }
+                        }
+
+                        // Recargar datos del paciente
+                        const historia = $('#paciente-historia').text();
+                        cargarPendientesPaciente(historia);
+
+                        // Limpiar selección
+                        $('#limpiar_seleccion').trigger('click');
+                    } else {
+                        Swal.fire('Error', response.message || 'Error al actualizar pendientes', 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error', 'Error de conexión al actualizar pendientes', 'error');
+                },
+                complete: function() {
+                    $('.loaders').hide();
+                }
+            });
+        }
+
+        // Volver a lista de pacientes
+        $('#volver_lista_pacientes').click(function() {
+            $('#lista-pacientes-tab').tab('show');
+            $('#info-paciente').hide();
+            $('#info-seleccion').hide();
+            $('#volver_lista_pacientes').hide();
+            $('#actualizar_lista_pacientes').hide();
+            $('#limpiar_seleccion').hide();
+            $('#aplicar_cambios_masivos').hide();
+            $('#limpiar_seleccion').trigger('click');
+        });
+
+        // Actualizar lista de pacientes
+        $('#actualizar_lista_pacientes').click(function() {
+            if (tablaPacientes) {
+                tablaPacientes.ajax.reload();
+            }
+        });
+
+        // Manejar widgets de la card del modal
+        $('#modalGestionPacientes [data-card-widget="maximize"]').click(function(e) {
+            e.preventDefault();
+            const card = $(this).closest('.card');
+            const isMaximized = card.hasClass('maximized-card');
+
+            if (isMaximized) {
+                card.removeClass('maximized-card');
+                $(this).find('i').removeClass('fa-compress').addClass('fa-expand');
+            } else {
+                card.addClass('maximized-card');
+                $(this).find('i').removeClass('fa-expand').addClass('fa-compress');
+            }
+
+            // Redimensionar tablas
+            setTimeout(function() {
+                if (tablaPacientes) tablaPacientes.columns.adjust();
+                if (tablaPendientesPaciente) tablaPendientesPaciente.columns.adjust();
+            }, 300);
+        });
+
+        $('#modalGestionPacientes [data-card-widget="collapse"]').click(function(e) {
+            e.preventDefault();
+            const cardBody = $(this).closest('.card').find('.card-body');
+            const isCollapsed = cardBody.is(':hidden');
+
+            if (isCollapsed) {
+                cardBody.show();
+                $(this).find('i').removeClass('fa-plus').addClass('fa-minus');
+            } else {
+                cardBody.hide();
+                $(this).find('i').removeClass('fa-minus').addClass('fa-plus');
+            }
+        });
+
+        // Limpiar modal al cerrar
+        $('#modalGestionPacientes').on('hidden.bs.modal', function() {
+            // Limpiar todas las selecciones y estados
+            pendientesSeleccionados = [];
+            $('#info-paciente').hide();
+            $('#info-seleccion').hide();
+            $('#volver_lista_pacientes').hide();
+            $('#actualizar_lista_pacientes').hide();
+            $('#limpiar_seleccion').hide();
+            $('#aplicar_cambios_masivos').hide();
+
+            // Volver a la primera pestaña
+            $('#lista-pacientes-tab').tab('show');
+
+            // Destruir tablas
+            if (tablaPacientes) {
+                tablaPacientes.destroy();
+                tablaPacientes = null;
+            }
+            if (tablaPendientesPaciente) {
+                tablaPendientesPaciente.destroy();
+                tablaPendientesPaciente = null;
+            }
+
+            // Resetear el card
+            const card = $(this).find('.card');
+            card.removeClass('maximized-card');
+            card.find('.card-body').show();
+            card.find('[data-card-widget="maximize"] i').removeClass('fa-compress').addClass('fa-expand');
+            card.find('[data-card-widget="collapse"] i').removeClass('fa-plus').addClass('fa-minus');
+        });
+    });
+</script>
 
 @endsection

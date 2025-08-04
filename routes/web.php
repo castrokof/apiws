@@ -277,6 +277,11 @@ Route::get('medcol6/informe', 'Medcol6\PendienteApiMedcol6Controller@informes')-
 
 Route::get('informepedientes6', 'Medcol6\PendienteApiMedcol6Controller@informepedientes')->name('informepedientes6')->middleware('verified')->middleware('verifyuser');
 
+// Nuevas rutas para gestión de pendientes por paciente
+Route::post('medcol6/pendientes-por-paciente', 'Medcol6\PendienteApiMedcol6Controller@getPendientesPorPaciente')->name('medcol6.pendientes_por_paciente')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/pendientes-paciente-detalle', 'Medcol6\PendienteApiMedcol6Controller@getPendientesPacienteDetalle')->name('medcol6.pendientes_paciente_detalle')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/update-multiples-pendientes', 'Medcol6\PendienteApiMedcol6Controller@updateMultiplesPendientes')->name('medcol6.update_multiples_pendientes')->middleware('verified')->middleware('verifyuser');
+
 
 
 

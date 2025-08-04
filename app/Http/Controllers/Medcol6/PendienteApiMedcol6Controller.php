@@ -832,7 +832,7 @@ class PendienteApiMedcol6Controller extends Controller
         try {
             // Los datos ya están validados por el FormRequest
             $validatedData = $request->validated();
-            
+
             Log::info('Attempting to update pendiente', [
                 'pendiente_id' => $id,
                 'user' => Auth::user()->email ?? 'unknown',
@@ -847,7 +847,6 @@ class PendienteApiMedcol6Controller extends Controller
             ]);
 
             return response()->json($result);
-
         } catch (\Illuminate\Database\QueryException $e) {
             Log::error('Database error updating pendiente: ' . $e->getMessage(), [
                 'pendiente_id' => $id,
@@ -861,7 +860,6 @@ class PendienteApiMedcol6Controller extends Controller
                 'success' => false,
                 'message' => 'Error en la base de datos: ' . $e->getMessage()
             ], 500);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Validation error updating pendiente: ' . $e->getMessage(), [
                 'pendiente_id' => $id,
@@ -874,7 +872,6 @@ class PendienteApiMedcol6Controller extends Controller
                 'message' => 'Error de validación',
                 'errors' => $e->errors()
             ], 422);
-
         } catch (\Exception $e) {
             Log::error('General error updating pendiente: ' . $e->getMessage(), [
                 'pendiente_id' => $id,
@@ -1789,7 +1786,7 @@ class PendienteApiMedcol6Controller extends Controller
         ];
 
         $drogueria = $droguerias[$i] ?? null;
-        
+
         // Obtener parámetros de filtros
         $fechaInicio = $request->get('fechaini');
         $fechaFin = $request->get('fechafin');
@@ -1841,7 +1838,7 @@ class PendienteApiMedcol6Controller extends Controller
         // Mapeo de farmacias a depósitos para consultar saldos
         $farmaciaToDeposito = [
             'BIO1' => 'BIO1',
-            'DLR1' => 'DLR1', 
+            'DLR1' => 'DLR1',
             'DPA1' => 'DPA1',
             'EM01' => 'EM01',
             'EHU1' => 'EHU1',
@@ -1860,7 +1857,7 @@ class PendienteApiMedcol6Controller extends Controller
         foreach ($pendientes as $pendiente) {
             // Buscar saldo correspondiente
             $deposito = $farmaciaToDeposito[$pendiente->farmacia] ?? $pendiente->farmacia;
-            
+
             $saldo = \App\Models\Medcol6\SaldosMedcol6::where('codigo', $pendiente->codigo)
                 ->where('deposito', $deposito)
                 ->orderBy('fecha_saldo', 'desc')
@@ -1869,10 +1866,10 @@ class PendienteApiMedcol6Controller extends Controller
             $saldoDisponible = $saldo ? $saldo->saldo : 0;
             $fechaSaldo = $saldo ? $saldo->fecha_saldo->format('Y-m-d') : null;
             $marca = $saldo ? $saldo->marca : null;
-            
+
             // Determinar estado del saldo
             $estadoSaldo = $saldoDisponible > 0 ? 'CON SALDO' : 'SIN SALDO';
-            
+
             // Comparar pendiente vs saldo
             $pendienteVsSaldo = '';
             if ($saldoDisponible >= $pendiente->cantidad_pendiente) {
@@ -1898,7 +1895,7 @@ class PendienteApiMedcol6Controller extends Controller
         }
 
         // Ordenar por farmacia y luego por nombre
-        usort($resultado, function($a, $b) {
+        usort($resultado, function ($a, $b) {
             if ($a['farmacia'] === $b['farmacia']) {
                 return strcmp($a['nombre'], $b['nombre']);
             }
@@ -1954,13 +1951,13 @@ class PendienteApiMedcol6Controller extends Controller
 
             $codigo = trim($request->input('codigo'));
             $centroproduccion = trim($request->input('deposito'));
-            
+
             // Obtener el depósito correspondiente
             $deposito = $centroToDeposito[$centroproduccion] ?? $centroproduccion;
 
             Log::info('Consultando saldo para medicamento', [
                 'codigo' => $codigo,
-                'centroproduccion' => $centroproduccion, 
+                'centroproduccion' => $centroproduccion,
                 'deposito_mapeado' => $deposito,
                 'user' => Auth::user()->email ?? 'unknown'
             ]);
@@ -1974,7 +1971,7 @@ class PendienteApiMedcol6Controller extends Controller
             if ($saldo) {
                 $saldoDisponible = (float) $saldo->saldo;
                 $estadoSaldo = $saldoDisponible > 0 ? 'CON SALDO' : 'SIN SALDO';
-                
+
                 Log::info('Saldo encontrado', [
                     'codigo' => $codigo,
                     'deposito' => $deposito,
@@ -2022,6 +2019,344 @@ class PendienteApiMedcol6Controller extends Controller
                 'success' => false,
                 'message' => 'Error al obtener el saldo del medicamento: ' . $e->getMessage(),
                 'saldo' => 0
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtener pendientes agrupados por documento de paciente
+     */
+    public function getPendientesPorPaciente(Request $request)
+    {
+        $i = Auth::user()->drogueria;
+
+        // Mapeo de droguerías
+        $droguerias = [
+            "1" => '',
+            "2" => 'SM01',
+            "3" => 'DLR1',
+            "4" => 'PAC',
+            "5" => 'EHU1',
+            "6" => 'BIO1',
+            "8" => 'EM01',
+            "9" => 'BPDT',
+            "10" => 'DPA1',
+            "11" => 'EVSM',
+            "12" => 'EVEN',
+            "13" => 'FRJA'
+        ];
+
+        $drogueria = $droguerias[$i] ?? '';
+
+        if ($request->ajax()) {
+            // Query base para obtener pacientes con pendientes
+            $query = PendienteApiMedcol6::query()
+                ->select(
+                    'historia',
+                    'documento',
+                    'nombre1',
+                    'nombre2',
+                    'apellido1',
+                    'apellido2',
+                    'telefres',
+                    'direcres',
+                    DB::raw('COUNT(*) as total_pendientes'),
+                    DB::raw('SUM(CASE WHEN estado = "PENDIENTE" THEN 1 ELSE 0 END) as pendientes_activos'),
+                    DB::raw('MAX(fecha_factura) as ultima_factura')
+                )
+                ->where(function ($q) {
+                    $q->where('estado', 'PENDIENTE')
+                        ->orWhere('estado', 'TRAMITADO')
+                        ->orWhere('estado', 'DESABASTECIDO');
+                });
+
+            // Filtrar por droguería si no es admin
+            if ($i !== "1" && $drogueria) {
+                if ($i == "3") {
+                    $query->whereIn('centroproduccion', ['DLR1', 'DPA1']);
+                } else {
+                    $query->where('centroproduccion', $drogueria);
+                }
+            }
+
+            // Filtros de fecha si están presentes
+            if (!empty($request->fechaini) && !empty($request->fechafin)) {
+                $fechaini = Carbon::parse($request->fechaini)->startOfDay();
+                $fechafin = Carbon::parse($request->fechafin)->endOfDay();
+                $query->whereBetween('fecha_factura', [$fechaini, $fechafin]);
+            }
+
+            // Filtro por contrato
+            if (!empty($request->contrato)) {
+                $query->where('centroproduccion', $request->contrato);
+            }
+
+            // Filtro por historia
+            if (!empty($request->historia)) {
+                $query->where('historia', 'like', '%' . $request->historia . '%');
+            }
+
+            $pacientes = $query->groupBy('historia', 'documento', 'nombre1', 'nombre2', 'apellido1', 'apellido2', 'telefres', 'direcres')
+                ->orderBy('ultima_factura', 'desc')
+                ->get();
+
+            return DataTables()->of($pacientes)
+                ->addColumn('historia_documento', function ($paciente) {
+                    return $paciente->historia;
+                })
+                ->addColumn('nombre_completo', function ($paciente) {
+                    return trim($paciente->nombre1 . ' ' . $paciente->nombre2 . ' ' . $paciente->apellido1 . ' ' . $paciente->apellido2);
+                })
+                ->addColumn('ultima_factura_formatted', function ($paciente) {
+                    return $paciente->ultima_factura ? Carbon::parse($paciente->ultima_factura)->format('d/m/Y') : '';
+                })
+                ->addColumn('action', function ($paciente) {
+                    $button = '<button type="button" name="ver_pendientes_paciente" 
+                                      data-historia="' . $paciente->historia . '" 
+                                      class="ver_pendientes_paciente btn btn-sm btn-primary" 
+                                      title="Ver pendientes del paciente">
+                                    <i class="fas fa-eye"></i> Ver Pendientes
+                               </button>';
+                    return $button;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+
+        return response()->json(['error' => 'Solicitud no válida'], 400);
+    }
+
+    /**
+     * Obtener los pendientes específicos de un paciente por historia
+     */
+    public function getPendientesPacienteDetalle(Request $request)
+    {
+        $request->validate([
+            'historia' => 'required|string'
+        ]);
+
+        $historia = $request->input('historia');
+        $i = Auth::user()->drogueria;
+
+        // Mapeo de droguerías
+        $droguerias = [
+            "1" => '',
+            "2" => 'SM01',
+            "3" => 'DLR1',
+            "4" => 'PAC',
+            "5" => 'EHU1',
+            "6" => 'BIO1',
+            "8" => 'EM01',
+            "9" => 'BPDT',
+            "10" => 'DPA1',
+            "11" => 'EVSM',
+            "12" => 'EVEN',
+            "13" => 'FRJA'
+        ];
+
+        $drogueria = $droguerias[$i] ?? '';
+
+        try {
+            // Obtener datos del paciente usando historia
+            $paciente = PendienteApiMedcol6::where('historia', $historia)
+                ->select('documento', 'historia', 'nombre1', 'nombre2', 'apellido1', 'apellido2', 'telefres', 'direcres', 'cantedad')
+                ->first();
+
+            if (!$paciente) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Paciente no encontrado con esa historia clínica'
+                ], 404);
+            }
+
+            Log::info('Buscando pendientes para paciente', [
+                'historia' => $historia,
+                'documento' => $paciente->documento,
+                'nombre1' => $paciente->nombre1,
+                'apellido1' => $paciente->apellido1
+            ]);
+
+            // Query para los pendientes del paciente usando historia
+            $query = PendienteApiMedcol6::where('historia', $historia)
+                ->where(function ($q) {
+                    $q->where('estado', 'PENDIENTE')
+                        ->orWhere('estado', 'TRAMITADO')
+                        ->orWhere('estado', 'DESABASTECIDO');
+                });
+
+            // Filtrar por droguería si no es admin
+            if ($i !== "1" && $drogueria) {
+                if ($i == "3") {
+                    $query->whereIn('centroproduccion', ['DLR1', 'DPA1']);
+                } else {
+                    $query->where('centroproduccion', $drogueria);
+                }
+            }
+
+            $pendientes = $query->orderBy('fecha_factura', 'desc')->get();
+
+            Log::info('Pendientes encontrados para el paciente', [
+                'cantidad_pendientes' => $pendientes->count(),
+                'historia' => $historia,
+                'documento' => $paciente->documento
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'paciente' => [
+                    'historia' => $historia,
+                    'documento' => $paciente->documento,
+                    'nombre_completo' => trim($paciente->nombre1 . ' ' . $paciente->nombre2 . ' ' . $paciente->apellido1 . ' ' . $paciente->apellido2),
+                    'telefono' => $paciente->telefres,
+                    'direccion' => $paciente->direcres,
+                    'edad' => $paciente->cantedad
+                ],
+                'pendientes' => $pendientes->map(function ($pendiente) {
+                    return [
+                        'id' => $pendiente->id,
+                        'factura' => $pendiente->factura,
+                        'fecha_factura' => $pendiente->fecha_factura ? Carbon::parse($pendiente->fecha_factura)->format('d/m/Y') : '',
+                        'codigo' => $pendiente->codigo,
+                        'nombre' => $pendiente->nombre,
+                        'cums' => $pendiente->cums,
+                        'cantord' => $pendiente->cantord,
+                        'cantdpx' => $pendiente->cantdpx,
+                        'saldo_pendiente' => $pendiente->cantord - $pendiente->cantdpx,
+                        'estado' => $pendiente->estado,
+                        'centroproduccion' => $pendiente->centroproduccion,
+                        'observaciones' => $pendiente->observaciones,
+                        'fecha_factura_raw' => $pendiente->fecha_factura
+                    ];
+                })
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error obteniendo pendientes del paciente por historia: ' . $e->getMessage(), [
+                'historia' => $historia,
+                'user' => Auth::user()->email ?? 'unknown',
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener los pendientes del paciente: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Actualizar múltiples pendientes por lotes
+     */
+    public function updateMultiplesPendientes(Request $request)
+    {
+        $request->validate([
+            'pendientes' => 'required|array',
+            'pendientes.*.id' => 'required|integer|exists:pendiente_api_medcol6,id',
+            'pendientes.*.cantdpx' => 'required|numeric|min:0',
+            'pendientes.*.estado' => 'required|in:PENDIENTE,ENTREGADO,TRAMITADO,DESABASTECIDO,ANULADO,VENCIDO',
+            'pendientes.*.fecha_entrega' => 'nullable|date'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $actualizados = 0;
+            $errores = [];
+
+            foreach ($request->pendientes as $pendienteData) {
+                try {
+                    $pendiente = PendienteApiMedcol6::findOrFail($pendienteData['id']);
+
+                    // Validar que la cantidad entregada no sea mayor a la ordenada
+                    if ($pendienteData['cantdpx'] > $pendiente->cantord) {
+                        $errores[] = "ID {$pendienteData['id']}: Cantidad entregada no puede ser mayor a cantidad ordenada";
+                        continue;
+                    }
+
+                    // Validar que la fecha_entrega no sea menor a fecha_factura
+                    if (!empty($pendienteData['fecha_entrega']) && !empty($pendiente->fecha_factura)) {
+                        $fechaEntrega = Carbon::parse($pendienteData['fecha_entrega']);
+                        $fechaFactura = Carbon::parse($pendiente->fecha_factura);
+
+                        if ($fechaEntrega->lt($fechaFactura)) {
+                            $errores[] = "ID {$pendienteData['id']}: Fecha de entrega no puede ser menor a fecha del pendiente ({$fechaFactura->format('d/m/Y')})";
+                            continue;
+                        }
+                    }
+
+                    $updateData = [
+                        'cantdpx' => $pendienteData['cantdpx'],
+                        'estado' => $pendienteData['estado'],
+                        'usuario' => Auth::user()->email,
+                        'updated_at' => now()
+                    ];
+
+                    // Agregar fecha según el estado
+                    switch ($pendienteData['estado']) {
+                        case 'ENTREGADO':
+                            // Usar fecha personalizada si se proporciona, sino fecha actual
+                            if (!empty($pendienteData['fecha_entrega'])) {
+                                $updateData['fecha_entrega'] = Carbon::parse($pendienteData['fecha_entrega']);
+                            } else {
+                                $updateData['fecha_entrega'] = now();
+                            }
+                            break;
+                        case 'TRAMITADO':
+                        case 'DESABASTECIDO':
+                            $updateData['fecha_impresion'] = now();
+                            break;
+                        case 'ANULADO':
+                            $updateData['fecha_anulado'] = now();
+                            break;
+                    }
+
+                    $pendiente->update($updateData);
+
+                    // Crear observación
+                    $observacionTexto = 'Actualización masiva: Estado cambiado a ' . $pendienteData['estado'] . ' con cantidad entregada: ' . $pendienteData['cantdpx'];
+
+                    if ($pendienteData['estado'] === 'ENTREGADO' && !empty($pendienteData['fecha_entrega'])) {
+                        $observacionTexto .= ' - Fecha de entrega: ' . Carbon::parse($pendienteData['fecha_entrega'])->format('d/m/Y');
+                    }
+
+                    ObservacionesApiMedcol6::create([
+                        'pendiente_id' => $pendiente->id,
+                        'observacion' => $observacionTexto,
+                        'usuario' => Auth::user()->email,
+                        'estado' => $pendienteData['estado']
+                    ]);
+
+                    $actualizados++;
+                } catch (\Exception $e) {
+                    $errores[] = "ID {$pendienteData['id']}: " . $e->getMessage();
+                }
+            }
+
+            DB::commit();
+
+            Log::info('Actualización masiva de pendientes completada', [
+                'user' => Auth::user()->email,
+                'actualizados' => $actualizados,
+                'errores' => count($errores)
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Se actualizaron {$actualizados} pendientes correctamente.",
+                'actualizados' => $actualizados,
+                'errores' => $errores
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Error en actualización masiva de pendientes: ' . $e->getMessage(), [
+                'user' => Auth::user()->email,
+                'request_data' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error en la actualización masiva: ' . $e->getMessage()
             ], 500);
         }
     }

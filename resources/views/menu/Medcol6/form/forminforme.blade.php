@@ -61,8 +61,11 @@
                         <button type="button" id="generar-informe" class="btn btn-success mr-2">
                             <i class="fas fa-file-pdf mr-1"></i> Generar Informe
                         </button>
-                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#modalIndicadores">
+                        <button type="button" class="btn btn-info mr-2" data-toggle="modal" data-target="#modalIndicadores">
                             <i class="fas fa-chart-bar mr-1"></i> Indicadores
+                        </button>
+                        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#modalGestionPacientes">
+                            <i class="fas fa-user-medical mr-1"></i> Gestión por Paciente
                         </button>
                     </div>
                 </div>
