@@ -95,7 +95,7 @@
                         <div class="tab-pane fade show active" id="lista-pacientes" role="tabpanel" aria-labelledby="lista-pacientes-tab">
                             <div class="card">
                                 <div class="card-body table-responsive">
-                                    <table id="tablaPacientes" class="table table-hover text-nowrap">
+                                    <table id="tablaPacientes" class="table table-bordered table-striped table-hover text-center">
                                         <thead class="thead-light">
                                             <tr>
                                                 <th>Historia</th>
@@ -176,12 +176,13 @@
                                     </h6>
                                 </div>
                                 <div class="card-body table-responsive">
-                                    <table id="tablaPendientesPaciente" class="table table-sm table-bordered table-striped">
+                                    <table id="tablaPendientesPaciente" class="table table-bordered table-striped table-hover text-center">
                                         <thead class="thead-light">
                                             <tr>
                                                 <th class="text-center">
                                                     <input type="checkbox" id="check_all_pendientes">
                                                 </th>
+                                                <th>Farmacia</th>
                                                 <th>Pendiente</th>
                                                 <th>Fecha Pendiente</th>
                                                 <th>Código</th>
@@ -192,7 +193,6 @@
                                                 <th>Fecha Entrega</th>
                                                 <th>Cant. Pendiente</th>
                                                 <th>Estado Actual</th>
-                                                <th>Farmacia</th>
                                                 <th class="text-center">Nuevo Estado</th>
                                             </tr>
                                         </thead>

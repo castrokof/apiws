@@ -3048,6 +3048,7 @@ Pendientes Medcol
 
             const data = pendientes.map(pendiente => [
                 `<input type="checkbox" class="pendiente-checkbox" value="${pendiente.id}" data-cantord="${pendiente.cantord}">`,
+                pendiente.centroproduccion,
                 pendiente.factura,
                 pendiente.fecha_factura,
                 pendiente.codigo,
@@ -3062,7 +3063,6 @@ Pendientes Medcol
                     data-id="${pendiente.id}">`,
                 pendiente.saldo_pendiente,
                 `<span class="badge badge-${getEstadoBadgeClass(pendiente.estado)}">${pendiente.estado}</span>`,
-                pendiente.centroproduccion,
                 `<select class="form-control form-control-sm estado-select" data-id="${pendiente.id}">
                 <option value="PENDIENTE" ${pendiente.estado === 'PENDIENTE' ? 'selected' : ''}>PENDIENTE</option>
                 <option value="ENTREGADO" ${pendiente.estado === 'ENTREGADO' ? 'selected' : ''}>ENTREGADO</option>
