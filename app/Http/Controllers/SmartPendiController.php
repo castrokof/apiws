@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Medcol6\PendienteApiMedcol6;
+use App\Models\Medcol6\SaldosMedcol6;
 use App\Helpers\DeliveryMetricsHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -120,6 +121,7 @@ class SmartPendiController extends Controller
                 'id' => $pendiente->id,
                 'paciente' => trim($pendiente->nombre1 . ' ' . $pendiente->nombre2 . ' ' . $pendiente->apellido1 . ' ' . $pendiente->apellido2),
                 'documento' => $pendiente->documento,
+                'historia' => $pendiente->historia ?? $pendiente->documento,
                 'medicamento' => $pendiente->nombre,
                 'cantidad' => $pendiente->cantidad,
                 'fecha_factura' => $pendiente->fecha_factura,
@@ -156,14 +158,17 @@ class SmartPendiController extends Controller
     {
         $drogueria = $this->getUserDrogueria();
         
-        // Build query to get pendientes within 0-48 hours grouped by patient
+        // Build query to get pendientes within 0-48 hours grouped by patient with medication details
         $query = PendienteApiMedcol6::query()
             ->select([
                 'documento',
+                'historia',
                 'nombre1', 'nombre2', 'apellido1', 'apellido2',
                 'telefres', 'municipio',
                 DB::raw('COUNT(*) as total_medicamentos'),
-                DB::raw('GROUP_CONCAT(nombre SEPARATOR " | ") as medicamentos_list'),
+                DB::raw('GROUP_CONCAT(DISTINCT nombre SEPARATOR " | ") as medicamentos_list'),
+                DB::raw('GROUP_CONCAT(DISTINCT codigo SEPARATOR ",") as codigos_list'),
+                DB::raw('GROUP_CONCAT(DISTINCT centroproduccion SEPARATOR ",") as farmacias_list'),
                 DB::raw('GROUP_CONCAT(id SEPARATOR ",") as pendientes_ids'),
                 DB::raw('MIN(fecha_factura) as fecha_mas_antigua'),
                 DB::raw('MAX(fecha_factura) as fecha_mas_reciente'),
@@ -174,7 +179,7 @@ class SmartPendiController extends Controller
                   ->orWhere('estado', NULL);
             })
             ->where('fecha_factura', '>=', Carbon::now()->subHours(48))
-            ->groupBy(['documento', 'nombre1', 'nombre2', 'apellido1', 'apellido2', 'telefres', 'municipio'])
+            ->groupBy(['documento', 'historia', 'nombre1', 'nombre2', 'apellido1', 'apellido2', 'telefres', 'municipio'])
             ->having('total_medicamentos', '>=', 2);
 
         // Apply droguería filter if needed
@@ -187,37 +192,101 @@ class SmartPendiController extends Controller
                                    ->orderBy('fecha_mas_antigua', 'ASC')
                                    ->get();
 
+        // Mapeo de farmacias a depósitos para consultar saldos
+        $farmaciaToDeposito = [
+            'BIO1' => 'BIO1',
+            'DLR1' => 'DLR1',
+            'DPA1' => 'DPA1',
+            'EM01' => 'EM01',
+            'EHU1' => 'EHU1',
+            'FRJA' => 'FRJA',
+            'FRIO' => 'FRIO',
+            'INY' => 'INY',
+            'PAC' => 'PAC',
+            'SM01' => 'SM01',
+            'BPDT' => 'BPDT',
+            'EVEN' => 'EVEN',
+            'EVSM' => 'EVSM'
+        ];
+
         $suggestions = [];
 
         foreach ($pacientesMultiples as $paciente) {
             $nombreCompleto = trim($paciente->nombre1 . ' ' . $paciente->nombre2 . ' ' . $paciente->apellido1 . ' ' . $paciente->apellido2);
             $promedioHoras = round($paciente->promedio_horas_transcurridas, 1);
             
-            // Determine priority based on number of medications and average hours
+            // Analizar estado de saldos por medicamento
+            $codigos = explode(',', $paciente->codigos_list);
+            $farmacias = explode(',', $paciente->farmacias_list);
+            $medicamentosConSaldo = 0;
+            $medicamentosSinSaldo = 0;
+            $estadosSaldos = [];
+
+            // Revisar saldo para cada código de medicamento
+            for ($i = 0; $i < count($codigos); $i++) {
+                $codigo = trim($codigos[$i]);
+                $farmacia = isset($farmacias[$i]) ? trim($farmacias[$i]) : (isset($farmacias[0]) ? trim($farmacias[0]) : '');
+                
+                // Determinar depósito para consultar saldo
+                $deposito = $farmaciaToDeposito[$farmacia] ?? $farmacia;
+                
+                // Consultar saldo más reciente para este medicamento
+                $saldo = SaldosMedcol6::where('codigo', $codigo)
+                    ->where('deposito', $deposito)
+                    ->orderBy('fecha_saldo', 'desc')
+                    ->first();
+                
+                $saldoDisponible = $saldo ? (float)$saldo->saldo : 0;
+                
+                if ($saldoDisponible > 0) {
+                    $medicamentosConSaldo++;
+                    $estadosSaldos[$codigo] = 'CON_SALDO';
+                } else {
+                    $medicamentosSinSaldo++;
+                    $estadosSaldos[$codigo] = 'SIN_SALDO';
+                }
+            }
+
+            // Determinar estado general de saldos del paciente
+            $tieneAlgunSaldo = $medicamentosConSaldo > 0;
+            $tieneTodosSaldos = $medicamentosSinSaldo == 0;
+            
+            // Determine priority based on number of medications, average hours, and inventory status
             $prioridad = 'MEDIA';
             $accion = '';
             $plazo = '';
             
-            if ($paciente->total_medicamentos >= 4 || $promedioHoras >= 40) {
+            // Ajustar prioridad considerando disponibilidad de saldos
+            if ($tieneTodosSaldos && ($paciente->total_medicamentos >= 4 || $promedioHoras >= 40)) {
                 $prioridad = 'ALTA';
-                $accion = 'URGENTE: Paciente con ' . $paciente->total_medicamentos . ' medicamentos pendientes. Contactar inmediatamente para coordinar entrega consolidada y evitar múltiples visitas.';
+                $accion = 'URGENTE: Paciente con ' . $paciente->total_medicamentos . ' medicamentos pendientes TODOS CON SALDO. Contactar inmediatamente para entrega consolidada.';
                 $plazo = 'INMEDIATO';
-            } elseif ($paciente->total_medicamentos >= 3 || $promedioHoras >= 30) {
+            } elseif ($tieneAlgunSaldo && ($paciente->total_medicamentos >= 3 || $promedioHoras >= 30)) {
                 $prioridad = 'MEDIA-ALTA';
-                $accion = 'PRIORITARIO: Consolidar entrega de ' . $paciente->total_medicamentos . ' medicamentos en una sola visita para optimizar recursos y mejorar experiencia del paciente.';
+                $accion = 'PRIORITARIO: ' . $medicamentosConSaldo . ' de ' . $paciente->total_medicamentos . ' medicamentos con saldo disponible. Priorizar entrega de disponibles y gestionar faltantes.';
                 $plazo = '12 HORAS';
-            } else {
+            } elseif ($tieneAlgunSaldo) {
                 $prioridad = 'MEDIA';
-                $accion = 'PLANIFICAR: Agrupar entrega de ' . $paciente->total_medicamentos . ' medicamentos para eficiencia operativa.';
+                $accion = 'PLANIFICAR: ' . $medicamentosConSaldo . ' medicamentos disponibles de ' . $paciente->total_medicamentos . '. Coordinar entrega parcial y reposición.';
                 $plazo = '24 HORAS';
+            } else {
+                $prioridad = 'BAJA';
+                $accion = 'GESTIONAR INVENTARIO: Ningún medicamento tiene saldo disponible. Requiere gestión de compras antes de entrega.';
+                $plazo = '48-72 HORAS';
             }
 
             $suggestions[] = [
                 'pendiente_ids' => explode(',', $paciente->pendientes_ids),
                 'documento' => $paciente->documento,
+                'historia' => $paciente->historia ?? $paciente->documento,
                 'paciente' => $nombreCompleto,
                 'total_medicamentos' => $paciente->total_medicamentos,
                 'medicamentos' => $paciente->medicamentos_list,
+                'medicamentos_con_saldo' => $medicamentosConSaldo,
+                'medicamentos_sin_saldo' => $medicamentosSinSaldo,
+                'tiene_saldo' => $tieneAlgunSaldo,
+                'todos_con_saldo' => $tieneTodosSaldos,
+                'estados_saldos' => $estadosSaldos,
                 'prioridad' => $prioridad,
                 'accion' => $accion,
                 'telefono' => $paciente->telefres,
@@ -226,20 +295,51 @@ class SmartPendiController extends Controller
                 'fecha_mas_antigua' => $paciente->fecha_mas_antigua,
                 'fecha_mas_reciente' => $paciente->fecha_mas_reciente,
                 'promedio_horas_transcurridas' => $promedioHoras,
-                'ventaja_consolidacion' => 'Reducir de ' . $paciente->total_medicamentos . ' entregas individuales a 1 entrega consolidada'
+                'ventaja_consolidacion' => $tieneTodosSaldos ? 
+                    'Entrega consolidada inmediata: ' . $paciente->total_medicamentos . ' medicamentos listos' :
+                    ($tieneAlgunSaldo ? 
+                        'Entrega parcial: ' . $medicamentosConSaldo . ' listos, ' . $medicamentosSinSaldo . ' por gestionar' :
+                        'Requiere gestión de inventario completa antes de entrega'
+                    )
             ];
         }
+
+        // Ordenar sugerencias: primero por estado de saldo, luego por prioridad
+        usort($suggestions, function($a, $b) {
+            // Priorizar pacientes con todos los saldos disponibles
+            if ($a['todos_con_saldo'] && !$b['todos_con_saldo']) return -1;
+            if (!$a['todos_con_saldo'] && $b['todos_con_saldo']) return 1;
+            
+            // Luego por pacientes con algunos saldos
+            if ($a['tiene_saldo'] && !$b['tiene_saldo']) return -1;
+            if (!$a['tiene_saldo'] && $b['tiene_saldo']) return 1;
+            
+            // Finalmente por número de medicamentos
+            return $b['total_medicamentos'] <=> $a['total_medicamentos'];
+        });
+
+        // Calcular estadísticas de saldos
+        $conTodosSaldos = array_filter($suggestions, fn($s) => $s['todos_con_saldo']);
+        $conAlgunSaldo = array_filter($suggestions, fn($s) => $s['tiene_saldo'] && !$s['todos_con_saldo']);
+        $sinSaldo = array_filter($suggestions, fn($s) => !$s['tiene_saldo']);
 
         return response()->json([
             'success' => true,
             'suggestions' => $suggestions,
             'total_suggestions' => count($suggestions),
-            'enfoque' => 'Pacientes con múltiples medicamentos pendientes (2+) en ventana de oportunidad 0-48h',
+            'estadisticas_saldos' => [
+                'con_todos_saldos' => count($conTodosSaldos),
+                'con_algunos_saldos' => count($conAlgunSaldo),
+                'sin_saldos' => count($sinSaldo),
+                'porcentaje_disponibles' => count($suggestions) > 0 ? round((count($conTodosSaldos) + count($conAlgunSaldo)) * 100 / count($suggestions), 1) : 0
+            ],
+            'enfoque' => 'Pacientes con múltiples medicamentos pendientes (2+) priorizados por disponibilidad de inventario',
             'beneficios' => [
-                'Optimización de rutas de entrega',
-                'Reducción de costos operativos', 
-                'Mejor experiencia del paciente',
-                'Cumplimiento de ventana de oportunidad'
+                'Optimización basada en disponibilidad real de medicamentos',
+                'Priorización de entregas inmediatas para medicamentos con saldo',
+                'Gestión proactiva de medicamentos sin disponibilidad',
+                'Reducción de costos operativos y mejor experiencia del paciente',
+                'Cumplimiento de ventana de oportunidad 0-48h'
             ]
         ]);
     }

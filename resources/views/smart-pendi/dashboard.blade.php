@@ -100,51 +100,166 @@
         </div>
     </div>
 
-    <!-- Results Section -->
-    <div class="row" id="results-section" style="display: none;">
+    <!-- Main Analysis Tabs Section -->
+    <div class="row" id="analysis-tabs-section" style="display: none;">
         <div class="col-12">
             <div class="card shadow-sm">
-                <div class="card-header bg-gradient-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-list-alt mr-2"></i>
-                        Pendientes en Ventana de Oportunidad (0-48 Horas)
+                <div class="card-header bg-light">
+                    <h5 class="mb-3">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        Análisis - Vista Organizada
                     </h5>
+                    <!-- Main Navigation Tabs -->
+                    <ul class="nav nav-tabs nav-tabs-custom" id="mainAnalysisTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="pendientes-tab" data-toggle="tab" href="#pendientes-panel" role="tab">
+                                <i class="fas fa-clock text-primary mr-1"></i>
+                                <span class="d-none d-md-inline">Pendientes en Ventana</span>
+                                <span class="d-md-none">Pendientes</span>
+                                <small class="d-block text-muted">(0-48 Horas)</small>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="sugerencias-tab" data-toggle="tab" href="#sugerencias-panel" role="tab">
+                                <i class="fas fa-lightbulb text-warning mr-1"></i>
+                                <span class="d-none d-md-inline">Sugerencias Inteligentes</span>
+                                <span class="d-md-none">Sugerencias</span>
+                                <small class="d-block text-muted">de Entrega</small>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="inventario-tab" data-toggle="tab" href="#inventario-panel" role="tab">
+                                <i class="fas fa-warehouse text-info mr-1"></i>
+                                <span class="d-none d-md-inline">Análisis por Inventario</span>
+                                <span class="d-md-none">Inventario</span>
+                                <small class="d-block text-muted">Estado de Saldo</small>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-                <div class="card-body table-responsive">
-                    <table id="pendientes-table" class="table table-hover mb-0">
-                        <thead class="thead-light">
-                            <tr>
-                                <th class="border-0">Estado</th>
-                                <th class="border-0">Paciente</th>
-                                <th class="border-0">Documento</th>
-                                <th class="border-0">Medicamento</th>
-                                <th class="border-0">Horas Transcurridas</th>
-                                <th class="border-0">Fecha Factura</th>
-                                <th class="border-0">Teléfono</th>
-                                <th class="border-0">Municipio</th>
-                                <th class="border-0">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Filas dinámicas se llenan por JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+                <div class="card-body p-0">
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="mainAnalysisTabsContent">
+                        <!-- Pendientes Tab -->
+                        <div class="tab-pane fade show active" id="pendientes-panel" role="tabpanel">
+                            <div class="p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-list-alt mr-2"></i>
+                                        Pendientes en Ventana de Oportunidad (0-48 Horas)
+                                    </h6>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-primary" id="refresh-pendientes">
+                                            <i class="fas fa-sync-alt mr-1"></i>
+                                            Actualizar
+                                        </button>
+                                        <button type="button" class="btn btn-outline-success" id="export-pendientes">
+                                            <i class="fas fa-download mr-1"></i>
+                                            Exportar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table id="pendientes-table" class="table table-hover mb-0">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th class="border-0">Estado</th>
+                                                <th class="border-0">Paciente</th>
+                                                <th class="border-0">Historia</th>
+                                                <th class="border-0">Medicamento</th>
+                                                <th class="border-0">Horas Transcurridas</th>
+                                                <th class="border-0">Fecha Factura</th>
+                                                <th class="border-0">Teléfono</th>
+                                                <th class="border-0">Municipio</th>
+                                                <th class="border-0">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Filas dinámicas se llenan por JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
 
-    <!-- Suggestions Section -->
-    <div class="row mt-4" id="suggestions-section" style="display: none;">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-gradient-success text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-lightbulb mr-2"></i>
-                        Sugerencias Inteligentes de Entrega
-                    </h5>
-                </div>
-                <div class="card-body" id="suggestions-content">
+                        <!-- Sugerencias Tab -->
+                        <div class="tab-pane fade" id="sugerencias-panel" role="tabpanel">
+                            <div class="p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-lightbulb mr-2"></i>
+                                        Sugerencias Inteligentes de Entrega
+                                    </h6>
+                                    <button type="button" class="btn btn-outline-warning btn-sm" id="refresh-sugerencias">
+                                        <i class="fas fa-sync-alt mr-1"></i>
+                                        Actualizar Sugerencias
+                                    </button>
+                                </div>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    <strong>Información:</strong> Estas sugerencias priorizan pacientes con múltiples medicamentos pendientes para optimizar las entregas consolidadas.
+                                </div>
+                                <div id="suggestions-content">
+                                    <!-- Content loaded by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inventario Tab -->
+                        <div class="tab-pane fade" id="inventario-panel" role="tabpanel">
+                            <div class="p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-warehouse mr-2"></i>
+                                        Análisis por Estado de Inventario
+                                    </h6>
+                                    <button type="button" class="btn btn-outline-info btn-sm" id="refresh-inventario">
+                                        <i class="fas fa-sync-alt mr-1"></i>
+                                        Actualizar Inventario
+                                    </button>
+                                </div>
+                                
+                                <!-- Sub-tabs for inventory status -->
+                                <ul class="nav nav-pills nav-fill" id="inventoryTabs" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" id="con-saldo-tab" data-toggle="tab" href="#con-saldo" role="tab">
+                                            <i class="fas fa-check-circle text-success mr-1"></i>
+                                            <span class="d-none d-sm-inline">Medicamentos</span> Con Saldo
+                                            <span class="badge badge-success ml-2" id="con-saldo-count">0</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="sin-saldo-tab" data-toggle="tab" href="#sin-saldo" role="tab">
+                                            <i class="fas fa-exclamation-triangle text-warning mr-1"></i>
+                                            <span class="d-none d-sm-inline">Medicamentos</span> Sin Saldo
+                                            <span class="badge badge-warning ml-2" id="sin-saldo-count">0</span>
+                                        </a>
+                                    </li>
+                                </ul>
+
+                                <!-- Inventory sub-tabs content -->
+                                <div class="tab-content mt-3" id="inventoryTabsContent">
+                                    <!-- Con Saldo Sub-tab -->
+                                    <div class="tab-pane fade show active" id="con-saldo" role="tabpanel">
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-info-circle mr-2"></i>
+                                            <strong>Medicamentos Disponibles:</strong> Estos pacientes tienen medicamentos con saldo disponible, priorizados para entrega inmediata.
+                                        </div>
+                                        <div id="con-saldo-content"></div>
+                                    </div>
+
+                                    <!-- Sin Saldo Sub-tab -->
+                                    <div class="tab-pane fade" id="sin-saldo" role="tabpanel">
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                                            <strong>Medicamentos Sin Disponibilidad:</strong> Estos pacientes requieren gestión de compras o coordinación con proveedores.
+                                        </div>
+                                        <div id="sin-saldo-content"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -252,8 +367,11 @@
                     }
                 },
                 {
-                    data: 'documento',
-                    name: 'documento'
+                    data: 'historia',
+                    name: 'historia',
+                    render: function(data, type, row) {
+                        return '<span class="font-weight-medium text-info">' + (data || 'N/A') + '</span>';
+                    }
                 },
                 {
                     data: 'medicamento',
@@ -349,10 +467,10 @@
             });
     }
 
-    // Execute analysis
+    // Execute analysis - Updated for new tab structure
     $('#btn-analysis').click(function() {
-        $('#results-section').show();
-        $('#suggestions-section').hide();
+        $('#analysis-tabs-section').show();
+        $('#pendientes-tab').tab('show'); // Show pendientes tab by default
 
         if (pendientesTable) {
             pendientesTable.ajax.reload();
@@ -367,15 +485,17 @@
         });
     });
 
-    // Get predictive suggestions
+    // Get predictive suggestions with inventory balance logic - Updated for tabs
     $('#btn-suggestions').click(function() {
+        $('#analysis-tabs-section').show();
+        $('#sugerencias-tab').tab('show'); // Show sugerencias tab
         $('#loading-section').show();
 
         $.get('{{ route("smart.pendi.suggestions") }}')
             .done(function(response) {
                 if (response.success) {
                     displaySuggestions(response.suggestions);
-                    $('#suggestions-section').show();
+                    displayInventoryBasedSuggestions(response.suggestions);
                 } else {
                     Swal.fire('Error', 'No se pudieron cargar las sugerencias', 'error');
                 }
@@ -388,21 +508,100 @@
             });
     });
 
-    // Refresh data
-    $('#btn-refresh').click(function() {
-        loadStatistics();
+    // Individual tab refresh buttons
+    $('#refresh-pendientes').click(function() {
         if (pendientesTable) {
             pendientesTable.ajax.reload();
         }
+        showSuccessMessage('Datos de pendientes actualizados');
+    });
 
+    $('#refresh-sugerencias').click(function() {
+        $('#loading-section').show();
+        $.get('{{ route("smart.pendi.suggestions") }}')
+            .done(function(response) {
+                if (response.success) {
+                    displaySuggestions(response.suggestions);
+                    displayInventoryBasedSuggestions(response.suggestions);
+                    showSuccessMessage('Sugerencias actualizadas');
+                } else {
+                    Swal.fire('Error', 'No se pudieron cargar las sugerencias', 'error');
+                }
+            })
+            .fail(function() {
+                Swal.fire('Error', 'Error al cargar las sugerencias', 'error');
+            })
+            .always(function() {
+                $('#loading-section').hide();
+            });
+    });
+
+    $('#refresh-inventario').click(function() {
+        $('#loading-section').show();
+        $.get('{{ route("smart.pendi.suggestions") }}')
+            .done(function(response) {
+                if (response.success) {
+                    displayInventoryBasedSuggestions(response.suggestions);
+                    showSuccessMessage('Análisis de inventario actualizado');
+                } else {
+                    Swal.fire('Error', 'No se pudieron cargar los datos de inventario', 'error');
+                }
+            })
+            .fail(function() {
+                Swal.fire('Error', 'Error al cargar los datos de inventario', 'error');
+            })
+            .always(function() {
+                $('#loading-section').hide();
+            });
+    });
+
+    // Export functionality for pendientes tab
+    $('#export-pendientes').click(function() {
+        // Trigger DataTables export functionality
+        if (pendientesTable) {
+            $('.buttons-excel').click();
+        }
+    });
+
+    // Refresh data - Updated to work with tabs
+    $('#btn-refresh').click(function() {
+        loadStatistics();
+        
+        // Check which tab is active and refresh accordingly
+        if ($('#pendientes-tab').hasClass('active')) {
+            if (pendientesTable) {
+                pendientesTable.ajax.reload();
+            }
+        }
+        
+        if ($('#sugerencias-tab').hasClass('active') || $('#inventario-tab').hasClass('active')) {
+            // Refresh suggestions and inventory data
+            $('#loading-section').show();
+            $.get('{{ route("smart.pendi.suggestions") }}')
+                .done(function(response) {
+                    if (response.success) {
+                        displaySuggestions(response.suggestions);
+                        displayInventoryBasedSuggestions(response.suggestions);
+                    }
+                })
+                .always(function() {
+                    $('#loading-section').hide();
+                });
+        }
+
+        showSuccessMessage('Información refrescada correctamente');
+    });
+
+    // Helper function for success messages
+    function showSuccessMessage(message) {
         Swal.fire({
             title: 'Datos Actualizados',
-            text: 'Información refrescada correctamente',
+            text: message,
             icon: 'success',
             timer: 1500,
             showConfirmButton: false
         });
-    });
+    }
 
     // Helper function to get estado badge (moved up for DataTable render function)
     function getEstadoBadge(prioridad) {
@@ -532,16 +731,19 @@
                                   estimatedDays >= 1 ? 'warning' : 'success';
             
             medicationCards += `
-                <div class="col-md-6 mb-3">
-                    <div class="card border-left-${daysBadgeClass} h-100">
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card border-left-${daysBadgeClass} h-100 shadow-sm">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center mb-2">
                                 <i class="fas fa-pills text-primary mr-2"></i>
-                                <strong class="text-primary">${medicamento}</strong>
+                                <strong class="text-primary text-truncate" title="${medicamento}">${medicamento}</strong>
                             </div>
-                            <span class="badge badge-${daysBadgeClass}">
-                                ${estimatedDays} día${estimatedDays !== 1 ? 's' : ''} pendiente${estimatedDays !== 1 ? 's' : ''}
-                            </span>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge badge-${daysBadgeClass} badge-pill">
+                                    ${estimatedDays} día${estimatedDays !== 1 ? 's' : ''}
+                                </span>
+                                <small class="text-muted">#${medIndex + 1}</small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -565,36 +767,221 @@
                 
                 <!-- Modal -->
                 <div class="modal fade" id="${modalId}" tabindex="-1" role="dialog" aria-labelledby="${modalId}Label" aria-hidden="true">
-                    <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-dialog modal-xl" role="document">
                         <div class="modal-content">
-                            <div class="modal-header bg-info text-white">
+                            <div class="modal-header bg-info text-white sticky-top">
                                 <h5 class="modal-title" id="${modalId}Label">
                                     <i class="fas fa-pills mr-2"></i>
-                                    Medicamentos Pendientes Detallados
+                                    Medicamentos Pendientes Detallados (${medicamentos.length} total)
                                 </h5>
                                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
-                            <div class="modal-body">
-                                <div class="alert alert-info">
-                                    <i class="fas fa-info-circle mr-2"></i>
-                                    <strong>Total:</strong> ${medicamentos.length} medicamentos pendientes
-                                    <br>
-                                    <strong>Rango de días:</strong> ${diasReciente} - ${diasAntigua} días
+                            <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+                                <div class="alert alert-info sticky-top mb-3">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <i class="fas fa-info-circle mr-2"></i>
+                                            <strong>Total:</strong> ${medicamentos.length} medicamentos
+                                        </div>
+                                        <div class="col-md-4">
+                                            <i class="fas fa-calendar-alt mr-2"></i>
+                                            <strong>Rango:</strong> ${diasReciente} - ${diasAntigua} días
+                                        </div>
+                                        <div class="col-md-4">
+                                            <i class="fas fa-scroll mr-2"></i>
+                                            <small class="text-muted">Desplázate para ver todos</small>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="row">
+                                <div class="row" style="max-height: calc(75vh - 120px); overflow-y: auto; padding-right: 10px;">
                                     ${medicationCards}
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                            <div class="modal-footer bg-light">
+                                <div class="d-flex justify-content-between w-100 align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-lightbulb mr-1"></i>
+                                        Contacte al paciente para coordinar entrega consolidada
+                                    </small>
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">
+                                        <i class="fas fa-check mr-1"></i>
+                                        Entendido
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         `;
+    }
+
+    // Display inventory-based suggestions
+    function displayInventoryBasedSuggestions(suggestions) {
+        // Separar sugerencias por estado de saldo
+        const conSaldo = suggestions.filter(s => s.tiene_saldo === true || s.medicamentos_con_saldo > 0);
+        const sinSaldo = suggestions.filter(s => s.tiene_saldo === false || s.medicamentos_sin_saldo > 0);
+        
+        // Actualizar contadores
+        $('#con-saldo-count').text(conSaldo.length);
+        $('#sin-saldo-count').text(sinSaldo.length);
+        
+        // Mostrar sugerencias con saldo
+        displayInventoryGroup(conSaldo, '#con-saldo-content', 'success');
+        
+        // Mostrar sugerencias sin saldo
+        displayInventoryGroup(sinSaldo, '#sin-saldo-content', 'warning');
+    }
+
+    // Helper function to display inventory groups
+    function displayInventoryGroup(suggestions, containerId, theme) {
+        const content = $(containerId);
+        content.empty();
+        
+        if (suggestions.length === 0) {
+            const messageType = theme === 'success' ? 'Disponibles' : 'Sin Disponibilidad';
+            const iconType = theme === 'success' ? 'check-circle' : 'info-circle';
+            
+            content.append(`
+                <div class="text-center py-4">
+                    <i class="fas fa-${iconType} text-${theme} fa-2x mb-3"></i>
+                    <h6 class="text-${theme}">Sin Medicamentos ${messageType}</h6>
+                    <p class="text-muted">No hay pacientes en esta categoría actualmente</p>
+                </div>
+            `);
+            return;
+        }
+        
+        suggestions.forEach(function(suggestion, index) {
+            const priorityColor = suggestion.prioridad === 'ALTA' ? 'danger' : 
+                                (suggestion.prioridad === 'MEDIA-ALTA' ? 'warning' : 'info');
+            const statusBadge = theme === 'success' ? 'success' : 'warning';
+            const statusText = theme === 'success' ? 'CON SALDO' : 'SIN SALDO';
+            const statusIcon = theme === 'success' ? 'check-circle' : 'exclamation-triangle';
+            
+            content.append(`
+                <div class="card mb-3 border-${theme}">
+                    <div class="card-header bg-${theme} text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-user mr-2"></i>
+                                ${suggestion.paciente}
+                            </h6>
+                            <div class="d-flex align-items-center">
+                                <span class="badge badge-light mr-2">
+                                    <i class="fas fa-${statusIcon} mr-1"></i>
+                                    ${statusText}
+                                </span>
+                                <span class="badge badge-light mr-2">
+                                    <i class="fas fa-pills mr-1"></i>
+                                    ${suggestion.total_medicamentos} Meds
+                                </span>
+                                <span class="badge badge-light">${suggestion.plazo || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>Historia:</strong> <span class="text-info font-weight-bold">${suggestion.historia || 'N/A'}</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Promedio Horas:</strong> 
+                                    <span class="badge badge-${priorityColor}">${suggestion.promedio_horas_transcurridas || 'N/A'}h</span>
+                                </p>
+                                ${suggestion.municipio ? `<p class="mb-2"><strong>Municipio:</strong> ${suggestion.municipio}</p>` : ''}
+                                ${suggestion.telefono ? 
+                                    `<p class="mb-2"><strong>Teléfono:</strong> 
+                                        <button class="btn btn-sm btn-outline-primary" onclick="contactPatientMultiple('${suggestion.pendiente_ids ? suggestion.pendiente_ids.join(',') : ''}', '${suggestion.paciente}', '${suggestion.telefono}', '${suggestion.total_medicamentos}')">
+                                            <i class="fas fa-phone mr-1"></i>${suggestion.telefono}
+                                        </button>
+                                    </p>` : 
+                                    '<p class="mb-2 text-muted"><i class="fas fa-phone-slash mr-1"></i>Sin teléfono</p>'
+                                }
+                            </div>
+                            <div class="col-md-6">
+                                <div class="border rounded p-3 bg-light">
+                                    <h6 class="text-${theme} mb-2">
+                                        <i class="fas fa-pills mr-1"></i>
+                                        Medicamentos (${suggestion.total_medicamentos})
+                                    </h6>
+                                    <div style="max-height: 150px; overflow-y: auto;">
+                                        ${getMedicamentosCompactList(suggestion.medicamentos, theme)}
+                                    </div>
+                                    ${theme === 'success' ? 
+                                        '<small class="text-success"><i class="fas fa-check mr-1"></i>Listos para entrega</small>' :
+                                        '<small class="text-warning"><i class="fas fa-shopping-cart mr-1"></i>Requiere gestión de compras</small>'
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="btn-group w-100" role="group">
+                                    <button class="btn btn-${theme} btn-sm" onclick="prioritizarPaciente('${suggestion.historia || suggestion.documento}', '${theme}')">
+                                        <i class="fas fa-star mr-1"></i>
+                                        ${theme === 'success' ? 'Priorizar Entrega' : 'Gestionar Compras'}
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="markSuggestionAsHandled(${index})">
+                                        <i class="fas fa-check mr-1"></i>
+                                        Gestionado
+                                    </button>
+                                    <button class="btn btn-outline-info btn-sm" onclick="viewPatientDetails('${suggestion.historia || suggestion.documento}')">
+                                        <i class="fas fa-eye mr-1"></i>
+                                        Detalles
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+        });
+    }
+    
+    // Helper function for compact medication list
+    function getMedicamentosCompactList(medicamentosString, theme) {
+        if (!medicamentosString) return '<p class="text-muted">Sin medicamentos</p>';
+        
+        const medicamentos = medicamentosString.split(' | ');
+        const iconClass = theme === 'success' ? 'check-circle text-success' : 'exclamation-circle text-warning';
+        
+        return medicamentos.map((med, index) => 
+            `<div class="d-flex align-items-center mb-1">
+                <i class="fas fa-${iconClass} mr-2" style="font-size: 0.8rem;"></i>
+                <small class="text-truncate" title="${med}">${med}</small>
+            </div>`
+        ).join('');
+    }
+
+    // New function for prioritizing patients
+    function prioritizarPaciente(historia, tipo) {
+        const accion = tipo === 'success' ? 'priorizar la entrega' : 'gestionar las compras';
+        const titulo = tipo === 'success' ? 'Priorizar Entrega' : 'Gestionar Compras';
+        
+        Swal.fire({
+            title: titulo,
+            text: `¿Desea ${accion} para el paciente con historia ${historia}?`,
+            icon: tipo === 'success' ? 'success' : 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, proceder',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: tipo === 'success' ? '#28a745' : '#ffc107'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Aquí se puede hacer una llamada AJAX al backend
+                Swal.fire({
+                    title: '¡Procesado!',
+                    text: `Paciente marcado para ${accion}`,
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        });
     }
 
     // Display suggestions
@@ -645,7 +1032,7 @@
                                     ${suggestion.paciente}
                                 </h6>
                                 <p class="mb-1">
-                                    <strong>Documento:</strong> ${suggestion.documento}
+                                    <strong>Historia:</strong> <span class="text-info font-weight-bold">${suggestion.historia || 'N/A'}</span>
                                     ${suggestion.municipio ? `<span class="ml-3"><strong>Municipio:</strong> ${suggestion.municipio}</span>` : ''}
                                 </p>
                                 <p class="mb-3">
@@ -711,7 +1098,7 @@
                                     <i class="fas fa-check mr-1"></i>
                                     Marcar como Gestionada
                                 </button>
-                                <button class="btn btn-outline-info btn-block" onclick="viewPatientDetails('${suggestion.documento}')">
+                                <button class="btn btn-outline-info btn-block" onclick="viewPatientDetails('${suggestion.historia || suggestion.documento}')">
                                     <i class="fas fa-eye mr-1"></i>
                                     Ver Detalles
                                 </button>
@@ -897,7 +1284,7 @@
         transition: all 0.3s ease;
     }
 
-    .card:hover {
+    .card:hover:not([id^="medicamentos-modal-"] .card) {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
     }
@@ -1042,8 +1429,35 @@
 
     /* Modal improvements */
     .modal-lg .modal-body {
-        max-height: 70vh;
+        max-height: 75vh;
         overflow-y: auto;
+        padding: 1.5rem;
+    }
+    
+    /* Específico para modales de medicamentos */
+    [id^="medicamentos-modal-"] .modal-dialog {
+        max-width: 90%;
+    }
+    
+    [id^="medicamentos-modal-"] .modal-body {
+        max-height: 80vh;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+    
+    [id^="medicamentos-modal-"] .row {
+        margin: -0.5rem;
+    }
+    
+    [id^="medicamentos-modal-"] .col-md-6,
+    [id^="medicamentos-modal-"] .col-lg-4 {
+        padding: 0.5rem;
+    }
+
+    /* Prevenir efectos hover problemáticos en cards del modal */
+    [id^="medicamentos-modal-"] .card {
+        transform: none !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
     }
 
     .modal-header.bg-info {
@@ -1052,13 +1466,14 @@
 
     /* Card hover effects in modal - specific scope to avoid conflicts */
     .medication-summary .modal-body .card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition: box-shadow 0.2s ease, border-color 0.2s ease;
         border-radius: 8px;
+        border: 1px solid #dee2e6;
     }
 
     .medication-summary .modal-body .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-color: #007bff;
     }
 
     /* Improved spacing for medication items */
@@ -1111,6 +1526,229 @@
         opacity: 0.6;
         transform: none !important;
         box-shadow: none !important;
+    }
+
+    /* ==================== NEW TABBED LAYOUT STYLES ==================== */
+    
+    /* Main analysis tabs custom styling */
+    .nav-tabs-custom .nav-link {
+        border: none;
+        background-color: #f8f9fa;
+        color: #495057;
+        padding: 1rem 1.5rem;
+        margin-right: 0.25rem;
+        border-radius: 0.5rem 0.5rem 0 0;
+        transition: all 0.3s ease;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .nav-tabs-custom .nav-link:hover {
+        background-color: #e9ecef;
+        color: #007bff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .nav-tabs-custom .nav-link.active {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+        box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+    }
+
+    .nav-tabs-custom .nav-link.active:hover {
+        background-color: #0056b3;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .nav-tabs-custom .nav-link i {
+        font-size: 1.2rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .nav-tabs-custom .nav-link small {
+        font-size: 0.75rem;
+        opacity: 0.8;
+        margin-top: 0.25rem;
+    }
+
+    /* Tab content styling */
+    #mainAnalysisTabsContent {
+        min-height: 600px;
+    }
+
+    #mainAnalysisTabsContent .tab-pane {
+        animation: fadeInUp 0.3s ease-in-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translate3d(0, 20px, 0);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+    /* Individual tab headers */
+    .tab-pane h6 {
+        color: #495057;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    /* Pills navigation for inventory sub-tabs */
+    .nav-pills .nav-link {
+        border-radius: 50px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .nav-pills .nav-link:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .nav-pills .nav-link.active {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    /* Enhanced button groups for tabs */
+    .tab-pane .btn-group-sm .btn {
+        font-size: 0.8rem;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .tab-pane .btn-outline-primary:hover,
+    .tab-pane .btn-outline-success:hover,
+    .tab-pane .btn-outline-warning:hover,
+    .tab-pane .btn-outline-info:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Alert styling within tabs */
+    .tab-pane .alert {
+        border-radius: 0.75rem;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .tab-pane .alert-info {
+        background: linear-gradient(45deg, #d1ecf1 0%, #bee5eb 100%);
+        color: #0c5460;
+    }
+
+    .tab-pane .alert-success {
+        background: linear-gradient(45deg, #d4edda 0%, #c3e6cb 100%);
+        color: #155724;
+    }
+
+    .tab-pane .alert-warning {
+        background: linear-gradient(45deg, #fff3cd 0%, #ffeaa7 100%);
+        color: #856404;
+    }
+
+    /* Responsive design for tabs */
+    @media (max-width: 768px) {
+        .nav-tabs-custom .nav-link {
+            padding: 0.75rem;
+            min-height: 60px;
+            font-size: 0.875rem;
+        }
+        
+        .nav-tabs-custom .nav-link i {
+            font-size: 1rem;
+        }
+        
+        .nav-tabs-custom .nav-link small {
+            font-size: 0.6875rem;
+        }
+        
+        #mainAnalysisTabsContent {
+            min-height: 400px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .nav-tabs-custom {
+            flex-direction: column;
+        }
+        
+        .nav-tabs-custom .nav-link {
+            margin-right: 0;
+            margin-bottom: 0.25rem;
+            border-radius: 0.5rem;
+            text-align: left;
+            flex-direction: row;
+            align-items: center;
+        }
+        
+        .nav-tabs-custom .nav-link i {
+            margin-right: 0.5rem;
+            margin-bottom: 0;
+        }
+        
+        .nav-tabs-custom .nav-link small {
+            margin-left: auto;
+            margin-top: 0;
+        }
+    }
+
+    /* Loading overlay for tab content */
+    .tab-pane {
+        position: relative;
+    }
+
+    .tab-loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255,255,255,0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+
+    /* Badge enhancements for tab navigation */
+    .nav-tabs-custom .badge,
+    .nav-pills .badge {
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    /* Enhanced card styling within tabs */
+    .tab-pane .card {
+        transition: all 0.3s ease;
+        border-radius: 0.75rem;
+    }
+
+    .tab-pane .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    }
+
+    /* Table enhancements within tabs */
+    .tab-pane .table-responsive {
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .tab-pane .table thead th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
     }
 </style>
 @endsection
