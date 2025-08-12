@@ -1500,7 +1500,7 @@ Pendientes Medcol
                         "FRIO": "CDIO",
                         "EHU1": "CDHU",
                         "FRJA": "CDJA",
-                        "FRIO": "CDIO",
+                        "FRIP": "CDIP",
                         "BDNT": "EVIO",
                         "SM01": "CDSM"
                     };
@@ -2041,6 +2041,8 @@ Pendientes Medcol
                 "DLR1": "Dolor",
                 "EVEN": "Evento",
                 "EM01": "Emcali",
+                "FRIO": "Ideo",
+                "FRIP": "Pasoancho",
                 "EVSM": "Evento SM",
                 "BPDT": "Bolsa",
                 "DPA1": "Paliativos",
@@ -2189,7 +2191,8 @@ Pendientes Medcol
                 "SM01": "Salud Mental",
                 "BPDT": "Bolsa",
                 "EVEN": "Evento",
-                "EVSM": "Evento SM"
+                "EVSM": "Evento SM",
+                "FRIP": "Pasoancho"
             };
 
             $.ajax({
@@ -2572,7 +2575,7 @@ Pendientes Medcol
             const filasTotales = $("#tablaDetPend tbody tr:last");
             if (filasTotales.length > 0) {
                 const celdas = filasTotales.find('th');
-                const farmacias = ['BIO1', 'DLR1', 'DPA1', 'EM01', 'EHU1', 'FRJA', 'FRIO', 'INY', 'PAC', 'SM01', 'BPDT', 'EVEN', 'EVSM'];
+                const farmacias = ['BIO1', 'DLR1', 'DPA1', 'EM01', 'EHU1', 'FRJA', 'FRIO', 'INY', 'PAC', 'SM01', 'BPDT', 'EVEN', 'EVSM','FRIP'];
 
                 const servicioMap = {
                     "BIO1": "Biológicos",
@@ -2587,7 +2590,8 @@ Pendientes Medcol
                     "SM01": "Salud Mental",
                     "BPDT": "Bolsa",
                     "EVEN": "Evento",
-                    "EVSM": "Evento SM"
+                    "EVSM": "Evento SM",
+                    "FRIP": "Pasoancho"
                 };
 
                 celdas.each(function(index) {
@@ -2643,7 +2647,7 @@ Pendientes Medcol
             const filasTotales = $("#tablaDetPend tbody tr:last");
             if (filasTotales.length > 0) {
                 const celdas = filasTotales.find('th');
-                const farmacias = ['BIO1', 'DLR1', 'DPA1', 'EM01', 'EHU1', 'FRJA', 'FRIO', 'INY', 'PAC', 'SM01', 'BPDT', 'EVEN', 'EVSM'];
+                const farmacias = ['BIO1', 'DLR1', 'DPA1', 'EM01', 'EHU1', 'FRJA', 'FRIO', 'INY', 'PAC', 'SM01', 'BPDT', 'EVEN', 'EVSM', 'FRIP'];
 
                 const servicioMap = {
                     "BIO1": "Biológicos",
@@ -2658,7 +2662,8 @@ Pendientes Medcol
                     "SM01": "Salud Mental",
                     "BPDT": "Bolsa",
                     "EVEN": "Evento",
-                    "EVSM": "Evento SM"
+                    "EVSM": "Evento SM",
+                    "FRIP": "Pasoancho"
                 };
 
                 celdas.each(function(index) {

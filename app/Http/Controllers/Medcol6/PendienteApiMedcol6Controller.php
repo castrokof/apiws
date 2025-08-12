@@ -433,9 +433,6 @@ class PendienteApiMedcol6Controller extends Controller
 
 
 
-
-
-
             return DataTables()->of($pendiente_api_medcol6)
                 ->addColumn('action', function ($pendiente) {
                     $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '
@@ -1540,7 +1537,8 @@ class PendienteApiMedcol6Controller extends Controller
             'FSAU',
             'EVSO',
             'FRJA',
-            'FRIO'
+            'FRIO',
+            'FRIP'
         ];
 
         // Construcción de la consulta base
@@ -1685,7 +1683,8 @@ class PendienteApiMedcol6Controller extends Controller
             "SM01",
             "BPDT",
             "EVEN",
-            "EVSM"
+            "EVSM",
+            "FRIP"
         ];
 
         $drogueria = $droguerias[$i] ?? null;
@@ -1849,7 +1848,8 @@ class PendienteApiMedcol6Controller extends Controller
             'SM01' => 'SM01',
             'BPDT' => 'BPDT',
             'EVEN' => 'EVEN',
-            'EVSM' => 'EVSM'
+            'EVSM' => 'EVSM',
+            'FRIP' => 'FRIP'
         ];
 
         $resultado = [];
@@ -1943,10 +1943,7 @@ class PendienteApiMedcol6Controller extends Controller
                 // Agregar más mapeos según sea necesario
                 'SALUD' => 'SM01',
                 'DOLOR' => 'DLR1',
-                'FSIO' => 'BIO1',
-                'FSOS' => 'DPA1',
-                'FSAU' => 'SM01',
-                'EVSO' => 'EVEN'
+                'FRIP' => 'FRIP'
             ];
 
             $codigo = trim($request->input('codigo'));

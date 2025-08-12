@@ -41,15 +41,17 @@
                                     <option value="DLR1">DLR1-FARMACIA DOLOR</option>
                                     <option value="DPA1">DPA1-FARMACIA PALIATIVOS</option>
                                     <option value="EM01">EM01-FARMACIA EMCALI</option>
+                                    <option value="FRIO">FRIO-FARMACIA IDEO</option>
                                     <option value="EHU1">EHU1-FARMACIA HUERFANAS</option>
                                     <option value="FRJA">FRJA-FARMACIA JAMUNDI</option>
-                                    <option value="FRIO">FRIO-FARMACIA IDEO</option>
+                                    <option value="FRIP">FRIP-FARMACIA PASOANCHO</option>
                                     <option value="INY">INY-FARMACIA INYECTABLES</option>
                                     <option value="PAC">PAC-FARMACIA PAC</option>
                                     <option value="SM01">SM01-FARMACIA SALUD MENTAL</option>
                                 </optgroup>
                                 <optgroup label="Farmacias Especializadas">
                                     <option value="BPDT">BPDT-BOLSA</option>
+                                    <option value="EVIO">EVIO-EVENTO IDEO</option>
                                     <option value="EVEN">EVEN-FARMACIA EVENTO</option>
                                     <option value="EVSM">EVSM-EVENTO SALUD MENTAL</option>
                                 </optgroup>
@@ -190,7 +192,7 @@
                                     <thead class="thead-light">
                                         <tr>
                                             <th rowspan="2" class="align-middle">Molecula/Insumo</th>
-                                            <th colspan="13">Cantidad Pendiente por Farmacia</th>
+                                            <th colspan="14">Cantidad Pendiente por Farmacia</th>
                                             <th rowspan="2" class="align-middle">Total</th>
                                         </tr>
                                         <tr>
@@ -207,6 +209,7 @@
                                             <th>BPDT</th>
                                             <th>EVEN</th>
                                             <th>EVSM</th>
+                                            <th>FRIP</th>
                                         </tr>
                                     </thead>
                                     <tbody>

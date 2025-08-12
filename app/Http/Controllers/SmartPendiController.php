@@ -201,6 +201,7 @@ class SmartPendiController extends Controller
             'EHU1' => 'EHU1',
             'FRJA' => 'FRJA',
             'FRIO' => 'FRIO',
+            'FRIP' => 'FRIP',
             'INY' => 'INY',
             'PAC' => 'PAC',
             'SM01' => 'SM01',
