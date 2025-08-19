@@ -200,15 +200,18 @@ Pendientes Medcol
             var futuro2 = $('#futuro2');
             var futuro3 = $('#futuro3');
             var futuro4 = $('#futuro4');
+            var futuro5 = $('#futuro5');
 
             var enviar_fecha_entrega = $('#enviar_fecha_entrega');
             var enviar_fecha_impresion = $('#enviar_fecha_impresion');
             var enviar_fecha_anulado = $('#enviar_fecha_anulado');
             var enviar_factura_entrega = $('#enviar_factura_entrega');
+            var enviar_fecha_sincontacto = $('#enviar_fecha_sincontacto');
 
             var input1 = $('#fecha_entrega');
             var input2 = $('#fecha_impresion');
             var anulado = $('#fecha_anulado');
+            var sincontacto = $('#fecha_sincontacto');
             var input3 = $('#cantord');
             var input4 = $('#cantdpx');
 
@@ -217,12 +220,14 @@ Pendientes Medcol
             futuro2.hide().addClass('hidden');
             futuro3.hide().addClass('hidden');
             futuro4.hide().addClass('hidden');
+            futuro5.hide().addClass('hidden');
 
             // Resetear campos ocultos
             enviar_fecha_entrega.val('false');
             enviar_fecha_impresion.val('false');
             enviar_fecha_anulado.val('false');
             enviar_factura_entrega.val('false');
+            enviar_fecha_sincontacto.val('false');
 
             // CORREGIDO: Usar el valor en lugar del texto y agregar todos los estados
             switch (estado_valor) {
@@ -280,6 +285,16 @@ Pendientes Medcol
 
                     // Limpiar otros campos
                     input1.val('');
+                    anulado.val('');
+                    break;
+                case "SIN CONTACTO":
+                    console.log('✅ Mostrando campos para SIN CONTACTO');
+                    futuro5.show().removeClass('hidden');
+                    enviar_fecha_sincontacto.val('true');
+
+                    // Limpiar otros campos
+                    input1.val('');
+                    input2.val('');
                     anulado.val('');
                     break;
 
@@ -1600,6 +1615,7 @@ Pendientes Medcol
                     $('#centroproduccion_n').val(data.pendiente.centroproduccion);
                     $('#observ_n').val(data.pendiente.observaciones);
                     $('#fac_entrega').val(data.fac_entrega);
+                    $('#ultima_observacion_n').val(data.observaciones);
 
                     if (data.pendiente.cums == '' || data.pendiente.cums == null) {
                         $('#cums_n').val(data.pendiente.codigo);
@@ -1614,6 +1630,7 @@ Pendientes Medcol
                     $('#fecha_impresion_n').val(data.pendiente.fecha_impresion);
                     $('#fecha_entrega_n').val(data.pendiente.fecha_entrega);
                     $('#fecha_anulado_n').val(data.pendiente.fecha_anulado);
+                    $('#fecha_sincontacto').val(data.pendiente.updated_at);
                     $('#usuario_n').val(data.pendiente.usuario);
 
                     $('#hidden_id').val(id)
@@ -1644,6 +1661,10 @@ Pendientes Medcol
                         case "ANULADO":
                             $('#fecha_estado').val(moment(data.pendiente.fecha_anulado).format('YYYY-MM-DD'));
                             $('label[for="fecha_estado"]').text('Fecha Anulación');
+                            break;
+                        case "SIN CONTACTO":
+                            $('#fecha_estado').val(moment(data.pendiente.updated_at).format('YYYY-MM-DD'));
+                            $('label[for="fecha_estado"]').text('Fecha Contacto');
                             break;
                         default:
                             $('#fecha_estado').val("");
@@ -1679,10 +1700,6 @@ Pendientes Medcol
             });
 
         });
-
-
-
-
 
         // Función que envían los datos de la factura al controlador para cambiar el estado
         $('#form-general1').on('submit', function(event) {
@@ -2575,7 +2592,7 @@ Pendientes Medcol
             const filasTotales = $("#tablaDetPend tbody tr:last");
             if (filasTotales.length > 0) {
                 const celdas = filasTotales.find('th');
-                const farmacias = ['BIO1', 'DLR1', 'DPA1', 'EM01', 'EHU1', 'FRJA', 'FRIO', 'INY', 'PAC', 'SM01', 'BPDT', 'EVEN', 'EVSM','FRIP'];
+                const farmacias = ['BIO1', 'DLR1', 'DPA1', 'EM01', 'EHU1', 'FRJA', 'FRIO', 'INY', 'PAC', 'SM01', 'BPDT', 'EVEN', 'EVSM', 'FRIP'];
 
                 const servicioMap = {
                     "BIO1": "Biológicos",

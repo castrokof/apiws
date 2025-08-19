@@ -922,18 +922,33 @@ class PendienteApiMedcol6Controller extends Controller
      */
     public function show($id)
     {
-        //
         if (request()->ajax()) {
-            $pendiente = PendienteApiMedcol6::where([['id', '=', $id]])
+            // Consulta corregida usando el modelo Eloquent con join
+            $pendiente = PendienteApiMedcol6::from('pendiente_api_medcol6 as p')
+                ->leftJoin(DB::raw('(SELECT pendiente_id, observacion, created_at,
+                                ROW_NUMBER() OVER (PARTITION BY pendiente_id ORDER BY created_at DESC) as rn
+                                FROM observaciones_api_medcol6) as o'), 
+                    function($join) {
+                        $join->on('p.id', '=', 'o.pendiente_id')
+                             ->where('o.rn', '=', 1);
+                    })
+                ->select('p.*', 'o.observacion as ultima_observacion', 'o.created_at as fecha_ultima_observacion')
+                ->where('p.id', $id)
                 ->first();
-
+            
+            // Verificar si se encontró el registro
+            if (!$pendiente) {
+                return response()->json(['error' => 'Registro no encontrado'], 404);
+            }
+            
             $saldo_pendiente = $pendiente->cantord - $pendiente->cantdpx;
             // Concatenar los campos doc_entrega y factura_entrega
             $fac_entrega = $pendiente->doc_entrega . ' ' . $pendiente->factura_entrega;
-
+    
             return response()->json([
                 'pendiente' => $pendiente,
                 'saldo_pendiente' => $saldo_pendiente,
+                'observaciones' => $pendiente->ultima_observacion,
                 'fac_entrega' => $fac_entrega
             ]);
         }
@@ -2356,5 +2371,115 @@ class PendienteApiMedcol6Controller extends Controller
                 'message' => 'Error en la actualización masiva: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function sincontacto(Request $request)
+    {
+        // Definir las fechas por defecto
+        $fechaAi = now()->startOfDay();
+        $fechaAf = now()->endOfDay();
+    
+        // Obtener la droguería del usuario autenticado
+        $drogueria = '';
+        switch (Auth::user()->drogueria) {
+            case "1":
+                $drogueria = ''; // Todos
+                break;
+            case "2":
+                $drogueria = 'SALUD';
+                break;
+            case "3":
+                $drogueria = 'DOLOR';
+                break;
+            case "4":
+                $drogueria = 'PAC';
+                break;
+            case "5":
+                $drogueria = 'EHU1';
+                break;
+            case "6":
+                $drogueria = 'BIO1';
+                break;
+            case "8":
+                $drogueria = 'EM01';
+                break;
+            case "9":
+                $drogueria = 'FSIO';
+                break;
+            case "10":
+                $drogueria = 'FSOS';
+                break;
+            case "11":
+                $drogueria = 'FSAU';
+                break;
+            case "12":
+                $drogueria = 'EVSO';
+                break;
+            case "13":
+                $drogueria = 'FRJA';
+                break;
+            default:
+                $drogueria = '';
+                break;
+        }
+    
+        if ($request->ajax()) {
+            // Iniciar la consulta
+            $query = DB::table('pendiente_api_medcol6 as p')
+                ->leftJoin(DB::raw('(SELECT pendiente_id, observacion, created_at,
+                                    ROW_NUMBER() OVER (PARTITION BY pendiente_id ORDER BY created_at DESC) as rn
+                                    FROM observaciones_api_medcol6) as o'), 
+                    function($join) {
+                        $join->on('p.id', '=', 'o.pendiente_id')
+                             ->where('o.rn', '=', 1);
+                    })
+                ->select('p.*', 'o.observacion as ultima_observacion', 'o.created_at as fecha_ultima_observacion')
+                ->where(function($q) {
+                    $q->where('p.estado', 'SIN CONTACTO')
+                      ->orWhereNull('p.estado');
+                });
+    
+            // Filtrar por centro de producción si no es '1'
+            if (Auth::user()->drogueria !== '1') {
+                $query->where('p.centroproduccion', $drogueria);
+            }
+    
+            // Filtrar por fechas si están presentes
+            if (!empty($request->fechaini) && !empty($request->fechafin)) {
+                $fechaini = Carbon::parse($request->fechaini)->startOfDay();
+                $fechafin = Carbon::parse($request->fechafin)->endOfDay();
+                $query->whereBetween('p.fecha_factura', [$fechaini, $fechafin]);
+            } else {
+                // Si no se proporcionan fechas, usar las fechas por defecto
+                $query->whereBetween('p.fecha_factura', [$fechaAi, $fechaAf]);
+            }
+    
+            // Filtrar por contrato si está presente
+            if (!empty($request->contrato)) {
+                $query->where('p.centroproduccion', $request->contrato);
+            }
+            
+            // Excluir centros de producción específicos
+            $query->whereNotIn('p.centroproduccion', ['FSIO','FSOS', 'FSAU', 'ENMP']);
+            
+            // Ordenar y obtener los resultados
+            $pendiente_api_medcol6 = $query->orderBy('p.id')->get();
+    
+            // Retornar los resultados para DataTables
+            return DataTables()->of($pendiente_api_medcol6)
+                ->addColumn('action', function ($pendiente) {
+                    $button = '<button type="button" name="show_detail" id="' . $pendiente->id . '" class="show_detail btn btn-app bg-secondary tooltipsC" title="Detalle">
+                        <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i></button>';
+                    $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar">
+                        <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i></button>';
+    
+                    return $button . ' ' . $button2;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+    
+        // Retornar la vista si no es una solicitud AJAX
+        return view('menu.Medcol6.indexAnalista');
     }
 }
