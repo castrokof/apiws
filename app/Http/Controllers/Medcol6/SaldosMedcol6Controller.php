@@ -44,7 +44,17 @@ class SaldosMedcol6Controller extends Controller
         // DataTables puede usar GET o POST, verificamos ambos
         if ($request->ajax() || $request->has('draw')) {
             try {
-                $query = SaldosMedcol6::query();
+                
+                // Subconsulta para obtener la fecha máxima por cada código
+                $subquery = SaldosMedcol6::select('codigo', DB::raw('MAX(fecha_saldo) as max_fecha'))
+                    ->groupBy('codigo');
+                
+                
+                $query = SaldosMedcol6::query()
+                ->joinSub($subquery, 'ultimos_saldos', function($join) {
+                    $join->on('saldos_medcol6.codigo', '=', 'ultimos_saldos.codigo')
+                         ->on('saldos_medcol6.fecha_saldo', '=', 'ultimos_saldos.max_fecha');
+                });
 
                 // Aplicar filtros según los parámetros recibidos
                 if ($request->filled('deposito') && $request->deposito !== 'todos') {
@@ -81,9 +91,9 @@ class SaldosMedcol6Controller extends Controller
                 if ($request->filled('buscar')) {
                     $buscar = $request->buscar;
                     $query->where(function ($q) use ($buscar) {
-                        $q->where('codigo', 'like', "%{$buscar}%")
-                            ->orWhere('nombre', 'like', "%{$buscar}%")
-                            ->orWhere('cums', 'like', "%{$buscar}%");
+                        $q->where('saldos_medcol6.codigo', 'like', "%{$buscar}%")
+                            ->orWhere('saldos_medcol6.nombre', 'like', "%{$buscar}%")
+                            ->orWhere('saldos_medcol6.cums', 'like', "%{$buscar}%");
                     });
                 }
 
