@@ -250,6 +250,7 @@ Route::get('medcol6/pendientes', 'Medcol6\PendienteApiMedcol6Controller@index')-
 Route::post('medcol6/pendientes1', 'Medcol6\PendienteApiMedcol6Controller@index1')->name('medcol6.pendientes1')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/porentregar', 'Medcol6\PendienteApiMedcol6Controller@porentregar')->name('medcol6.porentregar')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/entregados', 'Medcol6\PendienteApiMedcol6Controller@entregados')->name('medcol6.entregados')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/sincontacto', 'Medcol6\PendienteApiMedcol6Controller@sincontacto')->name('medcol6.sincontacto')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/desabastecidos', 'Medcol6\PendienteApiMedcol6Controller@getDesabastecidos')->name('medcol6.desabastecidos')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/anulados', 'Medcol6\PendienteApiMedcol6Controller@getAnulados')->name('medcol6.anulados')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/vencidos', 'Medcol6\PendienteApiMedcol6Controller@getVencidos')->name('medcol6.vencidos')->middleware('verified')->middleware('verifyuser');

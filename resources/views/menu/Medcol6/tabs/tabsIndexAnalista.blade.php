@@ -21,6 +21,9 @@
                     <li class="nav-item">
                         <a class="nav-link" id="custom-tabs-one-datos-vencidos-tab" data-toggle="pill" href="#custom-tabs-one-datos-vencidos" role="tab" aria-controls="custom-tabs-one-datos-vencidos" aria-selected="false">Vencidos</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-one-datos-sincontacto-tab" data-toggle="pill" href="#custom-tabs-one-datos-sincontacto" role="tab" aria-controls="custom-tabs-one-datos-sincontacto" aria-selected="false">Sin Contacto</a>
+                    </li>
 
                     <div class="card-tools pull-right">
 
@@ -64,6 +67,12 @@
                     <div class="tab-pane fade " id="custom-tabs-one-datos-vencidos" role="tabpanel" aria-labelledby="custom-tabs-one-datos-vencidos-tab">
                         <div class="card-body">
                             @include('menu.Medcol6.tablas.tablaIndexVencidos')
+                        </div>
+
+                    </div>
+                    <div class="tab-pane fade " id="custom-tabs-one-datos-sincontacto" role="tabpanel" aria-labelledby="custom-tabs-one-datos-sincontacto-tab">
+                        <div class="card-body">
+                            @include('menu.Medcol6.tablas.tablaIndexSincontacto')
                         </div>
 
                     </div>

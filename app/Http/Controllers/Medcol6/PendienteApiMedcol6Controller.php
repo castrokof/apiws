@@ -102,7 +102,7 @@ class PendienteApiMedcol6Controller extends Controller
             if (Auth::user()->drogueria !== '1') {
 
                 if (Auth::user()->drogueria == '3')
-                    $query->where('centroproduccion', [$drogueria, 'DPA1']);
+                    $query->whereIn('centroproduccion', [$drogueria, 'DPA1']);
                 else
                     $query->where('centroproduccion', $drogueria);
             }
@@ -2193,6 +2193,7 @@ class PendienteApiMedcol6Controller extends Controller
                 ->where(function ($q) {
                     $q->where('estado', 'PENDIENTE')
                         ->orWhere('estado', 'TRAMITADO')
+                        ->orWhere('estado', 'VENCIDO')
                         ->orWhere('estado', 'DESABASTECIDO');
                 });
 
@@ -2265,7 +2266,10 @@ class PendienteApiMedcol6Controller extends Controller
             'pendientes.*.id' => 'required|integer|exists:pendiente_api_medcol6,id',
             'pendientes.*.cantdpx' => 'required|numeric|min:0',
             'pendientes.*.estado' => 'required|in:PENDIENTE,ENTREGADO,TRAMITADO,DESABASTECIDO,ANULADO,VENCIDO',
-            'pendientes.*.fecha_entrega' => 'nullable|date'
+            'pendientes.*.fecha_entrega' => 'nullable|date',
+            'pendientes.*.observaciones' => 'nullable|string|max:1000',
+            'pendientes.*.doc_entrega' => 'nullable|string|max:50',
+            'pendientes.*.factura_entrega' => 'nullable|string|max:50'
         ]);
 
         try {
@@ -2311,6 +2315,14 @@ class PendienteApiMedcol6Controller extends Controller
                             } else {
                                 $updateData['fecha_entrega'] = now();
                             }
+                            
+                            // Agregar campos de entrega
+                            if (isset($pendienteData['doc_entrega'])) {
+                                $updateData['doc_entrega'] = $pendienteData['doc_entrega'];
+                            }
+                            if (isset($pendienteData['factura_entrega'])) {
+                                $updateData['factura_entrega'] = $pendienteData['factura_entrega'];
+                            }
                             break;
                         case 'TRAMITADO':
                         case 'DESABASTECIDO':
@@ -2323,11 +2335,19 @@ class PendienteApiMedcol6Controller extends Controller
 
                     $pendiente->update($updateData);
 
-                    // Crear observación
-                    $observacionTexto = 'Actualización masiva: Estado cambiado a ' . $pendienteData['estado'] . ' con cantidad entregada: ' . $pendienteData['cantdpx'];
-
-                    if ($pendienteData['estado'] === 'ENTREGADO' && !empty($pendienteData['fecha_entrega'])) {
-                        $observacionTexto .= ' - Fecha de entrega: ' . Carbon::parse($pendienteData['fecha_entrega'])->format('d/m/Y');
+                    // Crear observación con el texto ingresado por el usuario o generar automática
+                    $observacionTexto = '';
+                    
+                    if (!empty($pendienteData['observaciones'])) {
+                        // Si el usuario ingresó observaciones específicas, usarlas
+                        $observacionTexto = $pendienteData['observaciones'];
+                    } else {
+                        // Si no hay observaciones específicas, generar observación automática
+                        $observacionTexto = 'Actualización masiva: Estado cambiado a ' . $pendienteData['estado'] . ' con cantidad entregada: ' . $pendienteData['cantdpx'];
+                        
+                        if ($pendienteData['estado'] === 'ENTREGADO' && !empty($pendienteData['fecha_entrega'])) {
+                            $observacionTexto .= ' - Fecha de entrega: ' . Carbon::parse($pendienteData['fecha_entrega'])->format('d/m/Y');
+                        }
                     }
 
                     ObservacionesApiMedcol6::create([

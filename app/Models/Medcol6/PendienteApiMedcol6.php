@@ -58,4 +58,12 @@ class PendienteApiMedcol6 extends Model
     {
         return $date->format('Y-m-d H:i:s');
     }
+
+    /**
+     * Relación con observaciones
+     */
+    public function observaciones()
+    {
+        return $this->hasMany(ObservacionesApiMedcol6::class, 'pendiente_id');
+    }
 }

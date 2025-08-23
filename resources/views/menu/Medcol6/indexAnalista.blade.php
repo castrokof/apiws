@@ -368,6 +368,7 @@ Pendientes Medcol
                 $("#tdesabastecidos").DataTable().destroy();
                 $("#porentregar").DataTable().destroy();
                 $("#entregados").DataTable().destroy();
+                $("#sincontacto").DataTable().destroy();
 
                 // Llamar a la función para llenar la tabla con los filtros aplicados
                 fill_datatable_tabla(fechaini, fechafin, contrato);
@@ -392,6 +393,7 @@ Pendientes Medcol
             $("#tdesabastecidos").DataTable().destroy();
             $("#porentregar").DataTable().destroy();
             $("#entregados").DataTable().destroy();
+            $("#sincontacto").DataTable().destroy();
             fill_datatable_tabla();
         });
 
@@ -596,6 +598,9 @@ Pendientes Medcol
                                 ajax: {
                                     url: "{{route('medcol6.porentregar')}}",
                                     data: {
+                                        fechaini: fechaini,
+                                        fechafin: fechafin,
+                                        contrato: contrato,
                                         _token: "{{ csrf_token() }}"
                                     },
                                     method: 'POST'
@@ -907,6 +912,9 @@ Pendientes Medcol
                                 ajax: {
                                     url: "{{route('medcol6.desabastecidos')}}",
                                     data: {
+                                        fechaini: fechaini,
+                                        fechafin: fechafin,
+                                        contrato: contrato,
                                         _token: "{{ csrf_token() }}"
                                     },
                                     method: 'POST'
@@ -1061,6 +1069,9 @@ Pendientes Medcol
                                 ajax: {
                                     url: "{{route('medcol6.anulados')}}",
                                     data: {
+                                        fechaini: fechaini,
+                                        fechafin: fechafin,
+                                        contrato: contrato,
                                         _token: "{{ csrf_token() }}"
                                     },
                                     method: 'POST'
@@ -1298,6 +1309,162 @@ Pendientes Medcol
                                     },
                                     {
                                         data: 'fecha_anulado'
+                                    },
+                                    {
+                                        data: 'fecha_entrega'
+                                    },
+                                    {
+                                        data: 'centroproduccion'
+                                    }
+                                ],
+
+                                //Botones----------------------------------------------------------------------
+
+                                "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
+
+                                buttons: [{
+
+                                        extend: 'copyHtml5',
+                                        titleAttr: 'Copiar Registros',
+                                        title: "Control de horas",
+                                        className: "btn  btn-outline-primary btn-sm"
+
+
+                                    },
+                                    {
+
+                                        extend: 'excelHtml5',
+                                        titleAttr: 'Exportar Excel',
+                                        title: "Control de horas",
+                                        className: "btn  btn-outline-success btn-sm"
+
+
+                                    },
+                                    {
+
+                                        extend: 'csvHtml5',
+                                        titleAttr: 'Exportar csv',
+                                        className: "btn  btn-outline-warning btn-sm"
+
+                                    },
+                                    {
+
+                                        extend: 'pdfHtml5',
+                                        titleAttr: 'Exportar pdf',
+                                        className: "btn  btn-outline-secondary btn-sm"
+
+
+                                    }
+                                ],
+
+                            });
+
+                    }else if (tabId === "custom-tabs-one-datos-sincontacto-tab") {
+                        // Llamar a la función correspondiente al tab "Sin Contacto"
+
+                        // Destruir la tabla existente
+                        if ($.fn.DataTable.isDataTable("#sincontacto")) {
+                            $("#sincontacto").DataTable().destroy();
+                        }
+                        // Funcion para pintar con data table la pestaña Lista Sin Contacto
+                        var datatable =
+                            $('#sincontacto').DataTable({
+                                language: idioma_espanol,
+                                processing: true,
+                                lengthMenu: [
+                                    [25, 50, 100, 500, -1],
+                                    [25, 50, 100, 500, "Mostrar Todo"]
+                                ],
+                                processing: true,
+                                serverSide: true,
+                                aaSorting: [
+                                    [1, "desc"]
+                                ],
+                                ajax: {
+                                    url: "{{route('medcol6.sincontacto')}}",
+                                    data: {
+                                        fechaini: fechaini,
+                                        fechafin: fechafin,
+                                        contrato: contrato,
+                                        _token: "{{ csrf_token() }}"
+                                    },
+                                    method: 'POST'
+                                },
+                                columns: [{
+                                        data: 'action',
+                                        orderable: false
+                                    },
+                                    {
+                                        data: 'id'
+                                    },
+                                    {
+                                        data: 'Tipodocum'
+                                    },
+                                    {
+                                        data: 'cantdpx'
+                                    },
+                                    {
+                                        data: 'cantord'
+                                    },
+                                    {
+                                        data: 'fecha_factura'
+                                    },
+                                    {
+                                        data: 'fecha'
+                                    },
+                                    {
+                                        data: 'historia'
+                                    },
+                                    {
+                                        data: 'apellido1'
+                                    },
+                                    {
+                                        data: 'apellido2'
+                                    },
+                                    {
+                                        data: 'nombre1'
+                                    },
+                                    {
+                                        data: 'nombre2'
+                                    },
+                                    {
+                                        data: 'cantedad'
+                                    },
+                                    {
+                                        data: 'direcres'
+                                    },
+                                    {
+                                        data: 'telefres'
+                                    },
+                                    {
+                                        data: 'documento'
+                                    },
+                                    {
+                                        data: 'factura'
+                                    },
+                                    {
+                                        data: 'codigo'
+                                    },
+                                    {
+                                        data: 'nombre'
+                                    },
+                                    {
+                                        data: 'cums'
+                                    },
+                                    {
+                                        data: 'cantidad'
+                                    },
+                                    {
+                                        data: 'cajero'
+                                    },
+                                    {
+                                        data: 'usuario'
+                                    },
+                                    {
+                                        data: 'estado'
+                                    },
+                                    {
+                                        data: 'fecha_impresion'
                                     },
                                     {
                                         data: 'fecha_entrega'
@@ -3062,11 +3229,46 @@ Pendientes Medcol
             });
         }
 
+        // Función para verificar y mostrar/ocultar columnas de entrega
+        function verificarYMostrarColumnasEntrega() {
+            if (tablaPendientesPaciente) {
+                // Verificar si hay algún registro con estado ENTREGADO
+                let hayEntregados = false;
+                $('.estado-select').each(function() {
+                    if ($(this).val() === 'ENTREGADO') {
+                        hayEntregados = true;
+                        return false;
+                    }
+                });
+                
+                // Mostrar/ocultar columnas Doc Entrega (13) y Factura Entrega (14)
+                tablaPendientesPaciente.column(13).visible(hayEntregados);
+                tablaPendientesPaciente.column(14).visible(hayEntregados);
+                
+                // Ajustar el layout de la tabla
+                tablaPendientesPaciente.columns.adjust();
+            }
+        }
+
         // Cargar tabla de pendientes del paciente
         function cargarTablaPendientesPaciente(pendientes) {
             if ($.fn.DataTable.isDataTable('#tablaPendientesPaciente')) {
                 $('#tablaPendientesPaciente').DataTable().destroy();
             }
+
+            // Mapeo de servicios a documentos de entrega
+            var servicioDocMap = {
+                "BIO1": "CDBI",
+                "PAC": "CDPC", 
+                "DLR1": "CDDO",
+                "DPA1": "CDDO",
+                "EM01": "CDEM",
+                "FRIO": "CDIO",
+                "EHU1": "CDHU",
+                "FRJA": "CDJA",
+                "FRIP": "CDIP",
+                "BDNT": "EVIO"
+            };
 
             const data = pendientes.map(pendiente => [
                 `<input type="checkbox" class="pendiente-checkbox" value="${pendiente.id}" data-cantord="${pendiente.cantord}">`,
@@ -3085,14 +3287,24 @@ Pendientes Medcol
                     data-id="${pendiente.id}">`,
                 pendiente.saldo_pendiente,
                 `<span class="badge badge-${getEstadoBadgeClass(pendiente.estado)}">${pendiente.estado}</span>`,
-                `<select class="form-control form-control-sm estado-select" data-id="${pendiente.id}">
+                `<select class="form-control form-control-sm estado-select select2" data-id="${pendiente.id}" style="width: 100%;">
                 <option value="PENDIENTE" ${pendiente.estado === 'PENDIENTE' ? 'selected' : ''}>PENDIENTE</option>
                 <option value="ENTREGADO" ${pendiente.estado === 'ENTREGADO' ? 'selected' : ''}>ENTREGADO</option>
                 <option value="TRAMITADO" ${pendiente.estado === 'TRAMITADO' ? 'selected' : ''}>TRAMITADO</option>
                 <option value="DESABASTECIDO" ${pendiente.estado === 'DESABASTECIDO' ? 'selected' : ''}>DESABASTECIDO</option>
                 <option value="ANULADO" ${pendiente.estado === 'ANULADO' ? 'selected' : ''}>ANULADO</option>
                 <option value="VENCIDO" ${pendiente.estado === 'VENCIDO' ? 'selected' : ''}>VENCIDO</option>
-            </select>`
+                <option value="SIN CONTACTO" ${pendiente.estado === 'SIN CONTACTO' ? 'selected' : ''}>SIN CONTACTO</option>
+            </select>`,
+                `<input type="text" class="form-control form-control-sm doc-entrega-field" 
+                    value="${servicioDocMap[pendiente.centroproduccion] || ''}" 
+                    data-id="${pendiente.id}" readonly>`,
+                `<input type="text" class="form-control form-control-sm factura-entrega-field" 
+                    value="${pendiente.factura_entrega || ''}" 
+                    data-id="${pendiente.id}" placeholder="Número factura">`,
+                `<textarea class="form-control form-control-sm observaciones-pendiente" 
+                    data-id="${pendiente.id}" rows="2" placeholder="Ingrese observaciones..."
+                    style="resize: vertical; min-height: 60px;"></textarea>`
             ]);
 
             tablaPendientesPaciente = $('#tablaPendientesPaciente').DataTable({
@@ -3104,15 +3316,33 @@ Pendientes Medcol
                 ],
                 columnDefs: [{
                         orderable: false,
-                        targets: [0, 7, 8, 12]
-                    }, // checkbox, cantidad entregada, fecha entrega, nuevo estado
+                        targets: [0, 7, 8, 12, 13, 14, 15]
+                    }, // checkbox, cantidad entregada, fecha entrega, nuevo estado, doc entrega, factura entrega, observaciones
                     {
                         className: 'text-center',
-                        targets: [0, 6, 7, 8, 9, 10]
+                        targets: [0, 6, 7, 8, 9, 10, 12, 13, 14]
+                    },
+                    {
+                        visible: false,
+                        targets: [13, 14] // Doc Entrega y Factura Entrega inicialmente ocultas
                     }
                 ],
                 drawCallback: function() {
                     actualizarContadorSeleccionados();
+                    // Inicializar Select2 para los select de estado
+                    $('.estado-select').select2({
+                        width: '100%',
+                        placeholder: 'Seleccione estado',
+                        allowClear: false
+                    });
+                    
+                    // Manejar cambio de estado para mostrar/ocultar campos de entrega
+                    $('.estado-select').on('change', function() {
+                        verificarYMostrarColumnasEntrega();
+                    });
+                    
+                    // Verificar estado inicial para mostrar/ocultar campos
+                    verificarYMostrarColumnasEntrega();
                 }
             });
         }
@@ -3225,12 +3455,18 @@ Pendientes Medcol
                 const estado = $(`.estado-select[data-id="${id}"]`).val();
                 const cantidad = $(`.cantidad-entregada[data-id="${id}"]`).val();
                 const fechaEntrega = $(`.fecha-entrega[data-id="${id}"]`).val();
+                const observaciones = $(`.observaciones-pendiente[data-id="${id}"]`).val();
+                const docEntrega = $(`.doc-entrega-field[data-id="${id}"]`).val();
+                const facturaEntrega = $(`.factura-entrega-field[data-id="${id}"]`).val();
 
                 return {
                     id: parseInt(id),
                     cantdpx: parseFloat(cantidad) || 0,
                     estado: estado,
-                    fecha_entrega: fechaEntrega
+                    fecha_entrega: fechaEntrega,
+                    observaciones: observaciones || '',
+                    doc_entrega: (estado === 'ENTREGADO') ? docEntrega : null,
+                    factura_entrega: (estado === 'ENTREGADO') ? facturaEntrega : null
                 };
             });
 

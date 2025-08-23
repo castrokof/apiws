@@ -20,4 +20,12 @@ class ObservacionesApiMedcol6 extends Model
     {
         return $date->format('Y-m-d H:i:s');
     }
+
+    /**
+     * Relación con pendiente
+     */
+    public function pendiente()
+    {
+        return $this->belongsTo(PendienteApiMedcol6::class, 'pendiente_id');
+    }
 }

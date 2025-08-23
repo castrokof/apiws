@@ -103,7 +103,7 @@
                                                 <th>Teléfono</th>
                                                 <th>Total Pendientes</th>
                                                 <th>Pendientes Activos</th>
-                                                <th>Última Factura</th>
+                                                <th>Último Pendiente</th>
                                                 <th class="text-center">Acciones</th>
                                             </tr>
                                         </thead>
@@ -194,6 +194,9 @@
                                                 <th>Cant. Pendiente</th>
                                                 <th>Estado Actual</th>
                                                 <th class="text-center">Nuevo Estado</th>
+                                                <th class="text-center doc-entrega-col">Doc Entrega</th>
+                                                <th class="text-center factura-entrega-col">Factura Entrega</th>
+                                                <th class="text-center">Observaciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -269,6 +272,34 @@
     .badge-desabastecido { background-color: #fd7e14; }
     .badge-anulado { background-color: #dc3545; }
     .badge-vencido { background-color: #6c757d; }
+    .badge-sincontacto { background-color: #88c3f7; }
+
+    /* Estilos para los campos de la tabla */
+    .estado-select {
+        min-width: 140px;
+    }
+    
+    .observaciones-pendiente {
+        min-width: 200px;
+        font-size: 12px;
+    }
+    
+    /* Mejorar el espaciado de la tabla */
+    #tablaPendientesPaciente td {
+        vertical-align: middle;
+        padding: 8px 4px;
+    }
+    
+    /* Select2 dentro de la tabla */
+    .select2-container--default .select2-selection--single {
+        height: 31px;
+        border: 1px solid #ced4da;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 29px;
+        font-size: 14px;
+    }
 </style>
 
 <script>
