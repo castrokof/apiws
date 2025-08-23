@@ -245,6 +245,11 @@
                 <input type="date" name="fecha_anulado" id="fecha_anulado" class="form-control">
                 <input type="hidden" name="enviar_fecha_anulado" id="enviar_fecha_anulado" value="false">
             </div>
+            <div id="futuro5" class="col-lg-3" style="display:none;">
+                <label for="fecha_sincontacto" class="col-xs-4 control-label ">📅 Fecha Sin Contacto</label>
+                <input type="date" name="fecha_sincontacto" id="fecha_sincontacto" class="form-control">
+                <input type="hidden" name="enviar_fecha_sincontacto" id="enviar_fecha_sincontacto" value="false">
+            </div>
         </div>
     </div>
 

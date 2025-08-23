@@ -2265,8 +2265,11 @@ class PendienteApiMedcol6Controller extends Controller
             'pendientes' => 'required|array',
             'pendientes.*.id' => 'required|integer|exists:pendiente_api_medcol6,id',
             'pendientes.*.cantdpx' => 'required|numeric|min:0',
-            'pendientes.*.estado' => 'required|in:PENDIENTE,ENTREGADO,TRAMITADO,DESABASTECIDO,ANULADO,VENCIDO',
+            'pendientes.*.estado' => 'required|in:PENDIENTE,ENTREGADO,TRAMITADO,DESABASTECIDO,ANULADO,VENCIDO,SIN CONTACTO',
             'pendientes.*.fecha_entrega' => 'nullable|date',
+            'pendientes.*.fecha_impresion' => 'nullable|date',
+            'pendientes.*.fecha_anulado' => 'nullable|date',
+            'pendientes.*.fecha_sincontacto' => 'nullable|date',
             'pendientes.*.observaciones' => 'nullable|string|max:1000',
             'pendientes.*.doc_entrega' => 'nullable|string|max:50',
             'pendientes.*.factura_entrega' => 'nullable|string|max:50'
@@ -2324,12 +2327,33 @@ class PendienteApiMedcol6Controller extends Controller
                                 $updateData['factura_entrega'] = $pendienteData['factura_entrega'];
                             }
                             break;
+                            
                         case 'TRAMITADO':
                         case 'DESABASTECIDO':
-                            $updateData['fecha_impresion'] = now();
+                            // Usar fecha personalizada si se proporciona, sino fecha actual
+                            if (!empty($pendienteData['fecha_impresion'])) {
+                                $updateData['fecha_impresion'] = Carbon::parse($pendienteData['fecha_impresion']);
+                            } else {
+                                $updateData['fecha_impresion'] = now();
+                            }
                             break;
+                            
                         case 'ANULADO':
-                            $updateData['fecha_anulado'] = now();
+                            // Usar fecha personalizada si se proporciona, sino fecha actual
+                            if (!empty($pendienteData['fecha_anulado'])) {
+                                $updateData['fecha_anulado'] = Carbon::parse($pendienteData['fecha_anulado']);
+                            } else {
+                                $updateData['fecha_anulado'] = now();
+                            }
+                            break;
+                            
+                        case 'SIN CONTACTO':
+                            // Para SIN CONTACTO usamos updated_at
+                            if (!empty($pendienteData['fecha_sincontacto'])) {
+                                $updateData['updated_at'] = Carbon::parse($pendienteData['fecha_sincontacto']);
+                            } else {
+                                $updateData['updated_at'] = now();
+                            }
                             break;
                     }
 

@@ -3229,6 +3229,23 @@ Pendientes Medcol
             });
         }
 
+        // Función para obtener el nombre del campo de fecha según el estado
+        function obtenerCampoFechaPorEstado(estado) {
+            switch (estado) {
+                case 'ENTREGADO':
+                    return 'fecha_entrega';
+                case 'TRAMITADO':
+                case 'DESABASTECIDO':
+                    return 'fecha_impresion';
+                case 'ANULADO':
+                    return 'fecha_anulado';
+                case 'SIN CONTACTO':
+                    return 'fecha_sincontacto';
+                default:
+                    return null;
+            }
+        }
+
         // Función para verificar y mostrar/ocultar columnas de entrega
         function verificarYMostrarColumnasEntrega() {
             if (tablaPendientesPaciente) {
@@ -3355,7 +3372,8 @@ Pendientes Medcol
                 'TRAMITADO': 'tramitado',
                 'DESABASTECIDO': 'desabastecido',
                 'ANULADO': 'anulado',
-                'VENCIDO': 'vencido'
+                'VENCIDO': 'vencido',
+                'SIN CONTACTO': 'sin contacto'
             };
             return clases[estado] || 'secondary';
         }
@@ -3459,15 +3477,27 @@ Pendientes Medcol
                 const docEntrega = $(`.doc-entrega-field[data-id="${id}"]`).val();
                 const facturaEntrega = $(`.factura-entrega-field[data-id="${id}"]`).val();
 
-                return {
+                // Crear objeto base
+                const dataItem = {
                     id: parseInt(id),
                     cantdpx: parseFloat(cantidad) || 0,
                     estado: estado,
-                    fecha_entrega: fechaEntrega,
-                    observaciones: observaciones || '',
-                    doc_entrega: (estado === 'ENTREGADO') ? docEntrega : null,
-                    factura_entrega: (estado === 'ENTREGADO') ? facturaEntrega : null
+                    observaciones: observaciones || ''
                 };
+
+                // Agregar la fecha específica según el estado usando la nueva función
+                const campoFecha = obtenerCampoFechaPorEstado(estado);
+                if (campoFecha) {
+                    dataItem[campoFecha] = fechaEntrega || new Date().toISOString().split('T')[0];
+                }
+
+                // Agregar campos de entrega solo para estado ENTREGADO
+                if (estado === 'ENTREGADO') {
+                    dataItem.doc_entrega = docEntrega;
+                    dataItem.factura_entrega = facturaEntrega;
+                }
+
+                return dataItem;
             });
 
             $.ajax({
