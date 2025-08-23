@@ -3305,14 +3305,14 @@ Pendientes Medcol
                 pendiente.saldo_pendiente,
                 `<span class="badge badge-${getEstadoBadgeClass(pendiente.estado)}">${pendiente.estado}</span>`,
                 `<select class="form-control form-control-sm estado-select select2" data-id="${pendiente.id}" style="width: 100%;">
-                <option value="PENDIENTE" ${pendiente.estado === 'PENDIENTE' ? 'selected' : ''}>PENDIENTE</option>
-                <option value="ENTREGADO" ${pendiente.estado === 'ENTREGADO' ? 'selected' : ''}>ENTREGADO</option>
-                <option value="TRAMITADO" ${pendiente.estado === 'TRAMITADO' ? 'selected' : ''}>TRAMITADO</option>
-                <option value="DESABASTECIDO" ${pendiente.estado === 'DESABASTECIDO' ? 'selected' : ''}>DESABASTECIDO</option>
-                <option value="ANULADO" ${pendiente.estado === 'ANULADO' ? 'selected' : ''}>ANULADO</option>
-                <option value="VENCIDO" ${pendiente.estado === 'VENCIDO' ? 'selected' : ''}>VENCIDO</option>
-                <option value="SIN CONTACTO" ${pendiente.estado === 'SIN CONTACTO' ? 'selected' : ''}>SIN CONTACTO</option>
-            </select>`,
+                    <option value="PENDIENTE" ${pendiente.estado === 'PENDIENTE' ? 'selected' : ''}>PENDIENTE</option>
+                    <option value="ENTREGADO" ${pendiente.estado === 'ENTREGADO' ? 'selected' : ''}>ENTREGADO</option>
+                    <option value="TRAMITADO" ${pendiente.estado === 'TRAMITADO' ? 'selected' : ''}>TRAMITADO</option>
+                    <option value="DESABASTECIDO" ${pendiente.estado === 'DESABASTECIDO' ? 'selected' : ''}>DESABASTECIDO</option>
+                    <option value="ANULADO" ${pendiente.estado === 'ANULADO' ? 'selected' : ''}>ANULADO</option>
+                    <option value="VENCIDO" ${pendiente.estado === 'VENCIDO' ? 'selected' : ''}>VENCIDO</option>
+                    <option value="SIN CONTACTO" ${pendiente.estado === 'SIN CONTACTO' ? 'selected' : ''}>SIN CONTACTO</option>
+                </select>`,
                 `<input type="text" class="form-control form-control-sm doc-entrega-field" 
                     value="${servicioDocMap[pendiente.centroproduccion] || ''}" 
                     data-id="${pendiente.id}" readonly>`,
