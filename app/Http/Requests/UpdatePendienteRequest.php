@@ -35,7 +35,7 @@ class UpdatePendienteRequest extends FormRequest
         
         // Reglas base que siempre aplican
         $rules = [
-            'estado' => 'required|in:PENDIENTE,ENTREGADO,DESABASTECIDO,ANULADO',
+            'estado' => 'required|in:PENDIENTE,ENTREGADO,DESABASTECIDO,ANULADO,VENCIDO,SIN CONTACTO',
             'cantord' => 'required|numeric|min:1'
         ];
 
@@ -63,6 +63,21 @@ class UpdatePendienteRequest extends FormRequest
                 $rules = array_merge($rules, [
                     'cantdpx' => 'nullable|numeric|min:0|lte:cantord',
                     'fecha_anulado' => 'required|date|after_or_equal:fecha_factura',
+                    'observacion' => 'nullable|string|max:500'
+                ]);
+                break;
+
+            case 'VENCIDO':
+                $rules = array_merge($rules, [
+                    'cantdpx' => 'nullable|numeric|min:0|lte:cantord',
+                    'observacion' => 'nullable|string|max:500'
+                ]);
+                break;
+
+            case 'SIN CONTACTO':
+                $rules = array_merge($rules, [
+                    'cantdpx' => 'nullable|numeric|min:0|lte:cantord',
+                    'fecha_sincontacto' => 'required|date|after_or_equal:fecha_factura',
                     'observacion' => 'nullable|string|max:500'
                 ]);
                 break;

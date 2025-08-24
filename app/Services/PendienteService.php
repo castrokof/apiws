@@ -42,7 +42,7 @@ class PendienteService
             
             // Crear observación si es necesario
             if (!empty($data['observacion'])) {
-                $this->createObservacion($pendiente, $data['observacion']);
+                $this->createObservacion($pendiente, $data['observacion'], $data['estado']);
             }
             
             // Crear registro de entregado si aplica
@@ -79,6 +79,7 @@ class PendienteService
     {
         $processedData = $data;
         $processedData['usuario'] = Auth::user()->name;
+        $processedData['estado'] = $data['estado'];
         $processedData['updated_at'] = now();
 
         switch ($data['estado']) {
@@ -96,6 +97,12 @@ class PendienteService
                 
             case 'PENDIENTE':
                 $processedData = $this->processPendienteState($processedData);
+                break;
+            case 'VENCIDO':
+                $processedData = $this->processVencidoState($processedData);
+                break;
+            case 'SIN CONTACTO':
+                $processedData = $this->processSinContactoState($processedData);
                 break;
         }
 
@@ -160,6 +167,29 @@ class PendienteService
         $data['fecha'] = now()->format('Y-m-d');
         return $data;
     }
+    /**
+     * Procesar estado VENCIDO
+     *
+     * @param array $data
+     * @return array
+     */
+    private function processVencidoState(array $data): array
+    {
+        $data['fecha_anulado'] = $data['fecha_anulado'] ?? now()->format('Y-m-d');
+        return $data;
+    }
+
+    /**
+     * Procesar estado SIN CONTACTO
+     *
+     * @param array $data
+     * @return array
+     */
+    private function processSinContactoState(array $data): array
+    {
+        $data['fecha_sincontacto'] = $data['fecha_sincontacto'] ?? now()->format('Y-m-d');
+        return $data;
+    }
 
     /**
      * Crear observación
@@ -168,15 +198,13 @@ class PendienteService
      * @param string $observacion
      * @return ObservacionesApiMedcol6
      */
-    private function createObservacion(PendienteApiMedcol6 $pendiente, string $observacion): ObservacionesApiMedcol6
+    private function createObservacion(PendienteApiMedcol6 $pendiente, string $observacion, string $estado): ObservacionesApiMedcol6
     {
         return ObservacionesApiMedcol6::create([
             'pendiente_id' => $pendiente->id,
-            'factura' => $pendiente->factura,
-            'documento' => $pendiente->documento,
             'observacion' => $observacion,
+            'estado' => $estado,
             'usuario' => Auth::user()->name,
-            'fecha_observacion' => now(),
             'created_at' => now(),
             'updated_at' => now()
         ]);
@@ -310,7 +338,7 @@ class PendienteService
     public function validateData(array $data, string $estado): array
     {
         $rules = [
-            'estado' => 'required|in:PENDIENTE,ENTREGADO,DESABASTECIDO,ANULADO',
+            'estado' => 'required|in:PENDIENTE,ENTREGADO,DESABASTECIDO,ANULADO,VENCIDO,SIN CONTACTO',
             'observacion' => 'required|string|min:3|max:500'
         ];
 
@@ -352,6 +380,11 @@ class PendienteService
             case 'ANULADO':
                 $rules['fecha_anulado'] = 'required|date';
                 $messages['fecha_anulado.required'] = 'La fecha de anulación es requerida';
+                break;
+
+            case 'SIN CONTACTO':
+                $rules['fecha_sincontacto'] = 'required|date';
+                $messages['fecha_sincontacto.required'] = 'La fecha de sin contacto es requerida';
                 break;
         }
 

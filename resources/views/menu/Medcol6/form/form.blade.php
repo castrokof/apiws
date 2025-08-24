@@ -205,13 +205,15 @@
                 <span class="modal-quantity-badge saldo-badge">Inventario actual</span>
             </div>
             <div class="modal-form-group">
-                <label for="estado" class="col-xs-4 control-label requerido">Estado</label>                
+                <label for="estado" class="col-xs-4 control-label requerido">Estado</label>
                 <select name="estado" id="estado" class="form-control" style="width: 100%;" required>
                     <option value="">---Seleccione Estado---</option>
                     <option value="PENDIENTE">📋 PENDIENTE</option>
                     <option value="ENTREGADO">✅ ENTREGADO</option>
                     <option value="DESABASTECIDO">❌ DESABASTECIDO</option>
                     <option value="ANULADO">🚫 ANULADO</option>
+                    <option value="VENCIDO">❌ VENCIDO</option>
+                    <option value="SIN CONTACTO">📅 SIN CONTACTO</option>
                 </select>
             </div>
         </div>
@@ -529,7 +531,8 @@ function mostrarCamposSegunEstado(estado) {
     document.getElementById('futuro2').style.display = 'none'; // fecha_impresion
     document.getElementById('futuro3').style.display = 'none'; // fecha (pendiente)
     document.getElementById('futuro4').style.display = 'none'; // fecha_anulado
-    
+    document.getElementById('futuro5').style.display = 'none'; // fecha_sincontacto
+
     // Mostrar campos según el estado
     switch (estado) {
         case 'ENTREGADO':
@@ -543,6 +546,9 @@ function mostrarCamposSegunEstado(estado) {
             break;
         case 'PENDIENTE':
             document.getElementById('futuro3').style.display = 'block';
+            break;
+        case 'SIN CONTACTO':
+            document.getElementById('futuro5').style.display = 'block';
             break;
     }
 }
@@ -567,7 +573,7 @@ function limpiarCamposEditables() {
         // Solo limpiar campos que el usuario puede editar
         const camposEditables = [
             'cantord', 'cantdpx', 'estado', 'fecha_entrega', 
-            'fecha_impresion', 'fecha_anulado', 'factura_entrega', 'observacion'
+            'fecha_impresion', 'fecha_anulado', 'factura_entrega', 'observacion', 'fecha_sincontacto'
         ];
         
         camposEditables.forEach(fieldId => {
