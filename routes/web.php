@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Medcol6\ExportarExcel\ExportController;
+use App\Http\Controllers\Scann\ScannController;
+use App\Http\Controllers\Medcol6\OrdenCompraApiMedcol6Controller;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +53,9 @@ Route::emailVerification();
 //Ruta para consultar lo direccionado por la EPS
 Route::get('/home', 'HomeController@index')->name('home')->middleware('verified')->middleware('verifyuser');
 
+//Ruta para consultar lo direccionado por la EPS
+Route::get('/homeapi', 'HomeController@index')->name('homeapi')->middleware('verified')->middleware('verifyuser');
+
 //Ruta para consultar lo direccionado por la EPS por documento
 Route::get('/direccionado', 'HomeController@direccionado')->name('direccionado')->middleware('verified')->middleware('verifyuser');
 
@@ -58,6 +64,9 @@ Route::post('/programar', 'HomeController@Programarm')->name('programar')->middl
 
 //Ruta para consultar lo programado por el regente o administrador
 Route::get('/programado', 'HomeController@indexp')->name('programado')->middleware('verified')->middleware('verifyuser');
+
+//Ruta para consultar lo programado por el regente o administrador
+Route::post('/programado1', 'HomeController@indexp')->name('programado1')->middleware('verified')->middleware('verifyuser');
 
 //Ruta que se usa para enviar por el servicio put a anular lo programado desde la function indexp
 Route::post('/a-programar', 'HomeController@Anularprogramacion')->name('a-programar')->middleware('verified')->middleware('verifyuser');

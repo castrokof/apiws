@@ -33,7 +33,7 @@
     </div>
 </div>
 
-<!-- CSS para estilos del modal y formulario -->
+<!-- CSS para estilos del modal y formulario en tabsIndexPendientes-->
 <style>
     .tabs-container {
         background: #fff;
