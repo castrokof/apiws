@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía: Guía Visual de Reglas para Pendientes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .flow-arrow {
+            font-size: 2rem;
+            line-height: 1;
+            color: #007EA7;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#003459]">Guía Visual de Reglas para Pendientes</h1>
+            <p class="text-lg text-[#007EA7] mt-2">Una referencia rápida para la gestión correcta de estados y campos.</p>
+        </header>
+
+        <section id="reglas-generales" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-[#003459]">Reglas Generales Siempre Activas</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-[#00A8E8]">
+                    <h3 class="text-xl font-semibold mb-2 text-[#003459]">Estado del Pendiente</h3>
+                    <p class="text-gray-600">Es <span class="font-bold text-[#007EA7]">obligatorio</span> seleccionar un estado válido para cada operación. Este campo determina qué otras reglas se aplicarán.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-[#00A8E8]">
+                    <h3 class="text-xl font-semibold mb-2 text-[#003459]">Cantidad Ordenada</h3>
+                    <p class="text-gray-600">Siempre se debe especificar la cantidad original del Pendiente. Debe ser un <span class="font-bold text-[#007EA7]">número mayor que cero</span>.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="flujo-proceso" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-[#003459]">El Flujo de un Pendiente</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <p class="text-center text-gray-600 mb-6">Un Pendiente inicia en estado 'Pendiente' y puede transitar hacia diferentes estados finales dependiendo de las acciones de gestión. Este diagrama muestra las rutas más comunes.</p>
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 text-center">
+                    <div class="p-4 bg-[#00A8E8] text-white rounded-lg shadow-lg">
+                        <span class="font-bold">INICIO: PENDIENTE</span>
+                    </div>
+                    <div class="flow-arrow transform md:-rotate-0">➔</div>
+                    <div class="flex flex-col space-y-2">
+                         <div class="p-3 bg-[#007EA7] text-white rounded-lg shadow">ENTREGADO</div>
+                         <div class="p-3 bg-[#007EA7] text-white rounded-lg shadow">ANULADO</div>
+                         <div class="p-3 bg-[#007EA7] text-white rounded-lg shadow">DESABASTECIDO</div>
+                         <div class="p-3 bg-[#007EA7] text-white rounded-lg shadow">SIN CONTACTO</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="comparativa" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-[#003459]">Campos Requeridos por Estado</h2>
+             <div class="bg-white p-6 rounded-lg shadow-md">
+                <p class="text-center text-gray-600 mb-4">No todos los estados requieren la misma cantidad de información. El estado 'Entregado' es el que más datos necesita para ser registrado correctamente, ya que finaliza el ciclo de venta.</p>
+                <div class="chart-container">
+                    <canvas id="camposRequeridosChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="reglas-especificas">
+            <h2 class="text-3xl font-bold text-center mb-8 text-[#003459]">Detalle de Reglas por Estado</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <div class="bg-white p-6 rounded-lg shadow-md flex flex-col">
+                    <h3 class="text-2xl font-bold text-[#003459] mb-4">1. Entregado</h3>
+                    <p class="text-gray-600 mb-4 flex-grow">Para Pendientes completados exitosamente. Es el estado con más validaciones.</p>
+                    <ul class="space-y-2 text-gray-700">
+                        <li><span class="text-[#00A8E8] mr-2">✓</span><strong>Cant. Entregada:</strong> Requerido, ≥ 1</li>
+                        <li><span class="text-[#00A8E8] mr-2">✓</span><strong>Fecha Entrega:</strong> Requerida</li>
+                        <li><span class="text-[#00A8E8] mr-2">✓</span><strong>Factura Entrega:</strong> Requerida</li>
+                        <li><span class="text-[#00A8E8] mr-2">✓</span><strong>Doc. Entrega:</strong> Requerido</li>
+                        <li><span class="text-[#00A8E8] mr-2">✓</span><strong>Observaciones:</strong> Requeridas (mín. 3 car.)</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md flex flex-col">
+                    <h3 class="text-2xl font-bold text-[#003459] mb-4">2. Desabastecido</h3>
+                    <p class="text-gray-600 mb-4 flex-grow">Cuando no hay stock para surtir el Pendiente.</p>
+                    <ul class="space-y-2 text-gray-700">
+                        <li><span class="text-[#00A8E8] mr-2">✓</span><strong>Fecha Tramitado:</strong> Requerida</li>
+                        <li><span class="text-gray-400 mr-2">○</span><strong>Cant. Entregada:</strong> Opcional</li>
+                        <li><span class="text-gray-400 mr-2">○</span><strong>Observaciones:</strong> Opcional</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md flex flex-col">
+                    <h3 class="text-2xl font-bold text-[#003459] mb-4">3. Anulado</h3>
+                    <p class="text-gray-600 mb-4 flex-grow">Para Pendientes cancelados por cualquier motivo.</p>
+                    <ul class="space-y-2 text-gray-700">
+                        <li><span class="text-[#00A8E8] mr-2">✓</span><strong>Fecha Anulación:</strong> Requerida</li>
+                        <li><span class="text-gray-400 mr-2">○</span><strong>Cant. Entregada:</strong> Opcional</li>
+                        <li><span class="text-gray-400 mr-2">○</span><strong>Observaciones:</strong> Opcional</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md flex flex-col">
+                    <h3 class="text-2xl font-bold text-[#003459] mb-4">4. Vencido</h3>
+                    <p class="text-gray-600 mb-4 flex-grow">Pendientes que superaron el tiempo límite de gestión.</p>
+                     <ul class="space-y-2 text-gray-700">
+                        <li><span class="text-gray-400 mr-2">○</span><strong>Cant. Entregada:</strong> Opcional</li>
+                        <li><span class="text-gray-400 mr-2">○</span><strong>Observaciones:</strong> Opcional</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md flex flex-col">
+                    <h3 class="text-2xl font-bold text-[#003459] mb-4">5. Sin Contacto</h3>
+                    <p class="text-gray-600 mb-4 flex-grow">Cuando no se pudo contactar al cliente.</p>
+                    <ul class="space-y-2 text-gray-700">
+                        <li><span class="text-[#00A8E8] mr-2">✓</span><strong>Fecha Sin Contacto:</strong> Requerida</li>
+                        <li><span class="text-gray-400 mr-2">○</span><strong>Cant. Entregada:</strong> Opcional</li>
+                        <li><span class="text-gray-400 mr-2">○</span><strong>Observaciones:</strong> Opcional</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md flex flex-col">
+                    <h3 class="text-2xl font-bold text-[#003459] mb-4">6. Pendiente</h3>
+                    <p class="text-gray-600 mb-4 flex-grow">Estado inicial de todo Pendiente nuevo.</p>
+                     <ul class="space-y-2 text-gray-700">
+                        <li><span class="text-gray-400 mr-2">○</span><strong>Cant. Entregada:</strong> Opcional</li>
+                        <li><span class="text-gray-400 mr-2">○</span><strong>Observaciones:</strong> Opcional</li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('camposRequeridosChart').getContext('2d');
+            
+            const data = {
+                labels: ['ENTREGADO', 'DESABASTECIDO', 'ANULADO', 'SIN CONTACTO', 'VENCIDO', 'PENDIENTE'],
+                datasets: [{
+                    label: 'Campos Requeridos Adicionales',
+                    data: [5, 1, 1, 1, 0, 0],
+                    backgroundColor: '#00A8E8',
+                    borderColor: '#007EA7',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    barThickness: 30,
+                }]
+            };
+
+            const options = {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                         grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) {
+                                  return label.join(' ');
+                                } else {
+                                  return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: options
+            });
+        });
+    </script>
+
+</body>
+</html>

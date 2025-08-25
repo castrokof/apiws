@@ -42,6 +42,7 @@ Pendientes Medcol
 @include('menu.Medcol6.modal.modalindexresumenpendientes')
 @include('menu.Medcol6.modal.modalIndicadoresPendientes')
 @include('menu.Medcol6.modal.modalGestionPacientes')
+@include('menu.Medcol6.modal.modalReglasGestion')
 
 
 @endsection
