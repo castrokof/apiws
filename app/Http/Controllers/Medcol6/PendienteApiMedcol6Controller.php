@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Medcol6;
 
 use App\Http\Controllers\Controller;
 use App\Models\Medcol6\PendienteApiMedcol6;
+use App\Models\Medcol6\DispensadoApiMedcol6;
 use App\Models\Medcol6\EntregadosApiMedcol6;
 use App\Models\Medcol6\ObservacionesApiMedcol6;
 use App\Models\Medcol6\SaldosMedcol6;
@@ -2525,5 +2526,259 @@ class PendienteApiMedcol6Controller extends Controller
     
         // Retornar la vista si no es una solicitud AJAX
         return view('menu.Medcol6.indexAnalista');
+    }
+
+    /**
+     * Busca pendientes que pueden ser validados contra dispensados
+     */
+    public function buscarValidacion(Request $request)
+    {
+        // Aumentar tiempo de ejecución para consultas complejas
+        set_time_limit(120); // 2 minutos máximo
+        ini_set('memory_limit', '256M');
+
+        Log::info('Función buscarValidacion llamada', [
+            'user' => Auth::user()->email ?? 'unknown',
+            'request_data' => $request->all()
+        ]);
+
+        try {
+            $fechaInicial = $request->input('fecha_inicial');
+            $fechaFinal = $request->input('fecha_final');
+            $farmacia = $request->input('farmacia');
+
+            // Validar parámetros requeridos
+            if (!$fechaInicial || !$fechaFinal || !$farmacia) {
+                Log::warning('Parámetros faltantes', [
+                    'fecha_inicial' => $fechaInicial,
+                    'fecha_final' => $fechaFinal,
+                    'farmacia' => $farmacia
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Fecha inicial, fecha final y farmacia son requeridos'
+                ], 400);
+            }
+
+            Log::info('Ejecutando query de validación', [
+                'fecha_inicial' => $fechaInicial,
+                'fecha_final' => $fechaFinal,
+                'farmacia' => $farmacia,
+                'filtro_estado_dispensado' => 'DISPENSADO Y REVISADO'
+            ]);
+
+            // Query para buscar pendientes que coincidan con dispensados
+            // Estrategia optimizada: primero filtrar pendientes, luego buscar coincidencias
+            $pendientesBase = DB::table('pendiente_api_medcol6')
+                ->select('id', 'fecha', 'historia', 'codigo', 'nombre1', 'nombre2', 'apellido1', 'apellido2', 
+                        'nombre', 'cantord', 'estado', 'centroproduccion')
+                ->whereIn('estado', ['PENDIENTE', 'VENCIDO', 'SIN CONTACTO', 'DESABASTECIDO'])
+                ->where('centroproduccion', $farmacia)
+                ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
+                ->orderBy('fecha', 'desc')
+                ->limit(1000) // Limitar pendientes base
+                ->get();
+
+            Log::info('Pendientes base encontrados', ['total' => $pendientesBase->count()]);
+
+            if ($pendientesBase->isEmpty()) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [],
+                    'total' => 0,
+                    'message' => 'No se encontraron pendientes en el rango de fechas especificado'
+                ]);
+            }
+
+            // Obtener historias y códigos para optimizar la búsqueda
+            $historias = $pendientesBase->pluck('historia')->unique()->values();
+            $codigos = $pendientesBase->pluck('codigo')->unique()->values();
+
+            // Buscar dispensados que coincidan
+            $dispensados = DB::table('dispensado_medcol6')
+                ->select('historia', 'codigo', 'fecha_suministro', 'numero_unidades', 'factura', 'estado', 'id')
+                ->whereIn('historia', $historias)
+                ->whereIn('codigo', $codigos)
+                ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
+                ->get();
+
+            Log::info('Dispensados encontrados', ['total' => $dispensados->count()]);
+
+            // Hacer el matching en PHP para mejor control
+            $pendientesValidados = collect();
+            
+            foreach ($pendientesBase as $pendiente) {
+                $dispensadoCoincidente = $dispensados->first(function($dispensado) use ($pendiente) {
+                    return $dispensado->historia == $pendiente->historia 
+                        && $dispensado->codigo == $pendiente->codigo
+                        && $dispensado->fecha_suministro >= $pendiente->fecha
+                        && $dispensado->numero_unidades <= $pendiente->cantord;
+                });
+
+                if ($dispensadoCoincidente) {
+                    $pendientesValidados->push((object)[
+                        'id' => $pendiente->id,
+                        'fecha_pendiente' => $pendiente->fecha,
+                        'historia' => $pendiente->historia,
+                        'nombre1' => $pendiente->nombre1,
+                        'nombre2' => $pendiente->nombre2,
+                        'apellido1' => $pendiente->apellido1,
+                        'apellido2' => $pendiente->apellido2,
+                        'codigo' => $pendiente->codigo,
+                        'nombre_medicamento' => $pendiente->nombre,
+                        'cantord' => $pendiente->cantord,
+                        'estado_actual' => $pendiente->estado,
+                        'fecha_suministro' => $dispensadoCoincidente->fecha_suministro,
+                        'numero_unidades' => $dispensadoCoincidente->numero_unidades,
+                        'factura_dispensado' => $dispensadoCoincidente->factura,
+                        'estado_dispensado' => $dispensadoCoincidente->estado,
+                        'dispensado_id' => $dispensadoCoincidente->id
+                    ]);
+                }
+
+                // Limitar resultados para evitar timeouts
+                if ($pendientesValidados->count() >= 200) {
+                    break;
+                }
+            }
+
+            Log::info('Query ejecutado exitosamente', [
+                'total_resultados' => $pendientesValidados->count()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $pendientesValidados->values(), // Convertir a array indexado
+                'total' => $pendientesValidados->count(),
+                'message' => $pendientesValidados->count() > 0 
+                    ? "Se encontraron {$pendientesValidados->count()} pendientes validados"
+                    : 'No se encontraron coincidencias entre pendientes y dispensados'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error en buscarValidacion: ' . $e->getMessage(), [
+                'user' => Auth::user()->email ?? 'unknown',
+                'request_data' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al buscar pendientes: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Procesa entregas masivas de pendientes
+     */
+    public function procesarEntregas(Request $request)
+    {
+        try {
+            $pendientesIds = $request->input('pendientes_ids', []);
+
+            if (empty($pendientesIds)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se proporcionaron pendientes para procesar'
+                ], 400);
+            }
+
+            DB::beginTransaction();
+
+            $procesados = 0;
+            $errores = [];
+
+            foreach ($pendientesIds as $pendienteId) {
+                try {
+                    // Obtener el pendiente y su dispensado correspondiente
+                    $datosActualizar = DB::table('pendiente_api_medcol6 as p')
+                        ->join('dispensado_medcol6 as d', function($join) {
+                            $join->on('p.historia', '=', 'd.historia')
+                                 ->on('p.codigo', '=', 'd.codigo');
+                        })
+                        ->where('p.id', $pendienteId)
+                        ->whereRaw('d.fecha_suministro >= p.fecha')
+                        ->whereRaw('d.numero_unidades <= p.cantord')
+                        ->select(
+                            'd.fecha_suministro',
+                            'd.numero_unidades',
+                            'd.factura'
+                        )
+                        ->first();
+
+                    if (!$datosActualizar) {
+                        $errores[] = "No se encontraron datos de dispensado para pendiente ID: $pendienteId";
+                        continue;
+                    }
+
+                    // Separar doc_entrega y factura_entrega del campo factura
+                    $factura = $datosActualizar->factura;
+                    $docEntrega = '';
+                    $facturaEntrega = '';
+
+                    // Usar regex para separar letras y números
+                    if (preg_match('/^([A-Za-z]+)(\d+)$/', $factura, $matches)) {
+                        $docEntrega = $matches[1];
+                        $facturaEntrega = $matches[2];
+                    } else {
+                        // Si no se puede separar, asignar toda la cadena a doc_entrega
+                        $docEntrega = $factura;
+                        $facturaEntrega = '';
+                    }
+
+                    // Actualizar el pendiente
+                    $actualizado = PendienteApiMedcol6::where('id', $pendienteId)
+                        ->update([
+                            'estado' => 'ENTREGADO',
+                            'fecha_entrega' => $datosActualizar->fecha_suministro,
+                            'cantdpx' => $datosActualizar->numero_unidades,
+                            'doc_entrega' => $docEntrega,
+                            'factura_entrega' => $facturaEntrega,
+                            'updated_at' => now()
+                        ]);
+
+                    if ($actualizado) {
+                        $procesados++;
+                        
+                        // Log de la acción
+                        Log::info("Pendiente procesado como ENTREGADO", [
+                            'pendiente_id' => $pendienteId,
+                            'user' => Auth::user()->email ?? 'unknown',
+                            'fecha_entrega' => $datosActualizar->fecha_suministro,
+                            'cantidad' => $datosActualizar->numero_unidades,
+                            'doc_entrega' => $docEntrega,
+                            'factura_entrega' => $facturaEntrega
+                        ]);
+                    }
+
+                } catch (\Exception $e) {
+                    $errores[] = "Error procesando pendiente ID $pendienteId: " . $e->getMessage();
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'procesados' => $procesados,
+                'errores' => $errores,
+                'message' => "Se procesaron $procesados pendientes correctamente"
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error('Error en procesarEntregas: ' . $e->getMessage(), [
+                'user' => Auth::user()->email ?? 'unknown',
+                'request_data' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar entregas: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

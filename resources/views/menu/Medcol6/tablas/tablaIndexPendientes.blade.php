@@ -5,10 +5,9 @@
             <div class="card-header with-border">
                 <h3 class="card-title">Lista de pendientes</h3>
                 <div class="card-tools pull-right">
-                    <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalReglasGestion" title="Ver reglas de gestión">
+                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#modalReglasGestion" title="Ver reglas de gestión">
                         <i class="fas fa-info-circle"></i> Reglas
                     </button>
-                    {{-- <button type="button" class="btn create_evolution btn-default" name="create_evolution" id="create_evolution" ><i class="fa fa-fw fa-plus-circle"></i>Nueva evolución</button> --}}
                 </div>
             </div>
             <div class="card-body table-responsive p-2">

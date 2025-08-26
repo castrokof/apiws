@@ -293,6 +293,10 @@ Route::post('medcol6/pendientes-por-paciente', 'Medcol6\PendienteApiMedcol6Contr
 Route::get('medcol6/pendientes-paciente-detalle', 'Medcol6\PendienteApiMedcol6Controller@getPendientesPacienteDetalle')->name('medcol6.pendientes_paciente_detalle')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/update-multiples-pendientes', 'Medcol6\PendienteApiMedcol6Controller@updateMultiplesPendientes')->name('medcol6.update_multiples_pendientes')->middleware('verified')->middleware('verifyuser');
 
+// Rutas para gestión de pendientes - validación y entrega
+Route::post('medcol6/buscar-validacion', 'Medcol6\PendienteApiMedcol6Controller@buscarValidacion')->name('medcol6.buscar_validacion')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/procesar-entregas', 'Medcol6\PendienteApiMedcol6Controller@procesarEntregas')->name('medcol6.procesar_entregas')->middleware('verified')->middleware('verifyuser');
+
 
 //Rutas de tablas de Dispensado MEDCOL 6 SOS y JAMUNDI
 

@@ -3632,6 +3632,299 @@ Pendientes Medcol
             card.find('[data-card-widget="maximize"] i').removeClass('fa-compress').addClass('fa-expand');
             card.find('[data-card-widget="collapse"] i').removeClass('fa-plus').addClass('fa-minus');
         });
+
+        // =================================================================
+        // FUNCIONES PARA GESTIÓN DE PENDIENTES - VALIDACIÓN Y ENTREGA
+        // =================================================================
+        
+        let tablaPendientesGestion = null;
+        
+        // Event listener para abrir modal de gestión pendientes
+        $('#modalGestionPendientes').on('shown.bs.modal', function() {
+            console.log('Modal de gestión pendientes abierto');
+            // Establecer fechas por defecto
+            const hoy = new Date().toISOString().split('T')[0];
+            const haceUnMes = new Date();
+            haceUnMes.setMonth(haceUnMes.getMonth() - 1);
+            $('#fechaInicialGestion').val(haceUnMes.toISOString().split('T')[0]);
+            $('#fechaFinalGestion').val(hoy);
+        });
+
+        // Búsqueda de pendientes
+        $('#buscarPendientes').click(function() {
+            console.log('Botón buscarPendientes clickeado');
+            const fechaInicial = $('#fechaInicialGestion').val();
+            const fechaFinal = $('#fechaFinalGestion').val();
+            const farmacia = $('#farmaciaGestion').val();
+
+            console.log('Valores:', {fechaInicial, fechaFinal, farmacia});
+
+            if (!fechaInicial || !fechaFinal) {
+                Swal.fire('Error', 'Debe seleccionar fechas de inicio y fin', 'error');
+                return;
+            }
+
+            if (!farmacia) {
+                Swal.fire('Error', 'Debe seleccionar una farmacia', 'error');
+                return;
+            }
+
+            console.log('Llamando a buscarPendientesValidacion');
+            buscarPendientesValidacion(fechaInicial, fechaFinal, farmacia);
+        });
+
+        function buscarPendientesValidacion(fechaInicial, fechaFinal, farmacia) {
+            console.log('Iniciando buscarPendientesValidacion');
+            $('#loadingGestion').show();
+            $('#resultadosGestion').hide();
+
+            // Mostrar mensaje de progreso
+            $('#loadingGestion p').text('Procesando datos... Esto puede tomar unos minutos.');
+
+            if (tablaPendientesGestion) {
+                tablaPendientesGestion.destroy();
+            }
+
+            const token = $('meta[name="csrf-token"]').attr('content');
+            console.log('CSRF Token:', token);
+            
+            // URL de la ruta
+            const routeUrl = '{{ route("medcol6.buscar_validacion") }}';
+            console.log('URL de la ruta:', routeUrl);
+
+            $.ajax({
+                url: routeUrl,
+                method: 'POST',
+                timeout: 120000, // 2 minutos de timeout
+                data: {
+                    _token: token,
+                    fecha_inicial: fechaInicial,
+                    fecha_final: fechaFinal,
+                    farmacia: farmacia
+                },
+                beforeSend: function(xhr) {
+                    console.log('Enviando petición AJAX...');
+                },
+                success: function(response) {
+                    console.log('Respuesta exitosa:', response);
+                    $('#loadingGestion').hide();
+                    $('#resultadosGestion').show();
+
+                    if (response.data.length === 0) {
+                        Swal.fire('Información', 'No se encontraron pendientes que coincidan con los criterios de búsqueda', 'info');
+                        return;
+                    }
+
+                    tablaPendientesGestion = $('#tablaPendientesGestion').DataTable({
+                        data: response.data,
+                        destroy: true,
+                        pageLength: 25,
+                        order: [[1, 'desc']],
+                        language: {
+                            url: "{{ asset('theme/lte/plugins/datatables/Spanish.json') }}"
+                        },
+                        columns: [
+                            {
+                                data: null,
+                                orderable: false,
+                                className: 'text-center',
+                                render: function(data, type, row) {
+                                    return `<div class="form-check">
+                                        <input type="checkbox" class="form-check-input pendiente-checkbox" value="${row.id}">
+                                    </div>`;
+                                }
+                            },
+                            { data: 'fecha_pendiente' },
+                            { data: 'historia' },
+                            { 
+                                data: null,
+                                render: function(data, type, row) {
+                                    return `${row.nombre1} ${row.nombre2 || ''} ${row.apellido1} ${row.apellido2 || ''}`.trim();
+                                }
+                            },
+                            { data: 'codigo' },
+                            { data: 'nombre_medicamento' },
+                            { data: 'cantord' },
+                            { 
+                                data: 'estado_actual',
+                                render: function(data, type, row) {
+                                    const badgeClass = {
+                                        'PENDIENTE': 'badge-warning',
+                                        'VENCIDO': 'badge-danger',
+                                        'SIN CONTACTO': 'badge-secondary',
+                                        'DESABASTECIDO': 'badge-info'
+                                    }[data] || 'badge-light';
+                                    return `<span class="badge ${badgeClass}">${data}</span>`;
+                                }
+                            },
+                            { data: 'fecha_suministro' },
+                            { data: 'numero_unidades' },
+                            { 
+                                data: 'estado_dispensado',
+                                render: function(data, type, row) {
+                                    return `<span class="badge badge-success">${data}</span>`;
+                                }
+                            },
+                            { data: 'factura_dispensado' },
+                            {
+                                data: null,
+                                orderable: false,
+                                className: 'text-center',
+                                render: function(data, type, row) {
+                                    return `
+                                        <button class="btn btn-sm btn-success marcar-revisado" data-id="${row.id}" title="Marcar como revisado">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger rechazar-pendiente ml-1" data-id="${row.id}" title="Rechazar">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    `;
+                                }
+                            }
+                        ]
+                    });
+
+                    actualizarContadorSeleccionados();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error AJAX:', {xhr, status, error});
+                    console.error('Response Text:', xhr.responseText);
+                    console.error('Status:', xhr.status);
+                    $('#loadingGestion').hide();
+                    
+                    let errorMessage = 'Error desconocido';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    } else if (xhr.responseText) {
+                        errorMessage = xhr.responseText;
+                    } else {
+                        errorMessage = error || 'Error en la conexión';
+                    }
+                    
+                    Swal.fire('Error', 'Error al buscar pendientes: ' + errorMessage, 'error');
+                }
+            });
+        }
+
+        // Manejo de checkbox principal
+        $(document).on('change', '#checkboxAll', function() {
+            const isChecked = $(this).prop('checked');
+            $('.pendiente-checkbox').prop('checked', isChecked);
+            actualizarContadorSeleccionados();
+        });
+
+        // Manejo de checkboxes individuales
+        $(document).on('change', '.pendiente-checkbox', function() {
+            const totalCheckboxes = $('.pendiente-checkbox').length;
+            const checkedCheckboxes = $('.pendiente-checkbox:checked').length;
+            
+            $('#checkboxAll').prop('checked', totalCheckboxes === checkedCheckboxes);
+            actualizarContadorSeleccionados();
+        });
+
+        // Botones de selección masiva
+        $('#seleccionarTodos').click(function() {
+            $('.pendiente-checkbox').prop('checked', true);
+            $('#checkboxAll').prop('checked', true);
+            actualizarContadorSeleccionados();
+        });
+
+        $('#deseleccionarTodos').click(function() {
+            $('.pendiente-checkbox').prop('checked', false);
+            $('#checkboxAll').prop('checked', false);
+            actualizarContadorSeleccionados();
+        });
+
+        function actualizarContadorSeleccionados() {
+            const seleccionados = $('.pendiente-checkbox:checked').length;
+            $('#contadorSeleccionados').text(seleccionados + ' seleccionados');
+            $('#procesarEntregas').prop('disabled', seleccionados === 0);
+        }
+
+        // Procesar entregas masivas
+        $('#procesarEntregas').click(function() {
+            const seleccionados = [];
+            $('.pendiente-checkbox:checked').each(function() {
+                seleccionados.push($(this).val());
+            });
+
+            if (seleccionados.length === 0) {
+                Swal.fire('Error', 'Debe seleccionar al menos un pendiente', 'error');
+                return;
+            }
+
+            Swal.fire({
+                title: '¿Confirmar procesamiento?',
+                text: `Se procesarán ${seleccionados.length} pendientes como ENTREGADO`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, procesar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    procesarEntregasMasivas(seleccionados);
+                }
+            });
+        });
+
+        function procesarEntregasMasivas(ids) {
+            const button = $('#procesarEntregas');
+            const originalText = button.html();
+            button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Procesando...');
+
+            $.ajax({
+                url: '{{ route("medcol6.procesar_entregas") }}',
+                method: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    pendientes_ids: ids
+                },
+                success: function(response) {
+                    Swal.fire('Éxito', `${response.procesados} pendientes procesados correctamente`, 'success');
+                    
+                    // Recargar la tabla
+                    const fechaInicial = $('#fechaInicialGestion').val();
+                    const fechaFinal = $('#fechaFinalGestion').val();
+                    const farmacia = $('#farmaciaGestion').val();
+                    buscarPendientesValidacion(fechaInicial, fechaFinal, farmacia);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'Error al procesar entregas: ' + error, 'error');
+                },
+                complete: function() {
+                    button.prop('disabled', false).html(originalText);
+                }
+            });
+        }
+
+        // Marcar como revisado
+        $(document).on('click', '.marcar-revisado', function() {
+            const id = $(this).data('id');
+            const checkbox = $(`.pendiente-checkbox[value="${id}"]`);
+            checkbox.prop('checked', !checkbox.prop('checked'));
+            actualizarContadorSeleccionados();
+        });
+
+        // Rechazar pendiente
+        $(document).on('click', '.rechazar-pendiente', function() {
+            const id = $(this).data('id');
+            const checkbox = $(`.pendiente-checkbox[value="${id}"]`);
+            checkbox.prop('checked', false);
+            actualizarContadorSeleccionados();
+            
+            Swal.fire({
+                title: 'Pendiente rechazado',
+                text: 'Este pendiente ha sido desmarcado para no ser procesado',
+                icon: 'info',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        });
+
+        // =================================================================
+        // FIN FUNCIONES PARA GESTIÓN DE PENDIENTES
+        // =================================================================
     });
 </script>
 
