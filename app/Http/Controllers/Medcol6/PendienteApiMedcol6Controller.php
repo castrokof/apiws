@@ -2238,6 +2238,7 @@ class PendienteApiMedcol6Controller extends Controller
                         'saldo_pendiente' => $pendiente->cantord - $pendiente->cantdpx,
                         'estado' => $pendiente->estado,
                         'centroproduccion' => $pendiente->centroproduccion,
+                        'orden_externa' => $pendiente->orden_externa,
                         'observaciones' => $pendiente->observaciones,
                         'fecha_factura_raw' => $pendiente->fecha_factura
                     ];
@@ -2571,7 +2572,7 @@ class PendienteApiMedcol6Controller extends Controller
             // Estrategia optimizada: primero filtrar pendientes, luego buscar coincidencias
             $pendientesBase = DB::table('pendiente_api_medcol6')
                 ->select('id', 'fecha', 'historia', 'codigo', 'nombre1', 'nombre2', 'apellido1', 'apellido2', 
-                        'nombre', 'cantord', 'estado', 'centroproduccion')
+                        'nombre', 'cantord', 'estado', 'centroproduccion', 'orden_externa')
                 ->whereIn('estado', ['PENDIENTE', 'VENCIDO', 'SIN CONTACTO', 'DESABASTECIDO'])
                 ->where('centroproduccion', $farmacia)
                 ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
@@ -2632,7 +2633,8 @@ class PendienteApiMedcol6Controller extends Controller
                         'numero_unidades' => $dispensadoCoincidente->numero_unidades,
                         'factura_dispensado' => $dispensadoCoincidente->factura,
                         'estado_dispensado' => $dispensadoCoincidente->estado,
-                        'dispensado_id' => $dispensadoCoincidente->id
+                        'dispensado_id' => $dispensadoCoincidente->id,
+                        'orden_externa' => $pendiente->orden_externa
                     ]);
                 }
 
@@ -2778,6 +2780,65 @@ class PendienteApiMedcol6Controller extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al procesar entregas: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Guardar observación individual para un pendiente
+     */
+    public function guardarObservacion(Request $request)
+    {
+        $request->validate([
+            'pendiente_id' => 'required|integer|exists:pendiente_api_medcol6,id',
+            'observacion' => 'nullable|string|max:1000'
+        ]);
+
+        try {
+            $pendienteId = $request->input('pendiente_id');
+            $observacion = trim($request->input('observacion'));
+            $usuario = Auth::user()->email;
+
+            // Si la observación está vacía, no crear registro
+            if (empty($observacion)) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Observación vacía, no se guardó registro'
+                ]);
+            }
+
+            // Buscar el pendiente para obtener su estado actual
+            $pendiente = PendienteApiMedcol6::findOrFail($pendienteId);
+
+            // Crear la observación en la tabla observaciones_api_medcol6
+            ObservacionesApiMedcol6::create([
+                'pendiente_id' => $pendienteId,
+                'observacion' => $observacion,
+                'usuario' => $usuario,
+                'estado' => $pendiente->estado
+            ]);
+
+            Log::info('Observación guardada', [
+                'pendiente_id' => $pendienteId,
+                'usuario' => $usuario,
+                'observacion' => substr($observacion, 0, 100) . (strlen($observacion) > 100 ? '...' : '')
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Observación guardada correctamente'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al guardar observación: ' . $e->getMessage(), [
+                'pendiente_id' => $request->input('pendiente_id'),
+                'usuario' => Auth::user()->email ?? 'unknown',
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar la observación: ' . $e->getMessage()
             ], 500);
         }
     }

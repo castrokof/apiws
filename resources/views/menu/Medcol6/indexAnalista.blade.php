@@ -3766,6 +3766,18 @@ Pendientes Medcol
                                 }
                             },
                             { data: 'factura_dispensado' },
+                            { data: 'orden_externa' },
+                            {
+                                data: null,
+                                orderable: false,
+                                className: 'text-center',
+                                render: function(data, type, row) {
+                                    return `<input type="text" class="form-control form-control-sm observaciones-input" 
+                                                   value="" 
+                                                   data-id="${row.id}" 
+                                                   placeholder="Ingrese observaciones...">`;
+                                }
+                            },
                             {
                                 data: null,
                                 orderable: false,
@@ -3785,6 +3797,23 @@ Pendientes Medcol
                     });
 
                     actualizarContadorSeleccionados();
+
+                    // Agregar evento para guardar observaciones
+                    $(document).off('input.observaciones').on('input.observaciones', '.observaciones-input', function() {
+                        const input = $(this);
+                        const pendienteId = input.data('id');
+                        const observacion = input.val();
+                        
+                        // Limpiar timeout previo
+                        clearTimeout(input.data('timeout'));
+                        
+                        // Establecer nuevo timeout para guardar después de 1 segundo sin escribir
+                        const timeout = setTimeout(function() {
+                            guardarObservacion(pendienteId, observacion);
+                        }, 1000);
+                        
+                        input.data('timeout', timeout);
+                    });
                 },
                 error: function(xhr, status, error) {
                     console.error('Error AJAX:', {xhr, status, error});
@@ -3921,6 +3950,40 @@ Pendientes Medcol
                 showConfirmButton: false
             });
         });
+
+        // Función para guardar observaciones individuales
+        function guardarObservacion(pendienteId, observacion) {
+            $.ajax({
+                url: "{{ route('medcol6.guardar_observacion') }}",
+                method: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    pendiente_id: pendienteId,
+                    observacion: observacion
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Mostrar indicador visual de guardado (opcional)
+                        const input = $(`.observaciones-input[data-id="${pendienteId}"]`);
+                        input.addClass('border-success').removeClass('border-danger');
+                        setTimeout(function() {
+                            input.removeClass('border-success');
+                        }, 1500);
+                    } else {
+                        // Mostrar error visual
+                        const input = $(`.observaciones-input[data-id="${pendienteId}"]`);
+                        input.addClass('border-danger');
+                        console.error('Error al guardar observación:', response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Mostrar error visual
+                    const input = $(`.observaciones-input[data-id="${pendienteId}"]`);
+                    input.addClass('border-danger');
+                    console.error('Error al guardar observación:', error);
+                }
+            });
+        }
 
         // =================================================================
         // FIN FUNCIONES PARA GESTIÓN DE PENDIENTES

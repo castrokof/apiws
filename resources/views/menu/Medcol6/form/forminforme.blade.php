@@ -241,12 +241,14 @@
                                     <th>Paciente</th>
                                     <th>Código</th>
                                     <th>Medicamento</th>
-                                    <th>Cant. Ordenada</th>
+                                    <th>Cant. Pendiente</th>
                                     <th>Estado Actual</th>
                                     <th>Fecha Suministro</th>
                                     <th>Cant. Dispensada</th>
                                     <th>Estado Dispensado</th>
                                     <th>Factura</th>
+                                    <th>No. Pendiente</th>
+                                    <th>Observaciones</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
