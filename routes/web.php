@@ -562,3 +562,14 @@ Route::get('medcol6/saldos/{id}', 'Medcol6\SaldosMedcol6Controller@show')->name(
     Route::get('/smart/pendi/suggestions', 'SmartPendiController@getPredictiveSuggestions')->name('smart.pendi.suggestions')->middleware('verified')->middleware('verifyuser');
     Route::get('/smart/pendi/statistics', 'SmartPendiController@getStatistics')->name('smart.pendi.statistics')->middleware('verified')->middleware('verifyuser');
     Route::get('/smart/pendi/summary', 'SmartPendiController@getSummary')->name('smart.pendi.summary')->middleware('verified')->middleware('verifyuser');
+
+    // Análisis NT Routes - Gestión de Medicamentos por Contrato/Nota Técnica
+    Route::get('/analisis-nt', 'AnalisisNtController@index')->name('analisis-nt.index')->middleware('verified')->middleware('verifyuser');
+    Route::get('/analisis-nt/create', 'AnalisisNtController@create')->name('analisis-nt.create')->middleware('verified')->middleware('verifyuser');
+    Route::post('/analisis-nt', 'AnalisisNtController@store')->name('analisis-nt.store')->middleware('verified')->middleware('verifyuser');
+    Route::get('/analisis-nt/{id}', 'AnalisisNtController@show')->name('analisis-nt.show')->middleware('verified')->middleware('verifyuser');
+    Route::get('/analisis-nt/{id}/edit', 'AnalisisNtController@edit')->name('analisis-nt.edit')->middleware('verified')->middleware('verifyuser');
+    Route::put('/analisis-nt/{id}', 'AnalisisNtController@update')->name('analisis-nt.update')->middleware('verified')->middleware('verifyuser');
+    Route::delete('/analisis-nt/{id}', 'AnalisisNtController@destroy')->name('analisis-nt.destroy')->middleware('verified')->middleware('verifyuser');
+    Route::post('/analisis-nt/import', 'AnalisisNtController@importExcel')->name('analisis-nt.import')->middleware('verified')->middleware('verifyuser');
+    Route::get('/analisis-nt/datatable/data', 'AnalisisNtController@getDataTable')->name('analisis-nt.datatable')->middleware('verified')->middleware('verifyuser');
