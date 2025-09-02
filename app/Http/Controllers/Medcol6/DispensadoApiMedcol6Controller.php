@@ -461,7 +461,7 @@ class DispensadoApiMedcol6Controller extends Controller
 
                        
 
-                        $responsefacturas = Http::withToken($token)->get("http://192.168.66.91:8004/api/dispensadoapi");
+                        $responsefacturas = Http::withToken($token)->get("http://192.168.66.95:8004/api/dispensadoapi");
 
                         $facturassapi = $responsefacturas->json()['data'];
 
@@ -546,7 +546,7 @@ class DispensadoApiMedcol6Controller extends Controller
                             }
                         }
 
-                        Http::withToken($token)->get("http://192.168.66.91:8004/api/closeallacceso");
+                        Http::withToken($token)->get("http://192.168.66.95:8004/api/closeallacceso");
 
 
                         Log::info('Desde la web syncapi centralizado local' . $contador . ' Lineas dispensadas' . ' Usuario: ' . $usuario);
