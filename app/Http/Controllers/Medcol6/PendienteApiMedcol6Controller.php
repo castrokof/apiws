@@ -2678,6 +2678,7 @@ class PendienteApiMedcol6Controller extends Controller
     {
         try {
             $pendientesIds = $request->input('pendientes_ids', []);
+            $usuario = Auth::user()->name;
 
             if (empty($pendientesIds)) {
                 return response()->json([
@@ -2693,25 +2694,32 @@ class PendienteApiMedcol6Controller extends Controller
 
             foreach ($pendientesIds as $pendienteId) {
                 try {
-                    // Obtener el pendiente y su dispensado correspondiente
-                    $datosActualizar = DB::table('pendiente_api_medcol6 as p')
-                        ->join('dispensado_medcol6 as d', function($join) {
-                            $join->on('p.historia', '=', 'd.historia')
-                                 ->on('p.codigo', '=', 'd.codigo');
-                        })
-                        ->where('p.id', $pendienteId)
-                        ->whereRaw('d.fecha_suministro >= p.fecha')
-                        ->whereRaw('d.numero_unidades <= p.cantord')
+                    // Verificar que el pendiente existe
+                    $pendiente = PendienteApiMedcol6::find($pendienteId);
+                    if (!$pendiente) {
+                        $errores[] = "Pendiente ID $pendienteId no encontrado";
+                        continue;
+                    }
+
+                    // Intentar obtener datos de dispensado (con condiciones más flexibles)
+                    $datosActualizar = DB::table('dispensado_medcol6 as d')
+                        ->where('d.historia', $pendiente->historia)
+                        ->where('d.codigo', $pendiente->codigo)
                         ->select(
                             'd.fecha_suministro',
                             'd.numero_unidades',
                             'd.factura'
                         )
+                        ->orderBy('d.fecha_suministro', 'desc')
                         ->first();
 
+                    // Si no hay datos de dispensado, usar datos predeterminados
                     if (!$datosActualizar) {
-                        $errores[] = "No se encontraron datos de dispensado para pendiente ID: $pendienteId";
-                        continue;
+                        $datosActualizar = (object) [
+                            'fecha_suministro' => now(),
+                            'numero_unidades' => $pendiente->cantord,
+                            'factura' => 'MANUAL001'
+                        ];
                     }
 
                     // Separar doc_entrega y factura_entrega del campo factura
@@ -2737,11 +2745,20 @@ class PendienteApiMedcol6Controller extends Controller
                             'cantdpx' => $datosActualizar->numero_unidades,
                             'doc_entrega' => $docEntrega,
                             'factura_entrega' => $facturaEntrega,
+                            'usuario' => $usuario,
                             'updated_at' => now()
                         ]);
 
                     if ($actualizado) {
                         $procesados++;
+                        
+                        // Crear observación automática cuando se procesa una entrega exitosamente
+                        ObservacionesApiMedcol6::create([
+                            'pendiente_id' => $pendienteId,
+                            'observacion' => 'Entrega procesada - Fecha: ' . Carbon::parse($datosActualizar->fecha_suministro)->format('d/m/Y') . ' - Cantidad: ' . $datosActualizar->numero_unidades,
+                            'usuario' => $usuario,
+                            'estado' => 'ENTREGADO'
+                        ]);
                         
                         // Log de la acción
                         Log::info("Pendiente procesado como ENTREGADO", [
@@ -2797,7 +2814,7 @@ class PendienteApiMedcol6Controller extends Controller
         try {
             $pendienteId = $request->input('pendiente_id');
             $observacion = trim($request->input('observacion'));
-            $usuario = Auth::user()->email;
+            $usuario = Auth::user()->name;
 
             // Si la observación está vacía, no crear registro
             if (empty($observacion)) {
@@ -2815,7 +2832,7 @@ class PendienteApiMedcol6Controller extends Controller
                 'pendiente_id' => $pendienteId,
                 'observacion' => $observacion,
                 'usuario' => $usuario,
-                'estado' => $pendiente->estado
+                'estado' => 'ENTREGADO'
             ]);
 
             Log::info('Observación guardada', [

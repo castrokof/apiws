@@ -3720,9 +3720,7 @@ Pendientes Medcol
                         destroy: true,
                         pageLength: 25,
                         order: [[1, 'desc']],
-                        language: {
-                            url: "{{ asset('theme/lte/plugins/datatables/Spanish.json') }}"
-                        },
+                        language: idioma_espanol,
                         columns: [
                             {
                                 data: null,
@@ -3798,22 +3796,8 @@ Pendientes Medcol
 
                     actualizarContadorSeleccionados();
 
-                    // Agregar evento para guardar observaciones
-                    $(document).off('input.observaciones').on('input.observaciones', '.observaciones-input', function() {
-                        const input = $(this);
-                        const pendienteId = input.data('id');
-                        const observacion = input.val();
-                        
-                        // Limpiar timeout previo
-                        clearTimeout(input.data('timeout'));
-                        
-                        // Establecer nuevo timeout para guardar después de 1 segundo sin escribir
-                        const timeout = setTimeout(function() {
-                            guardarObservacion(pendienteId, observacion);
-                        }, 1000);
-                        
-                        input.data('timeout', timeout);
-                    });
+                    // Las observaciones ya no se guardan automáticamente al escribir
+                    // Solo se guardan después de procesar entregas exitosamente
                 },
                 error: function(xhr, status, error) {
                     console.error('Error AJAX:', {xhr, status, error});
@@ -3911,6 +3895,16 @@ Pendientes Medcol
                 success: function(response) {
                     Swal.fire('Éxito', `${response.procesados} pendientes procesados correctamente`, 'success');
                     
+                    // Guardar observaciones de los pendientes procesados exitosamente
+                    ids.forEach(function(pendienteId) {
+                        const input = $(`.observaciones-input[data-id="${pendienteId}"]`);
+                        const observacion = input.val().trim();
+                        
+                        if (observacion) {
+                            guardarObservacionDespuesProceso(pendienteId, observacion);
+                        }
+                    });
+                    
                     // Recargar la tabla
                     const fechaInicial = $('#fechaInicialGestion').val();
                     const fechaFinal = $('#fechaFinalGestion').val();
@@ -3981,6 +3975,33 @@ Pendientes Medcol
                     const input = $(`.observaciones-input[data-id="${pendienteId}"]`);
                     input.addClass('border-danger');
                     console.error('Error al guardar observación:', error);
+                }
+            });
+        }
+
+        // Función específica para guardar observaciones después del procesamiento exitoso
+        function guardarObservacionDespuesProceso(pendienteId, observacion) {
+            if (!observacion || observacion.trim() === '') {
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('medcol6.guardar_observacion') }}",
+                method: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    pendiente_id: pendienteId,
+                    observacion: observacion
+                },
+                success: function(response) {
+                    if (response.success) {
+                        console.log(`Observación guardada para pendiente ${pendienteId} después del procesamiento`);
+                    } else {
+                        console.error('Error al guardar observación post-proceso:', response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error al guardar observación post-proceso:', error);
                 }
             });
         }
