@@ -45,20 +45,25 @@
                                         <label for="paciente_contrato">Farmacia</label>
                                         <select id="paciente_contrato" class="form-control form-control-sm select2bs4">
                                             <option value="">Todas las farmacias</option>
-                                            <option value="BIO1">BIO1-FARMACIA BIOLOGICOS</option>
-                                            <option value="DLR1">DLR1-FARMACIA DOLOR</option>
-                                            <option value="DPA1">DPA1-FARMACIA PALIATIVOS</option>
-                                            <option value="EHU1">EHU1-FARMACIA HUERFANAS</option>
-                                            <option value="EM01">EM01-FARMACIA EMCALI</option>
-                                            <option value="EVEN">EVEN-FARMACIA EVENTO</option>
-                                            <option value="EVSM">EVSM-EVENTO SALUD MENTAL</option>
-                                            <option value="FRJA">FRJA-FARMACIA JAMUNDI</option>
-                                            <option value="INY">INY-FARMACIA INYECTABLES</option>
-                                            <option value="PAC">PAC-FARMACIA PAC</option>
-                                            <option value="SM01">SM01-FARMACIA SALUD MENTAL</option>
-                                            <option value="BPDT">BPDT-BOLSA</option>
-                                            <option value="BDNT">BDNT-BOLSA NORTE</option>
-                                            <option value="EVIO">EVIO-EVENTO IDEO</option>
+                                            <optgroup label="Farmacias Principales">
+                                                <option value="BIO1">BIO1-FARMACIA BIOLOGICOS</option>
+                                                <option value="DLR1">DLR1-FARMACIA DOLOR</option>
+                                                <option value="DPA1">DPA1-FARMACIA PALIATIVOS</option>
+                                                <option value="EM01">EM01-FARMACIA EMCALI</option>
+                                                <option value="FRIO">FRIO-FARMACIA IDEO</option>
+                                                <option value="EHU1">EHU1-FARMACIA HUERFANAS</option>
+                                                <option value="FRJA">FRJA-FARMACIA JAMUNDI</option>
+                                                <option value="FRIP">FRIP-FARMACIA PASOANCHO</option>
+                                                <option value="INY">INY-FARMACIA INYECTABLES</option>
+                                                <option value="PAC">PAC-FARMACIA PAC</option>
+                                                <option value="SM01">SM01-FARMACIA SALUD MENTAL</option>
+                                            </optgroup>
+                                            <optgroup label="Farmacias Especializadas">
+                                                <option value="BPDT">BPDT-BOLSA</option>
+                                                <option value="EVIO">EVIO-EVENTO IDEO</option>
+                                                <option value="EVEN">EVEN-FARMACIA EVENTO</option>
+                                                <option value="EVSM">EVSM-EVENTO SALUD MENTAL</option>
+                                            </optgroup>
                                         </select>
                                     </div>
                                     <div class="col-md-2 d-flex align-items-end">
@@ -76,14 +81,14 @@
                     <!-- Pestañas -->
                     <ul class="nav nav-tabs" id="gestionPacientesTabs" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" id="lista-pacientes-tab" data-toggle="tab" href="#lista-pacientes" 
-                               role="tab" aria-controls="lista-pacientes" aria-selected="true">
+                            <a class="nav-link active" id="lista-pacientes-tab" data-toggle="tab" href="#lista-pacientes"
+                                role="tab" aria-controls="lista-pacientes" aria-selected="true">
                                 <i class="fas fa-users"></i> Lista de Pacientes
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="detalle-paciente-tab" data-toggle="tab" href="#detalle-paciente" 
-                               role="tab" aria-controls="detalle-paciente" aria-selected="false">
+                            <a class="nav-link" id="detalle-paciente-tab" data-toggle="tab" href="#detalle-paciente"
+                                role="tab" aria-controls="detalle-paciente" aria-selected="false">
                                 <i class="fas fa-user-medical"></i> Detalle del Paciente
                             </a>
                         </li>
@@ -156,7 +161,7 @@
 
                             <!-- Información de selección -->
                             <div id="info-seleccion" class="alert alert-info" style="display: none;">
-                                <i class="fas fa-info-circle"></i> <span id="items-seleccionados">0</span> items seleccionados. 
+                                <i class="fas fa-info-circle"></i> <span id="items-seleccionados">0</span> items seleccionados.
                                 Complete los datos en la tabla y use los botones de abajo para aplicar los cambios.
                             </div>
 
@@ -266,36 +271,57 @@
     }
 
     /* Estilos para badges de estado */
-    .badge-pendiente { background-color: #ffc107; color: #212529; }
-    .badge-entregado { background-color: #28a745; }
-    .badge-tramitado { background-color: #17a2b8; }
-    .badge-desabastecido { background-color: #fd7e14; }
-    .badge-anulado { background-color: #dc3545; }
-    .badge-vencido { background-color: #6c757d; }
-    .badge-sincontacto { background-color: #88c3f7; }
+    .badge-pendiente {
+        background-color: #ffc107;
+        color: #212529;
+    }
+
+    .badge-entregado {
+        background-color: #28a745;
+    }
+
+    .badge-tramitado {
+        background-color: #17a2b8;
+    }
+
+    .badge-desabastecido {
+        background-color: #fd7e14;
+    }
+
+    .badge-anulado {
+        background-color: #dc3545;
+    }
+
+    .badge-vencido {
+        background-color: #6c757d;
+    }
+
+    .badge-sincontacto {
+        background-color: #88c3f7;
+    }
 
     /* Estilos para los campos de la tabla */
     .estado-select {
         min-width: 140px;
     }
-    
+
     .observaciones-pendiente {
         min-width: 200px;
         font-size: 12px;
     }
-    
+
     /* Mejorar el espaciado de la tabla */
     #tablaPendientesPaciente td {
         vertical-align: middle;
         padding: 8px 4px;
     }
-    
+
     /* Select2 dentro de la tabla */
     .select2-container--default .select2-selection--single {
         height: 31px;
         border: 1px solid #ced4da;
     }
-    
+
     .select2-container--default .select2-selection--single .select2-selection__rendered {
         line-height: 29px;
         font-size: 14px;
@@ -309,7 +335,7 @@
             e.preventDefault();
             const card = $(this).closest('.card');
             const isMaximized = card.hasClass('maximized-card');
-            
+
             if (isMaximized) {
                 card.removeClass('maximized-card');
                 $(this).find('i').removeClass('fa-compress').addClass('fa-expand');
@@ -317,7 +343,7 @@
                 card.addClass('maximized-card');
                 $(this).find('i').removeClass('fa-expand').addClass('fa-compress');
             }
-            
+
             // Redimensionar tablas después de cambiar el tamaño
             setTimeout(function() {
                 if ($.fn.DataTable.isDataTable('#tablaPacientes')) {
@@ -334,7 +360,7 @@
             e.preventDefault();
             const cardBody = $(this).closest('.card').find('.card-body');
             const isCollapsed = cardBody.is(':hidden');
-            
+
             if (isCollapsed) {
                 cardBody.show();
                 $(this).find('i').removeClass('fa-plus').addClass('fa-minus');
@@ -345,7 +371,7 @@
         });
 
         // Event handler simple para ajuste de tablas al cambiar pestañas
-        $('#gestionPacientesTabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        $('#gestionPacientesTabs a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
             // Solo ajustar tablas después del cambio de pestaña
             setTimeout(function() {
                 if ($.fn.DataTable.isDataTable('#tablaPacientes')) {
@@ -356,9 +382,9 @@
                 }
             }, 100);
         });
-        
+
         // Redimensionar tablas cuando el modal se muestra completamente
-        $('#modalGestionPacientes').on('shown.bs.modal', function () {
+        $('#modalGestionPacientes').on('shown.bs.modal', function() {
             setTimeout(function() {
                 if ($.fn.DataTable.isDataTable('#tablaPacientes')) {
                     $('#tablaPacientes').DataTable().columns.adjust();

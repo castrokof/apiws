@@ -2577,7 +2577,7 @@ class PendienteApiMedcol6Controller extends Controller
                 ->where('centroproduccion', $farmacia)
                 ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
                 ->orderBy('fecha', 'desc')
-                ->limit(1000) // Limitar pendientes base
+                ->limit(20000) // Limitar pendientes base
                 ->get();
 
             Log::info('Pendientes base encontrados', ['total' => $pendientesBase->count()]);
@@ -2639,7 +2639,7 @@ class PendienteApiMedcol6Controller extends Controller
                 }
 
                 // Limitar resultados para evitar timeouts
-                if ($pendientesValidados->count() >= 200) {
+                if ($pendientesValidados->count() >= 2000) {
                     break;
                 }
             }

@@ -34,7 +34,6 @@ Dispensado Medcol Jamundi
         align-items: center;
         z-index: 9999;
     }
-
 </style>
 
 @endsection
@@ -242,7 +241,34 @@ Dispensado Medcol Jamundi
                 "EVSM": "Evento SM",
                 "BPDT": "Bolsa",
                 "DPA1": "Paliativos",
-                "INY": "Inyectables"
+                "INY": "Inyectables",
+                "FRIP": "Pasoancho",
+                "F24H": "Urgencias",
+                "FRPE": "Entrega Pendientes",
+                "FRIO": "IDEO"
+            };
+
+            // Helper: recibe arreglo de items, aplica map->filter->sort y devuelve HTML en <ul>
+            const construirListaOrdenada = (items) => {
+                const normalizados = items
+                    .map(it => {
+                        const nombre = servicioMap[it.centroprod] || it.centroprod;
+                        return {
+                            nombre,
+                            total: it.total
+                        };
+                    })
+                    .filter(it => !nombresExcluidos.includes(it.nombre))
+                    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', {
+                        sensitivity: 'base'
+                    }));
+
+                let html = "<ul>";
+                normalizados.forEach(it => {
+                    html += `<li>${it.nombre}: ${it.total}</li>`;
+                });
+                html += "</ul>";
+                return html;
             };
 
             $.ajax({
@@ -260,72 +286,49 @@ Dispensado Medcol Jamundi
                         anulado
                     } = data;
 
-                    let htmlDispensado = "<ul>";
-                    dispensado.forEach(item => {
-                        const nombreCentroprod = servicioMap[item.centroprod] || item.centroprod;
-                        if (!nombresExcluidos.includes(nombreCentroprod)) {
-                            htmlDispensado += `<li>${nombreCentroprod}: ${item.total}</li>`;
-                        }
-                    });
-                    htmlDispensado += "</ul>";
-
-                    let htmlRevisado = "<ul>";
-                    revisado.forEach(item => {
-                        const nombreCentroprod = servicioMap[item.centroprod] || item.centroprod;
-                        if (!nombresExcluidos.includes(nombreCentroprod)) {
-                            htmlRevisado += `<li>${nombreCentroprod}: ${item.total}</li>`;
-                        }
-                    });
-                    htmlRevisado += "</ul>";
-
-                    let htmlAnulado = "<ul>";
-                    anulado.forEach(item => {
-                        const nombreCentroprod = servicioMap[item.centroprod] || item.centroprod;
-                        if (!nombresExcluidos.includes(nombreCentroprod)) {
-                            htmlAnulado += `<li>${nombreCentroprod}: ${item.total}</li>`;
-                        }
-                    });
-                    htmlAnulado += "</ul>";
+                    const htmlDispensado = construirListaOrdenada(dispensado || []);
+                    const htmlRevisado = construirListaOrdenada(revisado || []);
+                    const htmlAnulado = construirListaOrdenada(anulado || []);
 
                     $("#detalle_informe").append(`
-                        <div class="small-box shadow-lg l-bg-blue-dark">
-                            <div class="inner">
-                                <!--<h5>PENDIENTES X REVISAR</h5>-->
-                                <h5>CONTRATOS</h5>
-                                <p>${htmlDispensado}</p>
-                            </div>
-                            <a class="informependientes" id="informependientesclic" href="#">
-                                <div class="icon">
-                                    <i class="fas fa-notes-medical informependientes"></i>
-                                </div>
-                            </a>
+                <div class="small-box shadow-lg l-bg-blue-dark">
+                    <div class="inner">
+                        <!--<h5>PENDIENTES X REVISAR</h5>-->
+                        <h5>CONTRATOS</h5>
+                        <p>${htmlDispensado}</p>
+                    </div>
+                    <a class="informependientes" id="informependientesclic" href="#">
+                        <div class="icon">
+                            <i class="fas fa-notes-medical informependientes"></i>
                         </div>
-                    `);
+                    </a>
+                </div>
+            `);
 
                     $("#detalle_informe1").append(`
-                        <div class="small-box shadow-lg l-bg-orange-dark">
-                            <div class="inner">
-                                <!--<h5>REVISADAS</h5>-->
-                                <h5>CONTRATOS</h5>
-                                <p>${htmlRevisado}</p>
-                            </div>
-                            <div class="icon">
-                                <i class="fas fa-briefcase-medical"></i>
-                            </div>
-                        </div>
-                    `);
+                <div class="small-box shadow-lg l-bg-orange-dark">
+                    <div class="inner">
+                        <!--<h5>REVISADAS</h5>-->
+                        <h5>CONTRATOS</h5>
+                        <p>${htmlRevisado}</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-briefcase-medical"></i>
+                    </div>
+                </div>
+            `);
 
                     $("#detalle_informe2").append(`
-                        <div class="small-box shadow-lg l-bg-red-dark">
-                            <div class="inner">
-                                <!--<h5>ANULADAS</h5>-->
-                                <p>${htmlAnulado}</p>
-                            </div>
-                            <div class="icon">
-                                <i class="fas fa-ban"></i>
-                            </div>
-                        </div>
-                    `);
+                <div class="small-box shadow-lg l-bg-red-dark">
+                    <div class="inner">
+                        <!--<h5>ANULADAS</h5>-->
+                        <p>${htmlAnulado}</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-ban"></i>
+                    </div>
+                </div>
+            `);
                 }
             });
         }

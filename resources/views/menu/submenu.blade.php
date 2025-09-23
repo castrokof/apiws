@@ -257,6 +257,7 @@
                                         <a class="dropdown-item text-dark" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                             {{ __('Logout') }}
                                         </a>
+                                        <a class="dropdown-item text-dark" href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('tokenhercules') }}">{{ __('Mipres 2.0') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('submenu') }}">{{ __('Pendientes') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('dismenu') }}">{{ __('Dispensado') }}</a>
@@ -320,6 +321,7 @@
                                         <a class="dropdown-item text-dark" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                             {{ __('Logout') }}
                                         </a>
+                                        <a class="dropdown-item text-dark" href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
 
                                         <div class="dropdown-divider"></div>
 
@@ -373,6 +375,7 @@
                                         <a class="dropdown-item text-dark" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                             {{ __('Logout') }}
                                         </a>
+                                        <a class="dropdown-item text-dark" href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
                                         <!-- <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Compras') }}</a> -->
                                         <a class="dropdown-item text-dark" href="{{ route('tokenhercules') }}">{{ __('Mipres 2.0') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('submenu') }}">{{ __('Pendientes') }}</a>
@@ -433,6 +436,7 @@
                                         <a class="dropdown-item text-dark" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                             {{ __('Logout') }}
                                         </a>
+                                        <a class="dropdown-item text-dark" href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('comprmenu') }}">{{ __('Compras') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('tokenhercules') }}">{{ __('Mipres 2.0') }}</a>
                                         <a class="dropdown-item text-dark" href="{{ route('submenu') }}">{{ __('Pendientes') }}</a>
@@ -472,6 +476,7 @@
                                         <a class="dropdown-item text-dark" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                             {{ __('Logout') }}
                                         </a>
+                                        <a class="dropdown-item text-dark" href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
 
                                         <a class="dropdown-item text-dark" href="{{ route('submenu') }}">{{ __('Pendientes') }}</a>
                                         <!-- <a class="dropdown-item text-dark" href="{{ route('dismenu') }}">{{ __('Dispensado') }}</a> -->
@@ -575,6 +580,11 @@
                                     <i class="fas fa-cogs fa-2x text-primary mb-2"></i>
                                     <h6 class="font-weight-bold text-dark mb-1">🚀 ACCESO PRINCIPAL</h6>
                                 </div>
+                                <a href="{{ route('dashboard') }}" class="btn btn-success btn-lg btn-block shadow-sm mb-2" style="border-radius: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    <i class="fas fa-chart-bar mr-2"></i>
+                                    Dashboard General
+                                    <span class="badge badge-light ml-2">NUEVO</span>
+                                </a>
                                 <a href="{{ route('medcol6.pendientes') }}" class="btn btn-primary btn-lg btn-block shadow-sm" style="border-radius: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
                                     <i class="fas fa-capsules mr-2"></i>
                                     Gestionar Pendientes

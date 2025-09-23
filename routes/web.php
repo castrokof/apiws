@@ -18,7 +18,7 @@ use App\Http\Controllers\Medcol6\OrdenCompraApiMedcol6Controller;
 */
 
 Route::get('/', function () {
-    return view('menu.submenu');
+    return redirect()->route('dashboard');
 });
 /*Route::prefix('usuarios')->group(function() {
   Auth::routes();
@@ -49,6 +49,11 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('passw
 Route::emailVerification();
 
 //Auth::routes(['verify' => true, 'verifyuser' => true]);
+
+//Rutas del Dashboard
+Route::get('/dashboard', 'DashboardController@index')->name('dashboard')->middleware('verified')->middleware('verifyuser');
+Route::get('/dashboard/estadisticas-ajax', 'DashboardController@getEstadisticasAjax')->name('dashboard.estadisticas-ajax')->middleware('verified')->middleware('verifyuser');
+Route::get('/dashboard/top-medicamentos-datatable', 'DashboardController@getTopMedicamentosDataTable')->name('dashboard.top-medicamentos-datatable')->middleware('verified')->middleware('verifyuser');
 
 //Ruta para consultar lo direccionado por la EPS
 Route::get('/home', 'HomeController@index')->name('home')->middleware('verified')->middleware('verifyuser');
