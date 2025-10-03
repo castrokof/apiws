@@ -621,6 +621,20 @@
                                             <span class="badge badge-success">CONSULTA</span>
                                         </div>
                                     </a>
+                                    <a href="{{ route('medcol6.statistics') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2" style="background: rgba(248,249,250,0.8);">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0 mr-3">
+                                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                                    <i class="fas fa-chart-bar text-white fa-sm"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-0 font-weight-bold text-dark">Estadísticas e Indicadores</h6>
+                                                <small class="text-muted">Análisis de pendientes por facturar</small>
+                                            </div>
+                                            <span class="badge badge-primary">NUEVO</span>
+                                        </div>
+                                    </a>
                                     
                                     <a href="{{ route('smart.pendi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2" style="background: rgba(248,249,250,0.8);">
                                         <div class="d-flex align-items-center">

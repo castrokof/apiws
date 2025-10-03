@@ -24,6 +24,11 @@
                     <li class="nav-item">
                         <a class="nav-link" id="custom-tabs-one-datos-sincontacto-tab" data-toggle="pill" href="#custom-tabs-one-datos-sincontacto" role="tab" aria-controls="custom-tabs-one-datos-sincontacto" aria-selected="false">Sin Contacto</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('medcol6.statistics') }}" target="_blank">
+                            <i class="fas fa-chart-bar"></i> Estadísticas
+                        </a>
+                    </li>
 
                     <div class="card-tools pull-right">
 

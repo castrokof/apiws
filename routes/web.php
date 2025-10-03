@@ -53,7 +53,23 @@ Route::emailVerification();
 //Rutas del Dashboard
 Route::get('/dashboard', 'DashboardController@index')->name('dashboard')->middleware('verified')->middleware('verifyuser');
 Route::get('/dashboard/estadisticas-ajax', 'DashboardController@getEstadisticasAjax')->name('dashboard.estadisticas-ajax')->middleware('verified')->middleware('verifyuser');
+Route::get('/dashboard/estadisticas-seguras', 'DashboardController@getEstadisticasSeguras')->name('dashboard.estadisticas-seguras')->middleware('verified')->middleware('verifyuser');
 Route::get('/dashboard/top-medicamentos-datatable', 'DashboardController@getTopMedicamentosDataTable')->name('dashboard.top-medicamentos-datatable')->middleware('verified')->middleware('verifyuser');
+Route::post('/dashboard/limpiar-cache', 'DashboardController@limpiarCache')->name('dashboard.limpiar-cache')->middleware('verified')->middleware('verifyuser');
+
+// Nuevas rutas optimizadas para carga asíncrona
+Route::get('/dashboard/facturacion-mensual', 'DashboardController@getFacturacionMensual')->name('dashboard.facturacion-mensual')->middleware('verified')->middleware('verifyuser');
+Route::get('/dashboard/pacientes-contrato', 'DashboardController@getPacientesPorContrato')->name('dashboard.pacientes-contrato')->middleware('verified')->middleware('verifyuser');
+Route::get('/dashboard/top-medicamentos', 'DashboardController@getTopMedicamentos')->name('dashboard.top-medicamentos')->middleware('verified')->middleware('verifyuser');
+Route::get('/dashboard/medcol6-estadisticas', 'DashboardController@getEstadisticasMedcol6Ajax')->name('dashboard.medcol6-estadisticas')->middleware('verified')->middleware('verifyuser');
+Route::get('/dashboard/paciente-mayor-valor', 'DashboardController@getPacienteMayorValor')->name('dashboard.paciente-mayor-valor')->middleware('verified')->middleware('verifyuser');
+
+// Rutas del dashboard optimizado modular
+Route::get('/dashboard/resumen-general', 'DashboardController@getResumenGeneral')->name('dashboard.resumen-general')->middleware('verified')->middleware('verifyuser');
+Route::get('/dashboard/resumen-pendientes', 'DashboardController@getResumenPendientes')->name('dashboard.resumen-pendientes')->middleware('verified')->middleware('verifyuser');
+Route::get('/dashboard/analisis-distribucion', 'DashboardController@getAnalisisDistribucion')->name('dashboard.analisis-distribucion')->middleware('verified')->middleware('verifyuser');
+Route::get('/dashboard/tendencias-pendientes', 'DashboardController@getAnalisisTendenciasPendientes')->name('dashboard.tendencias-pendientes')->middleware('verified')->middleware('verifyuser');
+Route::get('/dashboard/reportes-detallados', 'DashboardController@getReportesDetallados')->name('dashboard.reportes-detallados')->middleware('verified')->middleware('verifyuser');
 
 //Ruta para consultar lo direccionado por la EPS
 Route::get('/home', 'HomeController@index')->name('home')->middleware('verified')->middleware('verifyuser');
@@ -339,6 +355,10 @@ Route::post('medcol6/saldos/probar-api', 'Medcol6\SaldosMedcol6Controller@probar
 Route::get('medcol6/saldos/estadisticas', 'Medcol6\SaldosMedcol6Controller@getEstadisticas')->name('medcol6.saldos.estadisticas')->middleware('verified')->middleware('verifyuser');
 Route::get('medcol6/saldos/filtros', 'Medcol6\SaldosMedcol6Controller@getOpcionesFiltros')->name('medcol6.saldos.filtros')->middleware('verified')->middleware('verifyuser');
 Route::get('medcol6/saldos/{id}', 'Medcol6\SaldosMedcol6Controller@show')->name('medcol6.saldos.show')->middleware('verified')->middleware('verifyuser');
+
+// Rutas para estadísticas e indicadores de Medcol6
+Route::get('medcol6/statistics', 'Medcol6\StatisticsMedcol6Controller@index')->name('medcol6.statistics')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/statistics/ajax', 'Medcol6\StatisticsMedcol6Controller@getEstadisticasAjax')->name('medcol6.statistics.ajax')->middleware('verified')->middleware('verifyuser');
 
 
 
