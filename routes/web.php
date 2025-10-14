@@ -56,6 +56,7 @@ Route::get('/dashboard/estadisticas-ajax', 'DashboardController@getEstadisticasA
 Route::get('/dashboard/estadisticas-seguras', 'DashboardController@getEstadisticasSeguras')->name('dashboard.estadisticas-seguras')->middleware('verified')->middleware('verifyuser');
 Route::get('/dashboard/top-medicamentos-datatable', 'DashboardController@getTopMedicamentosDataTable')->name('dashboard.top-medicamentos-datatable')->middleware('verified')->middleware('verifyuser');
 Route::post('/dashboard/limpiar-cache', 'DashboardController@limpiarCache')->name('dashboard.limpiar-cache')->middleware('verified')->middleware('verifyuser');
+Route::get('/dashboard/diagnostico-entregados', 'DashboardController@diagnosticoEntregados')->name('dashboard.diagnostico-entregados')->middleware('verified')->middleware('verifyuser');
 
 // Nuevas rutas optimizadas para carga asíncrona
 Route::get('/dashboard/facturacion-mensual', 'DashboardController@getFacturacionMensual')->name('dashboard.facturacion-mensual')->middleware('verified')->middleware('verifyuser');

@@ -130,14 +130,21 @@ class DashboardController extends Controller
 
         // Intentar obtener del caché (válido por 30 minutos)
         return Cache::remember($cacheKey, 1800, function () use ($fechaInicio, $fechaFin) {
-            // Crear una tabla temporal con precios promedio para reutilizar en todas las consultas
-            // Esto evita recalcular la subconsulta múltiples veces
-            DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_promedio');
+            // Crear tabla temporal con el precio (costo_unitario) desde saldos_medcol6
+            // Esta tabla contendrá UN registro por código con el costo unitario más reciente
+            DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_ultimo');
             DB::statement('
-                CREATE TEMPORARY TABLE temp_precios_promedio AS
-                SELECT codigo, AVG(CAST(REPLACE(precio_unitario, ",", "") as DECIMAL(15,2))) as precio_promedio
-                FROM dispensado_medcol6
-                GROUP BY codigo
+                CREATE TEMPORARY TABLE temp_precios_ultimo AS
+                SELECT
+                    codigo,
+                    CAST(REPLACE(REPLACE(costo_unitario, ",", ""), "$", "") as DECIMAL(15,2)) as precio_ultimo,
+                    updated_at
+                FROM saldos_medcol6
+                WHERE costo_unitario IS NOT NULL
+                AND costo_unitario != ""
+                AND costo_unitario != "0"
+                AND costo_unitario != "$0"
+                GROUP BY codigo, costo_unitario, updated_at
             ');
 
             // Estadísticas por estado de pendientes
@@ -156,7 +163,7 @@ class DashboardController extends Controller
             $tendenciasPorMes = $this->getTendenciasPorMes($fechaInicio, $fechaFin);
 
             // Limpiar tabla temporal
-            DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_promedio');
+            DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_ultimo');
 
             return [
                 'estadisticas_por_estado' => $estadisticasPorEstado,
@@ -170,15 +177,15 @@ class DashboardController extends Controller
 
     private function getEstadisticasPorEstadoOptimizado($fechaInicio, $fechaFin)
     {
-        // Optimización: Usar tabla temporal con precios promedio
+        // Optimización: Usar tabla temporal con el último precio
         $estadisticas = DB::table('pendiente_api_medcol6 as p')
-            ->leftJoin('temp_precios_promedio as d', 'p.codigo', '=', 'd.codigo')
+            ->leftJoin('temp_precios_ultimo as d', 'p.codigo', '=', 'd.codigo')
             ->whereBetween('p.fecha', [$fechaInicio, $fechaFin])
             ->select(
                 'p.estado',
                 DB::raw('COUNT(*) as total_pendientes'),
                 DB::raw('SUM(CAST(p.cantord as DECIMAL(10,2))) as total_cantidad'),
-                DB::raw('SUM(CAST(p.cantord as DECIMAL(10,2)) * CAST(COALESCE(d.precio_promedio, 0) as DECIMAL(10,2))) as valor_total')
+                DB::raw('SUM(CAST(p.cantord as DECIMAL(10,2)) * CAST(COALESCE(d.precio_ultimo, 0) as DECIMAL(10,2))) as valor_total')
             )
             ->groupBy('p.estado')
             ->get()
@@ -231,12 +238,12 @@ class DashboardController extends Controller
 
     private function getValorPendientePorFacturarOptimizado($fechaInicio, $fechaFin)
     {
-        // Optimización: Usar tabla temporal con precios promedio
+        // Optimización: Usar tabla temporal con el último precio
         $resultado = DB::table('pendiente_api_medcol6 as p')
-            ->leftJoin('temp_precios_promedio as d', 'p.codigo', '=', 'd.codigo')
+            ->leftJoin('temp_precios_ultimo as d', 'p.codigo', '=', 'd.codigo')
             ->whereIn('p.estado', ['PENDIENTE', 'DESABASTECIDO', 'SIN CONTACTO', 'TRAMITADO', 'VENCIDO'])
             ->whereBetween('p.fecha', [$fechaInicio, $fechaFin])
-            ->select(DB::raw('SUM(CAST(p.cantord as DECIMAL(10,2)) * CAST(COALESCE(d.precio_promedio, 0) as DECIMAL(10,2))) as valor_total'))
+            ->select(DB::raw('SUM(CAST(p.cantord as DECIMAL(10,2)) * CAST(COALESCE(d.precio_ultimo, 0) as DECIMAL(10,2))) as valor_total'))
             ->value('valor_total');
 
         return $resultado ?? 0;
@@ -264,15 +271,21 @@ class DashboardController extends Controller
 
     private function getValorEntregadoOptimizado($fechaInicio, $fechaFin)
     {
-        // Optimización: Usar tabla temporal con precios promedio
-        $resultado = DB::table('pendiente_api_medcol6 as p')
-            ->leftJoin('temp_precios_promedio as d', 'p.codigo', '=', 'd.codigo')
-            ->where('p.estado', 'ENTREGADO')
-            ->whereBetween('p.fecha', [$fechaInicio, $fechaFin])
-            ->select(DB::raw('SUM(CAST(p.cantord as DECIMAL(10,2)) * CAST(COALESCE(d.precio_promedio, 0) as DECIMAL(10,2))) as valor_total'))
-            ->value('valor_total');
+        // Buscar el valor total entregado desde las estadísticas por estado
+        // ya calculadas, buscando el estado ENTREGADO
+        $estadisticas = $this->getEstadisticasPorEstadoOptimizado($fechaInicio, $fechaFin);
 
-        return $resultado ?? 0;
+        // Buscar el estado que represente entregados
+        $valorEntregado = 0;
+        foreach ($estadisticas as $stat) {
+            if (strtoupper($stat['estado']) === 'ENTREGADO' ||
+                strtoupper($stat['estado']) === 'ENTREGADOS') {
+                $valorEntregado = floatval($stat['valor_total']);
+                break;
+            }
+        }
+
+        return $valorEntregado;
     }
 
     private function getValorEntregado($fechaInicio, $fechaFin)
@@ -297,16 +310,16 @@ class DashboardController extends Controller
 
     private function getTopMedicamentosPendientesOptimizado($fechaInicio, $fechaFin, $limit = 10)
     {
-        // Optimización: Usar tabla temporal con precios promedio
+        // Optimización: Usar tabla temporal con el último precio
         $query = DB::table('pendiente_api_medcol6 as p')
-            ->leftJoin('temp_precios_promedio as d', 'p.codigo', '=', 'd.codigo')
+            ->leftJoin('temp_precios_ultimo as d', 'p.codigo', '=', 'd.codigo')
             ->whereBetween('p.fecha', [$fechaInicio, $fechaFin])
             ->select(
                 'p.codigo',
                 'p.nombre',
                 DB::raw('SUM(CAST(p.cantord as DECIMAL(10,2))) as total_cantidad'),
                 DB::raw('COUNT(*) as total_pendientes'),
-                DB::raw('SUM(CAST(p.cantord as DECIMAL(10,2)) * CAST(COALESCE(d.precio_promedio, 0) as DECIMAL(10,2))) as valor_total')
+                DB::raw('SUM(CAST(p.cantord as DECIMAL(10,2)) * CAST(COALESCE(d.precio_ultimo, 0) as DECIMAL(10,2))) as valor_total')
             )
             ->groupBy('p.codigo', 'p.nombre')
             ->orderBy('valor_total', 'desc');
@@ -782,13 +795,21 @@ class DashboardController extends Controller
         $cacheKey = "tendencias_pendientes_{$fechaInicio}_{$fechaFin}";
 
         $data = Cache::remember($cacheKey, 1800, function () use ($fechaInicio, $fechaFin) {
-            // Crear tabla temporal con precios promedio para optimizar las consultas
-            DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_promedio');
+            // Crear tabla temporal con el precio (costo_unitario) desde saldos_medcol6
+            // Esta tabla contendrá UN registro por código con el costo unitario más reciente
+            DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_ultimo');
             DB::statement('
-                CREATE TEMPORARY TABLE temp_precios_promedio AS
-                SELECT codigo, AVG(CAST(REPLACE(precio_unitario, ",", "") as DECIMAL(15,2))) as precio_promedio
-                FROM dispensado_medcol6
-                GROUP BY codigo
+                CREATE TEMPORARY TABLE temp_precios_ultimo AS
+                SELECT
+                    codigo,
+                    CAST(REPLACE(REPLACE(costo_unitario, ",", ""), "$", "") as DECIMAL(15,2)) as precio_ultimo,
+                    updated_at
+                FROM saldos_medcol6
+                WHERE costo_unitario IS NOT NULL
+                AND costo_unitario != ""
+                AND costo_unitario != "0"
+                AND costo_unitario != "$0"
+                GROUP BY codigo, costo_unitario, updated_at
             ');
 
             // Usar métodos optimizados que aprovechan la tabla temporal
@@ -802,7 +823,7 @@ class DashboardController extends Controller
             $todosMedicamentosPendientes = $this->getTopMedicamentosPendientesOptimizado($fechaInicio, $fechaFin, null);
 
             // Limpiar tabla temporal
-            DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_promedio');
+            DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_ultimo');
 
             return [
                 'estadisticas_por_estado' => $estadisticasPorEstado,
@@ -902,5 +923,110 @@ class DashboardController extends Controller
             ->groupBy('centroprod')
             ->orderBy('total_facturado', 'desc')
             ->get();
+    }
+
+    /**
+     * Endpoint de diagnóstico para analizar el cálculo de valores entregados
+     */
+    public function diagnosticoEntregados(Request $request)
+    {
+        $fechaInicio = $request->get('fecha_inicio');
+        $fechaFin = $request->get('fecha_fin');
+
+        // 1. Verificar estados únicos en pendientes - OPTIMIZADO
+        $estadosUnicos = DB::table('pendiente_api_medcol6')
+            ->whereBetween('fecha', [$fechaInicio, $fechaFin])
+            ->select('estado', DB::raw('COUNT(*) as total'))
+            ->groupBy('estado')
+            ->orderBy('total', 'desc')
+            ->limit(20)  // Limitar para evitar timeout
+            ->get();
+
+        // 2. Obtener códigos únicos de pendientes en el rango de fechas (OPTIMIZADO)
+        $codigosPendientes = DB::table('pendiente_api_medcol6')
+            ->whereBetween('fecha', [$fechaInicio, $fechaFin])
+            ->distinct()
+            ->pluck('codigo')
+            ->take(1000);  // Limitar a 1000 códigos únicos
+
+        // 3. Crear tabla temporal SOLO con los códigos que se usan en pendientes
+        DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_diagnostico');
+
+        if ($codigosPendientes->isNotEmpty()) {
+            $codigosIn = $codigosPendientes->map(function($codigo) {
+                return DB::connection()->getPdo()->quote($codigo);
+            })->implode(',');
+
+            DB::statement("
+                CREATE TEMPORARY TABLE temp_precios_diagnostico AS
+                SELECT
+                    codigo,
+                    CAST(REPLACE(REPLACE(costo_unitario, ',', ''), '$', '') as DECIMAL(15,2)) as precio_ultimo,
+                    updated_at
+                FROM saldos_medcol6
+                WHERE codigo IN ($codigosIn)
+                AND costo_unitario IS NOT NULL
+                AND costo_unitario != ''
+                AND costo_unitario != '0'
+                AND costo_unitario != '\$0'
+                GROUP BY codigo, costo_unitario, updated_at
+            ");
+        } else {
+            // Si no hay códigos, crear tabla vacía
+            DB::statement("
+                CREATE TEMPORARY TABLE temp_precios_diagnostico (
+                    codigo VARCHAR(50),
+                    precio_ultimo DECIMAL(15,2),
+                    updated_at TIMESTAMP
+                )
+            ");
+        }
+
+        // 4. Analizar registros entregados (muestra reducida)
+        $entregados = DB::table('pendiente_api_medcol6')
+            ->where('estado', 'ENTREGADO')
+            ->whereBetween('fecha', [$fechaInicio, $fechaFin])
+            ->limit(5)
+            ->get(['codigo', 'nombre', 'cantord', 'estado']);
+
+        // 5. Verificar cuántos códigos tienen precio en la tabla temporal
+        $codigosConPrecio = DB::table('temp_precios_diagnostico')
+            ->count();
+
+        // 6. Verificar coincidencias (muestra reducida)
+        $entregadosConPrecio = DB::table('pendiente_api_medcol6 as p')
+            ->join('temp_precios_diagnostico as d', 'p.codigo', '=', 'd.codigo')
+            ->where('p.estado', 'ENTREGADO')
+            ->whereBetween('p.fecha', [$fechaInicio, $fechaFin])
+            ->select('p.codigo', 'p.nombre', 'p.cantord', 'd.precio_ultimo',
+                DB::raw('CAST(p.cantord as DECIMAL(10,2)) * CAST(d.precio_ultimo as DECIMAL(10,2)) as valor_calculado'))
+            ->limit(5)
+            ->get();
+
+        // 7. Calcular totales SOLO de ENTREGADO
+        $totales = DB::table('pendiente_api_medcol6 as p')
+            ->leftJoin('temp_precios_diagnostico as d', 'p.codigo', '=', 'd.codigo')
+            ->where('p.estado', 'ENTREGADO')
+            ->whereBetween('p.fecha', [$fechaInicio, $fechaFin])
+            ->select(
+                DB::raw('COUNT(*) as total_registros'),
+                DB::raw('COUNT(d.codigo) as registros_con_precio'),
+                DB::raw('SUM(CAST(p.cantord as DECIMAL(10,2))) as total_cantidades'),
+                DB::raw('SUM(CAST(p.cantord as DECIMAL(10,2)) * CAST(COALESCE(d.precio_ultimo, 0) as DECIMAL(10,2))) as valor_total')
+            )
+            ->first();
+
+        // Limpiar tabla temporal
+        DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_diagnostico');
+
+        return response()->json([
+            'estados_disponibles' => $estadosUnicos,
+            'total_codigos_analizados' => $codigosPendientes->count(),
+            'total_codigos_con_precio_valido' => $codigosConPrecio,
+            'muestra_entregados_sin_precio' => $entregados,
+            'muestra_entregados_con_precio' => $entregadosConPrecio,
+            'totales' => $totales,
+            'nota' => 'Optimizado: solo analiza códigos usados en pendientes del rango de fechas. Máximo 1000 códigos.'
+        ]);
     }
 }

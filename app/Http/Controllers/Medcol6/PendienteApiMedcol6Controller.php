@@ -144,7 +144,6 @@ class PendienteApiMedcol6Controller extends Controller
         return view('menu.Medcol6.indexAnalista');
     }
 
-
     /**
      * Show the form for creating a new resource.
      *
@@ -153,14 +152,13 @@ class PendienteApiMedcol6Controller extends Controller
     public function createapendientespi(Request $request)
     {
         // Obtener la fecha límite de los últimos 7 días
-        $fechaLimite = Carbon::now()->startOfWeek()->subDays(7)->startOfDay();
+        $fechaLimite = Carbon::now()->startOfWeek()->subDays(8)->startOfDay();
 
-        $email = 'castrokofdev@gmail.com'; // Auth::user()->email
+        $email = 'castrokofdev@gmail.com';
         $password = 'colMed2023**';
         $usuario = Auth::user()->email;
 
         set_time_limit(0);
-        //ini_set('memory_limit', '512M');
 
         try {
 
@@ -174,70 +172,63 @@ class PendienteApiMedcol6Controller extends Controller
 
             $token = $response->json()["token"];
 
-
             $responsefacturas = Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/pendientesapi");
 
             $facturassapi = $responsefacturas->json()['data'];
 
             ini_set('memory_limit', count($facturassapi) > 10000 ? '1024M' : '512M');
 
-            $contadorei = 0;
             $contador = 0;
-            //$pendientes = [];
-
-            // Obtener las facturas existentes en un solo query
-
-            // Crear las claves únicas de cada entrada en $facturassapi
-            $clavesFacturasApi = array_map(function ($f) {
-                return trim($f['documento']) . '-' . trim($f['factura']) . '-' . trim($f['codigo']);
-            }, $facturassapi);
-
             $facturasExistentes = collect();
 
-
-            // Consultar la base de datos en chunks para evitar demasiados placeholders
+            // Consultar la base de datos en chunks
             foreach (array_chunk($facturassapi, 500) as $chunk) {
-                $ids = array_map(fn($f) => trim($f['documento']), $chunk);
-                $facturas = array_map(fn($f) => trim($f['factura']), $chunk);
-                $codigos = array_map(fn($f) => trim($f['codigo']), $chunk);
-
                 $resultados = PendienteApiMedcol6::select('documento', 'factura', 'codigo')
-                    ->whereIn('documento', $ids)
-                    ->whereIn('factura', $facturas)
-                    ->whereIn('codigo', $codigos)
+                    ->where(function ($query) use ($chunk) {
+                        foreach ($chunk as $item) {
+                            $query->orWhere(function ($subQuery) use ($item) {
+                                $subQuery->where('documento', trim($item['documento']))
+                                    ->where('factura', trim($item['factura']))
+                                    ->where('codigo', trim($item['codigo']));
+                            });
+                        }
+                    })
                     ->where('fecha_factura', '>=', $fechaLimite)
                     ->get();
 
                 $facturasExistentes = $facturasExistentes->merge($resultados);
             }
 
-            // Crear claves únicas de los existentes en base de datos
+            // Crear claves únicas
             $facturasExistentesFlip = array_flip(
                 $facturasExistentes->map(function ($item) {
                     return trim($item->documento) . '-' . trim($item->factura) . '-' . trim($item->codigo);
                 })->toArray()
-
             );
-            unset($facturasExistentesFlip);
 
             $pendientes = [];
+            $totalAPI = count($facturassapi);
+            $totalExistentes = count($facturasExistentesFlip);
+            $omitidas = 0;
+            $procesadas = 0;
 
-            //dd($pendientes);
+            Log::info("🚀 INICIO: {$totalAPI} facturas del API, {$totalExistentes} ya en BD");
 
             foreach ($facturassapi as $factura) {
-
-                // Verificar si la factura ya existe en el array obtenido antes
                 $clave = trim($factura['documento']) . '-' . trim($factura['factura']) . '-' . trim($factura['codigo']);
 
-
                 if (isset($facturasExistentesFlip[$clave])) {
-                    // Registrar en el log como "NO" (porque ya existe)
-                    Log::info("{$clave} => NO (ya existe)");
+                    $omitidas++;
+                    if ($omitidas <= 3 || $omitidas % 50 == 0) {
+                        Log::info("⏭️  OMITIDA #{$omitidas}: {$clave}");
+                    }
                     continue;
                 }
 
-                // Registrar en el log como "SI" (porque se va a insertar)
-                Log::info("{$clave} => SI (se inserta)");
+                $procesadas++;
+                if ($procesadas <= 3 || $procesadas % 50 == 0) {
+                    Log::info("✅ NUEVA #{$procesadas}: {$clave}");
+                }
 
                 $pendientes[] = [
                     'Tipodocum' => trim($factura['Tipodocum']),
@@ -271,101 +262,145 @@ class PendienteApiMedcol6Controller extends Controller
             }
 
             if (!empty($pendientes)) {
-                $chunks = array_chunk($pendientes, 500); // Divide en lotes de 500 registros
-
+                $chunks = array_chunk($pendientes, 500);
                 foreach ($chunks as $chunk) {
                     PendienteApiMedcol6::insertOrIgnore($chunk);
                 }
             }
 
+            // Liberar memoria
+            unset($facturasExistentesFlip);
+            unset($facturasExistentes);
+
             Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/closeallacceso");
 
-            $var = $this->createentregadospi(null);
+            // ⚠️ CAMBIO CRÍTICO: Manejar el array retornado
+            $resultadoEntregados = $this->createentregadospi(null);
+            $insertados = $resultadoEntregados['insertados'] ?? 0;
+            $actualizados = $resultadoEntregados['actualizados'] ?? 0;
 
-            Log::info('Desde la web syncapi ' . $contador . ' Lineas creadas y ' . $var . ' Lineas entregadas' . ' Usuario: ' . $usuario);
+            // Resultado final
+            $porcentajeOmitidas = $totalAPI > 0 ? round(($omitidas / $totalAPI) * 100, 1) : 0;
+            $porcentajeProcesadas = $totalAPI > 0 ? round(($procesadas / $totalAPI) * 100, 1) : 0;
+
+            Log::info("🏁 RESULTADO: {$omitidas} omitidas ({$porcentajeOmitidas}%) | {$procesadas} nuevas ({$porcentajeProcesadas}%)");
+            Log::info("📊 Entregados: {$insertados} insertados, {$actualizados} actualizados - Usuario: {$usuario}");
 
             return response()->json([
-                ['respuesta' => $contador . ' Lineas creadas y ' . $var . ' Lineas entregadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']
+                [
+                    'respuesta' => "{$contador} pendientes creados | {$insertados} entregados insertados | {$actualizados} pendientes actualizados",
+                    'titulo' => 'Sincronización Exitosa',
+                    'icon' => 'success',
+                    'position' => 'bottom-left'
+                ]
             ]);
         } catch (\Exception $e) {
 
-
-            $response = Http::post("http://192.168.66.95:8004/api/acceso", [
-                'email' =>  $email,
-                'password' => $password,
-            ]);
-
-            $token = $response->json()["token"];
-
-            $responsefacturas = Http::withToken($token)->get("http://192.168.66.95:8004/api/pendientesapi");
-
-            $facturassapi = $responsefacturas->json()['data'];
-
-            //dd($facturassapi);
-
-            $contador = 0;
-            $pendientes = [];
-
-            foreach ($facturassapi as $factura) {
-                $existe = PendienteApiMedcol6::where([['factura', $factura['factura']], ['documento', $factura['documento']]])->count();
-
-                if ($existe == 0 || $existe == '') {
-                    $pendientes[] = [
-                        'Tipodocum' => trim($factura['Tipodocum']),
-                        'cantdpx' => trim($factura['cantdpx']),
-                        'cantord' => trim($factura['cantord']),
-                        'fecha_factura' => trim($factura['fecha_factura']),
-                        'fecha' => trim($factura['fecha']),
-                        'historia' => trim($factura['historia']),
-                        'apellido1' => trim($factura['apellido1']),
-                        'apellido2' => trim($factura['apellido2']),
-                        'nombre1' => trim($factura['nombre1']),
-                        'nombre2' => trim($factura['nombre2']),
-                        'cantedad' => trim($factura['cantedad']),
-                        'direcres' => trim($factura['direcres']),
-                        'telefres' => trim($factura['telefres']),
-                        'documento' => trim($factura['documento']),
-                        'factura' => trim($factura['factura']),
-                        'agrupador' => trim($factura['agrupador']),
-                        'codigo' => trim($factura['codigo']),
-                        'nombre' => trim($factura['nombre']),
-                        'cums' => trim($factura['cums']),
-                        'cantidad' => trim($factura['cantidad']),
-                        'cajero' => trim($factura['cajero']),
-                        'estado' => 'PENDIENTE',
-                        'orden_externa' => trim($factura['ORDEN_EXTERNA']),
-                        'centroproduccion' => trim($factura['CENTROPRODUCCION']),
-                        'observaciones' => trim($factura['observaciones'])
-                    ];
-
-                    $contador++;
-                }
-            }
-
-            if (!empty($pendientes)) {
-                PendienteApiMedcol6::insert($pendientes);
-            }
-
-            Http::withToken($token)->get("http://192.168.66.95:8004/api/closeallacceso");
-
-            $var = $this->createentregadospilocal(null);
-
-
-            if ($e->getMessage()) {
-
-
-                Log::error('Desde la web syncapi ' . $e->getMessage() . ' Usuario: ' . $usuario);
-
-
-                return response()->json([
-                    ['respuesta' => 'Error: ' . $e->getMessage(), 'titulo' => 'Error', 'icon' => 'error', 'position' => 'bottom-left']
+            try {
+                $response = Http::post("http://192.168.66.95:8004/api/acceso", [
+                    'email' =>  $email,
+                    'password' => $password,
                 ]);
-            } else {
 
-                Log::info('Desde la web syncapi ' . $contador . ' Lineas creadas y ' . $var . ' Lineas entregadas' . ' Usuario: ' . $usuario);
+                $token = $response->json()["token"];
+                $responsefacturas = Http::withToken($token)->get("http://192.168.66.95:8004/api/pendientesapi");
+                $facturassapi = $responsefacturas->json()['data'];
+
+                $contador = 0;
+                $pendientes = [];
+                $facturasExistentes = collect();
+
+                foreach (array_chunk($facturassapi, 500) as $chunk) {
+                    $resultados = PendienteApiMedcol6::select('documento', 'factura', 'codigo')
+                        ->where(function ($query) use ($chunk) {
+                            foreach ($chunk as $item) {
+                                $query->orWhere(function ($subQuery) use ($item) {
+                                    $subQuery->where('documento', trim($item['documento']))
+                                        ->where('factura', trim($item['factura']))
+                                        ->where('codigo', trim($item['codigo']));
+                                });
+                            }
+                        })
+                        ->where('fecha_factura', '>=', $fechaLimite)
+                        ->get();
+
+                    $facturasExistentes = $facturasExistentes->merge($resultados);
+                }
+
+                $facturasExistentesFlip = array_flip(
+                    $facturasExistentes->map(function ($item) {
+                        return trim($item->documento) . '-' . trim($item->factura) . '-' . trim($item->codigo);
+                    })->toArray()
+                );
+
+                foreach ($facturassapi as $factura) {
+                    $clave = trim($factura['documento']) . '-' . trim($factura['factura']) . '-' . trim($factura['codigo']);
+
+                    if (!isset($facturasExistentesFlip[$clave])) {
+                        $pendientes[] = [
+                            'Tipodocum' => trim($factura['Tipodocum']),
+                            'cantdpx' => trim($factura['cantdpx']),
+                            'cantord' => trim($factura['cantord']),
+                            'fecha_factura' => trim($factura['fecha_factura']),
+                            'fecha' => trim($factura['fecha']),
+                            'historia' => trim($factura['historia']),
+                            'apellido1' => trim($factura['apellido1']),
+                            'apellido2' => trim($factura['apellido2']),
+                            'nombre1' => trim($factura['nombre1']),
+                            'nombre2' => trim($factura['nombre2']),
+                            'cantedad' => trim($factura['cantedad']),
+                            'direcres' => trim($factura['direcres']),
+                            'telefres' => trim($factura['telefres']),
+                            'documento' => trim($factura['documento']),
+                            'factura' => trim($factura['factura']),
+                            'agrupador' => trim($factura['agrupador']),
+                            'codigo' => trim($factura['codigo']),
+                            'nombre' => trim($factura['nombre']),
+                            'cums' => trim($factura['cums']),
+                            'cantidad' => trim($factura['cantidad']),
+                            'cajero' => trim($factura['cajero']),
+                            'estado' => 'PENDIENTE',
+                            'orden_externa' => trim($factura['ORDEN_EXTERNA']),
+                            'centroproduccion' => trim($factura['CENTROPRODUCCION']),
+                            'observaciones' => trim($factura['observaciones'])
+                        ];
+
+                        $contador++;
+                    }
+                }
+
+                if (!empty($pendientes)) {
+                    $chunks = array_chunk($pendientes, 500);
+                    foreach ($chunks as $chunk) {
+                        PendienteApiMedcol6::insertOrIgnore($chunk);
+                    }
+                }
+
+                Http::withToken($token)->get("http://192.168.66.95:8004/api/closeallacceso");
+
+                // ⚠️ CAMBIO: Manejar retorno de createentregadospilocal
+                $varLocal = $this->createentregadospilocal(null);
+
+                Log::info('Desde la web syncapi (servidor local) ' . $contador . ' Lineas creadas y ' . $varLocal . ' Lineas entregadas - Usuario: ' . $usuario);
 
                 return response()->json([
-                    ['respuesta' => $contador . ' Lineas creadas y ' . $var . ' Lineas entregadas', 'titulo' => 'Usando Api Local', 'icon' => 'error', 'position' => 'bottom-left']
+                    [
+                        'respuesta' => $contador . ' Lineas creadas y ' . $varLocal . ' Lineas entregadas',
+                        'titulo' => 'Usando Api Local',
+                        'icon' => 'warning',
+                        'position' => 'bottom-left'
+                    ]
+                ]);
+            } catch (\Exception $localException) {
+                Log::error('Error en ambos servidores. Error principal: ' . $e->getMessage() . ' - Error local: ' . $localException->getMessage() . ' Usuario: ' . $usuario);
+
+                return response()->json([
+                    [
+                        'respuesta' => 'Error en ambos servidores: ' . $e->getMessage(),
+                        'titulo' => 'Error',
+                        'icon' => 'error',
+                        'position' => 'bottom-left'
+                    ]
                 ]);
             }
         }
@@ -926,26 +961,28 @@ class PendienteApiMedcol6Controller extends Controller
         if (request()->ajax()) {
             // Consulta corregida usando el modelo Eloquent con join
             $pendiente = PendienteApiMedcol6::from('pendiente_api_medcol6 as p')
-                ->leftJoin(DB::raw('(SELECT pendiente_id, observacion, created_at,
+                ->leftJoin(
+                    DB::raw('(SELECT pendiente_id, observacion, created_at,
                                 ROW_NUMBER() OVER (PARTITION BY pendiente_id ORDER BY created_at DESC) as rn
-                                FROM observaciones_api_medcol6) as o'), 
-                    function($join) {
+                                FROM observaciones_api_medcol6) as o'),
+                    function ($join) {
                         $join->on('p.id', '=', 'o.pendiente_id')
-                             ->where('o.rn', '=', 1);
-                    })
+                            ->where('o.rn', '=', 1);
+                    }
+                )
                 ->select('p.*', 'o.observacion as ultima_observacion', 'o.created_at as fecha_ultima_observacion')
                 ->where('p.id', $id)
                 ->first();
-            
+
             // Verificar si se encontró el registro
             if (!$pendiente) {
                 return response()->json(['error' => 'Registro no encontrado'], 404);
             }
-            
+
             $saldo_pendiente = $pendiente->cantord - $pendiente->cantdpx;
             // Concatenar los campos doc_entrega y factura_entrega
             $fac_entrega = $pendiente->doc_entrega . ' ' . $pendiente->factura_entrega;
-    
+
             return response()->json([
                 'pendiente' => $pendiente,
                 'saldo_pendiente' => $saldo_pendiente,
@@ -1050,164 +1087,265 @@ class PendienteApiMedcol6Controller extends Controller
         return response()->json(['pendientes' => $pendientes, 'entregados' => $entregados, 'tramitados' => $tramitados, 'agotados' => $agotados, 'anulados' => $anulados, 'vencidos' => $vencidos]);
     }
 
-    public function createentregadospi($var1)
+    private function actualizarPendientesOptimizado()
     {
-        $email = 'castrokofdev@gmail.com'; // Auth::user()->email
-        $password = 'colMed2023**';
-
-        $response = Http::post(
-            "http://hed08pf9dxt.sn.mynetname.net:8004/api/acceso",
-            [
-                'email' =>  $email,
-                'password' => $password,
-            ]
-        );
-
-
-        // $this->createapendientespi($request);
-
-        $prueba = $response->json();
-        $token = $prueba["token"];
-
-        $responsefacturas = Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/entregadosapi");
-
-        $facturassapi = $responsefacturas->json();
-
-
-        //dd($facturassapi);
-
         $contadorei = 0;
-        $contador1 = 0;
 
-        foreach ($facturassapi['data'] as $factura) {
+        try {
+            // Obtener fecha límite para consulta (últimos 30 días)
+            $fechaLimite = now()->subDays(60)->startOfDay();
 
+            Log::info("🔍 Buscando pendientes para actualizar (últimos 30 días)...");
 
+            // Obtener pendientes con join optimizado - solo últimos 30 días
+            $pendientes = DB::table('pendiente_api_medcol6 as p')
+                ->join('entregados_api_medcol6 as e', function ($join) use ($fechaLimite) {
+                    $join->on('p.orden_externa', '=', 'e.orden_externa')
+                        ->on('p.codigo', '=', 'e.codigo')
+                        ->where('e.fecha_factura', '>=', $fechaLimite);
+                })
+                ->select(
+                    'p.id as idd',
+                    'p.orden_externa',
+                    'p.codigo',
+                    'e.cantdpx',
+                    'e.fecha_factura',
+                    'e.documento',
+                    'e.factura'
+                )
+                ->where('p.estado', 'PENDIENTE')
+                ->where('p.fecha_factura', '>=', $fechaLimite)
+                ->whereNotExists(function ($query) use ($fechaLimite) {
+                    $query->select(DB::raw(1))
+                        ->from('pendiente_api_medcol6 as p2')
+                        ->whereColumn('p2.orden_externa', 'p.orden_externa')
+                        ->whereColumn('p2.codigo', 'p.codigo')
+                        ->where('p2.estado', 'ENTREGADO')
+                        ->where('p2.usuario', 'RFAST')
+                        ->where('p2.fecha_factura', '>=', $fechaLimite);
+                })
+                ->get();
 
+            Log::info("📋 Encontrados {$pendientes->count()} pendientes para actualizar");
 
-            $existe =  EntregadosApiMedcol6::where([
-                ['factura', trim($factura['factura'])],
-                ['documento', trim($factura['documento'])]
-            ])->count();
-
-
-
-            if ($existe == 0 || $existe == '') {
-
-
-
-                EntregadosApiMedcol6::create([
-                    'Tipodocum' => trim($factura['Tipodocum']),
-                    'cantdpx' => trim($factura['cantdpx']),
-                    'cantord' => trim($factura['cantord']),
-                    'fecha_factura' => trim($factura['fecha_factura']),
-                    'fecha' => trim($factura['fecha']),
-                    'historia' => trim($factura['historia']),
-                    'apellido1' => trim($factura['apellido1']),
-                    'apellido2' => trim($factura['apellido2']),
-                    'nombre1' => trim($factura['nombre1']),
-                    'nombre2' => trim($factura['nombre2']),
-                    'cantedad' => trim($factura['cantedad']),
-                    'direcres' => trim($factura['direcres']),
-                    'telefres' => trim($factura['telefres']),
-                    'documento' => trim($factura['documento']),
-                    'factura' => trim($factura['factura']),
-                    'codigo' => trim($factura['codigo']),
-                    'nombre' => trim($factura['nombre']),
-                    'cums' => trim($factura['cums']),
-                    'cantidad' => trim($factura['cantidad']),
-                    'cajero' => trim($factura['cajero']),
-                    'orden_externa' => trim($factura['orden_externa']),
-                    'doc_entrega' => trim($factura['documento']),
-                    'factura_entrega' => trim($factura['factura']),
-                    'centroproduccion' => trim($factura['CENTROPRODUCCION']),
-                    'observaciones' => trim($factura['observaciones'])
-                ]);
-
-
-                $contador1++;
-
-                Log::info('Desde la web syncapi ' . $contador1 . ' Linea creada entregados y ' . trim($factura['documento']) . trim($factura['factura']) . ' Medicamento - ' . trim($factura['cums']) . '=>' . trim($factura['nombre']) . 'Documento: ' . trim($factura['historia']));
-            } else {
-
-                Log::info('Desde la web syncapi ' . $contador1 . ' ya creada en entregados y ' . trim($factura['documento']) . trim($factura['factura']) . ' Medicamento - ' . trim($factura['cums']) . '=>' . trim($factura['nombre']) . 'Documento: ' . trim($factura['historia']));
+            if ($pendientes->isEmpty()) {
+                Log::info("✅ No hay pendientes para actualizar");
+                return 0;
             }
-        }
 
-        Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/closeallacceso");
+            $pendientesIds = [];
+            $observacionesData = [];
+            $updateData = []; // Para actualizaciones individuales con datos específicos
 
-        $pendientes = DB::table('pendiente_api_medcol6')
-            ->join('entregados_api_medcol6', function ($join) {
-                $join->on('pendiente_api_medcol6.orden_externa', '=', 'entregados_api_medcol6.orden_externa')
-                    ->on('pendiente_api_medcol6.codigo', '=', 'entregados_api_medcol6.codigo');
-            })
-            ->select(
-                'pendiente_api_medcol6.id as idd',
-                'entregados_api_medcol6.orden_externa',
-                'entregados_api_medcol6.codigo',
-                'entregados_api_medcol6.cantdpx',
-                'entregados_api_medcol6.fecha_factura',
-                'entregados_api_medcol6.documento',
-                'entregados_api_medcol6.factura'
-            )
-            ->where([['pendiente_api_medcol6.estado', 'PENDIENTE']])
-            ->get();
+            foreach ($pendientes as $pendiente) {
+                $pendientesIds[] = $pendiente->idd;
 
+                // Guardar datos para actualización
+                $updateData[$pendiente->idd] = [
+                    'cantdpx' => $pendiente->cantdpx,
+                    'fecha_factura' => $pendiente->fecha_factura,
+                    'documento' => $pendiente->documento,
+                    'factura' => $pendiente->factura
+                ];
 
-
-        foreach ($pendientes as $key => $value) {
-
-            $entregados =
-                DB::table('pendiente_api_medcol6')
-                ->where([
-                    ['pendiente_api_medcol6.estado', '=', 'ENTREGADO'],
-                    ['pendiente_api_medcol6.orden_externa', '=', $value->orden_externa],
-                    ['pendiente_api_medcol6.codigo', '=', $value->codigo],
-                    ['pendiente_api_medcol6.usuario', 'RFAST']
-                ])->count();
-
-
-
-            if ($entregados == 0 || $entregados == null) {
-
-                DB::table('pendiente_api_medcol6')
-                    ->where([
-                        ['pendiente_api_medcol6.estado', '=', 'PENDIENTE'],
-                        ['pendiente_api_medcol6.orden_externa', '=', $value->orden_externa],
-                        ['pendiente_api_medcol6.codigo', '=', $value->codigo]
-                    ])
-                    ->update([
-                        'pendiente_api_medcol6.fecha_entrega' =>  $value->fecha_factura,
-                        'pendiente_api_medcol6.estado' => 'ENTREGADO',
-                        'pendiente_api_medcol6.cantdpx' => $value->cantdpx,
-                        'pendiente_api_medcol6.doc_entrega' => $value->documento,
-                        'pendiente_api_medcol6.factura_entrega' => $value->factura,
-                        'pendiente_api_medcol6.usuario' => 'RFAST',
-                        'pendiente_api_medcol6.updated_at' => now()
-                    ]);
+                // Preparar datos para inserción masiva de observaciones
+                $observacionesData[] = [
+                    'pendiente_id' => $pendiente->idd,
+                    'observacion' => 'Este registro se generó automáticamente al consumir la API',
+                    'usuario' => 'RFAST',
+                    'estado' => 'ENTREGADO',
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
 
                 $contadorei++;
             }
 
+            if (!empty($pendientesIds)) {
+                Log::info("🔄 Actualizando {$contadorei} registros pendientes...");
 
-            // Guardar observación en la tabla ObservacionesApi
+                // Actualizar cada pendiente con sus datos específicos
+                foreach ($updateData as $id => $data) {
+                    DB::table('pendiente_api_medcol6')
+                        ->where('id', $id)
+                        ->where('estado', 'PENDIENTE')
+                        ->update([
+                            'estado' => 'ENTREGADO',
+                            'usuario' => 'RFAST',
+                            'fecha_entrega' => $data['fecha_factura'],
+                            'cantdpx' => $data['cantdpx'],
+                            'doc_entrega' => $data['documento'],
+                            'factura_entrega' => $data['factura'],
+                            'updated_at' => now()
+                        ]);
+                }
 
-            $entregado = ObservacionesApiMedcol6::where([
-                ['pendiente_id', $value->idd],
-                ['estado', 'ENTREGADO']
-            ])->count();
+                Log::info("📝 Insertando observaciones...");
 
-            if ($entregado == 0 || $entregado == null) {
+                // Insertar observaciones solo las que no existen
+                $observacionesExistentes = ObservacionesApiMedcol6::whereIn('pendiente_id', $pendientesIds)
+                    ->where('estado', 'ENTREGADO')
+                    ->pluck('pendiente_id')
+                    ->toArray();
 
-                ObservacionesApiMedcol6::create([
-                    'pendiente_id' => $value->idd,
-                    'observacion' => 'Este resgistro se genero automaticamente al consumir la api',
-                    'usuario' => 'RFAST',
-                    'estado' => 'ENTREGADO'
-                ]);
+                $observacionesNuevas = array_filter($observacionesData, function ($obs) use ($observacionesExistentes) {
+                    return !in_array($obs['pendiente_id'], $observacionesExistentes);
+                });
+
+                if (!empty($observacionesNuevas)) {
+                    ObservacionesApiMedcol6::insert($observacionesNuevas);
+                    Log::info("✅ Insertadas " . count($observacionesNuevas) . " nuevas observaciones");
+                }
+
+                Log::info("✅ Actualizados {$contadorei} registros pendientes a ENTREGADO");
             }
-        }
 
-        return $this->var1 = $contadorei;
+            return $contadorei;
+        } catch (\Exception $e) {
+            Log::error('❌ Error actualizando pendientes: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return $contadorei;
+        }
+    }
+
+    public function createentregadospi($var1)
+    {
+        $email = 'castrokofdev@gmail.com';
+        $password = 'colMed2023**';
+
+        try {
+            // Autenticación
+            $response = Http::timeout(30)->post(
+                "http://hed08pf9dxt.sn.mynetname.net:8004/api/acceso",
+                [
+                    'email' => $email,
+                    'password' => $password,
+                ]
+            );
+
+            if (!$response->successful()) {
+                Log::error('Error en autenticación API: ' . $response->body());
+                return ['insertados' => 0, 'actualizados' => 0];
+            }
+
+            $authData = $response->json();
+            $token = $authData["token"] ?? null;
+
+            if (!$token) {
+                Log::error('Token no recibido en la respuesta de autenticación');
+                return ['insertados' => 0, 'actualizados' => 0];
+            }
+
+            // Obtener datos de entregados
+            $responsefacturas = Http::withToken($token)
+                ->timeout(60)
+                ->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/entregadosapi");
+
+            if (!$responsefacturas->successful()) {
+                Log::error('Error al obtener datos de entregados: ' . $responsefacturas->body());
+                return ['insertados' => 0, 'actualizados' => 0];
+            }
+
+            $facturassapi = $responsefacturas->json();
+
+            // Verificar estructura de datos
+            if (!isset($facturassapi['data']) || !is_array($facturassapi['data'])) {
+                Log::error('Estructura de datos inválida recibida de la API');
+                return ['insertados' => 0, 'actualizados' => 0];
+            }
+
+            $contador1 = 0;
+            $batchSize = 100;
+            $facturas = collect($facturassapi['data']);
+
+            // Obtener fecha límite para consulta local (últimos 30 días)
+            $fechaLimite = now()->subDays(30)->startOfDay();
+
+            Log::info("🔄 Iniciando inserción de entregados. Total a procesar: " . $facturas->count());
+
+            // Procesar en lotes para mejorar rendimiento
+            $facturas->chunk($batchSize)->each(function ($batch, $chunkIndex) use (&$contador1, $fechaLimite) {
+
+                // Obtener registros existentes SOLO de los últimos 30 días
+                $existingRecords = EntregadosApiMedcol6::whereIn('factura', $batch->pluck('factura'))
+                    ->whereIn('documento', $batch->pluck('documento'))
+                    ->whereIn('codigo', $batch->pluck('codigo'))
+                    ->where('created_at', '>=', $fechaLimite)
+                    ->select('factura', 'documento', 'codigo')
+                    ->get()
+                    ->keyBy(function ($item) {
+                        return trim($item->factura) . '|' . trim($item->documento) . '|' . trim($item->codigo);
+                    });
+
+                $dataToInsert = [];
+
+                foreach ($batch as $factura) {
+                    $key = trim($factura['factura']) . '|' . trim($factura['documento']) . '|' . trim($factura['codigo']);
+
+                    if (!$existingRecords->has($key)) {
+                        $dataToInsert[] = [
+                            'Tipodocum' => trim($factura['Tipodocum'] ?? ''),
+                            'cantdpx' => trim($factura['cantdpx'] ?? ''),
+                            'cantord' => trim($factura['cantord'] ?? ''),
+                            'fecha_factura' => trim($factura['fecha_factura'] ?? ''),
+                            'fecha' => trim($factura['fecha'] ?? ''),
+                            'historia' => trim($factura['historia'] ?? ''),
+                            'apellido1' => trim($factura['apellido1'] ?? ''),
+                            'apellido2' => trim($factura['apellido2'] ?? ''),
+                            'nombre1' => trim($factura['nombre1'] ?? ''),
+                            'nombre2' => trim($factura['nombre2'] ?? ''),
+                            'cantedad' => trim($factura['cantedad'] ?? ''),
+                            'direcres' => trim($factura['direcres'] ?? ''),
+                            'telefres' => trim($factura['telefres'] ?? ''),
+                            'documento' => trim($factura['documento'] ?? ''),
+                            'factura' => trim($factura['factura'] ?? ''),
+                            'codigo' => trim($factura['codigo'] ?? ''),
+                            'nombre' => trim($factura['nombre'] ?? ''),
+                            'cums' => trim($factura['cums'] ?? ''),
+                            'cantidad' => trim($factura['cantidad'] ?? ''),
+                            'cajero' => trim($factura['cajero'] ?? ''),
+                            'orden_externa' => trim($factura['orden_externa'] ?? ''),
+                            'doc_entrega' => trim($factura['documento'] ?? ''),
+                            'factura_entrega' => trim($factura['factura'] ?? ''),
+                            'centroproduccion' => trim($factura['CENTROPRODUCCION'] ?? ''),
+                            'observaciones' => trim($factura['observaciones'] ?? ''),
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ];
+
+                        $contador1++;
+                    }
+                }
+
+                // Inserción masiva si hay datos
+                if (!empty($dataToInsert)) {
+                    EntregadosApiMedcol6::insert($dataToInsert);
+                    Log::info("✅ Lote " . ($chunkIndex + 1) . ": Insertados " . count($dataToInsert) . " registros");
+                }
+            });
+
+            // Cerrar sesión en la API
+            Http::withToken($token)
+                ->timeout(30)
+                ->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/closeallacceso");
+
+            Log::info("📊 Insertados {$contador1} registros nuevos en entregados_api_medcol6");
+            Log::info("🔄 Iniciando actualización de pendientes...");
+
+            // Actualizar pendientes de forma optimizada
+            $contadorei = $this->actualizarPendientesOptimizado();
+
+            Log::info("✅ Proceso completado. Nuevos registros: {$contador1}, Pendientes actualizados: {$contadorei}");
+
+            return [
+                'insertados' => $contador1,
+                'actualizados' => $contadorei
+            ];
+        } catch (\Exception $e) {
+            Log::error('❌ Error en createentregadospi: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return ['insertados' => 0, 'actualizados' => 0];
+        }
     }
 
     public function createentregadospilocal($var2)
@@ -2320,7 +2458,7 @@ class PendienteApiMedcol6Controller extends Controller
                             } else {
                                 $updateData['fecha_entrega'] = now();
                             }
-                            
+
                             // Agregar campos de entrega
                             if (isset($pendienteData['doc_entrega'])) {
                                 $updateData['doc_entrega'] = $pendienteData['doc_entrega'];
@@ -2329,7 +2467,7 @@ class PendienteApiMedcol6Controller extends Controller
                                 $updateData['factura_entrega'] = $pendienteData['factura_entrega'];
                             }
                             break;
-                            
+
                         case 'TRAMITADO':
                         case 'DESABASTECIDO':
                             // Usar fecha personalizada si se proporciona, sino fecha actual
@@ -2339,7 +2477,7 @@ class PendienteApiMedcol6Controller extends Controller
                                 $updateData['fecha_impresion'] = now();
                             }
                             break;
-                            
+
                         case 'ANULADO':
                             // Usar fecha personalizada si se proporciona, sino fecha actual
                             if (!empty($pendienteData['fecha_anulado'])) {
@@ -2348,7 +2486,7 @@ class PendienteApiMedcol6Controller extends Controller
                                 $updateData['fecha_anulado'] = now();
                             }
                             break;
-                            
+
                         case 'SIN CONTACTO':
                             // Para SIN CONTACTO usamos updated_at
                             if (!empty($pendienteData['fecha_sincontacto'])) {
@@ -2363,14 +2501,14 @@ class PendienteApiMedcol6Controller extends Controller
 
                     // Crear observación con el texto ingresado por el usuario o generar automática
                     $observacionTexto = '';
-                    
+
                     if (!empty($pendienteData['observaciones'])) {
                         // Si el usuario ingresó observaciones específicas, usarlas
                         $observacionTexto = $pendienteData['observaciones'];
                     } else {
                         // Si no hay observaciones específicas, generar observación automática
                         $observacionTexto = 'Actualización masiva: Estado cambiado a ' . $pendienteData['estado'] . ' con cantidad entregada: ' . $pendienteData['cantdpx'];
-                        
+
                         if ($pendienteData['estado'] === 'ENTREGADO' && !empty($pendienteData['fecha_entrega'])) {
                             $observacionTexto .= ' - Fecha de entrega: ' . Carbon::parse($pendienteData['fecha_entrega'])->format('d/m/Y');
                         }
@@ -2424,7 +2562,7 @@ class PendienteApiMedcol6Controller extends Controller
         // Definir las fechas por defecto
         $fechaAi = now()->startOfDay();
         $fechaAf = now()->endOfDay();
-    
+
         // Obtener la droguería del usuario autenticado
         $drogueria = '';
         switch (Auth::user()->drogueria) {
@@ -2468,28 +2606,30 @@ class PendienteApiMedcol6Controller extends Controller
                 $drogueria = '';
                 break;
         }
-    
+
         if ($request->ajax()) {
             // Iniciar la consulta
             $query = DB::table('pendiente_api_medcol6 as p')
-                ->leftJoin(DB::raw('(SELECT pendiente_id, observacion, created_at,
+                ->leftJoin(
+                    DB::raw('(SELECT pendiente_id, observacion, created_at,
                                     ROW_NUMBER() OVER (PARTITION BY pendiente_id ORDER BY created_at DESC) as rn
-                                    FROM observaciones_api_medcol6) as o'), 
-                    function($join) {
+                                    FROM observaciones_api_medcol6) as o'),
+                    function ($join) {
                         $join->on('p.id', '=', 'o.pendiente_id')
-                             ->where('o.rn', '=', 1);
-                    })
+                            ->where('o.rn', '=', 1);
+                    }
+                )
                 ->select('p.*', 'o.observacion as ultima_observacion', 'o.created_at as fecha_ultima_observacion')
-                ->where(function($q) {
+                ->where(function ($q) {
                     $q->where('p.estado', 'SIN CONTACTO')
-                      ->orWhereNull('p.estado');
+                        ->orWhereNull('p.estado');
                 });
-    
+
             // Filtrar por centro de producción si no es '1'
             if (Auth::user()->drogueria !== '1') {
                 $query->where('p.centroproduccion', $drogueria);
             }
-    
+
             // Filtrar por fechas si están presentes
             if (!empty($request->fechaini) && !empty($request->fechafin)) {
                 $fechaini = Carbon::parse($request->fechaini)->startOfDay();
@@ -2499,18 +2639,18 @@ class PendienteApiMedcol6Controller extends Controller
                 // Si no se proporcionan fechas, usar las fechas por defecto
                 $query->whereBetween('p.fecha_factura', [$fechaAi, $fechaAf]);
             }
-    
+
             // Filtrar por contrato si está presente
             if (!empty($request->contrato)) {
                 $query->where('p.centroproduccion', $request->contrato);
             }
-            
+
             // Excluir centros de producción específicos
-            $query->whereNotIn('p.centroproduccion', ['FSIO','FSOS', 'FSAU', 'ENMP']);
-            
+            $query->whereNotIn('p.centroproduccion', ['FSIO', 'FSOS', 'FSAU', 'ENMP']);
+
             // Ordenar y obtener los resultados
             $pendiente_api_medcol6 = $query->orderBy('p.id')->get();
-    
+
             // Retornar los resultados para DataTables
             return DataTables()->of($pendiente_api_medcol6)
                 ->addColumn('action', function ($pendiente) {
@@ -2518,13 +2658,13 @@ class PendienteApiMedcol6Controller extends Controller
                         <span class="badge bg-teal">Detalle</span><i class="fas fa-prescription-bottle-alt"></i></button>';
                     $button2 = '<button type="button" name="edit_pendiente" id="' . $pendiente->id . '" class="edit_pendiente btn btn-app bg-info tooltipsC" title="Editar">
                         <span class="badge bg-teal">Editar</span><i class="fas fa-pencil-alt"></i></button>';
-    
+
                     return $button . ' ' . $button2;
                 })
                 ->rawColumns(['action'])
                 ->make(true);
         }
-    
+
         // Retornar la vista si no es una solicitud AJAX
         return view('menu.Medcol6.indexAnalista');
     }
@@ -2571,8 +2711,21 @@ class PendienteApiMedcol6Controller extends Controller
             // Query para buscar pendientes que coincidan con dispensados
             // Estrategia optimizada: primero filtrar pendientes, luego buscar coincidencias
             $pendientesBase = DB::table('pendiente_api_medcol6')
-                ->select('id', 'fecha', 'historia', 'codigo', 'nombre1', 'nombre2', 'apellido1', 'apellido2', 
-                        'nombre', 'cantord', 'estado', 'centroproduccion', 'orden_externa')
+                ->select(
+                    'id',
+                    'fecha',
+                    'historia',
+                    'codigo',
+                    'nombre1',
+                    'nombre2',
+                    'apellido1',
+                    'apellido2',
+                    'nombre',
+                    'cantord',
+                    'estado',
+                    'centroproduccion',
+                    'orden_externa'
+                )
                 ->whereIn('estado', ['PENDIENTE', 'VENCIDO', 'SIN CONTACTO', 'DESABASTECIDO'])
                 ->where('centroproduccion', $farmacia)
                 ->whereBetween('fecha', [$fechaInicial, $fechaFinal])
@@ -2607,10 +2760,10 @@ class PendienteApiMedcol6Controller extends Controller
 
             // Hacer el matching en PHP para mejor control
             $pendientesValidados = collect();
-            
+
             foreach ($pendientesBase as $pendiente) {
-                $dispensadoCoincidente = $dispensados->first(function($dispensado) use ($pendiente) {
-                    return $dispensado->historia == $pendiente->historia 
+                $dispensadoCoincidente = $dispensados->first(function ($dispensado) use ($pendiente) {
+                    return $dispensado->historia == $pendiente->historia
                         && $dispensado->codigo == $pendiente->codigo
                         && $dispensado->fecha_suministro >= $pendiente->fecha
                         && $dispensado->numero_unidades <= $pendiente->cantord;
@@ -2652,11 +2805,10 @@ class PendienteApiMedcol6Controller extends Controller
                 'success' => true,
                 'data' => $pendientesValidados->values(), // Convertir a array indexado
                 'total' => $pendientesValidados->count(),
-                'message' => $pendientesValidados->count() > 0 
+                'message' => $pendientesValidados->count() > 0
                     ? "Se encontraron {$pendientesValidados->count()} pendientes validados"
                     : 'No se encontraron coincidencias entre pendientes y dispensados'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error en buscarValidacion: ' . $e->getMessage(), [
                 'user' => Auth::user()->email ?? 'unknown',
@@ -2751,7 +2903,7 @@ class PendienteApiMedcol6Controller extends Controller
 
                     if ($actualizado) {
                         $procesados++;
-                        
+
                         // Crear observación automática cuando se procesa una entrega exitosamente
                         ObservacionesApiMedcol6::create([
                             'pendiente_id' => $pendienteId,
@@ -2759,7 +2911,7 @@ class PendienteApiMedcol6Controller extends Controller
                             'usuario' => $usuario,
                             'estado' => 'ENTREGADO'
                         ]);
-                        
+
                         // Log de la acción
                         Log::info("Pendiente procesado como ENTREGADO", [
                             'pendiente_id' => $pendienteId,
@@ -2770,7 +2922,6 @@ class PendienteApiMedcol6Controller extends Controller
                             'factura_entrega' => $facturaEntrega
                         ]);
                     }
-
                 } catch (\Exception $e) {
                     $errores[] = "Error procesando pendiente ID $pendienteId: " . $e->getMessage();
                 }
@@ -2784,10 +2935,9 @@ class PendienteApiMedcol6Controller extends Controller
                 'errores' => $errores,
                 'message' => "Se procesaron $procesados pendientes correctamente"
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             Log::error('Error en procesarEntregas: ' . $e->getMessage(), [
                 'user' => Auth::user()->email ?? 'unknown',
                 'request_data' => $request->all(),
@@ -2845,7 +2995,6 @@ class PendienteApiMedcol6Controller extends Controller
                 'success' => true,
                 'message' => 'Observación guardada correctamente'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error al guardar observación: ' . $e->getMessage(), [
                 'pendiente_id' => $request->input('pendiente_id'),
