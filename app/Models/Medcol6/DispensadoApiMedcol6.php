@@ -46,6 +46,7 @@ class DispensadoApiMedcol6 extends Model
         'num_total_entregas',
         'numero_entrega',
         'numero_orden',
+        'formula_completa',
         'fecha_ordenamiento',
         'fecha_suministro',
         'dx',

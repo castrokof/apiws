@@ -42,26 +42,26 @@ class LoginController extends Controller
     
      protected function authenticated(Request $request, $user)
     {
-        
-        
-        
-        $rol = $user;
-        
-        if ($rol->rol == '1' || $rol->rol == '2'  ) {
-           
-            return redirect(RouteServiceProvider::HOME);
+        // Establecer sesión del usuario
+        $user->setSession();
 
-        }else if ($rol->rol == '3') {
-          
-            return redirect('submenu');
-
-        
-        }else{
-            $this->guard()->logout();
-            $request->session()->invalidate();
-            return redirect('/login')->withErrors(['error'=>'Este usuario no esta activo y no tiene rol ']);
+        // Redirigir a /admin/home si el usuario tiene roles asignados
+        if ($user->roles && $user->roles->count() > 0) {
+            return redirect('/admin/home');
         }
 
+        // Compatibilidad con sistema antiguo de roles
+        $rol = $user;
+
+        if ($rol->rol == '1' || $rol->rol == '2') {
+            return redirect('/admin/home');
+        } else if ($rol->rol == '3') {
+            return redirect('submenu');
+        } else {
+            $this->guard()->logout();
+            $request->session()->invalidate();
+            return redirect('/login')->withErrors(['error' => 'Este usuario no está activo y no tiene rol asignado']);
+        }
     }
     
 

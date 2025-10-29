@@ -36,6 +36,16 @@ class DispensadoApiMedcol6Controller extends Controller
 
     public function informes(Request $request)
     {
+        // Validar fechas requeridas
+        $request->validate([
+            'fechaini' => 'required|date',
+            'fechafin' => 'required|date|after_or_equal:fechaini'
+        ]);
+
+        $fechaini = Carbon::parse($request->fechaini)->startOfDay()->toDateTimeString();
+        $fechafin = Carbon::parse($request->fechafin)->endOfDay()->toDateTimeString();
+        $contrato = $request->contrato;
+
         $i = Auth::user()->drogueria;
 
         switch ($i) {
@@ -83,22 +93,34 @@ class DispensadoApiMedcol6Controller extends Controller
             // Agrupar y contar por estado y centroprod
             $dispensado = DispensadoApiMedcol6::select('centroprod', DB::raw('count(*) as total'))
                 ->where('estado', 'DISPENSADO')
-                ->where('fecha_suministro', '>=', '2024-09-01 00:00:00')
+                ->whereBetween('fecha_suministro', [$fechaini, $fechafin])
                 ->whereNotIn('codigo', ['1010', '1011', '1012'])
+                ->when($contrato, function($query) use ($contrato) {
+                    return $query->where('centroprod', $contrato);
+                })
+                ->orderBy('total', 'desc')
                 ->groupBy('centroprod')
                 ->get();
 
             $revisado = DispensadoApiMedcol6::select('centroprod', DB::raw('count(*) as total'))
                 ->where('estado', 'REVISADO')
-                ->where('fecha_suministro', '>=', '2024-09-01 00:00:00')
+                ->whereBetween('fecha_suministro', [$fechaini, $fechafin])
                 ->whereNotIn('codigo', ['1010', '1011', '1012'])
+                ->when($contrato, function($query) use ($contrato) {
+                    return $query->where('centroprod', $contrato);
+                })
+                ->orderBy('total', 'desc')
                 ->groupBy('centroprod')
                 ->get();
 
             $anulado = DispensadoApiMedcol6::select('centroprod', DB::raw('count(*) as total'))
                 ->where('estado', 'ANULADA')
-                ->where('fecha_suministro', '>=', '2024-09-01 00:00:00')
+                ->whereBetween('fecha_suministro', [$fechaini, $fechafin])
                 ->whereNotIn('codigo', ['1010', '1011', '1012'])
+                ->when($contrato, function($query) use ($contrato) {
+                    return $query->where('centroprod', $contrato);
+                })
+                ->orderBy('total', 'desc')
                 ->groupBy('centroprod')
                 ->get();
         } else {
@@ -106,31 +128,112 @@ class DispensadoApiMedcol6Controller extends Controller
             $dispensado = DispensadoApiMedcol6::select('centroprod', DB::raw('count(*) as total'))
                 ->where('estado', 'DISPENSADO')
                 ->where('centroprod', $drogueria)
-                ->where('fecha_suministro', '>=', '2024-09-01 00:00:00')
+                ->whereBetween('fecha_suministro', [$fechaini, $fechafin])
                 ->whereNotIn('codigo', ['1010', '1011', '1012'])
+                ->when($contrato, function($query) use ($contrato) {
+                    return $query->where('centroprod', $contrato);
+                })
+                ->orderBy('total', 'desc')
                 ->groupBy('centroprod')
                 ->get();
 
             $revisado = DispensadoApiMedcol6::select('centroprod', DB::raw('count(*) as total'))
                 ->where('estado', 'REVISADO')
                 ->where('centroprod', $drogueria)
-                ->where('fecha_suministro', '>=', '2024-09-01 00:00:00')
+                ->whereBetween('fecha_suministro', [$fechaini, $fechafin])
                 ->whereNotIn('codigo', ['1010', '1011', '1012'])
+                ->when($contrato, function($query) use ($contrato) {
+                    return $query->where('centroprod', $contrato);
+                })
+                ->orderBy('total', 'desc')
                 ->groupBy('centroprod')
                 ->get();
 
             $anulado = DispensadoApiMedcol6::select('centroprod', DB::raw('count(*) as total'))
                 ->where('estado', 'ANULADA')
                 ->where('centroprod', $drogueria)
-                ->where('fecha_suministro', '>=', '2024-09-01 00:00:00')
+                ->whereBetween('fecha_suministro', [$fechaini, $fechafin])
                 ->whereNotIn('codigo', ['1010', '1011', '1012'])
+                ->when($contrato, function($query) use ($contrato) {
+                    return $query->where('centroprod', $contrato);
+                })
+                ->orderBy('total', 'desc')
                 ->groupBy('centroprod')
                 ->get();
         }
 
+        // Mapeo de códigos a nombres de farmacias
+        $nombresFarmacias = [
+            'BIO1' => 'BIO1-FARMACIA BIOLOGICOS',
+            'DLR1' => 'DLR1-FARMACIA DOLOR',
+            'DPA1' => 'DPA1-FARMACIA PALIATIVOS',
+            'EM01' => 'EM01-FARMACIA EMCALI',
+            'EHU1' => 'EHU1-FARMACIA HUERFANAS',
+            'FRJA' => 'FRJA-FARMACIA JAMUNDI',
+            'INY' => 'INY-FARMACIA INYECTABLES',
+            'PAC' => 'PAC-FARMACIA PAC',
+            'SM01' => 'SM01-FARMACIA SALUD MENTAL',
+            'BPDT' => 'BPDT-BOLSA',
+            'EVEN' => 'EVEN-FARMACIA EVENTO',
+            'EVSM' => 'EVSM-EVENTO SALUD MENTAL',
+            'SALUD' => 'SALUD-FARMACIA SALUD MENTAL',
+            'DOLOR' => 'DOLOR-FARMACIA DOLOR',
+            'FSIO' => 'FSIO-FARMACIA SIO',
+            'FSOS' => 'FSOS-FARMACIA SOS',
+            'FSAU' => 'FSAU-FARMACIA SAU',
+            'EVSO' => 'EVSO-EVENTO SOS',
+            'FRIO' => 'FRIO-FARMACIA FRIO',
+            'FRIP' => 'FRIP-FARMACIA FRIP',
+            'F24H' => 'F24H-FARMACIA 24 HORAS',
+            'FRPE' => 'FRPE-FARMACIA PREVENTIVA'
+        ];
 
+        // Calcular totales
+        $totalDispensado = $dispensado->sum('total');
+        $totalRevisado = $revisado->sum('total');
+        $totalAnulado = $anulado->sum('total');
 
-        return response()->json(['dispensado' => $dispensado, 'revisado' => $revisado, 'anulado' => $anulado]);
+        // Generar HTML para dispensados
+        $htmlDispensado = '<table class="table table-sm table-bordered table-striped">';
+        $htmlDispensado .= '<thead class="thead-light"><tr><th>Farmacia</th><th class="text-center">Cantidad</th></tr></thead><tbody>';
+        foreach ($dispensado as $item) {
+            $nombreFarmacia = $nombresFarmacias[$item->centroprod] ?? $item->centroprod;
+            $htmlDispensado .= '<tr><td>' . $nombreFarmacia . '</td><td class="text-center font-weight-bold">' . number_format($item->total) . '</td></tr>';
+        }
+        if ($dispensado->isEmpty()) {
+            $htmlDispensado .= '<tr><td colspan="2" class="text-center text-muted">No hay registros</td></tr>';
+        }
+        $htmlDispensado .= '</tbody><tfoot><tr class="bg-primary text-white font-weight-bold"><td>TOTAL</td><td class="text-center">' . number_format($totalDispensado) . '</td></tr></tfoot></table>';
+
+        // Generar HTML para revisados
+        $htmlRevisado = '<table class="table table-sm table-bordered table-striped">';
+        $htmlRevisado .= '<thead class="thead-light"><tr><th>Farmacia</th><th class="text-center">Cantidad</th></tr></thead><tbody>';
+        foreach ($revisado as $item) {
+            $nombreFarmacia = $nombresFarmacias[$item->centroprod] ?? $item->centroprod;
+            $htmlRevisado .= '<tr><td>' . $nombreFarmacia . '</td><td class="text-center font-weight-bold">' . number_format($item->total) . '</td></tr>';
+        }
+        if ($revisado->isEmpty()) {
+            $htmlRevisado .= '<tr><td colspan="2" class="text-center text-muted">No hay registros</td></tr>';
+        }
+        $htmlRevisado .= '</tbody><tfoot><tr class="bg-success text-white font-weight-bold"><td>TOTAL</td><td class="text-center">' . number_format($totalRevisado) . '</td></tr></tfoot></table>';
+
+        // Generar HTML para anulados
+        $htmlAnulado = '<table class="table table-sm table-bordered table-striped">';
+        $htmlAnulado .= '<thead class="thead-light"><tr><th>Farmacia</th><th class="text-center">Cantidad</th></tr></thead><tbody>';
+        foreach ($anulado as $item) {
+            $nombreFarmacia = $nombresFarmacias[$item->centroprod] ?? $item->centroprod;
+            $htmlAnulado .= '<tr><td>' . $nombreFarmacia . '</td><td class="text-center font-weight-bold">' . number_format($item->total) . '</td></tr>';
+        }
+        if ($anulado->isEmpty()) {
+            $htmlAnulado .= '<tr><td colspan="2" class="text-center text-muted">No hay registros</td></tr>';
+        }
+        $htmlAnulado .= '</tbody><tfoot><tr class="bg-danger text-white font-weight-bold"><td>TOTAL</td><td class="text-center">' . number_format($totalAnulado) . '</td></tr></tfoot></table>';
+
+        return response()->json([
+            'dispensado' => $htmlDispensado,
+            'revisado' => $htmlRevisado,
+            'anulados' => $htmlAnulado
+        ]);
     }
 
     public function index(Request $request)
@@ -182,54 +285,66 @@ class DispensadoApiMedcol6Controller extends Controller
         $drogueria = $droguerias[Auth::user()->drogueria] ?? '';
 
         if ($request->ajax()) {
-            $query = DispensadoApiMedcol6::query();
+            try {
+                $query = DispensadoApiMedcol6::query();
 
-            // Filtro por droguería
-            if ($drogueria) {
-                if ($drogueria === 'PAC') {
-                    $query->whereIn('centroprod', ['FRJA', 'EVEN', 'PAC', 'EM01', 'EHU1', 'FRIO', 'FRIP']);
-                } elseif ($drogueria !== 'Todas') {
-                    $query->where('centroprod', $drogueria);
+                // Filtro por droguería del usuario logueado
+                if ($drogueria && $drogueria !== 'Todas') {
+                    if ($drogueria === 'PAC') {
+                        $query->whereIn('centroprod', ['FRJA', 'EVEN', 'PAC', 'EM01', 'EHU1', 'FRIO', 'FRIP']);
+                    } else {
+                        $query->where('centroprod', $drogueria);
+                    }
                 }
-            }
 
-            // Validar que fechaini y fechafin sean obligatorios
-            if (!empty($request->fechaini) && !empty($request->fechafin)) {
-                $fechaIni = Carbon::parse($request->fechaini)->startOfDay()->toDateTimeString();
-                $fechaFin = Carbon::parse($request->fechafin)->endOfDay()->toDateTimeString();
-                $query->whereBetween('fecha_suministro', [$fechaIni, $fechaFin]);
+                // Validar que fechaini y fechafin estén presentes
+                if (!empty($request->fechaini) && !empty($request->fechafin)) {
+                    $fechaIni = Carbon::parse($request->fechaini)->startOfDay()->toDateTimeString();
+                    $fechaFin = Carbon::parse($request->fechafin)->endOfDay()->toDateTimeString();
+                    $query->whereBetween('fecha_suministro', [$fechaIni, $fechaFin]);
+                } else {
+                    // Si no se pasan fechas, usar el rango del día actual
+                    $query->whereBetween('fecha_suministro', [$fechaAi, $fechaAf]);
+                }
 
-                // Aplicar contrato si está presente
-
-
+                // Aplicar filtro de contrato si está presente (es un string único)
                 if (!empty($request->contrato)) {
-
-                    $query->whereIn('centroprod', $request->contrato);
+                    $query->where('centroprod', $request->contrato);
                 }
 
-                // Aplicar cobertura si está presente
+                // Aplicar cobertura si está presente (1=PBS, 2=NOPBS)
                 if (!empty($request->cobertura)) {
                     $query->where('tipo_medicamento', $request->cobertura);
                 }
-            } else {
-                // Si no se pasan fechas, usar el rango del día actual
-                $query->whereBetween('fecha_suministro', [$fechaAi, $fechaAf]);
+
+                // Aplicar filtros de estado y códigos excluidos
+                $query->where('estado', 'DISPENSADO')
+                      ->whereNotIn('codigo', ['1010', '1011', '1012']);
+
+                // Log para debugging
+                \Log::info('Query Dispensados:', [
+                    'sql' => $query->toSql(),
+                    'bindings' => $query->getBindings(),
+                    'fechaini' => $request->fechaini,
+                    'fechafin' => $request->fechafin,
+                    'contrato' => $request->contrato,
+                    'cobertura' => $request->cobertura
+                ]);
+
+                return DataTables()->of($query)
+                    ->make(true);
+
+            } catch (\Exception $e) {
+                \Log::error('Error en index1 DataTables:', [
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]);
+
+                return response()->json([
+                    'error' => 'Error al procesar la solicitud: ' . $e->getMessage()
+                ], 500);
             }
-
-            // Aplicar filtros de estado y códigos
-            $query->where(function ($q) {
-                $q->where('estado', 'DISPENSADO')
-                    ->whereNotIn('codigo', ['1010', '1011', '1012'])
-                    ->orWhereNull('estado');
-            });
-
-            // Obtener resultados ordenados
-            $resultados = $query->orderBy('fecha_suministro')->get();
-
-            return DataTables()->of($resultados)
-                ->addColumn('copago1', fn($pendiente) => $pendiente->cuota_moderadora_sumada)
-                ->rawColumns(['copago1'])
-                ->make(true);
         }
 
         return view('menu.Medcol6.indexDispensado', ['droguerias' => $droguerias]);
@@ -1267,6 +1382,7 @@ class DispensadoApiMedcol6Controller extends Controller
             'data.*.num_total_entregas',
             'data.*.numero_orden',
             'data.*.duracion_tratamiento',
+            'data.*.formula_completa', // Campo formula_completa
             //'data.*.plan',
             'data.*.frecuencia',
             'data.*.dosis'
@@ -1316,6 +1432,7 @@ class DispensadoApiMedcol6Controller extends Controller
                         'user_id' => trim($idd['user_id']),
                         'num_total_entregas' => trim($idd['num_total_entregas']),
                         'numero_orden' => trim($idd['numero_orden']),
+                        'formula_completa' => trim($idd['formula_completa']),
                         'duracion_tratamiento' => trim($idd['duracion_tratamiento']),
                         'frecuencia' => trim($idd['frecuencia']),
                         'dosis' => trim($idd['dosis']),
@@ -1541,5 +1658,334 @@ class DispensadoApiMedcol6Controller extends Controller
             "recordsFiltered" => $totalRegistros,
             "data" => $resultados
         ]);
+    }
+
+    // funcion para consultar la api de dispendaso unico:
+    
+    public function createdispensadoapiunico(Request $request)
+    {
+        
+        
+        $factura = $request->factura;
+        $email = 'castrokofdev@gmail.com'; // Auth::user()->email
+        $password = 'colMed2023**';
+        $usuario = Auth::user()->email;
+        
+          set_time_limit(0);
+          ini_set('memory_limit', '512M');
+
+
+        try {
+
+
+            $response = Http::timeout(3)->post("http://hed08pf9dxt.sn.mynetname.net:8004/api/acceso", [
+                'email' =>  $email,
+                'password' => $password,
+            ]);
+
+            $token = $response->json()["token"];
+
+           
+
+            if ($token) {
+
+
+                try {
+
+                 
+            $responsefacturas = Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/dispensadoapiunico",['factura' => $factura]);
+            
+          
+            $facturassapi = $responsefacturas->json()['data'];
+    
+            $contadorei = 0;
+            $contador = 0;
+            
+           
+            // Obtener las facturas existentes en un solo query
+            
+             // Crear las claves únicas de cada entrada en $facturassapi
+                $clavesFacturasApi = array_map(function ($f) {
+                    return trim($f['factura']) . '-' . trim($f['codigo']) . '-' . trim($f['ID_REGISTRO']);
+                }, $facturassapi);
+            
+                $facturasExistentes = collect();
+            
+                // Consultar la base de datos en chunks para evitar demasiados placeholders
+                foreach (array_chunk($facturassapi, 50) as $chunk) {
+                    $facturas = array_map(fn($f) => trim($f['factura']), $chunk);
+                    $codigos = array_map(fn($f) => trim($f['codigo']), $chunk);
+                    $ids = array_map(fn($f) => trim($f['ID_REGISTRO']), $chunk);
+            
+                    $resultados = DispensadoApiMedcol6::select('factura', 'codigo', 'ID_REGISTRO')
+                        ->whereIn('factura', $facturas)
+                        ->whereIn('codigo', $codigos)
+                        ->whereIn('ID_REGISTRO', $ids)
+                        ->get();
+            
+                    $facturasExistentes = $facturasExistentes->merge($resultados);
+                }
+            
+                // Crear claves únicas de los existentes en base de datos
+                $facturasExistentesFlip = array_flip(
+                    $facturasExistentes->map(function ($item) {
+                        return trim($item->factura) . '-' . trim($item->codigo) . '-' . trim($item->ID_REGISTRO);
+                    })->toArray()
+                );
+            
+                $dispensados = [];
+             
+               foreach ($facturassapi as $factura) {
+                
+                // Verificar si la factura ya existe en el array obtenido antes
+                $clave = trim($factura['factura']) . '-' . trim($factura['codigo']) . '-' . trim($factura['ID_REGISTRO']);
+               
+               
+                
+                 if (isset($facturasExistentesFlip[$clave])) {
+                        // Registrar en el log como "NO" (porque ya existe)
+                        Log::info("{$clave} => NO (ya existe) Unico");
+                        continue;
+                    }
+                
+                    // Registrar en el log como "SI" (porque se va a insertar)
+                    Log::info("{$clave} => SI (se inserta) Unico");
+                
+                
+
+               $dispensados[] = [
+                                'idusuario'  => trim($factura['idusuario']),
+                                'tipo'  => trim($factura['tipo']),
+                                'facturad'  => trim($factura['facturad']),
+                                'factura'  => trim($factura['factura']),
+                                'tipodocument'  => trim($factura['tipodocument']),
+                                'historia'  => trim($factura['historia']),
+                                'autorizacion'  => trim($factura['autorizacion']),
+                                'cums'  => trim($factura['cums']),
+                                'expediente'  => trim($factura['expediente']),
+                                'consecutivo'  => trim($factura['consecutivo']),
+                                'cums_rips'  => trim($factura['cums_rips']),
+                                'codigo'  => trim($factura['codigo']),
+                                'tipo_medicamento'  => trim($factura['tipo_medicamento']),
+                                'nombre_generico'  => trim($factura['nombre_generico']),
+                                'atc'  => trim($factura['atc']),
+                                'forma'  => trim($factura['forma']),
+                                'concentracion'  => trim($factura['concentracion']),
+                                'unidad_medicamento'  => trim($factura['unidad_medicamento']),
+                                'cantidad_ordenada'  => trim($factura['cantidad_ordenada']),
+                                'numero_unidades'  => trim($factura['numero_unidades']),
+                                'regimen'  => trim($factura['regimen']),
+                                'paciente'  => trim($factura['paciente']),
+                                'primer_apellido'  => trim($factura['primer_apellido']),
+                                'segundo_apellido'  => trim($factura['segundo_apellido']),
+                                'primer_nombre'  => trim($factura['primer_nombre']),
+                                'segundo_nombre'  => trim($factura['segundo_nombre']),
+                                'cuota_moderadora'  => trim($factura['cuota_moderadora']),
+                                'copago'  => trim($factura['copago']),
+                                'numero_entrega'  => trim($factura['numero_entrega']),
+                                'fecha_ordenamiento'  => null,
+                                'fecha_suministro'  => trim($factura['fecha_suministro']),
+                                'dx'  => trim($factura['dx']),
+                                'id_medico'  => trim($factura['id_medico']),
+                                'medico'  => trim($factura['medico']),
+                                'mipres'  => trim($factura['mipres']),
+                                'precio_unitario'  => trim($factura['precio_unitario']),
+                                'valor_total'  => trim($factura['valor_total']),
+                                'reporte_entrega_nopbs'  => trim($factura['reporte_entrega_nopbs']),
+                                'estado'  => trim($factura['estado']),
+                                'centroprod'  => trim($factura['centroprod']),
+                                'drogueria'  => trim($factura['drogueria']),
+                                'cajero'  => trim($factura['cajero']),
+                                'documento_origen'  => trim($factura['documento_origen']),
+                                'factura_origen'  => trim($factura['factura_origen']),
+                                'ciudad'  => trim($factura['ciudad']),
+                                'via'  => trim($factura['via']),
+                                'ambito'  => trim($factura['ambito']),
+                                'tipoidmedico'  => trim($factura['tipoidmedico']),
+                                'especialidadmedico'  => trim($factura['especialidadmedico']),
+                                'numeroIdentificacion'  => trim($factura['numeroIdentificacion']),
+                                'tipocontrato'  => trim($factura['tipocontrato']),
+                                'cod_dispen_transacc'  => trim($factura['cod_dispen_transacc']),
+                                'cobertura'  => trim($factura['cobertura']),
+                                'cod_dispensario_sos'  => trim($factura['cod_dispensario_sos']),
+                                'tipoentrega'  => trim($factura['tipoentrega']),
+                                'ID_REGISTRO'  => trim($factura['ID_REGISTRO']),
+                                'created_at'  => now()
+                    ];
+                    
+                    $contador++;
+                    
+               }
+               
+              
+                    
+                if (!empty($dispensados)) {
+                    $chunks = array_chunk($dispensados, 50); // Divide en lotes de 500 registros
+                    
+                    
+                    foreach ($chunks as $chunk) {
+                        DispensadoApiMedcol6::insertOrIgnore($chunk);
+                    }
+                }
+
+
+                    
+                    Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/closeallacceso");
+
+                    Log::info('Desde la web syncapi centralizado unicos' . $contador . ' Lineas dispensadas' . ' Usuario: ' . $usuario);
+
+                    return response()->json([
+                        ['respuesta' => $contador . ' Lineas creadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']
+                    ]);
+                    
+                } catch (\Exception $e) {
+
+                    // Manejo de la excepción
+                    Log::error('Error en la sincronización SERVER IP FIJA: '.$e->getMessage()); // Registrar el error en los logs de Laravel
+
+                    return response()->json([
+                        ['respuesta' => 'Error: ' . $e->getMessage(), 'titulo' => 'Error', 'icon' => 'error', 'position' => 'bottom-left']
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+
+
+
+            try {
+
+                $factura = $request->factura;
+                $response = Http::timeout(3)->post("http://192.168.66.95:8004/api/acceso", [
+                    'email' =>  $email,
+                    'password' => $password,
+                ]);
+
+                $token = $response->json()["token"];
+
+                if ($token) {
+
+                    try {
+
+
+                       
+
+                        $responsefacturas = Http::withToken($token)->get("http://192.168.66.95:8004/api/dispensadoapiunico", ['factura' => $factura]);
+
+                        $facturassapi = $responsefacturas->json()['data'];
+
+                        $contador = 0;
+
+
+                        foreach ($facturassapi as $factura) {
+
+                            $existe = DispensadoApiMedcol6::where([['factura', $factura['factura']], ['codigo', $factura['codigo']]])->count();
+
+                            $dispensados = [];
+
+                            if ($existe == 0 || $existe == '') {
+
+                                $dispensados[] = [
+
+                                    'idusuario'  => trim($factura['idusuario']),
+                                    'tipo'  => trim($factura['tipo']),
+                                    'facturad'  => trim($factura['facturad']),
+                                    'factura'  => trim($factura['factura']),
+                                    'tipodocument'  => trim($factura['tipodocument']),
+                                    'historia'  => trim($factura['historia']),
+                                    'autorizacion'  => trim($factura['autorizacion']),
+                                    'cums'  => trim($factura['cums']),
+                                    'expediente'  => trim($factura['expediente']),
+                                    'consecutivo'  => trim($factura['consecutivo']),
+                                    'cums_rips'  => trim($factura['cums_rips']),
+                                    'codigo'  => trim($factura['codigo']),
+                                    'tipo_medicamento'  => trim($factura['tipo_medicamento']),
+                                    'nombre_generico'  => trim($factura['nombre_generico']),
+                                    'atc'  => trim($factura['atc']),
+                                    'forma'  => trim($factura['forma']),
+                                    'concentracion'  => trim($factura['concentracion']),
+                                    'unidad_medicamento'  => trim($factura['unidad_medicamento']),
+                                    'cantidad_ordenada'  => trim($factura['cantidad_ordenada']),
+                                    'numero_unidades'  => trim($factura['numero_unidades']),
+                                    'regimen'  => trim($factura['regimen']),
+                                    'paciente'  => trim($factura['paciente']),
+                                    'primer_apellido'  => trim($factura['primer_apellido']),
+                                    'segundo_apellido'  => trim($factura['segundo_apellido']),
+                                    'primer_nombre'  => trim($factura['primer_nombre']),
+                                    'segundo_nombre'  => trim($factura['segundo_nombre']),
+                                    'cuota_moderadora'  => trim($factura['cuota_moderadora']),
+                                    'copago'  => trim($factura['copago']),
+                                    'numero_entrega'  => trim($factura['numero_entrega']),
+                                    'fecha_ordenamiento'  => null,
+                                    'fecha_suministro'  => trim($factura['fecha_suministro']),
+                                    'dx'  => trim($factura['dx']),
+                                    'id_medico'  => trim($factura['id_medico']),
+                                    'medico'  => trim($factura['medico']),
+                                    'numeroIdentificacion'  => trim($factura['numeroIdentificacion']),
+                                    'mipres'  => trim($factura['mipres']),
+                                    'precio_unitario'  => trim($factura['precio_unitario']),
+                                    'valor_total'  => trim($factura['valor_total']),
+                                    'reporte_entrega_nopbs'  => trim($factura['reporte_entrega_nopbs']),
+                                    'estado'  => trim($factura['estado']),
+                                    'centroprod'  => trim($factura['centroprod']),
+                                    'drogueria'  => trim($factura['drogueria']),
+                                    'cajero'  => trim($factura['cajero']),
+                                    'documento_origen'  => trim($factura['documento_origen']),
+                                    'factura_origen'  => trim($factura['factura_origen']),
+                                    'ciudad'  => trim($factura['ciudad']),
+                                    'via'  => trim($factura['via']),
+                                    'ambito'  => trim($factura['ambito']),
+                                    'tipoidmedico'  => trim($factura['tipoidmedico']),
+                                    'especialidadmedico'  => trim($factura['especialidadmedico']),
+                                    'tipocontrato'  => trim($factura['tipocontrato']),
+                                    'cod_dispen_transacc'  => trim($factura['cod_dispen_transacc']),
+                                    'cobertura'  => trim($factura['cobertura']),
+                                    'cod_dispensario_sos'  => trim($factura['cod_dispensario_sos']),
+                                    'tipoentrega'  => trim($factura['tipoentrega']),
+                                    'ID_REGISTRO'  => trim($factura['ID_REGISTRO']),
+                                    'created_at'  => now()
+
+                                ];
+
+                                if (!empty($dispensados)) {
+                                    DispensadoApiMedcol6::insert($dispensados);
+                                }
+
+                                $contador++;
+                            }
+                        }
+
+                        Http::withToken($token)->get("http://192.168.66.95:8004/api/closeallacceso");
+
+
+                        Log::info('Desde la web syncapi centralizado local unico' . $contador . ' Lineas dispensadas' . ' Usuario: ' . $usuario);
+
+                        return response()->json([
+                            ['respuesta' => $contador . ' Lineas creadas', 'titulo' => 'Mixed lineas', 'icon' => 'success', 'position' => 'bottom-left']
+                        ]);
+
+
+            
+                    } catch (\Exception $e) {
+
+                        // Manejo de la excepción
+                        Log::error($e->getMessage()); // Registrar el error en los logs de Laravel
+
+                        return response()->json([
+                            ['respuesta' => 'Error: ' . $e->getMessage(), 'titulo' => 'Error', 'icon' => 'error', 'position' => 'bottom-left']
+                        ]);
+                    }
+                }
+            } catch (\Exception $e) {
+
+
+                // Manejo de la excepción
+                Log::error($e->getMessage()); // Registrar el error en los logs de Laravel
+
+
+                return response()->json([
+                    ['respuesta' => 'Error: ' . $e->getMessage(), 'titulo' => 'Error', 'icon' => 'error', 'position' => 'bottom-left']
+                ]);
+            }
+        }
     }
 }

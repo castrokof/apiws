@@ -1,8 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('titulo')
-Dispensado Medcol Jamundi
-@endsection
+@section('title', 'Dispensado Medcol6')
 @section("styles")
 
 <link href="{{asset("assets/lte/plugins/sweetalert2/sweetalert2.min.css")}}" rel="stylesheet" type="text/css" />
@@ -36,24 +34,52 @@ Dispensado Medcol Jamundi
     }
 </style>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css">
+
 @endsection
 
 
 @section('scripts')
 
+
 <script src="{{asset("assets/pages/scripts/admin/usuario/crearuser.js")}}" type="text/javascript"></script>
 @endsection
 
 @section('content')
-<div class="loaders"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-prescription-bottle-alt text-success mr-2"></i>
+                    Gestión de Dispensados - Medcol
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="{{ route('admin.home') }}">Inicio</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('submenu') }}">Pendientes</a></li>
+                    <li class="breadcrumb-item active">Dispensado</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="loaders"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>
 
-@include('menu.Medcol6.form.dispensado.forminformedispensado')
-@include('menu.Medcol6.tabs.tabsIndexDispensado')
-@include('menu.Medcol6.modal.modalGestionMultiple')
-@include('menu.Medcol6.modal.modalGenerarInforme')
+        @include('menu.Medcol6.form.dispensado.forminformedispensado')
+        @include('menu.Medcol6.tabs.tabsIndexDispensado')
+        @include('menu.Medcol6.modal.modalGestionMultiple')
+        @include('menu.Medcol6.modal.modalGenerarInforme')
 
-@include('menu.Medcol6.modal.modalEditDispensados')
+        @include('menu.Medcol6.modal.modalEditDispensados')
+    </div>
+</section>
 
 @endsection
 
@@ -72,23 +98,33 @@ Dispensado Medcol Jamundi
 <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
 
 
+
 <script>
     $(document).ready(function() {
+        
+       
+       
+     //Uso de select2 para enviar más de un contrato a filtrar  
+    $('.js-example-basic-multiple').select2({
+    theme: 'bootstrap4',
+    width: '100%' // 👈 Importante para que se adapte al contenedor
+     });
 
-
+        
+        
         $("#selectall").on('click', function() {
-            $(".case").prop("checked", this.checked);
+          $(".case").prop("checked", this.checked);
         });
-
+        
         fill_datatable1_resumen();
-
+        
         function fill_datatable1_resumen() {
-            $("#detalle").empty();
-            $("#detalle1").empty();
-            $("#detalle2").empty();
-
-            const nombresExcluidos = ['FSAU', 'FSIO', 'FSOS', 'ENMP', 'EVSO']; // Nombres a excluir
-            // Mapeo de centroprod a nombres más amigables
+          $("#detalle").empty();
+          $("#detalle1").empty();
+          $("#detalle2").empty();
+          
+          const nombresExcluidos = ['FSAU', 'FSIO', 'FSOS', 'ENMP', 'EVSO']; // Nombres a excluir
+           // Mapeo de centroprod a nombres más amigables
             const centroprodMap = {
                 "FRJA": "Comfe Jamundi",
                 "DOMI": "Domiciliario",
@@ -102,70 +138,68 @@ Dispensado Medcol Jamundi
                 "EVSM": "Comfe EVENTO SM",
                 "BPDT": "Comfe BOLSA",
                 "DPA1": "Comfe PALIATIVOS",
-                "INY": "Comfe INYECTABLES"
+                "INY": "Comfe INYECTABLES",
+                "FRIO": "Comfe IDEO"
+                
             };
 
-
-            $.ajax({
-                url: "{{ route('medcol6.informedis') }}",
-                dataType: "json",
-                success: function(data) {
-                    const {
-                        dispensado,
-                        revisado,
-                        anulado
-                    } = data;
-
-                    // Crear el contenido para dispensado dentro de una tarjeta
-                    let dispensadoHTML = "<ul>";
-                    dispensado.forEach(item => {
-                        const nombreCentroprod = centroprodMap[item.centroprod] || item.centroprod; // Validar si existe en el mapeo
-
-                        // Excluir los nombres no deseados
-                        if (!nombresExcluidos.includes(nombreCentroprod)) {
-                            dispensadoHTML += `
+        
+          $.ajax({
+            url: "{{ route('medcol6.informedis') }}",
+            dataType: "json",
+            success: function(data) {
+              const { dispensado, revisado, anulado } = data;
+        
+             // Crear el contenido para dispensado dentro de una tarjeta
+            let dispensadoHTML = "<ul>";
+            dispensado.forEach(item => {
+                const nombreCentroprod = centroprodMap[item.centroprod] || item.centroprod; // Validar si existe en el mapeo
+                
+                            // Excluir los nombres no deseados
+                if (!nombresExcluidos.includes(nombreCentroprod)) {
+                    dispensadoHTML += `
                         <li>${nombreCentroprod}: ${item.total}</li>
                     `;
-                        }
+                }
+                
+               
+            });
+            dispensadoHTML += "</ul>";
 
-
-                    });
-                    dispensadoHTML += "</ul>";
-
-                    // Crear el contenido para revisado dentro de una tarjeta
-                    let revisadoHTML = "<ul>";
-                    revisado.forEach(item => {
-                        const nombreCentroprod = centroprodMap[item.centroprod] || item.centroprod;
-
-                        // Excluir los nombres no deseados
-                        if (!nombresExcluidos.includes(nombreCentroprod)) {
-                            revisadoHTML += `
+            // Crear el contenido para revisado dentro de una tarjeta
+            let revisadoHTML = "<ul>";
+            revisado.forEach(item => {
+                const nombreCentroprod = centroprodMap[item.centroprod] || item.centroprod;
+                
+                               // Excluir los nombres no deseados
+                if (!nombresExcluidos.includes(nombreCentroprod)) {
+                    revisadoHTML += `
                         <li>${nombreCentroprod}: ${item.total}</li>
                     `;
-                        }
+                }
+            
+            });
+            revisadoHTML += "</ul>";
 
-                    });
-                    revisadoHTML += "</ul>";
-
-                    // Crear el contenido para anulado dentro de una tarjeta
-                    let anuladoHTML = "<ul>";
-                    anulado.forEach(item => {
-                        const nombreCentroprod = centroprodMap[item.centroprod] || item.centroprod;
-
-
-
-                        // Excluir los nombres no deseados
-                        if (!nombresExcluidos.includes(nombreCentroprod)) {
-                            anuladoHTML += `
+            // Crear el contenido para anulado dentro de una tarjeta
+            let anuladoHTML = "<ul>";
+            anulado.forEach(item => {
+                const nombreCentroprod = centroprodMap[item.centroprod] || item.centroprod;
+                
+                
+                
+                            // Excluir los nombres no deseados
+                if (!nombresExcluidos.includes(nombreCentroprod)) {
+                    anuladoHTML += `
                         <li>${nombreCentroprod}: ${item.total}</li>
                     `;
-                        }
+                }
+              
+            });
+            anuladoHTML += "</ul>";
 
-                    });
-                    anuladoHTML += "</ul>";
-
-                    // Mostrar el contenido dentro de las respectivas tarjetas
-                    $("#detalle").append(`
+            // Mostrar el contenido dentro de las respectivas tarjetas
+            $("#detalle").append(`
                 <div class="small-box shadow-lg l-bg-blue-dark">
                   <div class="inner">
                     <h5>PENDIENTES X REVISAR</h5>
@@ -179,7 +213,7 @@ Dispensado Medcol Jamundi
                 </div>
             `);
 
-                    $("#detalle1").append(`
+            $("#detalle1").append(`
                 <div class="small-box shadow-lg l-bg-orange-dark">
                   <div class="inner">
                     <h5>REVISADAS</h5>
@@ -191,7 +225,7 @@ Dispensado Medcol Jamundi
                 </div>
             `);
 
-                    $("#detalle2").append(`
+            $("#detalle2").append(`
                 <div class="small-box shadow-lg l-bg-red-dark">
                   <div class="inner">
                     <h5>ANULADAS</h5>
@@ -202,31 +236,31 @@ Dispensado Medcol Jamundi
                   </div>
                 </div>
             `);
-                }
-            });
+            }
+          });
         }
-
-        $("#ejecutar_informe").click(function() {
+        
+        $("#ejecutar_informe").click(function () {
             fechaInicio = $("#modal_fechaini").val();
             fechaFin = $("#modal_fechafin").val();
             contrato = $("#modal_contrato").val();
-
+        
             if (!fechaInicio || !fechaFin) {
                 alert("Por favor seleccione ambas fechas.");
                 return;
             }
-
+        
             // Llamar a la función con las fechas seleccionadas
             generar_informe(fechaInicio, fechaFin);
             cargarTablaForgif(fechaInicio, fechaFin, contrato);
             //$("#modal_generar_informe").modal("hide");
         });
-
+        
         function generar_informe(fechaInicio, fechaFin) {
             $("#detalle_informe").empty();
             $("#detalle_informe1").empty();
             $("#detalle_informe2").empty();
-
+        
             const nombresExcluidos = ['FSAU', 'FSIO', 'FSOS', 'ENMP', 'EVSO'];
             const servicioMap = {
                 "FRJA": "Jamundí",
@@ -247,22 +281,17 @@ Dispensado Medcol Jamundi
                 "FRPE": "Entrega Pendientes",
                 "FRIO": "IDEO"
             };
-
+        
             // Helper: recibe arreglo de items, aplica map->filter->sort y devuelve HTML en <ul>
             const construirListaOrdenada = (items) => {
                 const normalizados = items
                     .map(it => {
                         const nombre = servicioMap[it.centroprod] || it.centroprod;
-                        return {
-                            nombre,
-                            total: it.total
-                        };
+                        return { nombre, total: it.total };
                     })
                     .filter(it => !nombresExcluidos.includes(it.nombre))
-                    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', {
-                        sensitivity: 'base'
-                    }));
-
+                    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
+        
                 let html = "<ul>";
                 normalizados.forEach(it => {
                     html += `<li>${it.nombre}: ${it.total}</li>`;
@@ -270,7 +299,7 @@ Dispensado Medcol Jamundi
                 html += "</ul>";
                 return html;
             };
-
+        
             $.ajax({
                 url: "{{ route('medcol6.gestionsdis') }}",
                 data: {
@@ -278,61 +307,57 @@ Dispensado Medcol Jamundi
                     fechafin: fechaFin
                 },
                 dataType: "json",
-                success: function(data) {
+                success: function (data) {
                     $("#resultado_informe").show();
-                    const {
-                        dispensado,
-                        revisado,
-                        anulado
-                    } = data;
-
+                    const { dispensado, revisado, anulado } = data;
+        
                     const htmlDispensado = construirListaOrdenada(dispensado || []);
-                    const htmlRevisado = construirListaOrdenada(revisado || []);
-                    const htmlAnulado = construirListaOrdenada(anulado || []);
-
+                    const htmlRevisado   = construirListaOrdenada(revisado || []);
+                    const htmlAnulado    = construirListaOrdenada(anulado || []);
+        
                     $("#detalle_informe").append(`
-                <div class="small-box shadow-lg l-bg-blue-dark">
-                    <div class="inner">
-                        <!--<h5>PENDIENTES X REVISAR</h5>-->
-                        <h5>CONTRATOS</h5>
-                        <p>${htmlDispensado}</p>
-                    </div>
-                    <a class="informependientes" id="informependientesclic" href="#">
-                        <div class="icon">
-                            <i class="fas fa-notes-medical informependientes"></i>
+                        <div class="small-box shadow-lg l-bg-blue-dark">
+                            <div class="inner">
+                                <!--<h5>PENDIENTES X REVISAR</h5>-->
+                                <h5>CONTRATOS</h5>
+                                <p>${htmlDispensado}</p>
+                            </div>
+                            <a class="informependientes" id="informependientesclic" href="#">
+                                <div class="icon">
+                                    <i class="fas fa-notes-medical informependientes"></i>
+                                </div>
+                            </a>
                         </div>
-                    </a>
-                </div>
-            `);
-
+                    `);
+        
                     $("#detalle_informe1").append(`
-                <div class="small-box shadow-lg l-bg-orange-dark">
-                    <div class="inner">
-                        <!--<h5>REVISADAS</h5>-->
-                        <h5>CONTRATOS</h5>
-                        <p>${htmlRevisado}</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-briefcase-medical"></i>
-                    </div>
-                </div>
-            `);
-
+                        <div class="small-box shadow-lg l-bg-orange-dark">
+                            <div class="inner">
+                                <!--<h5>REVISADAS</h5>-->
+                                <h5>CONTRATOS</h5>
+                                <p>${htmlRevisado}</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-briefcase-medical"></i>
+                            </div>
+                        </div>
+                    `);
+        
                     $("#detalle_informe2").append(`
-                <div class="small-box shadow-lg l-bg-red-dark">
-                    <div class="inner">
-                        <!--<h5>ANULADAS</h5>-->
-                        <p>${htmlAnulado}</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-ban"></i>
-                    </div>
-                </div>
-            `);
+                        <div class="small-box shadow-lg l-bg-red-dark">
+                            <div class="inner">
+                                <!--<h5>ANULADAS</h5>-->
+                                <p>${htmlAnulado}</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-ban"></i>
+                            </div>
+                        </div>
+                    `);
                 }
             });
         }
-
+        
         // Función para generar el informe basado en las fechas seleccionadas
         function cargarTablaForgif(fechaini, fechafin) {
             // Destruir DataTable existente si ya está inicializado
@@ -343,8 +368,9 @@ Dispensado Medcol Jamundi
             // Inicializar DataTable con los nuevos datos
             $('#tablaForgif').DataTable({
                 language: idioma_espanol,
-                processing: true,
                 serverSide: true,
+                processing: true,
+                pageLength: 100,
                 lengthMenu: [
                     [25, 50, 100, 500, 5000, -1],
                     [25, 50, 100, 500, 5000, "Mostrar Todo"]
@@ -441,8 +467,7 @@ Dispensado Medcol Jamundi
                 ]
             });
         }
-
-
+        
 
         var fechaini;
         var fechafin;
@@ -453,50 +478,90 @@ Dispensado Medcol Jamundi
         fill_datatable_tabla();
 
         // Callback para filtrar los datos de la tabla y detalle
-        $('#buscar').click(function() {
+        $('#buscar').click(function(e) {
+            e.preventDefault(); // Prevenir comportamiento por defecto del botón
 
             fechaini = $('#fechaini').val();
             fechafin = $('#fechafin').val();
             contrato = $('#contrato').val();
             cobertura = $('#cobertura').val();
 
+            // Validar que al menos haya fechas (droguería y cobertura son opcionales)
+            if (fechaini != '' && fechafin != '') {
 
-            if (fechaini != '' && fechafin != '' || contrato != '' || cobertura != '') {
+                // Validar que fecha inicial no sea mayor que fecha final
+                if (new Date(fechaini) > new Date(fechafin)) {
+                    Swal.fire({
+                        title: 'Error en fechas',
+                        text: 'La fecha inicial no puede ser mayor que la fecha final',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
+                    return;
+                }
 
-                $('#dispensados').DataTable().destroy();
-                $("#revisados").DataTable().destroy();
-                $("#anulados").DataTable().destroy();
+                // Destruir las tablas existentes
+                if ($.fn.DataTable.isDataTable('#dispensados')) {
+                    $('#dispensados').DataTable().destroy();
+                }
+                if ($.fn.DataTable.isDataTable('#revisados')) {
+                    $('#revisados').DataTable().destroy();
+                }
+                if ($.fn.DataTable.isDataTable('#anulados')) {
+                    $('#anulados').DataTable().destroy();
+                }
 
+                // Recargar las tablas con los nuevos filtros
                 fill_datatable_tabla(fechaini, fechafin, contrato, cobertura);
 
             } else {
 
                 Swal.fire({
-                    title: 'Debes digitar fecha inicial y fecha final, la Droguería y Cobertura son opcionales',
+                    title: 'Campos requeridos',
+                    text: 'Debes seleccionar fecha inicial y fecha final. La Droguería y Cobertura son opcionales.',
                     icon: 'warning',
-                    buttons: {
-                        cancel: "Cerrar"
-
-                    }
-                })
+                    confirmButtonText: 'Aceptar'
+                });
             }
 
         });
 
-        $('#reset').click(function() {
+        $('#reset').click(function(e) {
+            e.preventDefault(); // Prevenir comportamiento por defecto del botón
 
+            // Limpiar campos de fecha
             $('#fechaini').val('');
             $('#fechafin').val('');
-            $('#contrato').val('');
-            $('#cobertura').val('');
 
-            $('#dispensados').DataTable().destroy();
-            $("#revisados").DataTable().destroy();
-            $("#anulados").DataTable().destroy();
+            // Limpiar select2 correctamente
+            $('#contrato').val('').trigger('change');
+            $('#cobertura').val('').trigger('change');
+
+            // Destruir las tablas existentes de forma segura
+            if ($.fn.DataTable.isDataTable('#dispensados')) {
+                $('#dispensados').DataTable().destroy();
+            }
+            if ($.fn.DataTable.isDataTable('#revisados')) {
+                $('#revisados').DataTable().destroy();
+            }
+            if ($.fn.DataTable.isDataTable('#anulados')) {
+                $('#anulados').DataTable().destroy();
+            }
+
+            // Recargar las tablas sin filtros
             fill_datatable_tabla();
+
+            // Notificación
+            Swal.fire({
+                title: 'Filtros limpiados',
+                text: 'Se han restaurado los valores por defecto',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
         });
 
-        function fill_datatable_tabla(fechaini = '', fechafin = '', contrato = '', cobertura = '') {
+        function fill_datatable_tabla(fechaini = '', fechafin = '', contrato = '', cobertura ='') {
 
 
             $(function() {
@@ -543,7 +608,7 @@ Dispensado Medcol Jamundi
                                 processing: true,
                                 serverSide: true,
                                 aaSorting: [
-                                    [28, "desc"]
+                                    [26, "desc"]  // Ordenar por fecha_suministro (columna 26)
                                 ],
 
 
@@ -556,138 +621,65 @@ Dispensado Medcol Jamundi
                                         cobertura: cobertura,
                                         _token: "{{ csrf_token() }}"
                                     },
-                                    method: 'POST'
-                                },
-                                columns: [{
-                                        data: 'idusuario'
-                                    },
-                                    {
-                                        data: 'tipo'
-                                    },
-                                    {
-                                        data: 'facturad'
-                                    },
-                                    {
-                                        data: 'factura'
-                                    },
-                                    {
-                                        data: 'tipodocument'
-                                    },
-                                    {
-                                        data: 'historia'
-                                    },
-                                    {
-                                        data: 'cums'
-                                    },
-                                    {
-                                        data: 'expediente'
-                                    },
-                                    {
-                                        data: 'consecutivo'
-                                    },
-                                    {
-                                        data: 'cums_rips'
-                                    },
-                                    {
-                                        data: 'codigo'
-                                    },
-                                    {
-                                        data: 'tipo_medicamento'
-                                    },
-                                    {
-                                        data: 'nombre_generico'
-                                    },
-                                    {
-                                        data: 'atc'
-                                    },
-                                    {
-                                        data: 'forma'
-                                    },
-                                    {
-                                        data: 'concentracion'
-                                    },
-                                    {
-                                        data: 'unidad_medicamento'
-                                    },
-                                    {
-                                        data: 'numero_unidades'
-                                    },
-                                    {
-                                        data: 'regimen'
-                                    },
-                                    {
-                                        data: 'paciente'
-                                    },
-                                    {
-                                        data: 'primer_apellido'
-                                    },
-                                    {
-                                        data: 'segundo_apellido'
-                                    },
-                                    {
-                                        data: 'primer_nombre'
-                                    },
-                                    {
-                                        data: 'segundo_nombre'
-                                    },
-                                    {
-                                        data: 'cuota_moderadora'
-                                    },
+                                    method: 'POST',
+                                    error: function(xhr, error, code) {
+                                        console.error('Error Ajax DataTables:', {
+                                            status: xhr.status,
+                                            statusText: xhr.statusText,
+                                            responseText: xhr.responseText,
+                                            error: error,
+                                            code: code
+                                        });
 
-                                    {
-                                        data: 'copago1',
-                                        orderable: false
-                                    }, //25
-
-
-                                    {
-                                        data: 'fecha_suministro'
-                                    },
-                                    {
-                                        data: 'id_medico'
-                                    },
-                                    {
-                                        data: 'medico'
-                                    },
-                                    {
-                                        data: 'especialidadmedico'
-                                    },
-                                    {
-                                        data: 'mipres'
-                                    },
-
-
-
-                                    {
-                                        data: 'autorizacion',
-                                        orderable: false
-                                    }, //31
-
-
-                                    {
-                                        data: 'precio_unitario'
-                                    },
-                                    {
-                                        data: 'valor_total'
-                                    },
-                                    {
-                                        data: 'estado'
-                                    }, //38
-                                    {
-                                        data: 'centroprod'
-                                    },
-                                    {
-                                        data: 'drogueria'
-                                    },
-                                    {
-                                        data: 'user_id'
-                                    }, //41
-                                    {
-                                        data: 'cajero'
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error al cargar datos',
+                                            html: `<strong>Error ${xhr.status}:</strong> ${xhr.statusText}<br><br>
+                                                   <small>Revise la consola del navegador (F12) para más detalles.</small>`,
+                                            confirmButtonText: 'Aceptar'
+                                        });
                                     }
-
-
-
+                                },
+                                columns: [
+                                    { data: 'idusuario' },                    // 0
+                                    { data: 'tipo' },                         // 1
+                                    { data: 'facturad' },                     // 2
+                                    { data: 'factura' },                      // 3
+                                    { data: 'tipodocument' },                 // 4
+                                    { data: 'historia' },                     // 5
+                                    { data: 'cums' },                         // 6
+                                    { data: 'expediente' },                   // 7
+                                    { data: 'consecutivo' },                  // 8
+                                    { data: 'cums_rips' },                    // 9
+                                    { data: 'codigo' },                       // 10
+                                    { data: 'tipo_medicamento' },             // 11
+                                    { data: 'nombre_generico' },              // 12
+                                    { data: 'atc' },                          // 13
+                                    { data: 'forma' },                        // 14
+                                    { data: 'concentracion' },                // 15
+                                    { data: 'unidad_medicamento' },           // 16
+                                    { data: 'numero_unidades' },              // 17
+                                    { data: 'regimen' },                      // 18
+                                    { data: 'paciente' },                     // 19
+                                    { data: 'primer_apellido' },              // 20
+                                    { data: 'segundo_apellido' },             // 21
+                                    { data: 'primer_nombre' },                // 22
+                                    { data: 'segundo_nombre' },               // 23
+                                    { data: 'cuota_moderadora' },             // 24
+                                    { data: 'copago' },                       // 25 - CORREGIDO: era 'copago1'
+                                    { data: 'fecha_suministro' },             // 26
+                                    { data: 'id_medico' },                    // 27
+                                    { data: 'medico' },                       // 28
+                                    { data: 'especialidadmedico' },           // 29
+                                    { data: 'mipres' },                       // 30
+                                    { data: 'autorizacion', orderable: false }, // 31
+                                    { data: 'precio_unitario' },              // 32
+                                    { data: 'valor_total' },                  // 33
+                                    { data: 'estado' },                       // 34
+                                    { data: 'centroprod' },                   // 35
+                                    { data: 'drogueria' },                    // 36
+                                    { data: 'user_id' },                      // 37
+                                    { data: 'cajero' }                        // 38
                                 ],
 
                                 //Botones----------------------------------------------------------------------
@@ -819,8 +811,8 @@ Dispensado Medcol Jamundi
                                     [25, 50, 100, 500, 5000, -1],
                                     [25, 50, 100, 500, 5000, "Mostrar Todo"]
                                 ],
-                                processing: true,
                                 serverSide: true,
+                                processing: true,
                                 aaSorting: [
                                     [28, "desc"]
                                 ],
@@ -934,11 +926,11 @@ Dispensado Medcol Jamundi
                                     {
                                         data: 'num_total_entregas',
                                         orderable: false
-                                    },
+                                    }, 
                                     {
                                         data: 'fecha_ordenamiento',
                                         orderable: false
-                                    },
+                                    }, 
 
                                     {
                                         data: 'fecha_suministro'
@@ -979,92 +971,91 @@ Dispensado Medcol Jamundi
                                         data: 'id_medico',
                                         orderable: false
                                     },
-
+                                    
                                     {
                                         data: 'numeroIdentificacion'
-                                    }, //docuemnto de medico nuevo campo para SOS
+                                    },//docuemnto de medico nuevo campo para SOS
 
                                     {
                                         data: 'medico',
                                         orderable: false
                                     }, //37
-
+                                    
                                     {
                                         data: 'especialidadmedico'
-                                    }, //Especialidad medico nuevo campo para SOS
+                                    },//Especialidad medico nuevo campo para SOS
 
 
                                     {
                                         data: 'precio_unitario'
                                     },
-
+                                    
                                     {
                                         data: 'valor_total' //40
                                     },
-
+                                    
                                     {
                                         data: 'estado'
                                     }, //41
-
+                                    
                                     {
                                         data: 'centroprod'
                                     },
-
+                                    
                                     {
                                         data: 'drogueria'
                                     },
-
-
+                                    
+                                 
                                     {
                                         data: 'cajero'
                                     },
-                                    {
+                                       {
                                         data: 'user_id'
                                     }, //44
-
+                                    
                                     // Nuevos datos de SOS para SOMA
-
-
+                                    
                                     {
                                         data: 'nitips'
                                     },
-
+                                    
                                     {
                                         data: 'frecuencia'
                                     },
-
+                                    
                                     {
                                         data: 'dosis'
                                     },
-
+                                    
                                     {
                                         data: 'duracion_tratamiento'
                                     },
-
+                                    
                                     {
                                         data: 'cobertura' //50
                                     },
-
+                                    
                                     {
                                         data: 'tipocontrato'
                                     },
-
+                                    
                                     {
                                         data: 'tipoentrega'
                                     },
-
+                                    
                                     {
                                         data: 'plan'
                                     },
-
+                                    
                                     {
                                         data: 'via'
                                     },
-
+                                    
                                     {
                                         data: 'ciudad'
                                     },
-
+                                    
 
                                 ],
 
@@ -1089,7 +1080,7 @@ Dispensado Medcol Jamundi
                                         className: "btn  btn-outline-success btn-sm",
                                         customize: function(xlsx) {
                                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
-                                            $('row c[r^="AG"]', sheet).each(function() {
+                                            $('row c[r^="AJ"]', sheet).each(function () {
                                                 $(this).attr('t', 's');
                                             });
                                         }
@@ -1112,20 +1103,19 @@ Dispensado Medcol Jamundi
                                     },
                                     {
                                         text: 'Exportar Excel (Servidor)',
-                                        className: 'btn btn-outline-success btn-sm',
-                                        action: function() {
-                                            const filters = {
-                                                fechaini: fechaini,
-                                                fechafin: fechafin,
-                                                contrato: contrato,
-                                                cobertura: cobertura,
-                                                estado: 'REVISADO',
-                                                _token: "{{ csrf_token() }}"
-                                            };
-
-                                            // Mostrar el spinner
-                                            const spinner = document.createElement('div');
-                                            spinner.innerHTML = `
+                                            className: 'btn btn-outline-success btn-sm',
+                                            action: function () {
+                                                const filters = {
+                                                    fechaini: fechaini,
+                                                    fechafin: fechafin,
+                                                    contrato: contrato,
+                                                    cobertura: cobertura,
+                                                    _token: "{{ csrf_token() }}"
+                                                };
+                                        
+                                                // Mostrar el spinner
+                                                const spinner = document.createElement('div');
+                                                spinner.innerHTML = `
                                                     <div class="spinner-backdrop">
                                                         <div class="spinner-border text-primary" role="status">
                                                             <span class="sr-only">Exportando...</span>
@@ -1133,35 +1123,35 @@ Dispensado Medcol Jamundi
                                                         <p style="color: white; margin-top: 10px;">Exportando, por favor espera...</p>
                                                     </div>
                                                 `;
-                                            document.body.appendChild(spinner);
-
-                                            $.ajax({
-                                                url: "{{ route('exportar.excel') }}",
-                                                method: 'POST',
-                                                data: filters,
-                                                xhrFields: {
-                                                    responseType: 'blob'
-                                                },
-                                                success: function(data) {
-                                                    const url = window.URL.createObjectURL(new Blob([data]));
-                                                    const a = document.createElement('a');
-                                                    a.href = url;
-                                                    a.download = 'informe_facturas.xlsx';
-                                                    document.body.appendChild(a);
-                                                    a.click();
-                                                    a.remove();
-
-                                                    // Ocultar el spinner
-                                                    document.body.removeChild(spinner);
-                                                },
-                                                error: function(xhr, status, error) {
-                                                    alert('Error al exportar el archivo: ' + error);
-
-                                                    // Ocultar el spinner en caso de error
-                                                    document.body.removeChild(spinner);
-                                                }
-                                            });
-                                        }
+                                                document.body.appendChild(spinner);
+                                        
+                                                $.ajax({
+                                                    url: "{{ route('exportar.excel') }}",
+                                                    method: 'POST',
+                                                    data: filters,
+                                                    xhrFields: {
+                                                        responseType: 'blob'
+                                                    },
+                                                    success: function (data) {
+                                                        const url = window.URL.createObjectURL(new Blob([data]));
+                                                        const a = document.createElement('a');
+                                                        a.href = url;
+                                                        a.download = 'informe_facturas.xlsx';
+                                                        document.body.appendChild(a);
+                                                        a.click();
+                                                        a.remove();
+                                        
+                                                        // Ocultar el spinner
+                                                        document.body.removeChild(spinner);
+                                                    },
+                                                    error: function (xhr, status, error) {
+                                                        alert('Error al exportar el archivo: ' + error);
+                                        
+                                                        // Ocultar el spinner en caso de error
+                                                        document.body.removeChild(spinner);
+                                                    }
+                                                });
+                                            }
                                     }
                                 ],
 
@@ -1382,7 +1372,7 @@ Dispensado Medcol Jamundi
                                         className: "btn  btn-outline-success btn-sm",
                                         customize: function(xlsx) {
                                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
-                                            $('row c[r^="AG"]', sheet).each(function() {
+                                            $('row c[r^="AG"]', sheet).each(function () {
                                                 $(this).attr('t', 's');
                                             });
                                         }
@@ -1437,7 +1427,8 @@ Dispensado Medcol Jamundi
             Swal.fire({
                 title: "¿Estás seguro?",
                 text: text,
-                type: "warning",
+                //type: "warning",
+                icon: "warning",
                 showCancelButton: true,
                 showCloseButton: true,
                 confirmButtonText: 'Aceptar',
@@ -1474,7 +1465,8 @@ Dispensado Medcol Jamundi
                                 // $('#tanulados').DataTable().ajax.reload();
                                 // $('#tdesabastecidos').DataTable().ajax.reload();
                                 Swal.fire({
-                                    type: 'success',
+                                    //type: 'success',
+                                    icon: 'success',
                                     title: 'Cuenta por pagar creada correctamente',
                                     showConfirmButton: false,
                                     timer: 1500
@@ -1516,12 +1508,13 @@ Dispensado Medcol Jamundi
         // Función que envia el id al controlador y cambia el estado del registro
         $(document).on('click', '#syncapidis', function() {
 
-            const text = 'De Medcol SOS - Jamundi';
+            const text = 'De Medcol Centralizado';
 
             Swal.fire({
                 title: "¿Estás por sincronizar lo dispensado?",
                 text: text,
-                type: "info",
+                //type: "info",
+                icon: "info",
                 showCancelButton: true,
                 showCloseButton: true,
                 confirmButtonText: 'Aceptar',
@@ -1533,14 +1526,17 @@ Dispensado Medcol Jamundi
                 }
             });
         });
+        
+        
+        
 
         function ajaxRequestSyncDispensados() {
-
+            
             $.ajax({
                 beforeSend: function() {
                     $('.loaders').css("visibility", "visible");
                 },
-
+                
                 url: "{{route('medcol6.dispensadosyncapi')}}",
                 type: 'GET',
                 success: function(data) {
@@ -1551,26 +1547,27 @@ Dispensado Medcol Jamundi
                         Apiws.notificaciones(item.respuesta, item.titulo, item.icon, item.position);
 
                     });
-
+                   
                 },
-
+                
                 complete: function() {
-
+                    
                     $('.loaders').css("visibility", "hidden");
-
+                    
                 }
             });
         }
-
+        
         //Funcion para sincronizar las facturas anuladas y actualizar el estado
         $(document).on('click', '#synanulados', function() {
 
-            const text = 'De Medcol SOS - Jamundi';
+            const text = 'De Medcol Centralizado';
 
             Swal.fire({
                 title: "¿Estás por sincronizar los anulados?",
                 text: text,
-                type: "info",
+                //type: "info",
+                icon: "info",
                 showCancelButton: true,
                 showCloseButton: true,
                 confirmButtonText: 'Aceptar',
@@ -1608,14 +1605,17 @@ Dispensado Medcol Jamundi
         }
 
 
+       
+
+            
         // Función que envia el id al controlador y cambia el estado del registro
         $(document).on('click', '#syncdis', function() {
-
+             
             var dispensado = [];
             var dispensadotrue1 = [];
-
+           
             // Utiliza 'tr' en lugar de 'tbody tr' para recorrer solo la fila específica
-            $("tbody tr").each(function(el) {
+           $("tbody tr").each(function(el){
 
                 var itemdispensado = {};
 
@@ -1639,15 +1639,15 @@ Dispensado Medcol Jamundi
                 dispensado.push(itemdispensado);
 
             });
-
-
+           
+            
             $.each(dispensado, function(i, items) {
 
                 var dispensadotrue = {};
 
-                if (items.checked == true) {
-
-                    console.log("entra acá");
+                 if(items.checked == true){
+                     
+                      console.log("entra acá");
                     dispensadotrue.ID = items.id;
                     dispensadotrue.copago1 = items.copago1;
                     dispensadotrue.numero_entrega1 = items.numero_entrega1;
@@ -1661,22 +1661,22 @@ Dispensado Medcol Jamundi
                     dispensadotrue.medico1 = items.medico1;
                     dispensadotrue.estado = items.estado;
                     dispensadotrue.user_id = items.user_id;
-
+                
                     dispensadotrue1.push(dispensadotrue);
+             
+                 }
+               
+                
 
-                }
-
-
-
-
+                
             });
-
-            console.log(dispensadotrue1);
+        
+                console.log(dispensadotrue1);
 
             $.each(dispensadotrue1, function(i, items) {
-
-
-                console.log("entra acá1");
+                
+            
+            console.log("entra acá1");
                 console.log(items.id);
                 console.log(items.fecha_orden);
                 console.log(items.diagnostico);
@@ -1688,7 +1688,7 @@ Dispensado Medcol Jamundi
                 console.log(items.medico1);
                 console.log(items.estado);
                 console.log(items.user_id);
-
+                
                 /*if (items.fecha_orden > ){
                     
                     Swal.fire({
@@ -1717,7 +1717,7 @@ Dispensado Medcol Jamundi
 
 
                 } else if (items.autorizacion1 != '' && items.mipre1 != '' && items.reporte_entrega1 != '') {
-
+                    
                     enviardatos(dispensadotrue1);
 
                 } else {
@@ -1732,7 +1732,10 @@ Dispensado Medcol Jamundi
                 }
 
             });
-
+            
+            
+            
+                    
         });
 
 
@@ -1761,7 +1764,8 @@ Dispensado Medcol Jamundi
                         if (data.success == 'ya') {
 
                             Swal.fire({
-                                type: 'warning',
+                                //type: 'warning',
+                                icon: 'warning',
                                 title: "Factura no adicionada",
                                 showConfirmButton: true,
                                 timer: 1500
@@ -1772,47 +1776,48 @@ Dispensado Medcol Jamundi
                         } else if (data.success == 'ok') {
 
                             Swal.fire({
-                                type: 'success',
+                                //type: 'success',
+                                icon: 'success',
                                 title: "Factura adicionada correctamente",
                                 showConfirmButton: true,
                                 timer: 1500
                             })
-
-
+                            
+                            
                             //console.log(index);
-
-                            //$("#dispensados").DataTable().row(index).remove().draw(false);
+                            
+                             //$("#dispensados").DataTable().row(index).remove().draw(false);
 
                             $("#dispensados").DataTable().ajax.reload();
 
                         }
 
                     },
-                    error: function(xhr) {
-                        // Manejar errores de validación de la solicitud AJAX
-                        var errorMessage = "Revise los siguientes errores:<br>";
-                        var errorMessage2 = "";
-                        if (xhr.responseJSON && xhr.responseJSON.errors) {
-                            $.each(xhr.responseJSON.errors, function(fieldName, fieldErrors) {
-
-                                errorMessage2 += "<strong>" + fieldName + ":</strong><br>";
-                                $.each(fieldErrors, function(index, error) {
-                                    errorMessage2 += "- " + error + "<br>";
+                            error: function(xhr) {
+                                // Manejar errores de validación de la solicitud AJAX
+                                var errorMessage = "Revise los siguientes errores:<br>";
+                                var errorMessage2 = "";
+                                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                                    $.each(xhr.responseJSON.errors, function(fieldName, fieldErrors) {
+                                        
+                                        errorMessage2 += "<strong>" + fieldName + ":</strong><br>";
+                                        $.each(fieldErrors, function(index, error) {
+                                            errorMessage2 += "- " + error + "<br>";
+                                        });
+                                    });
+                                } else {
+                                    errorMessage += "Error en la solicitud.";
+                                }
+                                Swal.fire({
+                                    type: 'error',
+                                    title: errorMessage,
+                                    showConfirmButton: true,
+                                    html: errorMessage2
                                 });
-                            });
-                        } else {
-                            errorMessage += "Error en la solicitud.";
-                        }
-                        Swal.fire({
-                            type: 'error',
-                            title: errorMessage,
-                            showConfirmButton: true,
-                            html: errorMessage2
-                        });
-                    }
+                            }
                 });
         }
-
+        
         $('.dxcie10').select2({
             language: "es",
             theme: "bootstrap4",
@@ -1877,44 +1882,43 @@ Dispensado Medcol Jamundi
                 cache: true
             }
         }).trigger('change');
-
+        
         //Cargar select del iva
-        $(".plansos").select2({
-            language: "es",
-            theme: "bootstrap4",
-            placeholder: 'Seleccione un Plan',
-            allowClear: true,
-            ajax: {
-                url: "{{ route('selectlist') }}",
-                dataType: 'json',
-                delay: 250,
-                data: function(params) {
-                    return {
-                        q: params.term,
-                        id: 4
-                    };
-                },
-                processResults: function(data) {
-                    return {
-                        results: $.map(data.array[0], function(datas) {
+            $(".plansos").select2({
+                language: "es",
+                theme: "bootstrap4",
+                placeholder: 'Seleccione un Plan',
+                allowClear: true,
+                ajax: {
+                    url: "{{ route('selectlist') }}",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            q: params.term,
+                            id: 4
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: $.map(data.array[0], function(datas) {
 
-                            return {
+                                return {
 
-                                text: datas.slug + "=>" + datas.descripcion,
-                                id: datas.descripcion
+                                    text: datas.slug + "=>" + datas.descripcion,
+                                    id: datas.descripcion
 
-                            }
-                        })
-                    };
-                },
-                cache: true
-            }
-        }).trigger('change');
+                                }
+                            })
+                        };
+                    },
+                    cache: true
+                }
+            }).trigger('change');
 
         $("#selector").on('click', function() {
             $(".checkbox2").prop("checked", this.checked);
         });
-
 
 
 
@@ -1926,137 +1930,170 @@ Dispensado Medcol Jamundi
             });
         });
 
-        /* Script para manejar la lógica de búsqueda y DataTable */
-        function buscarFactura() {
-            const numeroFactura = $('#numero_factura').val();
 
-            // Mostrar el spinner con SweetAlert2
-            Swal.fire({
-                icon: 'info',
-                title: 'Buscando factura...',
-                text: 'Por favor, espera mientras obtenemos la información.',
-                allowOutsideClick: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
 
+        // 🔁 1. Sincroniza el dispensado único
+        function ajaxRequestSyncDispensadosUnicos(numeroFactura = '', callback = null) {
+           
             $.ajax({
-                url: `{{ route('dispensado.medcol6', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
+               
+                url: "{{ route('medcol6.dispensadosyncapiunico') }}",
                 type: 'GET',
-                success: function(data) {
-                    Swal.close(); // Ocultar el loader
-
-                    // Verificar si el backend no ha devuelto un error
-                    if (data && !data.error && Array.isArray(data) && data.length > 0) {
-                        const firstRecord = data[0];
-
-                        $('#factura').val(firstRecord.factura);
-                        $('#paciente').val(firstRecord.paciente);
-                        $('#drogueria').val(firstRecord.drogueria);
-                        $('#regimen').val(firstRecord.regimen);
-                        $('#tipodocument').val(firstRecord.tipodocument);
-                        $('#medico1').val(firstRecord.medico);
-                        $('#fecha_solicitud').val(firstRecord.fecha_suministro);
-                        $('#fecha_orden').val(firstRecord.fecha_ordenamiento);
-                        $('#numero_entrega1').val(firstRecord.numero_entrega);
-                        $('#num_total_entregas').val(firstRecord.num_total_entregas);
-                        $('#formula1').val(firstRecord.numero_orden);
-                        $('#facturaelectronica').val(firstRecord.documento_origen + ' - ' + firstRecord.factura_origen);
-                        $('#ips_nombre').val(firstRecord.ips_nombre);
-                        $('#diagnostico2').val(firstRecord.dx);
-                        var newips = new Option(firstRecord.ips_nombre, firstRecord.ips, true, true);
-                        $('.ipsmul').append(newips).trigger('change');
-
-                        var newdx = new Option(firstRecord.dx, firstRecord.dx, true, true);
-                        $('.dxcie10').append(newdx).trigger('change');
-
-                        $('#estado2').val(firstRecord.estado);
-                        actualizarEstadoIndicator(firstRecord.estado);
-                        $('#id_medico').val(firstRecord.id_medico);
-                        $('#tipoidmedico').val(firstRecord.tipoidmedico);
-                        $('#numeroIdentificacion').val(firstRecord.numeroIdentificacion);
-                        $('#especialidadmedico').val(firstRecord.especialidadmedico);
-                        $('#ciudad').val(firstRecord.ciudad);
-                        $('#tipocontrato').val(firstRecord.tipocontrato);
-                        $('#ambito').val(firstRecord.ambito);
-                        $('#cod_dispensario_sos').val(firstRecord.cod_dispensario_sos);
-                        $('#tipoentrega').val(firstRecord.tipoentrega);
-                        $('#cobertura2').val(firstRecord.cobertura);
-                        $('#cod_dispen_transacc').val(firstRecord.cod_dispen_transacc);
-
-                        if (firstRecord.fecha_suministro) {
-                            const formattedFechaSuministro = new Date(firstRecord.fecha_suministro).toISOString().split('T')[0];
-                            $('#fecha_suministro').val(formattedFechaSuministro);
-                        } else {
-                            $('#fecha_suministro').val('');
-                        }
-
-                        $('#idusuario').val(firstRecord.idusuario);
-                        $('#cajero').val(firstRecord.cajero);
-
-                        actualizarDataTable(data);
-
-                        // Mostrar mensaje de éxito con SweetAlert2
-                        /* Swal.fire({
-                            icon: 'success',
-                            title: 'Factura encontrada',
-                            text: 'Los datos se han cargado correctamente.',
-                            timer: 2000,
-                            showConfirmButton: false
-                        }); */
-
-                        const Toast = Swal.mixin({
-                            toast: true,
-                            position: "top-end",
-                            showConfirmButton: false,
-                            timer: 2000,
-                            timerProgressBar: true,
-                            didOpen: (toast) => {
-                                toast.onmouseenter = Swal.stopTimer;
-                                toast.onmouseleave = Swal.resumeTimer;
-                            }
-                        });
-                        Toast.fire({
-                            icon: "success",
-                            title: 'Factura encontrada',
-                            text: 'Los datos se han cargado correctamente.'
-                        });
-
-                    } else if (data.error) {
-                        // Mostrar el mensaje de error específico devuelto por el backend
-                        mostrarError(data.error);
-                    } else {
-                        // Si no se encuentran registros y no hay error, mostrar mensaje genérico
-                        mostrarError('No se encontraron registros para la factura ingresada.');
+                data: { factura: numeroFactura },
+                success: function (data) {
+                    $('#dispensados').DataTable().ajax.reload();
+        
+                    $.each(data, function (i, item) {
+                        Apiws.notificaciones(item.respuesta, item.titulo, item.icon, item.position);
+                    });
+        
+                    // ✅ Si hay callback, ejecutarlo (ej. buscar datos de la factura)
+                    if (typeof callback === 'function') {
+                        callback();
                     }
                 },
-                error: function(xhr, status, error) {
-                    console.error('Error al buscar la factura:', error);
-
-                    // Extraer el mensaje de error del backend, si está disponible
-                    let errorMessage = 'Error al buscar la factura. Por favor, inténtalo de nuevo.';
-                    if (xhr.responseJSON && xhr.responseJSON.error) {
-                        errorMessage = xhr.responseJSON.error;
-                    }
-
-                    // Mostrar alerta con el error
-                    mostrarError(errorMessage);
+                
+                error: function (xhr, status, error) {
+                    console.error('Error en sincronización:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo sincronizar el dispensado único.',
+                    });
                 }
             });
         }
+        
+        // 🔍 2. Realiza la búsqueda y pinta los datos en el formulario
+function ejecutarBusquedaFactura(numeroFactura) {
+    $.ajax({
+        url: `{{ route('dispensado.medcol6', ['factura' => ':numero_factura']) }}`.replace(':numero_factura', numeroFactura),
+        type: 'GET',
+        success: function (data) {
+            Swal.close(); // Ocultar loader
+
+            if (data && !data.error && Array.isArray(data) && data.length > 0) {
+                const firstRecord = data[0];
+
+                // Llenar los campos del formulario con los datos recibidos
+                $('#factura').val(firstRecord.factura);
+                $('#paciente').val(firstRecord.paciente);
+                $('#drogueria').val(firstRecord.drogueria);
+                $('#regimen').val(firstRecord.regimen);
+                $('#tipodocument').val(firstRecord.tipodocument);
+                $('#medico1').val(firstRecord.medico);
+                $('#fecha_solicitud').val(firstRecord.fecha_suministro);
+                $('#fecha_orden').val(firstRecord.fecha_ordenamiento);
+                $('#numero_entrega1').val(firstRecord.numero_entrega);
+                $('#num_total_entregas').val(firstRecord.num_total_entregas);
+                $('#formula1').val(firstRecord.numero_orden);
+                $('#facturaelectronica').val(firstRecord.documento_origen + ' - ' + firstRecord.factura_origen);
+                $('#ips_nombre').val(firstRecord.ips_nombre);
+                $('#diagnostico2').val(firstRecord.dx);
+
+                // Agregar nuevas opciones a los select con .trigger('change')
+                var newips = new Option(firstRecord.ips_nombre, firstRecord.ips, true, true);
+                $('.ipsmul').append(newips).trigger('change');
+
+                var newdx = new Option(firstRecord.dx, firstRecord.dx, true, true);
+                $('.dxcie10').append(newdx).trigger('change');
+
+                $('#estado2').val(firstRecord.estado);
+                actualizarEstadoIndicator(firstRecord.estado);
+                $('#id_medico').val(firstRecord.id_medico);
+                $('#tipoidmedico').val(firstRecord.tipoidmedico);
+                $('#numeroIdentificacion').val(firstRecord.numeroIdentificacion);
+                $('#especialidadmedico').val(firstRecord.especialidadmedico);
+                $('#ciudad').val(firstRecord.ciudad);
+                $('#tipocontrato').val(firstRecord.tipocontrato);
+                $('#ambito').val(firstRecord.ambito);
+                $('#cod_dispensario_sos').val(firstRecord.cod_dispensario_sos);
+                $('#tipoentrega').val(firstRecord.tipoentrega);
+                $('#cobertura2').val(firstRecord.cobertura);
+                $('#cod_dispen_transacc').val(firstRecord.cod_dispen_transacc);
+
+                if (firstRecord.fecha_suministro) {
+                    const formattedFechaSuministro = new Date(firstRecord.fecha_suministro).toISOString().split('T')[0];
+                    $('#fecha_suministro').val(formattedFechaSuministro);
+                } else {
+                    $('#fecha_suministro').val('');
+                }
+
+                $('#idusuario').val(firstRecord.idusuario);
+                $('#cajero').val(firstRecord.cajero);
+
+                // Pintar los datos en la tabla
+                actualizarDataTable(data);
+
+                // Notificación de éxito
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: "top-end",
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.onmouseenter = Swal.stopTimer;
+                        toast.onmouseleave = Swal.resumeTimer;
+                    }
+                });
+
+                Toast.fire({
+                    icon: "success",
+                    title: 'Factura encontrada',
+                    text: 'Los datos se han cargado correctamente.'
+                });
+
+            } else if (data.error) {
+                mostrarError(data.error);
+            } else {
+                mostrarError('No se encontraron registros para la factura ingresada.');
+            }
+        },
+        error: function (xhr, status, error) {
+            Swal.close();
+            let errorMessage = 'Error al buscar la factura. Por favor, inténtalo de nuevo.';
+            if (xhr.responseJSON && xhr.responseJSON.error) {
+                errorMessage = xhr.responseJSON.error;
+            }
+            mostrarError(errorMessage);
+        }
+    });
+}
+
+
+            // ▶️ 3. Controlador principal llamado desde botón o evento
+    function buscarFactura() {
+        const numeroFactura = $('#numero_factura').val();
+    
+        // Mostramos loader con SweetAlert2
+        Swal.fire({
+            icon: 'info',
+            title: 'Buscando factura...',
+            text: 'Por favor, espera mientras obtenemos la información.',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+    
+        // ⏳ Primero sincroniza, luego busca la factura
+        ajaxRequestSyncDispensadosUnicos(numeroFactura, function () {
+            ejecutarBusquedaFactura(numeroFactura);
+        });
+    }
 
         function actualizarDataTable(data) {
             const tablaRegistros = $('#tablaRegistros').DataTable();
             tablaRegistros.clear().rows.add(data).draw();
         }
 
-
+        
         // Función para mostrar alertas de error utilizando SweetAlert2
         function mostrarError(mensaje) {
             Swal.fire({
-                type: 'error',
+                //type: 'error',
                 icon: 'error',
                 title: 'Error',
                 html: mensaje,
@@ -2070,6 +2107,7 @@ Dispensado Medcol Jamundi
             $('#tablaRegistros').DataTable({
                 language: idioma_espanol,
                 processing: true,
+                pageLength: 100,
                 lengthMenu: [
                     [25, 50, 100, 500, -1],
                     [25, 50, 100, 500, "Mostrar Todo"]
@@ -2149,18 +2187,19 @@ Dispensado Medcol Jamundi
                 const numeroEntrega = $('#numero_entrega1').val();
                 const numTotalEntregas = $('#num_total_entregas').val();
                 const numFormula = $('#formula1').val();
-
+                const formulaCompleta = $('input[name="formula_completa"]:checked').val();
+        
                 const diagnosticoElement = $('.dxcie10');
                 const diagnostico = diagnosticoElement.val();
-
+        
                 const ipsElement = $('.ipsmul');
                 const ips = ipsElement.val();
-
+                
                 //const planElement = $('.plansos');
                 //const plan = planElement.val();
-
+        
                 const userId = "{{ Auth::user()->id }}";
-
+        
                 // Validación de campos obligatorios
                 const camposFaltantes = [];
                 if (!fechaOrden) camposFaltantes.push('Fecha de Ordenamiento');
@@ -2170,16 +2209,17 @@ Dispensado Medcol Jamundi
                 if (!diagnostico) camposFaltantes.push('Diagnóstico');
                 //if (!plan) camposFaltantes.push('Plan');
                 if (!numFormula) camposFaltantes.push('No. de Fórmula');
-
+                if (!formulaCompleta) camposFaltantes.push('Fórmula Completa');
+        
                 // Validar si las fechas son coherentes
                 if (fechaOrden && fechaDisp && new Date(fechaOrden) > new Date(fechaDisp)) {
                     camposFaltantes.push('La Fecha de Ordenamiento no puede ser superior a la Fecha de Suministro');
                 }
-
+                
                 /*if (numeroEntrega>numTotalEntregas){
                     camposFaltantes.push('El Número de Entrega no puede ser mayor que el Número Total de Entregas');
                 }*/
-
+        
                 // Si hay campos faltantes, mostrar una alerta y detener el proceso
                 if (camposFaltantes.length > 0) {
                     const mensaje = `Los siguientes campos son obligatorios:<br><br>${camposFaltantes.map(campo => `<span style="font-weight: bold;">- ${campo}</span><br>`).join('')}`;
@@ -2192,10 +2232,10 @@ Dispensado Medcol Jamundi
                     });
                     return; // Detener la ejecución si faltan campos
                 }
-
+        
                 // Recopilar los datos de la tabla
                 const dispensado = [];
-
+        
                 $("#tablaRegistros tbody tr").each(function() {
                     const tds = $(this).find("td");
                     if (tds.eq(0).text() !== 'Ningún dato disponible en esta tabla =(') {
@@ -2215,28 +2255,29 @@ Dispensado Medcol Jamundi
                             numero_entrega: numeroEntrega,
                             num_total_entregas: numTotalEntregas,
                             numero_orden: numFormula,
+                            formula_completa: formulaCompleta,
                             //plan: plan,
                             diagnostico: diagnostico,
                             estado: "REVISADO",
                             ips: ips
                         };
-
-
+                        
+                     
                         dispensado.push(itemdispensado);
                     }
                 });
-
+        
                 // Validar y filtrar los elementos que se van a guardar
                 const dispensadotrue1 = [];
                 for (const item of dispensado) {
                     if (!item.checked) continue;
-
+                
                     console.log(item.autorizacion);
-
+                
                     // Validar que duracion_tratamiento tenga máximo 3 caracteres y entre 1 y 365 días
                     if (item.duracion_tratamiento?.length > 3 || item.duracion_tratamiento < 1 || item.duracion_tratamiento > 365) {
                         await Swal.fire({
-                            type: "error",
+                            //type: "error",
                             icon: "error",
                             title: "Error",
                             text: "El campo Duración del Tratamiento debe estar entre 1 y 365 días",
@@ -2244,12 +2285,12 @@ Dispensado Medcol Jamundi
                         });
                         return;
                     }
-
+                
                     // Si autorizacion está vacío, solo validar Frecuencia y Dosis
                     if (!item.autorizacion) {
                         if (!item.frecuencia?.trim() || !item.dosis?.trim() || !item.duracion_tratamiento?.trim()) {
                             await Swal.fire({
-                                type: "error",
+                                //type: "error",
                                 icon: "error",
                                 title: "Error",
                                 text: "Los campos Frecuencia, Dosis y Duración del Tratamiento deben completarse",
@@ -2259,37 +2300,19 @@ Dispensado Medcol Jamundi
                         }
                     } else {
                         // Definir validaciones para cuando autorizacion tiene un valor
-                        const validations = [{
-                                condition: !item.mipres || !item.reporte_entrega,
-                                message: "Los campos MIPRES y Reporte de Entrega deben completarse"
-                            },
-                            {
-                                condition: item.autorizacion.length !== 12,
-                                message: "El campo Autorización debe tener exactamente 12 caracteres"
-                            },
-                            {
-                                condition: item.mipres?.length !== 20,
-                                message: "El campo MIPRES debe tener exactamente 20 caracteres"
-                            },
-                            {
-                                condition: item.reporte_entrega?.length !== 8,
-                                message: "El campo Reporte de Entrega debe tener exactamente 8 caracteres"
-                            },
-                            {
-                                condition: !item.frecuencia?.trim() || !item.dosis?.trim(),
-                                message: "Los campos Frecuencia y Dosis deben completarse"
-                            }
+                        const validations = [
+                            { condition: !item.mipres || !item.reporte_entrega, message: "Los campos MIPRES y Reporte de Entrega deben completarse" },
+                            { condition: item.autorizacion.length !== 12, message: "El campo Autorización debe tener exactamente 12 caracteres" },
+                            { condition: item.mipres?.length !== 20, message: "El campo MIPRES debe tener exactamente 20 caracteres" },
+                            { condition: item.reporte_entrega?.length !== 8, message: "El campo Reporte de Entrega debe tener exactamente 8 caracteres" },
+                            { condition: !item.frecuencia?.trim() || !item.dosis?.trim(), message: "Los campos Frecuencia y Dosis deben completarse" }
                         ];
-
+                
                         // Ejecutar validaciones y mostrar alerta si falla alguna
-                        for (const {
-                                condition,
-                                message
-                            }
-                            of validations) {
+                        for (const { condition, message } of validations) {
                             if (condition) {
                                 await Swal.fire({
-                                    type: "error",
+                                    //type: "error",
                                     icon: "error",
                                     title: "Error",
                                     text: message,
@@ -2299,14 +2322,14 @@ Dispensado Medcol Jamundi
                             }
                         }
                     }
-
+                
                     dispensadotrue1.push(item);
                 }
-
+        
                 // Si no hay registros a enviar, mostrar alerta
                 if (dispensadotrue1.length === 0) {
                     await Swal.fire({
-                        type: "warning",
+                        //type: "warning",
                         icon: "warning",
                         title: "Advertencia",
                         text: "No hay registros seleccionados para guardar.",
@@ -2314,13 +2337,11 @@ Dispensado Medcol Jamundi
                     });
                     return;
                 }
-
+        
                 // Preparar los datos para enviar al controlador
-                const datos = {
-                    registros: dispensadotrue1
-                };
+                const datos = { registros: dispensadotrue1 };
                 console.log('Datos a enviar al controlador:', dispensadotrue1);
-
+        
                 // Enviar los datos al controlador
                 const response = await $.ajax({
                     url: "{{ route('dispensado6.guardar') }}", // Asegúrate de usar la ruta correcta
@@ -2330,21 +2351,25 @@ Dispensado Medcol Jamundi
                         "_token": $("meta[name='csrf-token']").attr("content")
                     }
                 });
-
+        
                 // Mostrar éxito
                 await Swal.fire({
-                    type: 'success',
+                    //type: "success",
                     icon: 'success',
                     title: 'Éxito',
                     text: 'Datos guardados correctamente.',
                     confirmButtonText: 'OK'
                 });
-
+        
                 // Limpiar el formulario y la tabla
-                $('#gestion_multiple').find('input, textarea').val('');
+                // Limpiar los radio buttons de formula_completa ANTES de limpiar el resto del formulario
+                $('input[name="formula_completa"]').prop('checked', false);
+
+                // Limpiar el formulario excluyendo los radio buttons para no corromper su estado
+                $('#gestion_multiple').find('input:not([type="radio"]), textarea').val('');
                 $('#gestion_multiple').find('select').val('');
                 $('#tablaRegistros').DataTable().clear().draw();
-
+        
             } catch (error) {
                 console.error('Error al guardar los datos:', error);
                 await Swal.fire({
@@ -2355,7 +2380,8 @@ Dispensado Medcol Jamundi
                 });
             }
         }
-
+        
+        
         //Función para abrir modal del detalle de la factura para editar los campos con valopres erroneos.
         $(document).on('click', '.edit_dispensado', function() {
 
@@ -2374,7 +2400,8 @@ Dispensado Medcol Jamundi
 
 
             $.ajax({
-                url: "/medcol6/showdispensado/" + id,
+                url: "medcol6/showdispensado/" + id,
+                //url: "{{route('medcol6.add_dispensacion')}}",
                 dataType: "json",
                 success: function(data) {
 
@@ -2440,7 +2467,7 @@ Dispensado Medcol Jamundi
             });
 
         });
-
+        
         function actualizarEstadoIndicator(estado) {
             // Ocultar ambos íconos antes de actualizar
             $('#estado-activo, #estado-inactivo').addClass('d-none');
@@ -2453,8 +2480,8 @@ Dispensado Medcol Jamundi
         }
 
 
-    });
 
+    });
 
 
     var idioma_espanol = {
@@ -2486,8 +2513,4 @@ Dispensado Medcol Jamundi
         }
     }
 </script>
-
-
-
-
 @endsection

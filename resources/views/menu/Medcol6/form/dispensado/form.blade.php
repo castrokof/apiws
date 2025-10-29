@@ -98,55 +98,62 @@
             <h5 class="mb-0">Completar la dispensación de la Fórmula</h5>
         </div>
         <div class="card-body">
-            <div class="row g-3">
+            <div class="row g-3 align-items-end">
                 <div class="col-md-2">
-                    <div class="mb-3">
-                        <label for="fecha_orden" class="form-label">Fecha Ordenamiento</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                            <input type="date" class="form-control" id="fecha_orden" name="fecha_orden">
+                    <label for="fecha_orden" class="form-label">Fecha Ordenamiento</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                        <input type="date" class="form-control" id="fecha_orden" name="fecha_orden">
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <label for="entrega" class="form-label">Entrega</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="numero_entrega1" name="numero_entrega1" placeholder="1" min="1">
+                        <span class="input-group-text">de</span>
+                        <input type="number" class="form-control" id="num_total_entregas" name="num_total_entregas" placeholder="2" min="1">
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <label for="diagnostico" class="form-label">Diagnóstico</label>
+                    <select name="diagnostico" class="dxcie10 form-control select2bs4" style="width: 100%;" required>
+                        <option value="" disabled selected>Seleccione diagnóstico</option>
+                        <!-- Opciones se cargarán dinámicamente -->
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label for="ips" class="form-label">IPS Formulación</label>
+                    <select name="ips" class="ipsmul form-control select2bs4" style="width: 100%;" required>
+                        <option value="" disabled selected>Seleccione IPS</option>
+                        <!-- Opciones se cargarán dinámicamente -->
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label for="formula1" class="form-label">No. de Formula</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-prescription"></i></span>
+                        <input type="number" class="form-control" id="formula1" name="formula1" required min="1">
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <label for="formula_completa" class="form-label">Fórmula Completa</label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="formula_completa" id="formula_completa_si" value="SI" required>
+                            <label class="form-check-label" for="formula_completa_si">
+                                SI
+                            </label>
                         </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="entrega" class="form-label">Entrega</label>
-                        <div class="input-group">
-                            <input type="number" class="form-control" id="numero_entrega1" name="numero_entrega1" placeholder="1" min="1">
-                            <span class="input-group-text">de</span>
-                            <input type="number" class="form-control" id="num_total_entregas" name="num_total_entregas" placeholder="2" min="1">
-                        </div>
-                        <small class="form-text text-muted"><i class="fas fa-info-circle text-primary"></i> Indique el número de esta entrega y el total de entregas.</small>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="diagnostico" class="form-label">Diagnóstico</label>
-                        <select name="diagnostico" class="dxcie10 form-control select2bs4" style="width: 100%;" required>
-                            <option value="" disabled selected>Seleccione diagnóstico</option>
-                            <!-- Opciones se cargarán dinámicamente -->
-                        </select>
-                    </div>
-                </div>
-
-                <div class="col-md-2">
-                    <div class="mb-3">
-                        <label for="ips" class="form-label">IPS Formulación</label>
-                        <select name="ips" class="ipsmul form-control select2bs4" style="width: 100%;" required>
-                            <option value="" disabled selected>Seleccione IPS</option>
-                            <!-- Opciones se cargarán dinámicamente -->
-                        </select>
-                    </div>
-                </div>
-
-                <div class="col-md-2">
-                    <div class="mb-3">
-                        <label for="formula1" class="form-label">No. de Formula</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-prescription"></i></span>
-                            <input type="number" class="form-control" id="formula1" name="formula1" required min="1">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="formula_completa" id="formula_completa_no" value="NO">
+                            <label class="form-check-label" for="formula_completa_no">
+                                NO
+                            </label>
                         </div>
                     </div>
                 </div>

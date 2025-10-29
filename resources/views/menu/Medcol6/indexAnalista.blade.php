@@ -1,8 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('titulo')
-Pendientes Medcol
-@endsection
+@section('title', 'Pendientes Medcol6')
 @section("styles")
 
 <link href="{{asset("assets/lte/plugins/sweetalert2/sweetalert2.min.css")}}" rel="stylesheet" type="text/css" />
@@ -31,19 +29,44 @@ Pendientes Medcol
 @endsection
 
 @section('content')
-<div class="loaders"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-capsules text-primary mr-2"></i>
+                    Gestión de Pendientes - Medcol6
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="{{ route('admin.home') }}">Inicio</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('submenu') }}">Pendientes</a></li>
+                    <li class="breadcrumb-item active">Medcol6</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
 
-@include('menu.Medcol6.form.forminforme')
-@include('menu.Medcol6.tabs.tabsIndexAnalista')
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="loaders"><img src="{{asset("assets/lte/dist/img/loader6.gif")}}" class="" /> </div>
 
-@include('menu.Medcol6.modal.modalPendientes')
-@include('menu.Medcol6.modal.modalDetallePendiente')
+        @include('menu.Medcol6.form.forminforme')
+        @include('menu.Medcol6.tabs.tabsIndexAnalista')
 
-@include('menu.Medcol6.modal.modalindexresumenpendientes')
-@include('menu.Medcol6.modal.modalIndicadoresPendientes')
-@include('menu.Medcol6.modal.modalGestionPacientes')
-@include('menu.Medcol6.modal.modalReglasGestion')
+        @include('menu.Medcol6.modal.modalPendientes')
+        @include('menu.Medcol6.modal.modalDetallePendiente')
 
+        @include('menu.Medcol6.modal.modalindexresumenpendientes')
+        @include('menu.Medcol6.modal.modalIndicadoresPendientes')
+        @include('menu.Medcol6.modal.modalGestionPacientes')
+        @include('menu.Medcol6.modal.modalReglasGestion')
+    </div>
+</section>
 
 @endsection
 
@@ -1158,6 +1181,9 @@ Pendientes Medcol
                                     },
                                     {
                                         data: 'centroproduccion'
+                                    },
+                                    {
+                                        data: 'ultima_observacion'
                                     }
                                 ],
 
@@ -1472,6 +1498,9 @@ Pendientes Medcol
                                     },
                                     {
                                         data: 'centroproduccion'
+                                    },
+                                    {
+                                        data: 'ultima_observacion'
                                     }
                                 ],
 

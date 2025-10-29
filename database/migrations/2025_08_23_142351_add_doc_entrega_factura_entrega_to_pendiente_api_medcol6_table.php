@@ -14,8 +14,12 @@ class AddDocEntregaFacturaEntregaToPendienteApiMedcol6Table extends Migration
     public function up()
     {
         Schema::table('pendiente_api_medcol6', function (Blueprint $table) {
-            $table->string('doc_entrega')->nullable();
-            $table->string('factura_entrega')->nullable();
+            if (!Schema::hasColumn('pendiente_api_medcol6', 'doc_entrega')) {
+                $table->string('doc_entrega')->nullable();
+            }
+            if (!Schema::hasColumn('pendiente_api_medcol6', 'factura_entrega')) {
+                $table->string('factura_entrega')->nullable();
+            }
         });
     }
 

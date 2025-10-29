@@ -200,6 +200,25 @@ class AnalisisNtController extends Controller
     {
         $query = AnalisisNt::query();
 
+        // Aplicar filtros específicos por columna
+        if ($request->has('codigo_cliente') && !empty($request->codigo_cliente)) {
+            $query->where('codigo_cliente', 'like', "%{$request->codigo_cliente}%");
+        }
+
+        if ($request->has('codigo_medcol') && !empty($request->codigo_medcol)) {
+            $query->where('codigo_medcol', 'like', "%{$request->codigo_medcol}%");
+        }
+
+        if ($request->has('nombre') && !empty($request->nombre)) {
+            $query->where('nombre', 'like', "%{$request->nombre}%");
+        }
+
+        // Filtro de contrato: solo aplicar si no es "Todos" y no está vacío
+        if ($request->has('contrato') && !empty($request->contrato) && $request->contrato !== 'Todos') {
+            $query->where('contrato', 'like', "%{$request->contrato}%");
+        }
+
+        // Búsqueda global de DataTables
         if ($request->has('search') && !empty($request->search['value'])) {
             $search = $request->search['value'];
             $query->where(function ($q) use ($search) {
@@ -217,7 +236,7 @@ class AnalisisNtController extends Controller
             $orderColumn = $request->order[0]['column'];
             $orderDirection = $request->order[0]['dir'];
             $columns = ['id', 'codigo_cliente', 'codigo_medcol', 'agrupador', 'nombre', 'cums', 'expediente', 'valor_unitario', 'frecuencia_uso', 'contrato'];
-            
+
             if (isset($columns[$orderColumn])) {
                 $query->orderBy($columns[$orderColumn], $orderDirection);
             }
@@ -225,7 +244,7 @@ class AnalisisNtController extends Controller
 
         $start = $request->start ?? 0;
         $length = $request->length ?? 10;
-        
+
         $data = $query->skip($start)->take($length)->get();
 
         return response()->json([

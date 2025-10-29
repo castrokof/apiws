@@ -128,39 +128,51 @@ class DashboardController extends Controller
         // Crear clave única para caché basada en fechas
         $cacheKey = "medcol6_estadisticas_{$fechaInicio}_{$fechaFin}";
 
-        // Intentar obtener del caché (válido por 30 minutos)
-        return Cache::remember($cacheKey, 1800, function () use ($fechaInicio, $fechaFin) {
-            // Crear tabla temporal con el precio (costo_unitario) desde saldos_medcol6
-            // Esta tabla contendrá UN registro por código con el costo unitario más reciente
+        // Aumentar tiempo de caché a 1 hora (3600 segundos) para reducir carga
+        return Cache::remember($cacheKey, 3600, function () use ($fechaInicio, $fechaFin) {
+            // Crear tabla temporal con el precio más reciente por código (UN SOLO registro por código)
             DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_ultimo');
             DB::statement('
                 CREATE TEMPORARY TABLE temp_precios_ultimo AS
                 SELECT
-                    codigo,
-                    CAST(REPLACE(REPLACE(costo_unitario, ",", ""), "$", "") as DECIMAL(15,2)) as precio_ultimo,
-                    updated_at
-                FROM saldos_medcol6
-                WHERE costo_unitario IS NOT NULL
-                AND costo_unitario != ""
-                AND costo_unitario != "0"
-                AND costo_unitario != "$0"
-                GROUP BY codigo, costo_unitario, updated_at
+                    t1.codigo,
+                    CAST(REPLACE(REPLACE(t1.costo_unitario, ",", ""), "$", "") as DECIMAL(15,2)) as precio_ultimo
+                FROM saldos_medcol6 t1
+                INNER JOIN (
+                    SELECT codigo, MAX(updated_at) as max_updated
+                    FROM saldos_medcol6
+                    WHERE costo_unitario IS NOT NULL
+                    AND costo_unitario != ""
+                    AND costo_unitario != "0"
+                    AND costo_unitario != "$0"
+                    GROUP BY codigo
+                ) t2 ON t1.codigo = t2.codigo AND t1.updated_at = t2.max_updated
             ');
 
-            // Estadísticas por estado de pendientes
+            // Crear índice en la tabla temporal para mejorar JOINs
+            DB::statement('CREATE INDEX idx_temp_codigo ON temp_precios_ultimo(codigo)');
+
+            // Calcular estadísticas por estado UNA SOLA VEZ y reutilizar
             $estadisticasPorEstado = $this->getEstadisticasPorEstadoOptimizado($fechaInicio, $fechaFin);
+
+            // Extraer valor entregado de las estadísticas ya calculadas (evitar query duplicado)
+            $valorTotalEntregado = 0;
+            foreach ($estadisticasPorEstado as $stat) {
+                if (strtoupper($stat['estado']) === 'ENTREGADO' ||
+                    strtoupper($stat['estado']) === 'ENTREGADOS') {
+                    $valorTotalEntregado = floatval($stat['valor_total']);
+                    break;
+                }
+            }
 
             // Valor total pendiente por facturar
             $valorTotalPendiente = $this->getValorPendientePorFacturarOptimizado($fechaInicio, $fechaFin);
 
-            // Valor total entregado
-            $valorTotalEntregado = $this->getValorEntregadoOptimizado($fechaInicio, $fechaFin);
-
             // Top medicamentos pendientes por valor
             $topMedicamentosPendientes = $this->getTopMedicamentosPendientesOptimizado($fechaInicio, $fechaFin, 10);
 
-            // Tendencias por mes
-            $tendenciasPorMes = $this->getTendenciasPorMes($fechaInicio, $fechaFin);
+            // Tendencias por mes (simplificado, sin calcular valores monetarios)
+            $tendenciasPorMes = $this->getTendenciasPorMesSimplificado($fechaInicio, $fechaFin);
 
             // Limpiar tabla temporal
             DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_ultimo');
@@ -271,6 +283,10 @@ class DashboardController extends Controller
 
     private function getValorEntregadoOptimizado($fechaInicio, $fechaFin)
     {
+        // DEPRECATED: Esta función ya no se usa.
+        // El valor entregado se extrae directamente de las estadísticas por estado
+        // para evitar duplicar queries. Ver getEstadisticasMedcol6()
+
         // Buscar el valor total entregado desde las estadísticas por estado
         // ya calculadas, buscando el estado ENTREGADO
         $estadisticas = $this->getEstadisticasPorEstadoOptimizado($fechaInicio, $fechaFin);
@@ -383,6 +399,50 @@ class DashboardController extends Controller
     {
         // Optimización: Usar índice compuesto (fecha, estado) si existe
         $tendencias = PendienteApiMedcol6::whereBetween('fecha', [$fechaInicio, $fechaFin])
+            ->select(
+                DB::raw('YEAR(fecha) as año'),
+                DB::raw('MONTH(fecha) as mes'),
+                'estado',
+                DB::raw('COUNT(*) as total_pendientes')
+            )
+            ->groupBy(DB::raw('YEAR(fecha)'), DB::raw('MONTH(fecha)'), 'estado')
+            ->orderBy(DB::raw('YEAR(fecha)'))
+            ->orderBy(DB::raw('MONTH(fecha)'))
+            ->get();
+
+        // Si no hay datos, retornar array vacío
+        if ($tendencias->isEmpty()) {
+            return [];
+        }
+
+        $tendenciasAgrupadas = [];
+
+        foreach ($tendencias as $tendencia) {
+            $key = $tendencia->año . '-' . str_pad($tendencia->mes, 2, '0', STR_PAD_LEFT);
+
+            if (!isset($tendenciasAgrupadas[$key])) {
+                $tendenciasAgrupadas[$key] = [
+                    'año' => (int)$tendencia->año,
+                    'mes' => (int)$tendencia->mes,
+                    'estados' => []
+                ];
+            }
+
+            $tendenciasAgrupadas[$key]['estados'][$tendencia->estado] = (int)$tendencia->total_pendientes;
+        }
+
+        return array_values($tendenciasAgrupadas);
+    }
+
+    /**
+     * Versión simplificada de tendencias por mes (solo conteos, sin valores monetarios)
+     * Mejora significativa de rendimiento al evitar JOINs con tabla de precios
+     */
+    private function getTendenciasPorMesSimplificado($fechaInicio, $fechaFin)
+    {
+        // Query altamente optimizada: solo conteo de registros agrupados
+        $tendencias = DB::table('pendiente_api_medcol6')
+            ->whereBetween('fecha', [$fechaInicio, $fechaFin])
             ->select(
                 DB::raw('YEAR(fecha) as año'),
                 DB::raw('MONTH(fecha) as mes'),
@@ -657,17 +717,55 @@ class DashboardController extends Controller
 
             // Cada llamada crea una nueva instancia de la query
             $totalPacientes = $baseQuery()->distinct('historia')->count('historia');
-            $valorTotal = $baseQuery()->sum(DB::raw('CAST(REPLACE(valor_total, ",", "") as DECIMAL(15,2))'));
+
+            // Cálculo del valor total usando analisis_nt cuando aplique
+            $valorTotal = DB::table('dispensado_medcol6 as d')
+                ->leftJoin('analisis_nt as a', function($join) {
+                    $join->on('d.codigo', '=', 'a.codigo_medcol')
+                         ->on('d.centroprod', '=', 'a.contrato');
+                })
+                ->whereBetween('d.fecha_suministro', [$fechaInicio, $fechaFin])
+                ->whereIn('d.estado', ['DISPENSADO', 'REVISADO'])
+                ->when($contrato !== 'all', function($query) use ($contrato) {
+                    return $query->where('d.centroprod', $contrato);
+                })
+                ->sum(DB::raw('
+                    CASE
+                        WHEN a.valor_unitario IS NOT NULL AND a.valor_unitario > 0
+                        THEN a.valor_unitario * d.numero_unidades
+                        WHEN d.precio_unitario IS NOT NULL AND d.precio_unitario > 0
+                        THEN d.precio_unitario * d.numero_unidades
+                        ELSE CAST(REPLACE(d.valor_total, ",", "") as DECIMAL(15,2))
+                    END
+                '));
+
             $totalMedicamentos = $baseQuery()->distinct('nombre_generico')->count('nombre_generico');
 
-            // Paciente con mayor valor
-            $pacienteMayorValor = $baseQuery()
+            // Paciente con mayor valor usando analisis_nt cuando aplique
+            $pacienteMayorValor = DB::table('dispensado_medcol6 as d')
+                ->leftJoin('analisis_nt as a', function($join) {
+                    $join->on('d.codigo', '=', 'a.codigo_medcol')
+                         ->on('d.centroprod', '=', 'a.contrato');
+                })
+                ->whereBetween('d.fecha_suministro', [$fechaInicio, $fechaFin])
+                ->whereIn('d.estado', ['DISPENSADO', 'REVISADO'])
+                ->when($contrato !== 'all', function($query) use ($contrato) {
+                    return $query->where('d.centroprod', $contrato);
+                })
                 ->select(
-                    'paciente',
-                    'historia',
-                    DB::raw('SUM(CAST(REPLACE(valor_total, ",", "") as DECIMAL(15,2))) as total_paciente')
+                    'd.paciente',
+                    'd.historia',
+                    DB::raw('SUM(
+                        CASE
+                            WHEN a.valor_unitario IS NOT NULL AND a.valor_unitario > 0
+                            THEN a.valor_unitario * d.numero_unidades
+                            WHEN d.precio_unitario IS NOT NULL AND d.precio_unitario > 0
+                            THEN d.precio_unitario * d.numero_unidades
+                            ELSE CAST(REPLACE(d.valor_total, ",", "") as DECIMAL(15,2))
+                        END
+                    ) as total_paciente')
                 )
-                ->groupBy('historia', 'paciente')
+                ->groupBy('d.historia', 'd.paciente')
                 ->orderBy('total_paciente', 'desc')
                 ->first();
 
@@ -775,9 +873,64 @@ class DashboardController extends Controller
                 ->groupBy('centroprod')
                 ->get();
 
+            // Calcular mes con mayor y menor facturación
+            $mesMayorFacturacion = null;
+            $mesMenorFacturacion = null;
+
+            if ($facturasPorMes->isNotEmpty()) {
+                $mesMayorFacturacion = $facturasPorMes->sortByDesc('total_mes')->first();
+                $mesMenorFacturacion = $facturasPorMes->sortBy('total_mes')->first();
+            }
+
+            // Facturación por día
+            // IMPORTANTE: Usamos fecha_suministro que representa cuando se dispensó el medicamento
+            // No confundir con fecha_ordenamiento (cuando se ordenó)
+            $facturasPorDia = $baseQuery()
+                ->select(
+                    DB::raw('fecha_suministro as fecha'),
+                    DB::raw('SUM(CAST(REPLACE(valor_total, ",", "") as DECIMAL(15,2))) as total_dia'),
+                    DB::raw('COUNT(DISTINCT historia) as pacientes_dia'),
+                    DB::raw('COUNT(*) as total_registros'),
+                    DB::raw('DAYOFWEEK(fecha_suministro) as dia_semana')
+                )
+                ->groupBy('fecha_suministro')
+                ->orderBy('fecha_suministro')
+                ->get();
+
+            // Log para depuración: verificar días con alta facturación
+            \Log::info('Facturación por día - Top 5:', [
+                'top_5' => $facturasPorDia->sortByDesc('total_dia')->take(7)->map(function($item) {
+                    $diasSemana = ['', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                    return [
+                        'fecha' => $item->fecha,
+                        'dia_semana' => $diasSemana[$item->dia_semana] ?? 'Desconocido',
+                        'total_dia' => number_format($item->total_dia, 2),
+                        'pacientes' => $item->pacientes_dia,
+                        'registros' => $item->total_registros
+                    ];
+                })->values()
+            ]);
+
+            // Calcular día con mayor y menor facturación
+            $diaMayorFacturacion = null;
+            $diaMenorFacturacion = null;
+            $diaMayorPacientes = null;
+
+            if ($facturasPorDia->isNotEmpty()) {
+                $diaMayorFacturacion = $facturasPorDia->sortByDesc('total_dia')->first();
+                $diaMenorFacturacion = $facturasPorDia->sortBy('total_dia')->first();
+                $diaMayorPacientes = $facturasPorDia->sortByDesc('pacientes_dia')->first();
+            }
+
             return [
                 'facturas_por_mes' => $facturasPorMes,
-                'pacientes_por_contrato' => $pacientesPorContrato
+                'pacientes_por_contrato' => $pacientesPorContrato,
+                'mes_mayor_facturacion' => $mesMayorFacturacion,
+                'mes_menor_facturacion' => $mesMenorFacturacion,
+                'facturas_por_dia' => $facturasPorDia,
+                'dia_mayor_facturacion' => $diaMayorFacturacion,
+                'dia_menor_facturacion' => $diaMenorFacturacion,
+                'dia_mayor_pacientes' => $diaMayorPacientes
             ];
         });
 
@@ -923,6 +1076,50 @@ class DashboardController extends Controller
             ->groupBy('centroprod')
             ->orderBy('total_facturado', 'desc')
             ->get();
+    }
+
+    /**
+     * Endpoint para obtener valor facturado por contrato
+     */
+    public function getValorPorContrato(Request $request)
+    {
+        $fechaInicio = $request->get('fecha_inicio');
+        $fechaFin = $request->get('fecha_fin');
+        $contrato = $request->get('contrato', 'all');
+
+        $cacheKey = "valor_por_contrato_{$fechaInicio}_{$fechaFin}_{$contrato}";
+
+        $data = Cache::remember($cacheKey, 1800, function () use ($fechaInicio, $fechaFin, $contrato) {
+            $query = DB::table('dispensado_medcol6 as d')
+                ->leftJoin('analisis_nt as a', function($join) {
+                    $join->on('d.codigo', '=', 'a.codigo_medcol')
+                         ->on('d.centroprod', '=', 'a.contrato');
+                })
+                ->whereBetween('d.fecha_suministro', [$fechaInicio, $fechaFin])
+                ->whereIn('d.estado', ['DISPENSADO', 'REVISADO']);
+
+            if ($contrato !== 'all') {
+                $query->where('d.centroprod', $contrato);
+            }
+
+            return $query->select(
+                    'd.centroprod',
+                    DB::raw('SUM(
+                        CASE
+                            WHEN a.valor_unitario IS NOT NULL AND a.valor_unitario > 0
+                            THEN a.valor_unitario * d.numero_unidades
+                            WHEN d.precio_unitario IS NOT NULL AND d.precio_unitario > 0
+                            THEN d.precio_unitario * d.numero_unidades
+                            ELSE CAST(REPLACE(d.valor_total, ",", "") as DECIMAL(15,2))
+                        END
+                    ) as total_facturado')
+                )
+                ->groupBy('d.centroprod')
+                ->orderBy('total_facturado', 'desc')
+                ->get();
+        });
+
+        return response()->json($data);
     }
 
     /**

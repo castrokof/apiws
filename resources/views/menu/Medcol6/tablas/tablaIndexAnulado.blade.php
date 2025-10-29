@@ -39,6 +39,7 @@
                             <th>Fecha de Tramite</th>
                             <th>Fecha de Entrega</th>
                             <th>Servicio</th>
+                            <th>Ultima Observacion</th>
                         </tr>
                     </thead>
                     <tbody>

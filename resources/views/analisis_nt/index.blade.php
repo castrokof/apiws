@@ -5,18 +5,20 @@ Análisis NT - Gestión de Medicamentos por Contrato
 @endsection
 
 @section("styles")
-<link href="{{asset("assets/lte/plugins/datatables-bs4/css/dataTables.bootstrap4.css")}}" rel="stylesheet" type="text/css"/>
-<link href="{{asset("assets/lte/plugins/icheck-bootstrap/icheck-bootstrap.min.css")}}" rel="stylesheet" type="text/css"/>
+<link href="{{asset("assets/lte/plugins/datatables-bs4/css/dataTables.bootstrap4.css")}}" rel="stylesheet" type="text/css" />
+<link href="{{asset("assets/lte/plugins/icheck-bootstrap/icheck-bootstrap.min.css")}}" rel="stylesheet" type="text/css" />
 <style>
     .card-header-custom {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
     }
+
     .btn-import {
         background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
         border: none;
         color: #333;
     }
+
     .btn-import:hover {
         background: linear-gradient(135deg, #fcb69f 0%, #ffecd2 100%);
         color: #333;
@@ -30,35 +32,35 @@ Análisis NT - Gestión de Medicamentos por Contrato
         <div class="col-12">
             <!-- Mensajes de éxito y error -->
             @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
             @endif
 
             @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>{{ session('error') }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle mr-2"></i>{{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
             @endif
 
             @if($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                    <ul class="mb-0">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                <ul class="mb-0">
+                    @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
             @endif
 
             <!-- Card Principal -->
@@ -85,6 +87,69 @@ Análisis NT - Gestión de Medicamentos por Contrato
                 </div>
 
                 <div class="card-body">
+                    <!-- Panel de Filtros -->
+                    <div class="card mb-3 border-info">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-filter mr-2"></i>Filtros de Búsqueda
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="filterForm">
+                                <div class="row">
+                                    <div class="col-md-3 mb-2">
+                                        <label for="filter_codigo_cliente" class="form-label">Código Cliente</label>
+                                        <input type="text" class="form-control form-control-sm" id="filter_codigo_cliente" name="codigo_cliente" placeholder="Buscar código cliente...">
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <label for="filter_codigo_medcol" class="form-label">Código Medcol</label>
+                                        <input type="text" class="form-control form-control-sm" id="filter_codigo_medcol" name="codigo_medcol" placeholder="Buscar código medcol...">
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <label for="filter_nombre" class="form-label">Nombre</label>
+                                        <input type="text" class="form-control form-control-sm" id="filter_nombre" name="nombre" placeholder="Buscar nombre...">
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <label for="filter_contrato">Farmacia</label>
+                                        <select name="contrato" id="filter_contrato" class="form-control select2bs4">
+                                            <!-- <option value="">Seleccione opción...</option> -->
+                                            <option value="Todos">Todas</option> <!-- Nueva opción -->
+                                            <optgroup label="Farmacias Principales">
+                                                <option value="BIO1">BIO1-FARMACIA BIOLOGICOS</option>
+                                                <option value="DLR1">DLR1-FARMACIA DOLOR</option>
+                                                <option value="DPA1">DPA1-FARMACIA PALIATIVOS</option>
+                                                <option value="EM01">EM01-FARMACIA EMCALI</option>
+                                                <option value="FRIO">FRIO-FARMACIA IDEO</option>
+                                                <option value="EHU1">EHU1-FARMACIA HUERFANAS</option>
+                                                <option value="FRJA">FRJA-FARMACIA JAMUNDI</option>
+                                                <option value="FRIP">FRIP-FARMACIA PASOANCHO</option>
+                                                <option value="INY">INY-FARMACIA INYECTABLES</option>
+                                                <option value="PAC">PAC-FARMACIA PAC</option>
+                                                <option value="SM01">SM01-FARMACIA SALUD MENTAL</option>
+                                            </optgroup>
+                                            <optgroup label="Farmacias Especializadas">
+                                                <option value="BPDT">BPDT-BOLSA</option>
+                                                <option value="EVIO">EVIO-EVENTO IDEO</option>
+                                                <option value="EVEN">EVEN-FARMACIA EVENTO</option>
+                                                <option value="EVSM">EVSM-EVENTO SALUD MENTAL</option>
+                                            </optgroup>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-12 text-right">
+                                        <button type="button" id="btnAplicarFiltros" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-search mr-1"></i>Aplicar Filtros
+                                        </button>
+                                        <button type="button" id="btnLimpiarFiltros" class="btn btn-secondary btn-sm">
+                                            <i class="fas fa-eraser mr-1"></i>Limpiar Filtros
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
                     <!-- Tabla de datos -->
                     <div class="table-responsive">
                         <table id="analisisNtTable" class="table table-bordered table-striped table-hover">
@@ -136,13 +201,13 @@ Análisis NT - Gestión de Medicamentos por Contrato
                             <strong>Código Cliente | Código Medcol | Agrupador | Nombre | CUMS | Expediente | Valor Unitario | Frecuencia Uso | Contrato</strong>
                         </small>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="archivo_excel">Seleccionar archivo Excel (.xlsx, .xls, .csv)</label>
                         <input type="file" class="form-control-file" id="archivo_excel" name="archivo_excel" accept=".xlsx,.xls,.csv" required>
                         <small class="form-text text-muted">Tamaño máximo: 10MB</small>
                     </div>
-                    
+
                     <div class="alert alert-warning">
                         <small>
                             <strong>Nota:</strong> Los registros con la misma combinación de Código Medcol, CUMS y Contrato serán actualizados. Los nuevos se insertarán.
@@ -168,65 +233,104 @@ Análisis NT - Gestión de Medicamentos por Contrato
 <script src="{{asset("assets/lte/plugins/datatables-responsive/js/dataTables.responsive.min.js")}}" type="text/javascript"></script>
 
 <script>
-$(document).ready(function(){
-    // Configuración de idioma en español para DataTables
-    var idioma_espanol = {
-        "sProcessing": "Procesando...",
-        "sLengthMenu": "Mostrar _MENU_ registros",
-        "sZeroRecords": "No se encontraron resultados",
-        "sEmptyTable": "Ningún dato disponible en esta tabla",
-        "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-        "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-        "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-        "sInfoPostFix": "",
-        "sSearch": "Buscar:",
-        "sUrl": "",
-        "sInfoThousands": ",",
-        "sLoadingRecords": "Cargando...",
-        "oPaginate": {
-            "sFirst": "Primero",
-            "sLast": "Último",
-            "sNext": "Siguiente",
-            "sPrevious": "Anterior"
-        },
-        "oAria": {
-            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-        }
-    };
+    $(document).ready(function() {
+        // Configuración de idioma en español para DataTables
+        var idioma_espanol = {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Ningún dato disponible en esta tabla",
+            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            }
+        };
 
-    // Inicializar DataTable
-    $('#analisisNtTable').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: "{{ route('analisis-nt.datatable') }}",
-            type: "GET"
-        },
-        columns: [
-            {data: 'id', name: 'id'},
-            {data: 'codigo_cliente', name: 'codigo_cliente', defaultContent: '-'},
-            {data: 'codigo_medcol', name: 'codigo_medcol'},
-            {data: 'agrupador', name: 'agrupador', defaultContent: '-'},
-            {data: 'nombre', name: 'nombre'},
-            {data: 'cums', name: 'cums'},
-            {data: 'expediente', name: 'expediente', defaultContent: '-'},
-            {
-                data: 'valor_unitario', 
-                name: 'valor_unitario',
-                render: function(data) {
-                    return data ? '$' + parseFloat(data).toLocaleString('es-CO', {minimumFractionDigits: 2}) : '-';
+        // Inicializar DataTable
+        var table = $('#analisisNtTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('analisis-nt.datatable') }}",
+                type: "GET",
+                data: function(d) {
+                    // Agregar parámetros de filtro personalizados
+                    d.codigo_cliente = $('#filter_codigo_cliente').val();
+                    d.codigo_medcol = $('#filter_codigo_medcol').val();
+                    d.nombre = $('#filter_nombre').val();
+                    d.contrato = $('#filter_contrato').val();
                 }
             },
-            {data: 'frecuencia_uso', name: 'frecuencia_uso', defaultContent: '-'},
-            {data: 'contrato', name: 'contrato'},
-            {
-                data: 'id',
-                name: 'acciones',
-                orderable: false,
-                searchable: false,
-                render: function(data) {
-                    return `
+            columns: [{
+                    data: 'id',
+                    name: 'id'
+                },
+                {
+                    data: 'codigo_cliente',
+                    name: 'codigo_cliente',
+                    defaultContent: '-'
+                },
+                {
+                    data: 'codigo_medcol',
+                    name: 'codigo_medcol'
+                },
+                {
+                    data: 'agrupador',
+                    name: 'agrupador',
+                    defaultContent: '-'
+                },
+                {
+                    data: 'nombre',
+                    name: 'nombre'
+                },
+                {
+                    data: 'cums',
+                    name: 'cums'
+                },
+                {
+                    data: 'expediente',
+                    name: 'expediente',
+                    defaultContent: '-'
+                },
+                {
+                    data: 'valor_unitario',
+                    name: 'valor_unitario',
+                    render: function(data) {
+                        return data ? '$' + parseFloat(data).toLocaleString('es-CO', {
+                            minimumFractionDigits: 2
+                        }) : '-';
+                    }
+                },
+                {
+                    data: 'frecuencia_uso',
+                    name: 'frecuencia_uso',
+                    defaultContent: '-'
+                },
+                {
+                    data: 'contrato',
+                    name: 'contrato'
+                },
+                {
+                    data: 'id',
+                    name: 'acciones',
+                    orderable: false,
+                    searchable: false,
+                    render: function(data) {
+                        return `
                         <div class="btn-group btn-group-sm" role="group">
                             <a href="/analisis-nt/${data}" class="btn btn-info btn-sm" title="Ver">
                                 <i class="fas fa-eye"></i>
@@ -239,63 +343,86 @@ $(document).ready(function(){
                             </button>
                         </div>
                     `;
+                    }
                 }
-            }
-        ],
-        language: idioma_espanol,
-        responsive: true,
-        pageLength: 25,
-        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
-        order: [[0, 'desc']],
-        dom: 'Bfrtip',
-        buttons: [
-            {
-                extend: 'excel',
-                text: '<i class="fas fa-file-excel"></i> Excel',
-                className: 'btn btn-success btn-sm'
-            },
-            {
-                extend: 'pdf',
-                text: '<i class="fas fa-file-pdf"></i> PDF',
-                className: 'btn btn-danger btn-sm'
-            }
-        ]
-    });
+            ],
+            language: idioma_espanol,
+            responsive: true,
+            pageLength: 25,
+            lengthMenu: [
+                [10, 25, 50, 100, -1],
+                [10, 25, 50, 100, "Todos"]
+            ],
+            order: [
+                [0, 'desc']
+            ],
+            dom: 'Bfrtip',
+            buttons: [{
+                    extend: 'excel',
+                    text: '<i class="fas fa-file-excel"></i> Excel',
+                    className: 'btn btn-success btn-sm'
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="fas fa-file-pdf"></i> PDF',
+                    className: 'btn btn-danger btn-sm'
+                }
+            ]
+        });
 
-    // Función para eliminar registro
-    window.eliminar = function(id) {
-        Swal.fire({
-            title: '¿Estás seguro?',
-            text: "¡No podrás revertir esta acción!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Crear formulario para enviar DELETE
-                var form = $('<form>', {
-                    'method': 'POST',
-                    'action': '/analisis-nt/' + id
-                });
-                form.append($('<input>', {
-                    'type': 'hidden',
-                    'name': '_token',
-                    'value': '{{ csrf_token() }}'
-                }));
-                form.append($('<input>', {
-                    'type': 'hidden',
-                    'name': '_method',
-                    'value': 'DELETE'
-                }));
-                $('body').append(form);
-                form.submit();
+        // Evento para aplicar filtros
+        $('#btnAplicarFiltros').on('click', function() {
+            table.draw();
+        });
+
+        // Evento para limpiar filtros
+        $('#btnLimpiarFiltros').on('click', function() {
+            $('#filterForm')[0].reset();
+            table.draw();
+        });
+
+        // Permitir aplicar filtros al presionar Enter en los campos
+        $('#filterForm input').on('keypress', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                table.draw();
             }
         });
-    };
-});
+
+        // Función para eliminar registro
+        window.eliminar = function(id) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esta acción!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Crear formulario para enviar DELETE
+                    var form = $('<form>', {
+                        'method': 'POST',
+                        'action': '/analisis-nt/' + id
+                    });
+                    form.append($('<input>', {
+                        'type': 'hidden',
+                        'name': '_token',
+                        'value': '{{ csrf_token() }}'
+                    }));
+                    form.append($('<input>', {
+                        'type': 'hidden',
+                        'name': '_method',
+                        'value': 'DELETE'
+                    }));
+                    $('body').append(form);
+                    form.submit();
+                }
+            });
+        };
+    });
 </script>
 
 <!-- SweetAlert2 -->

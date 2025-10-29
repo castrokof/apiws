@@ -13,7 +13,219 @@ Sistema web desarrollado en Laravel 7.x para la gestión de dispensación de med
 
 ## 📋 Changelog
 
-### v2.3 (Agosto 2025) - Interfaz de Pestañas Organizada para Smart Pendi
+### v2.7 (Octubre 2025) - Sistema de Roles y Permisos con Menú Moderno
+
+**🚀 Nuevas Funcionalidades:**
+- **Sistema RBAC Completo** con roles, permisos y gestión granular de acceso
+- **Menú Lateral Moderno** basado en AdminLTE3 con permisos dinámicos
+- **Gestión de Roles**: CRUD completo con asignación de permisos
+- **Gestión de Permisos**: Interfaz organizada con filtros por módulo
+- **Gestión de Usuarios**: Asignación de roles y permisos directos
+- **6 Roles Predefinidos**: Super Admin, Administrador, Analista, Auxiliar, Droguería, Reportes
+- **51 Permisos Granulares**: Organizados en 13 módulos del sistema
+
+**🔧 Arquitectura Implementada:**
+- **Backend**:
+  - Modelos: `Role`, `Permission` con relaciones many-to-many
+  - Middleware: `CheckRole`, `CheckPermission` para protección de rutas
+  - Controladores: `RoleController`, `PermissionController`, `UserManagementController`
+  - Migraciones: 5 tablas nuevas (roles, permissions, pivots)
+  - Seeder: `RolesAndPermissionsSeeder` con datos iniciales completos
+- **Frontend**:
+  - Layout: `layouts/admin.blade.php` con integración de sidebar
+  - Componente: `components/sidebar.blade.php` con menú dinámico por permisos
+  - Vistas CRUD: roles/index, permissions/index, users/index, users/edit
+  - CSS: `modern-sidebar.css` con animaciones y efectos modernos
+
+**🎨 Características del Menú:**
+- **Visibilidad Dinámica**: Elementos mostrados según permisos del usuario
+- **Navegación Jerárquica**: Menús desplegables por módulo
+- **Diseño Moderno**: Gradientes, sombras, animaciones smooth
+- **Indicadores Visuales**: Badges de estado, iconografía temática
+- **Responsive**: Adaptación móvil con sidebar colapsable
+
+**📊 Módulos con Permisos:**
+1. **Dashboard**: Visualización de métricas
+2. **Análisis NT**: Análisis de datos
+3. **Medcol2**: Pendientes y dispensados
+4. **Medcol3-6, Medcold**: Gestión multi-entidad
+5. **Inventario**: Compras, saldos, desabastecimientos
+6. **Reportes**: Generación de informes
+7. **Administración**: Usuarios, roles, permisos, configuración
+
+**🔐 Sistema de Autenticación Mejorado:**
+- Redirección automática a `/admin/home` después de login
+- Validación de roles antes de acceso
+- Mensajes de error informativos
+- Protección contra eliminación de propios registros
+- Super Admin no puede ser eliminado
+
+**🐛 Correcciones Técnicas:**
+- Namespace correcto de `User` model en Laravel 7.x
+- Métodos helper en User: `hasRole()`, `hasPermission()`, `hasAnyPermission()`
+- Blade directives personalizadas: `@role`, `@permission`
+- Paginación en listados para mejor rendimiento
+- Validación de datos en formularios con mensajes claros
+
+**📈 Beneficios Operativos:**
+- **Seguridad Mejorada**: Control granular de acceso por usuario
+- **Gestión Flexible**: Asignación dinámica de permisos sin cambios de código
+- **Auditoría**: Trazabilidad de quién puede hacer qué
+- **Escalabilidad**: Fácil adición de nuevos roles/permisos según necesidad
+- **UX Optimizada**: Menú limpio que solo muestra opciones relevantes
+
+---
+
+### v2.6 (Octubre 2025) - Dashboard Analytics con Análisis Diario Avanzado
+
+**🚀 Nuevas Funcionalidades:**
+- **Vista Unificada "Resumen General & Distribución"**: Unión de dos secciones en una sola para mejor experiencia visual
+- **Análisis de Facturación Diaria**: Nueva sección con 2 gráficas complementarias
+  - **Gráfica de Facturación Diaria** (línea verde): Seguimiento de ingresos día a día
+  - **Gráfica de Pacientes Únicos Diarios** (barras púrpura): Volumen de atención sin duplicados
+- **Tarjetas Estadísticas Diarias**: 3 cards horizontales con métricas clave
+  - Día con mayor facturación (verde ⬆️)
+  - Día con menor facturación (rojo ⬇️)
+  - Día con más pacientes únicos atendidos (azul)
+- **Cards de Meses con Mayor/Menor Facturación**: Identificación rápida de períodos clave
+- **Paleta de Colores Unificada**: Top 5 Medicamentos ahora usa misma paleta que Valor por Contrato
+
+**🔧 Mejoras Técnicas:**
+- **Backend**:
+  - Query optimizada para facturación diaria con `COUNT(DISTINCT historia)` para garantizar pacientes únicos
+  - Cálculo de día de semana (`DAYOFWEEK`) para análisis temporal
+  - Logs detallados en `laravel.log` con Top 7 días de mayor facturación
+  - Campos adicionales: `total_registros`, `dia_semana` para debugging
+- **Frontend**:
+  - Validación exhaustiva de fechas con corrección de zona horaria (`fecha + 'T00:00:00'`)
+  - Detección de fechas duplicadas y valores inválidos
+  - Tooltips enriquecidos con día de la semana, pacientes, registros y comparación con promedio
+  - Console logs detallados para debugging en cada paso del renderizado
+- **Layout Mejorado**:
+  - Grid 1:1 para gráficas diarias (facturación y pacientes lado a lado)
+  - Grid 3 columnas para tarjetas estadísticas horizontales
+  - Animaciones `fadeInUp` optimizadas para vista horizontal
+
+**🎨 Mejoras Visuales:**
+- **Gráfica Facturación Diaria**:
+  - Línea verde con área rellena semitransparente
+  - Labels con formato "DD MMM AA" (ej: "19 Oct 25")
+  - Eje Y con formato monetario
+  - Límite de 15 etiquetas en eje X para mejor legibilidad
+- **Gráfica Pacientes Únicos**:
+  - Barras verticales color púrpura (#6366f1)
+  - Títulos de ejes visibles ("Número de Pacientes", "Fecha")
+  - Formato "45 pac." en eje Y
+  - Tooltip con promedio y diferencia (↑/↓)
+- **Tarjetas Estadísticas**:
+  - Diseño horizontal en 3 columnas
+  - Día de la semana completo en español (ej: "domingo, 19 de octubre de 2025")
+  - Información adicional: pacientes y registros totales
+  - Iconos temáticos: `arrow-trend-up`, `arrow-trend-down`, `users`
+
+**🐛 Correcciones:**
+- **chartFacturacionDiaria**: Corrección de conversión de fechas que causaba días incorrectos
+- **chartPacientes**: Eliminados intentos de renderizado de porcentajes en el canvas (causaba visual pobre)
+- **Canvas rendering**: Uso de `requestAnimationFrame` en lugar de `setTimeout` para sincronización correcta
+- **Selectores jQuery**: Cambio de selectores ineficientes a `.find().eq()` para evitar errores "Canvas no encontrado"
+
+**📊 Análisis y Debugging:**
+- **Logs de Backend** (Top 7 días con más facturación):
+  ```json
+  {
+    "fecha": "2025-10-19",
+    "dia_semana": "Domingo",
+    "total_dia": "250,000.00",
+    "pacientes": 45,
+    "registros": 350
+  }
+  ```
+- **Logs de Frontend** (Console):
+  - Datos raw recibidos del servidor
+  - Detección de fechas duplicadas
+  - Detección de valores inválidos
+  - Resumen de datos procesados (min, max, promedio)
+- **Relación Registros/Pacientes**: Detecta posible duplicación cuando > 5:1
+
+**📈 Beneficios Operativos:**
+- **Análisis Dual**: Visualización simultánea de ingresos y volumen de atención
+- **Detección de Anomalías**: Identificación de días con datos anormales (ej: domingos con alta facturación)
+- **Comparación con Promedio**: Tooltip muestra si el día está por encima o debajo del promedio
+- **Métricas Clave Visibles**: Cards con días extremos para toma de decisiones rápida
+- **Debugging Facilitado**: Logs completos permiten identificar problemas de datos rápidamente
+
+---
+
+### v2.5 (Octubre 2024) - Dashboard Analytics Avanzado
+
+**🚀 Nuevas Funcionalidades:**
+- **Dashboard Analytics Optimizado** con arquitectura modular y carga asíncrona
+- **Gráfica de Valor Facturado por Contrato** con visualización de barras coloridas
+- **Sistema de Análisis por Distribución y Tendencias** con gráficas interactivas
+- **Integración con Análisis NT** para cálculos precisos de valores facturados
+- **Reportes Detallados** por medicamentos, pacientes y contratos
+
+**📊 Módulos del Dashboard:**
+1. **Resumen General & Distribución**: Estadísticas unificadas + distribución y tendencias
+2. **Análisis de Pendientes**: Estados y valores pendientes por facturar
+3. **Tendencias de Pendientes**: Evolución temporal con múltiples gráficas
+4. **Reportes**: Tablas interactivas con exportación a Excel/PDF
+
+**🔧 Mejoras Técnicas:**
+- Nueva ruta: `/dashboard/valor-por-contrato` con endpoint optimizado
+- Sistema de caché de 30 minutos para mejorar rendimiento
+- Validación de datos y manejo de errores mejorado en todas las gráficas
+- Indicadores de carga y mensajes informativos cuando no hay datos
+- Console logs para debugging y seguimiento de problemas
+
+**🎨 Mejoras Visuales:**
+- Gráficas con Chart.js: barras, líneas, dona y área
+- Paleta de 10 colores para distinguir múltiples contratos
+- Tooltips mejorados con formato de moneda y porcentajes
+- Diseño responsive que se adapta a móviles y tablets
+- Efectos hover y animaciones suaves
+
+**🐛 Correcciones:**
+- Gráfica `chartFacturacion` ahora se muestra correctamente con puntos visibles
+- Gráfica `chartPacientes` renderiza con leyenda personalizada con porcentajes
+- Canvas se recrean correctamente después de los indicadores de carga
+- Validación de datos vacíos antes de intentar renderizar
+
+**📊 Impacto Operativo:**
+- **Análisis Financiero**: Visualización clara del valor facturado por cada contrato
+- **Toma de Decisiones**: Acceso rápido a métricas clave y tendencias
+- **Rendimiento Optimizado**: Carga selectiva de datos según la sección activa
+- **Experiencia Mejorada**: Interfaz moderna con feedback visual constante
+
+---
+
+### v2.4 (Octubre 2024) - Mejoras en Dispensado y Sincronización
+
+**🚀 Nuevas Funcionalidades:**
+- Campo `formula_completa` agregado a la tabla `dispensado_medcol6` para mejor trazabilidad
+- Función mejorada para sincronizar pendientes entregados con sistemas externos
+- Optimización de la función `updateanuladosapi` para sincronización de facturas anuladas
+- Nueva funcionalidad para gestión de pendientes vs dispensación
+
+**🔧 Mejoras Técnicas:**
+- Migración de base de datos: `2025_10_17_152002_add_formula_completa_to_dispensado_medcol6_table.php`
+- Controlador `DispensadoApiMedcol6Controller.php` actualizado con mejoras de sincronización
+- Modelo `DispensadoApiMedcol6.php` mejorado para soportar nueva estructura
+- Vistas de dispensado actualizadas con campos adicionales
+
+**🐛 Correcciones:**
+- Mejora en la sincronización de pendientes entregados evitando duplicados
+- Control de integridad en actualización de facturas anuladas
+- Validaciones mejoradas en el proceso de dispensación
+
+**📊 Impacto Operativo:**
+- **Trazabilidad Completa**: Registro detallado de fórmulas completas en dispensación
+- **Sincronización Confiable**: Menor tasa de errores en sincronización con APIs externas
+- **Gestión Optimizada**: Mejor control del flujo pendientes → dispensado → entregado
+
+---
+
+### v2.3 (Septiembre 2024) - Interfaz de Pestañas Organizada para Smart Pendi
 
 **🚀 Nuevas Funcionalidades:**
 - Interfaz reorganizada con 3 pestañas principales para separar análisis
@@ -41,7 +253,7 @@ Sistema web desarrollado en Laravel 7.x para la gestión de dispensación de med
 
 ---
 
-### v2.2 (Agosto 2025) - Validaciones de Entrega y Filtros Avanzados
+### v2.2 (Agosto 2024) - Validaciones de Entrega y Filtros Avanzados
 
 **🚀 Nuevas Funcionalidades:**
 - Validación de fecha de entrega vs fecha de factura en actualizaciones masivas
@@ -59,7 +271,7 @@ Sistema web desarrollado en Laravel 7.x para la gestión de dispensación de med
 
 ---
 
-### v2.1 (Enero 2025) - Optimización de Entregas Consolidadas
+### v2.1 (Enero 2024) - Optimización de Entregas Consolidadas
 
 **🚀 Nuevas Funcionalidades:**
 - Sistema de sugerencias predictivas refactorizado para múltiples medicamentos
@@ -82,7 +294,204 @@ Sistema web desarrollado en Laravel 7.x para la gestión de dispensación de med
 
 ## 🚀 Funcionalidades Recientes
 
-### 🆕 Últimas Actualizaciones (v2.2)
+### 🆕 Últimas Actualizaciones (v2.5) - Dashboard Analytics
+
+#### 📊 Dashboard Analytics Optimizado
+
+##### ✨ Sistema Modular de Análisis
+El nuevo Dashboard Analytics presenta una arquitectura completamente modular que permite:
+
+- **Carga Asíncrona**: Solo se cargan los datos cuando el usuario selecciona cada sección
+- **5 Módulos Independientes**: Cada análisis tiene su propio endpoint y caché
+- **Arquitectura Optimizada**: Reducción significativa del tiempo de carga inicial
+- **Experiencia Mejorada**: Feedback visual constante con spinners e indicadores
+
+##### 📈 Gráfica de Valor Facturado por Contrato
+
+**Nueva funcionalidad destacada** que muestra el valor total facturado agrupado por el campo `centroprod`:
+
+```javascript
+// Características principales
+{
+    tipo: "Gráfica de barras verticales",
+    colores: "10 colores diferentes para distinguir contratos",
+    datos: "Agrupados por campo centroprod de dispensado_medcol6",
+    ordenamiento: "Descendente por valor facturado",
+    formato: "Valores monetarios con separador de miles",
+    interactividad: "Tooltips con formato detallado"
+}
+```
+
+**Cálculo Inteligente de Valores**:
+- Prioriza `valor_unitario` de tabla `analisis_nt` cuando existe
+- Fallback a `precio_unitario * numero_unidades` de `dispensado_medcol6`
+- Última opción: `valor_total` de dispensado
+
+**Implementación**:
+```php
+// Endpoint: /dashboard/valor-por-contrato
+// Controller: DashboardController@getValorPorContrato (línea 1029)
+// Cache: 30 minutos para optimizar rendimiento
+```
+
+##### 🎯 Módulos del Dashboard
+
+**1. Resumen General**
+- Total de pacientes atendidos
+- Valor total facturado
+- Medicamentos diferentes dispensados
+- Paciente con mayor valor
+- Top 5 medicamentos más dispensados
+- **NUEVO**: Valor total facturado por contrato (gráfica de barras)
+
+**2. Análisis de Pendientes (Medcol6)**
+- Valor pendiente por facturar
+- Valor total entregado
+- Estadísticas detalladas por estado (PENDIENTE, ENTREGADO, ANULADO, etc.)
+- Tarjetas con valores y totales por categoría
+
+**3. Distribución & Tendencias**
+- **Facturación por Mes**: Gráfica de línea con área rellena
+  - Puntos interactivos con hover effect
+  - Formato de moneda en tooltips
+  - Visualización de tendencias temporales
+
+- **Distribución por Contrato**: Gráfica de dona
+  - Porcentajes calculados automáticamente
+  - Leyenda con cantidad de pacientes
+  - 10 colores para soportar múltiples contratos
+
+**4. Tendencias de Pendientes**
+- Distribución por estado (gráfica de dona)
+- Valor monetario por estado (gráfica de barras)
+- Tendencias mensuales por estado (gráfica de líneas múltiples)
+- Top 10 medicamentos pendientes (gráfica horizontal)
+- DataTable completo con todos los medicamentos pendientes
+
+**5. Reportes Detallados**
+- Reporte de medicamentos con DataTables
+- Reporte de pacientes con DataTables
+- Exportación a Excel/PDF
+- Búsqueda y filtros avanzados
+
+##### 🔧 Mejoras Técnicas Implementadas
+
+**Backend (DashboardController.php)**:
+```php
+// Nuevos endpoints modulares
+Route::get('/dashboard/resumen-general', ...);          // Línea 69
+Route::get('/dashboard/resumen-pendientes', ...);       // Línea 70
+Route::get('/dashboard/analisis-distribucion', ...);    // Línea 71
+Route::get('/dashboard/tendencias-pendientes', ...);    // Línea 72
+Route::get('/dashboard/reportes-detallados', ...);      // Línea 73
+Route::get('/dashboard/valor-por-contrato', ...);       // Línea 74 - NUEVO
+```
+
+**Sistema de Caché Inteligente**:
+- Cache keys únicos por combinación de parámetros
+- TTL de 30 minutos (1800 segundos)
+- Invalidación automática al cambiar filtros
+- Optimización de consultas pesadas
+
+**Validación y Manejo de Errores**:
+```javascript
+// Antes: Sin validación
+function updateChart(data) {
+    // Renderiza directamente - FALLA si data es null
+}
+
+// Después: Con validación completa
+function updateChart(data) {
+    // 1. Verificar que canvas existe
+    if (!ctx) return;
+
+    // 2. Validar datos
+    if (!data || data.length === 0) {
+        showInfoMessage("No hay datos disponibles");
+        return;
+    }
+
+    // 3. Renderizar con datos validados
+    renderChart(data);
+}
+```
+
+##### 📊 Estructura de Datos
+
+**Endpoint `/dashboard/valor-por-contrato`**:
+```json
+[
+    {
+        "centroprod": "SOS",
+        "total_facturado": 45678900.50
+    },
+    {
+        "centroprod": "JAMUNDI",
+        "total_facturado": 32145600.75
+    }
+]
+```
+
+**Endpoint `/dashboard/analisis-distribucion`**:
+```json
+{
+    "facturas_por_mes": [
+        {
+            "mes": 10,
+            "año": 2024,
+            "total_mes": 78543200.25
+        }
+    ],
+    "pacientes_por_contrato": [
+        {
+            "centroprod": "SOS",
+            "total_pacientes": 1250
+        }
+    ]
+}
+```
+
+##### 🎨 Experiencia de Usuario
+
+**Interfaz Modular**:
+- Menú de selección con 6 tarjetas interactivas
+- Cada tarjeta activa su sección correspondiente
+- Indicadores visuales de sección activa
+- Diseño con gradientes y sombras modernas
+
+**Feedback Visual**:
+- Spinners de carga mientras se obtienen datos
+- Mensajes informativos cuando no hay datos
+- Mensajes de error amigables en caso de fallo
+- Animaciones suaves con CSS transitions
+
+**Accesibilidad**:
+- Iconografía clara y consistente
+- Tooltips descriptivos
+- Formato de moneda en español
+- Diseño responsive mobile-first
+
+##### 📈 Beneficios Operativos
+
+**Para Gerencia**:
+- Visualización clara de valores facturados por contrato
+- Identificación rápida de contratos más rentables
+- Tendencias temporales para toma de decisiones
+- Acceso a métricas clave en tiempo real
+
+**Para Operaciones**:
+- Análisis de distribución de pacientes
+- Seguimiento de pendientes por estado
+- Identificación de medicamentos más demandados
+- Reportes exportables para auditoría
+
+**Para TI**:
+- Sistema de caché reduce carga del servidor
+- Console logs facilitan debugging
+- Manejo robusto de errores
+- Código modular y mantenible
+
+### 🆕 Actualizaciones Anteriores (v2.2)
 
 #### 🔒 Sistema de Validación de Fechas de Entrega
 
@@ -742,14 +1151,37 @@ Direccionado → Programado → Dispensado → Entregado → Facturado
 - `EntregadosApi[Entity]`: Entregas realizadas
 - `ObservacionesApi[Entity]`: Observaciones del proceso
 
-### Archivos Modificados Recientemente (v2.2)
+### Archivos Modificados Recientemente
 
-#### Backend
+#### v2.4 (Octubre 2024) - Dispensado y Sincronización
+
+**Backend:**
+- `app/Http/Controllers/Medcol6/DispensadoApiMedcol6Controller.php`
+  - Mejoras en funciones de sincronización de pendientes entregados
+  - Optimización de `updateanuladosapi()` para facturas anuladas
+- `app/Models/Medcol6/DispensadoApiMedcol6.php`
+  - Soporte para campo `formula_completa`
+  - Mejoras en relaciones y scope queries
+
+**Base de Datos:**
+- `database/migrations/2025_10_17_152002_add_formula_completa_to_dispensado_medcol6_table.php`
+  - Nueva columna `formula_completa` en tabla `dispensado_medcol6`
+
+**Frontend:**
+- `resources/views/menu/Medcol6/form/dispensado/form.blade.php`
+  - Formulario actualizado con campo de fórmula completa
+- `resources/views/menu/Medcol6/indexDispensado.blade.php`
+  - Vista mejorada con columnas adicionales
+  - Interfaz optimizada para nueva funcionalidad
+
+#### v2.2 (Agosto 2024) - Validaciones de Entrega
+
+**Backend:**
 - `app/Http/Controllers/Medcol6/PendienteApiMedcol6Controller.php`
   - Función `updateMultiplesPendientes()` con validación de fechas mejorada
   - Control de integridad temporal entre `fecha_entrega` y `fecha_factura`
 
-#### Frontend
+**Frontend:**
 - `resources/views/menu/Medcol6/modal/modalGestionPacientes.blade.php`
   - Nuevo filtro de búsqueda por documento/historia
   - Reorganización de columnas para mejor distribución visual

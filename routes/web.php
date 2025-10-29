@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Medcol6\ExportarExcel\ExportController;
 use App\Http\Controllers\Scann\ScannController;
 use App\Http\Controllers\Medcol6\OrdenCompraApiMedcol6Controller;
@@ -18,7 +19,12 @@ use App\Http\Controllers\Medcol6\OrdenCompraApiMedcol6Controller;
 */
 
 Route::get('/', function () {
-    return redirect()->route('dashboard');
+    // Si el usuario está autenticado, redirigir a admin/home
+    if (Auth::check()) {
+        return redirect('/admin/home');
+    }
+    // Si no está autenticado, redirigir al login
+    return redirect('/login');
 });
 /*Route::prefix('usuarios')->group(function() {
   Auth::routes();
@@ -38,6 +44,25 @@ Route::get('usuariosapiws', 'Auth\RegisterController@usuariosApiws')->name('usua
 Route::get('usuario/{id}/editar', 'Auth\RegisterController@editar')->name('usuarioeditar')->middleware('verified')->middleware('verifyuser');
 Route::put('usuarioupdate/{id}', 'Auth\RegisterController@actualizar')->name('usuarioupdate')->middleware('verified')->middleware('verifyuser');
 
+// Rutas de Gestión de Roles, Permisos y Usuarios (Administración)
+Route::middleware(['verified', 'verifyuser', 'permission:roles.view|roles.manage'])->group(function () {
+    Route::resource('admin/roles', 'RoleController')->names('roles');
+    Route::get('admin/roles/{role}/permissions', 'RoleController@permissions')->name('roles.permissions');
+});
+
+Route::middleware(['verified', 'verifyuser', 'permission:permisos.view|permisos.assign'])->group(function () {
+    Route::resource('admin/permissions', 'PermissionController')->names('permissions');
+});
+
+Route::middleware(['verified', 'verifyuser', 'permission:usuarios.view|usuarios.create|usuarios.edit'])->group(function () {
+    Route::resource('admin/users', 'UserManagementController')->names('users');
+    Route::post('admin/users/{user}/toggle-status', 'UserManagementController@toggleStatus')->name('users.toggle-status');
+});
+
+// Ruta de prueba del nuevo sistema (accesible para todos los usuarios autenticados)
+Route::get('/admin/home', function() {
+    return view('admin.home');
+})->name('admin.home')->middleware('verified')->middleware('verifyuser');
 
 // Password Reset Routes...
 Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
@@ -71,6 +96,7 @@ Route::get('/dashboard/resumen-pendientes', 'DashboardController@getResumenPendi
 Route::get('/dashboard/analisis-distribucion', 'DashboardController@getAnalisisDistribucion')->name('dashboard.analisis-distribucion')->middleware('verified')->middleware('verifyuser');
 Route::get('/dashboard/tendencias-pendientes', 'DashboardController@getAnalisisTendenciasPendientes')->name('dashboard.tendencias-pendientes')->middleware('verified')->middleware('verifyuser');
 Route::get('/dashboard/reportes-detallados', 'DashboardController@getReportesDetallados')->name('dashboard.reportes-detallados')->middleware('verified')->middleware('verifyuser');
+Route::get('/dashboard/valor-por-contrato', 'DashboardController@getValorPorContrato')->name('dashboard.valor-por-contrato')->middleware('verified')->middleware('verifyuser');
 
 //Ruta para consultar lo direccionado por la EPS
 Route::get('/home', 'HomeController@index')->name('home')->middleware('verified')->middleware('verifyuser');
@@ -171,6 +197,8 @@ Route::post('medcol2/disrevisado', 'Medcol2\DispensadoApiMedcol2Controller@disre
 Route::put('medcol2/dispensado/{id}', 'Medcol2\DispensadoApiMedcol2Controller@update')->name('medcol2.actualizar_dispensado')->middleware('verified')->middleware('verifyuser');
 
 Route::get('medcol2/dispensado/syncdisapi', 'Medcol2\DispensadoApiMedcol2Controller@createdispensadoapi')->name('medcol2.dispensadosyncapi')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/dispensado/syncdisapiunico', 'Medcol6\DispensadoApiMedcol6Controller@createdispensadoapiunico')->name('medcol6.dispensadosyncapiunico')->middleware('verified')->middleware('verifyuser');
+
 Route::get('medcol2/dispensado/anuladosapi', 'Medcol2\DispensadoApiMedcol2Controller@updateanuladosapi')->name('medcol2.anuladosapi')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol2/add_dispensado', 'Medcol2\DispensadoApiMedcol2Controller@adddispensacionarray')->name('add_dispensacion2')->middleware('verified')->middleware('verifyuser');
 Route::get('medcol2/informedis', 'Medcol2\DispensadoApiMedcol2Controller@informes')->name('medcol2.informedis')->middleware('verified')->middleware('verifyuser');
@@ -322,8 +350,13 @@ Route::post('medcol6/procesar-entregas', 'Medcol6\PendienteApiMedcol6Controller@
 
 //Rutas de tablas de Dispensado MEDCOL 6 SOS y JAMUNDI
 
-Route::get('medcol6/dispensado', 'Medcol6\DispensadoApiMedcol6Controller@index')->name('medcol6.dispensado')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/dispensado', 'Medcol6\DispensadoApiMedcol6Controller@index')->name('medcol6.dispensado.index')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/dispensado1', 'Medcol6\DispensadoApiMedcol6Controller@index1')->name('medcol6.dispensado1')->middleware('verified')->middleware('verifyuser');
+
+// Ruta para la nueva interfaz de informes
+Route::get('medcol6/informes', function() {
+    return view('menu.Medcol6.informes.index');
+})->name('medcol6.informes')->middleware('verified')->middleware('verifyuser');
 
 Route::post('medcol6/disrevisado', 'Medcol6\DispensadoApiMedcol6Controller@disrevisado')->name('medcol6.disrevisado')->middleware('verified')->middleware('verifyuser');
 Route::put('medcol6/dispensado/{id}', 'Medcol6\DispensadoApiMedcol6Controller@update')->name('medcol6.actualizar_dispensado')->middleware('verified')->middleware('verifyuser');
@@ -339,8 +372,8 @@ Route::post('medcol6/update', 'Medcol6\DispensadoApiMedcol6Controller@actualizar
 Route::get('medcol6/showdispensado/{id}', 'Medcol6\DispensadoApiMedcol6Controller@showdis')->name('medcol6.dispensado-show')->middleware('verified')->middleware('verifyuser');
 Route::put('medcol6/editdispensado/{id}', 'Medcol6\DispensadoApiMedcol6Controller@updatedis')->name('medcol6.dispensado_update')->middleware('verified')->middleware('verifyuser');
 
-Route::get('medcol6/informedis', 'Medcol6\DispensadoApiMedcol6Controller@informes')->name('medcol6.informedis')->middleware('verified')->middleware('verifyuser');
-Route::get('medcol6/gestionsdis', 'Medcol6\DispensadoApiMedcol6Controller@gestionsdis')->name('medcol6.gestionsdis')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/informedis', 'Medcol6\DispensadoApiMedcol6Controller@informes')->name('medcol6.informedis')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/gestionsdis', 'Medcol6\DispensadoApiMedcol6Controller@gestionsdis')->name('medcol6.gestionsdis')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/forgif', 'Medcol6\DispensadoApiMedcol6Controller@gestionForgif')->name('medcol6.forgif')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/disanulado', 'Medcol6\DispensadoApiMedcol6Controller@disanulado')->name('medcol6.disanulado')->middleware('verified')->middleware('verifyuser');
 
