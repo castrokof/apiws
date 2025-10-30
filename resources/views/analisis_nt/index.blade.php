@@ -1,4 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Análisis NT')
+
+@section('page-title', 'Análisis NT - Medcol')
 
 @section('titulo')
 Análisis NT - Gestión de Medicamentos por Contrato

@@ -33,6 +33,62 @@
                 </li>
                 @endif
 
+                <!-- Mipres 2.0 - Menú Desplegable -->
+                <li class="nav-item {{ request()->is('tokenhercules*') || request()->is('home*') || request()->is('direccionado*') || request()->is('programado*') || request()->is('entregado*') || request()->is('repentregado*') || request()->is('facturado*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('tokenhercules*') || request()->is('home*') || request()->is('direccionado*') || request()->is('programado*') || request()->is('entregado*') || request()->is('repentregado*') || request()->is('facturado*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-exchange-alt text-warning"></i>
+                        <p>
+                            Mipres 2.0
+                            <i class="right fas fa-angle-left"></i>
+                            <span class="badge badge-warning right">7</span>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('tokenhercules') }}" class="nav-link {{ request()->routeIs('tokenhercules*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-warning"></i>
+                                <p>Token Hercules</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-cyan"></i>
+                                <p>Direccionados</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('direccionado') }}" class="nav-link {{ request()->routeIs('direccionado*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-primary"></i>
+                                <p>Direccionado x Doc</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('programado') }}" class="nav-link {{ request()->routeIs('programado*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-info"></i>
+                                <p>Programado</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('entregado') }}" class="nav-link {{ request()->routeIs('entregado*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-success"></i>
+                                <p>Entregado</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('repentregado') }}" class="nav-link {{ request()->routeIs('repentregado*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-teal"></i>
+                                <p>Reporte Entregado</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('facturado') }}" class="nav-link {{ request()->routeIs('facturado*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-purple"></i>
+                                <p>Reporte Facturación</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
                 <!-- Análisis NT -->
                 @if(Auth::user()->hasPermission('analisis-nt.view'))
                 <li class="nav-item">
@@ -127,17 +183,6 @@
                     </ul>
                 </li>
                 @endif
-
-                {{-- Mipres 2.0 - Comentado temporalmente --}}
-                {{-- Descomentar cuando la ruta esté disponible --}}
-                {{--
-                <li class="nav-item">
-                    <a href="{{ route('tokenhercules') }}" class="nav-link">
-                        <i class="nav-icon fas fa-exchange-alt"></i>
-                        <p>Mipres 2.0</p>
-                    </a>
-                </li>
-                --}}
 
             </ul>
         </nav>
