@@ -79,11 +79,18 @@ class SincronizarSaldosCommand extends Command
                 
                 if (isset($resultado['data'])) {
                     $data = $resultado['data'];
-                    $this->table(['Métrica', 'Valor'], [
+                    $table = [
                         ['Registros procesados', number_format($data['registros_procesados'])],
                         ['Errores', $data['errores']],
                         ['Fecha sincronización', $data['fecha_sincronizacion']]
-                    ]);
+                    ];
+
+                    // Agregar saldos cero si existe el campo
+                    if (isset($data['saldos_cero_insertados'])) {
+                        array_splice($table, 1, 0, [['Items con saldo cero', number_format($data['saldos_cero_insertados'])]]);
+                    }
+
+                    $this->table(['Métrica', 'Valor'], $table);
                 }
 
                 return 0;

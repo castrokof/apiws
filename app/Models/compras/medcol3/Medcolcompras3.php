@@ -21,6 +21,7 @@ class Medcolcompras3 extends Model
         'codigo',
         'nombre',
         'cums',
+        'presentacion',
         'marca',
         'cantidad',
         'precio',
@@ -30,7 +31,12 @@ class Medcolcompras3 extends Model
         'contrato',
         'observaciones',
         'usuario_id',
-        'created_at'
+        'estado',
+        'cantidadEntregada',
+        'created_at',
+        'totalParcial',
+        'UltimaEntrega',
+        'valorFacturado',
     ];
     
     /**

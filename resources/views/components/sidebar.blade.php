@@ -99,6 +99,40 @@
                 </li>
                 @endif
 
+                <!-- Órdenes de Compra -->
+                @if(Auth::user()->hasAnyPermission(['inventario.view', 'compras.view', 'inventario.manage']))
+                <li class="nav-item {{ request()->is('medcol3/compras*') || request()->is('ordenes*') || request()->is('informeTarjetasCompras*') || request()->is('BuscarOrdenesDeCompra*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('medcol3/compras*') || request()->is('ordenes*') || request()->is('informeTarjetasCompras*') || request()->is('BuscarOrdenesDeCompra*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-shopping-cart text-success"></i>
+                        <p>
+                            Órdenes de Compra
+                            <i class="right fas fa-angle-left"></i>
+                            <span class="badge badge-success right">3</span>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('compras.medcol3') }}" class="nav-link {{ request()->routeIs('compras.medcol3') || request()->is('medcol3/compras*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-primary"></i>
+                                <p>Órdenes de Compra</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('ordenes.resumen') }}" class="nav-link {{ request()->routeIs('ordenes.resumen') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-info"></i>
+                                <p>Resumen de Compras</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('buscar.ordenes.compra') }}" class="nav-link {{ request()->routeIs('buscar.ordenes.compra') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-success"></i>
+                                <p>Buscar Órdenes</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                @endif
+
                 <!-- Medcol2 -->
                 @if(Auth::user()->hasAnyPermission(['medcol2.pendientes.view', 'medcol2.dispensado.view']))
                 <li class="nav-item {{ request()->is('medcol2/*') ? 'menu-open' : '' }}">

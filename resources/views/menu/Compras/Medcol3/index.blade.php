@@ -1,14 +1,21 @@
-@extends("theme.$theme.layout")
+@extends('layouts.admin')
 
-@section('titulo')
-    Ordenes de Compra
+@section('title', 'Órdenes de Compra - Medcol SW')
+
+@section('page-title', 'Gestión de Órdenes de Compra')
+
+@section('breadcrumb')
+<li class="breadcrumb-item"><a href="{{ route('admin.home') }}">Inicio</a></li>
+<li class="breadcrumb-item active">Órdenes de Compra</li>
 @endsection
+
 @section('styles')
-    <link href="{{ asset("assets/$theme/plugins/datatables-bs4/css/dataTables.bootstrap4.css") }}" rel="stylesheet"
+
+    <link href="{{ asset('assets/lte/plugins/datatables-bs4/css/dataTables.bootstrap4.css') }}" rel="stylesheet"
         type="text/css" />
-    <link href="{{ asset("assets/$theme/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css") }}" rel="stylesheet"
+    <link href="{{ asset('assets/lte/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}" rel="stylesheet"
         type="text/css" />
-    <link href="{{asset("assets/css/select2-bootstrap.min.css")}}" rel="stylesheet" type="text/css" />
+    <link href="{{asset('assets/css/select2-bootstrap.min.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/select2.min.css') }}" rel="stylesheet" type="text/css" />
     <style>
         /* // Colores para las tarjetas widget */
@@ -30,8 +37,6 @@
             background-color: linear-gradient(to right, #373b44, #4286f4) !important;
             color: #fff;
         }
-
-
 
         .l-bg-cherry {
             background: linear-gradient(to right, #493240, #f09) !important;
@@ -143,22 +148,40 @@
             }
         }
     </style>
+    
 @endsection
 
 
-@section('scripts')
+@section('content')
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">@yield('page-title')</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        @yield('breadcrumb')
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
 
-@endsection
-
-@section('contenido')
-    @include('menu.Compras.Medcol3.modal.modalCompras')
-    @include('menu.Compras.Medcol3.modal.modalFacturaArticulo')
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            @include('menu.Compras.Medcol3.modal.modalCompras')
+            @include('menu.Compras.Medcol3.modal.modalFacturaArticulo')
+        </div>
+    </section>
 @endsection
 
 
 @section('scriptsPlugins')
-    <script src="{{ asset("assets/$theme/plugins/datatables/jquery.dataTables.js") }}" type="text/javascript"></script>
-    <script src="{{ asset("assets/$theme/plugins/datatables-bs4/js/dataTables.bootstrap4.js") }}" type="text/javascript">
+    <script src="{{ asset('assets/lte/plugins/datatables/jquery.dataTables.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('assets/lte/plugins/datatables-bs4/js/dataTables.bootstrap4.js') }}" type="text/javascript">
     </script>
     <script src="{{ asset('assets/js/jquery-select2/select2.min.js') }}" type="text/javascript"></script>
 
@@ -170,9 +193,806 @@
     <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
 
     <script>
+
+        // Función que envia el id al controlador y cambia el estado del registro
+        $(document).on('click', '#articulos', function() {
+
+            const text = 'De Medcol Centralizado';
+
+            Swal.fire({
+                title: "¿Estás por sincronizar los medicamentos?",
+                text: text,
+                //type: "info",
+                icon: "info",
+                showCancelButton: true,
+                showCloseButton: true,
+                confirmButtonText: 'Aceptar',
+            }).then((result) => {
+                if (result.value) {
+
+                    ajaxRequestSyncMedicamentos();
+
+                }
+            });
+        });
+
+        function ajaxRequestSyncMedicamentos() {
+            
+            $.ajax({
+                beforeSend: function() {
+                    $('.loaders').css("visibility", "visible");
+                },
+                
+                url: "{{route('medcol3.syncmedicamentosapi')}}",
+                type: 'GET',
+                success: function(data) {
+               
+
+                    $.each(data, function(i, item) {
+                        Apiws.notificaciones(item.respuesta, item.titulo, item.icon, item.position);
+
+                    });
+                   
+                },
+                
+                complete: function() {
+                    
+                    $('.loaders').css("visibility", "hidden");
+                    
+                }
+            });
+        }
+        
+    
+        
+       // Función que envia el id al controlador y cambia el estado del registro
+        $(document).on('click', '#proveedores', function() {
+
+            const text = 'De Medcol Centralizado';
+
+            Swal.fire({
+                title: "¿Estás por sincronizar los Terceros?",
+                text: text,
+                //type: "info",
+                icon: "info",
+                showCancelButton: true,
+                showCloseButton: true,
+                confirmButtonText: 'Aceptar',
+            }).then((result) => {
+                if (result.value) {
+
+                    ajaxRequestSyncTerceros();
+
+                }
+            });
+        });
+
+        function ajaxRequestSyncTerceros() {
+            
+            $.ajax({
+                beforeSend: function() {
+                    $('.loaders').css("visibility", "visible");
+                },
+                
+                url: "{{route('medcol3.synctercerosapi')}}",
+                type: 'GET',
+                success: function(data) {
+               
+
+                    $.each(data, function(i, item) {
+                        Apiws.notificaciones(item.respuesta, item.titulo, item.icon, item.position);
+
+                    });
+                   
+                },
+                
+                complete: function() {
+                    
+                    $('.loaders').css("visibility", "hidden");
+                    
+                }
+            });
+        }
+           
+        
+        
+        
+        
+        
+        
+        
         $(document).ready(function() {
         // Llamar a la función de calcular totales cuando se carga la página
         calcularTotales();
+        $(document).on('click', '.pagination a', function(e) {
+    e.preventDefault();
+    var url = $(this).attr('href');
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        success: function(response) {
+            if (response.tbody && response.pagination) {
+                $('#ordenes-body').html(response.tbody);
+                $('#paginacion').html(response.pagination);
+            } else {
+                console.error('Error: formato de respuesta inesperado.');
+            }
+        },
+        error: function(xhr) {
+            console.error('Error AJAX:', xhr.responseText);
+        }
+    });
+});
+
+function cargarTabla(url) {
+    fetch(url, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Error en la respuesta del servidor');
+        return response.text();
+    })
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+
+        // Obtiene solo las filas <tr>
+        const nuevasFilas = doc.querySelectorAll('tbody tr');
+        const nuevaPaginacion = doc.querySelector('#paginacion');
+
+        const cuerpo = document.querySelector('#ordenes-body');
+        const paginacion = document.querySelector('#paginacion');
+
+        // Limpia y reemplaza las filas
+        cuerpo.innerHTML = '';
+        nuevasFilas.forEach(fila => cuerpo.appendChild(fila));
+
+        // Reemplaza paginación
+        if (paginacion && nuevaPaginacion) {
+            paginacion.innerHTML = nuevaPaginacion.innerHTML;
+        }
+    })
+    .catch(err => {
+        console.error("Error AJAX:", err);
+    });
+}
+        fill_datatable1_resumen();
+
+
+                $('#subir').click(function() {
+                let text = 'Vas a importar una orden de compra';
+
+                var formData = new FormData(document.getElementById("form-importar"));
+                var proveedor = $("#codigop").val();
+                
+                // Agregar el valor del proveedor al FormData
+                formData.append('proveedor', proveedor);
+                
+                
+                
+                if(proveedor != null && formData != null){
+                    
+                Swal.fire({
+            target: document.getElementById('modal-pd'),
+            title: "¿Estás seguro?",
+            text: text,
+            icon: "info", 
+            showCancelButton: true,
+            showCloseButton: true,
+            allowOutsideClick: false,
+            confirmButtonText: 'Aceptar',
+            }).then((result)=>{
+            if(result.value){
+                Swal.fire({
+                        target: document.getElementById('modal-pd'),
+                        title: 'Espere por favor !',
+                        html: 'Realizando el cargue de la información',// add html attribute if you want or remove
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        willOpen: () => {
+                            Swal.showLoading()
+                        },
+                    }),    
+                    
+                    
+                $.ajax({
+                    beforeSend: function() {
+                        $('.loader').css("visibility", "visible");
+                    },
+                    url: "{{ route('importarchivo3') }}",
+                    method: 'post',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+
+                        if (response.mensaje == 'ok') {
+                            $('#importarModal').modal('hide');
+                            
+                            
+                            AgregarMedicamentosMasivos(response.data);
+                            
+                            
+                            Apiws.notificaciones('Archivo cargado exitosamente',
+                                'Compras Medcol', 'success');
+                                toastr.success('Archivo cargado exitosamente', 'Compras Medcol');
+                        
+                        } else if (response.mensaje == 'vacio') {
+
+                            Apiws.notificaciones('No seleccionaste ningun arhivo',
+                                'Compras Medcol', 'info');
+                        } else if (response.mensaje == 'ng') {
+                            $('#importarModal').modal('hide');
+                            Apiws.notificaciones('Registros duplicados en base de datos',
+                                'Compras Medcol', 'warning');
+                        
+
+                        }
+                    },
+
+                    complete: function() {
+                        $('.loader').css("visibility", "hidden");
+                    }
+
+                }).fail(function(jqXHR, textStatus, errorThrown) {
+
+                    if (jqXHR.status === 0) {
+
+                        alert('Not connect: Verify Network.');
+
+                    } else if (jqXHR.status == 404) {
+
+                        alert('Requested page not found [404]');
+
+                    } else if (jqXHR.status == 500) {
+
+                        Apiws.notificaciones('El archivo no tienen la estructura adecuada',
+                            'Compras Medcol', 'warning');
+                        // $('#tarchivos').DataTable().ajax.reload();
+
+                    } else if (textStatus === 'parsererror') {
+
+                        alert('Requested JSON parse failed.');
+
+                    } else if (textStatus === 'timeout') {
+
+                        alert('Time out error.');
+
+                    } else if (textStatus === 'abort') {
+
+                        alert('Ajax request aborted.');
+
+                    } else {
+
+                        Apiws.notificaciones(
+                            'El campo file debe ser un archivo de tipo: xls, xlsx',
+                            'Compras Medcol', 'warning');
+                        // $('#tarchivos').DataTable().ajax.reload();
+                    }
+
+                });
+                
+            }
+                
+            });
+            
+            
+                
+            }else{
+                
+                Apiws.notificaciones('Debes seleccionar el proveedor',
+                            'Compras Medcol', 'warning');
+            }
+            
+            
+
+            });
+            
+    $(document).on('click', '.btn-eliminar-orden', function () {
+        let id = $(this).data('id');
+        let row = $(this).closest('tr');
+
+        if (confirm('¿Estás seguro de que deseas eliminar esta Orden?')) {
+            $.ajax({
+                url: '{{ url("/ordenes") }}/' + id,
+                type: 'DELETE',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (response) {
+                    if (response.success) {
+                        row.remove(); // Elimina la fila de la tabla    
+                         $("#detalle").empty();
+                $("#detalle1").empty();
+                $("#detalle2").empty();
+                $("#detalle3").empty();
+                $("#detalle4").empty();
+                $("#detalle").append(
+                            '<div class="small-box shadow-lg l-bg-blue-dark"><div class="inner">' +
+                            '<h5>TOTAL ORDENES</h5>' +
+                            '<p><h5> ' + response.Estadistica.CantidadOrdenes + '</h5></p>'
+                            + '</div></div>'
+                        );
+
+                        $("#detalle1").append(
+                            '<div class="small-box shadow-lg l-bg-green-dark"><div class="inner">' +
+                            '<h5>ORDENES COMPLETAS</h5>' +
+                            '<p><h5> ' + response.Estadistica.OrdenesCompletadas + '</h5></p>'
+                            + '</div></div>'
+                        );
+
+                        $("#detalle2").append(
+                            '<div class="small-box shadow-lg l-bg-orange-dark"><div class="inner">' +
+                            '<h5>ORDENES PENDIENTES</h5>' +
+                            '<p><h5> ' + response.Estadistica.OrdenesPendientes + '</h5></p>'
+                            + '</div></div>'
+                        );
+
+                        $("#detalle3").append(
+                            '<div class="small-box shadow-lg l-bg-red-dark"><div class="inner">' +
+                            '<h5>ORDENES ANULADAS</h5>' +
+                            '<p><h5> ' + response.Estadistica.OrdenesIncumplidas + '</h5></p>'
+                            + '</div></div>'
+                        );  
+                        $("#detalle4").append(
+                            '<div class="small-box shadow-lg l-bg-cyan"><div class="inner">' +
+                            '<h5>TOTAL VALOR</h5>' +
+                            '<p><h5> ' + formatterCOP.format(response.Estadistica.TotalValorOrdenes)  + '</h5></p>'
+                            + '</div></div>'
+                        ); 
+                        alert(response.message);
+                    } else {
+                        alert('No se pudo eliminar la Orden.');
+                    }
+                },
+                error: function () {
+                    alert('Ocurrió un error en el servidor.');
+                }
+            });
+        }
+    });        
+            
+        $('#guardar_entrada').click(function() {
+
+            
+            var url = "{{ route('entradasstore_3') }}";
+            console.log($('#farmacia').val());
+            var camposObligatorios = [
+                {selector : '#consecutivo', mensaje: 'El campo documento es obligatorio.'},
+                {selector : '#nombrep', mensaje: 'El campo proveedor es obligatorio.'},
+                {selector : '#contrato', mensaje: 'El campo contrato es obligatorio.'},                                           
+                {selector : '#fecha_facturae', mensaje: 'El campo fecha es obligatorio.'},                
+                {selector : '#codigop', mensaje: 'El campo proveedor es obligatorio.'},
+                {selector : '#farmacia', mensaje: 'El campo farmacia es obligatorio.'},
+                {selector : '#numeroOrden', mensaje: 'El campo numero de orden es obligatorio.'},
+                {selector : '#descripcion1', mensaje: 'El campo observaciones es obligatorio.'},
+            ];
+            for (var i = 0; i < camposObligatorios.length; i++) {
+                var campo = camposObligatorios[i];
+                if ($(campo.selector).val() == "" || $(campo.selector).val() == null) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: campo.mensaje,
+                        showConfirmButton: true
+                    });
+                    return;
+                }
+            }
+
+            var entradaOrden = [];
+            var entradaOrdeninput = {};
+            entradaOrdeninput.orden_de_compra =  $('#numeroOrden').val();
+            entradaOrdeninput.nit = $('#codigop').val();
+            entradaOrdeninput.proveedor = $('#nombrep').val();
+            entradaOrdeninput.fecha = $('#fecha_facturae').val();
+            entradaOrdeninput.cod_farmacia = $('#farmacia').val();
+            entradaOrdeninput.num_orden_compra = $('#consecutivo').val();
+            entradaOrdeninput.codigo_proveedor = $('#codigop').val();
+            entradaOrdeninput.estado  = "Pendiente";
+            entradaOrdeninput.user_create = $('#user_ids').val();
+            entradaOrdeninput.created_at = $('#fecha_facturae').val();
+            entradaOrdeninput.update_at = $('#fecha_facturae').val();
+            entradaOrdeninput.ClasiOrden = $('#ClasiOrden').val()
+
+
+            let totalText = $('#totalTotal').val();
+            // Eliminar símbolos de moneda y reemplazar comas por puntos (si es necesario)
+            let totalNumerico = parseFloat(totalText.replace(/[$.]/g, "").replace(',', '.'));
+
+            // Verificar si la conversión a número fue exitosa
+            if (isNaN(totalNumerico)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de formato',
+                    text: 'El valor total ingresado no es un número válido.',
+                    showConfirmButton: true
+                });
+                return; // Detener el proceso si el formato es incorrecto
+            }
+
+            entradaOrdeninput.total = totalNumerico;
+            entradaOrdeninput.observaciones = $('#descripcion1').val();
+            entradaOrdeninput.numeroOrden = $('#consecutivo').val(); // Asegúrate de enviar también el numeroOrden para la tabla 6
+
+            entradaOrden.push(entradaOrdeninput);
+
+
+            var entrada = [];
+
+            var entradainput = {};
+
+            entradainput.documentoOrden = $('#documento').val();
+            entradainput.numeroOrden = $('#consecutivo').val();
+            entradainput.proveedor_id = $('#proveedor_id').val();
+            entradainput.created_at = $('#fecha_facturae').val();
+            entradainput.contrato = $('#contrato').val();
+            entradainput.usuario_id = $('#user_ids').val();
+
+
+            entrada.push(entradainput);
+
+            var entradadetalle = [];
+
+            $("#tcups > tbody > tr").each(function() {
+                var itemdetalle = {};
+                var tds = $(this).find("td");
+                if(itemdetalle.cums == null){
+                    itemdetalle.cums = "Sin Cums";
+                }
+                
+                if(itemdetalle.presentacion == null){
+                    itemdetalle.presentacion = "Sin Presentación";
+                }
+
+                itemdetalle.codigo = tds.eq(1).text();
+                itemdetalle.nombre = tds.eq(2).text();
+                itemdetalle.presentacion = tds.eq(3).text();
+                itemdetalle.marca = tds.eq(4).text();
+                itemdetalle.cums = tds.eq(5).text();
+
+                let subtotalunitext = tds.eq(6).text();
+                let subtotalunisin = subtotalunitext.replace(/[$.]/g, "").replace(',', '.');
+                itemdetalle.precio = parseInt(subtotalunisin);
+
+                let valorIvaUnitext = tds.eq(8).text();
+                let valorIvaUnisin = valorIvaUnitext.replace(/[$.]/g, "").replace(',', '.');
+                itemdetalle.iva = parseInt(valorIvaUnisin);
+
+                itemdetalle.cantidad = parseInt(tds.eq(9).text());
+
+                let subtotaltext = tds.eq(10).text();
+                let subtotalsin = subtotaltext.replace(/[$.]/g, "").replace(',', '.');
+                itemdetalle.subtotal = parseInt(subtotalsin);
+
+                let ivaTotaltext = tds.eq(11).text();
+                let ivaTotalsin = ivaTotaltext.replace(/[$.]/g, "").replace(',', '.');
+                itemdetalle.cantidad_iva_total = parseInt(ivaTotalsin);
+
+                let totaltext = tds.eq(12).text();
+                let totalsin = totaltext.replace(/[$.]/g, "").replace(',', '.');
+                itemdetalle.precio_compra_total = parseInt(totalsin);
+
+                itemdetalle.documentoOrden = $('#documento').val();
+                itemdetalle.numeroOrden = $('#consecutivo').val();
+                itemdetalle.proveedor_id = $('#proveedor_id').val();
+                itemdetalle.created_at = $('#fecha_facturae').val();
+                itemdetalle.contrato = $('#contrato').val();
+                itemdetalle.usuario_id = $('#user_ids').val();
+
+                entradadetalle.push(itemdetalle);
+            });
+
+            var dataToSend = {
+                entradaOrden: entradaOrden,
+                entradadetalle: entradadetalle
+            };
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Vas a realizar una entrada",
+                type: "warning",
+                showCancelButton: true,
+                showCloseButton: true,
+                confirmButtonText: 'Aceptar',
+            }).then((result) => {
+                if (result.value) {
+                    Swal.fire({
+                        type: "info",
+                        title: 'Espere por favor !',
+                        html: 'Realizando la entrada..',
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        willOpen: () => {
+                            Swal.showLoading()
+                        },
+                    });
+
+                    $.ajax({
+                        beforeSend: function() {
+                            $('.loader').css("visibility", "visible");
+                        },
+                        url: url,
+                        dataType: 'json',
+                        method: 'post',
+                        data: {
+                            data: dataToSend, // Enviar el objeto dataToSend
+                            "_token": $("meta[name='csrf-token']").attr("content")
+                        },
+                        success: function(data) {
+                            Swal.close(); // Cerrar la alerta de carga
+
+                            if (data.errors) {
+                                const mensaje = Array.isArray(data.errors) ? data.errors.join(', ') : data.errors;
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: mensaje,
+                                    showConfirmButton: true
+                                });
+                            } else if (data.success == 'ok') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    type: 'success',
+                                    title: "Orden realizada correctamente",
+                                    text: `Documento: ${data.documento}, Número de Orden: ${data.numeroOrden}`,
+                                    showConfirmButton: true
+                                }).then(() => {
+
+                                    location.reload(); // Refrescar la página completa
+
+                                });
+                            }
+                        },
+                        complete: function() {
+                            $('.loader').css("visibility", "hidden");
+                        }
+                    });
+                }
+            });
+            });
+
+        calcularTotales();
+
+        const formatterCOP = new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 0 // o 2 si quieres decimales
+        });
+        $('#buscarOrdenesBtn').click(function() {
+
+            // Mostrar el loader
+            $('#loader').show();
+
+            // Obtener los valores de los campos de búsqueda
+            var cod_farmacia = $('select[name="cod_farmacia"]').val();
+            var ClasiOrden = $('select[name="clasi_orden"]').val();
+            var estado = $('select[name="estado"]').val();
+            var user_create = $('select[name="userCreate"]').val();
+            var orden_de_compra = $('input[name="orden_de_compra"]').val();
+            var proveedor = $('input[name="proveedor"]').val();
+            var fecha_desde = $('input[name="fecha_desde"]').val();
+            var fecha_hasta = $('input[name="fecha_hasta"]').val();
+            // Realizar la búsqueda utilizando AJAX
+            $.ajax({
+                url: "{{ route('buscar.ordenes.compra') }}",
+                method: "GET",
+                data: {
+                    cod_farmacia: cod_farmacia,
+                    estado: estado,
+                    user_create: user_create,
+                    proveedor: proveedor,
+                    orden_de_compra: orden_de_compra,
+                    fecha_desde: fecha_desde,
+                    fecha_hasta: fecha_hasta,
+                    ClasiOrden: ClasiOrden
+                },
+                success: function(response) {
+                
+                var ordenes = response.data;
+                var html = '';
+                var CantidadOrdenes = ordenes.length;
+                var CantidadOrdenesPendientes = ordenes.filter(function(orden) {
+                    return orden.estado === "Pendiente";
+                }).length;
+                var CantidadOrdenesCompletadas = ordenes.filter(function(orden) {
+                    return orden.estado === "Completada";
+                }).length;
+                var CantidadOrdenesIncumplidas = ordenes.filter(function(orden) {
+                    return orden.estado === "Anulada";
+                }).length;
+                // Actualizar los contadores en el resumen
+                $("#detalle").empty();
+                $("#detalle1").empty();
+                $("#detalle2").empty();
+                $("#detalle3").empty();
+                $("#detalle4").empty();
+                $("#detalle").append(
+                            '<div class="small-box shadow-lg l-bg-blue-dark"><div class="inner">' +
+                            '<h5>TOTAL ORDENES</h5>' +
+                            '<p><h5> ' + CantidadOrdenes + '</h5></p>'
+                            + '</div></div>'
+                        );
+
+                        $("#detalle1").append(
+                            '<div class="small-box shadow-lg l-bg-green-dark"><div class="inner">' +
+                            '<h5>ORDENES COMPLETAS</h5>' +
+                            '<p><h5> ' + CantidadOrdenesCompletadas + '</h5></p>'
+                            + '</div></div>'
+                        );
+
+                        $("#detalle2").append(
+                            '<div class="small-box shadow-lg l-bg-orange-dark"><div class="inner">' +
+                            '<h5>ORDENES PENDIENTES</h5>' +
+                            '<p><h5> ' + CantidadOrdenesPendientes + '</h5></p>'
+                            + '</div></div>'
+                        );
+
+                        $("#detalle3").append(
+                            '<div class="small-box shadow-lg l-bg-red-dark"><div class="inner">' +
+                            '<h5>ORDENES ANULADAS</h5>' +
+                            '<p><h5> ' + CantidadOrdenesIncumplidas + '</h5></p>'
+                            + '</div></div>'
+                        );
+
+                        $("#detalle4").append(
+                            '<div class="small-box shadow-lg l-bg-cyan"><div class="inner">' +
+                            '<h5>TOTAL VALOR</h5>' +
+                            '<p><h5> ' + formatterCOP.format(response.Estadistica.TotalValorOrdenes)  + '</h5></p>'
+                            + '</div></div>'
+                        );
+
+                ordenes.forEach(function(orden) {
+                    var estadoClass = '';
+                    if (orden.estado === "Pendiente") {
+                        estadoClass = 'small-box shadow-lg l-bg-orange-dark';
+                    } else if (orden.estado === "Completada") {
+                        estadoClass = 'small-box shadow-lg l-bg-green-dark';
+                    } else {
+                        estadoClass = 'small-box shadow-lg l-bg-red-dark';
+                    }
+                    var detalleUrl = `ordenes/${orden.num_orden_compra}/detalle`;
+                    var detalleUrl2 = "{{ route('ordenes.editar', ['orden' => '__ID__']) }}".replace('__ID__', orden.id);
+                    
+
+                    html += `
+                        <tr>
+                            <td id="td_OrdenDeCompra">#${orden.orden_de_compra}</td>
+                            <td id="td_cod_farmacia">${orden.cod_farmacia}</td>
+                            <td id="td_fecha">${orden.fecha}</td>
+                            <td id="td_proveedor">${orden.proveedor}</td>
+                            <td id="td_codigo_proveedor">${orden.codigo_proveedor}</td>
+                            <td id="td_telefono">${orden.telefono}</td>
+                            <td id="td_total">${orden.total ? new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(orden.total) : '0,00'}</td>
+                            <td id="td_estado" class="${estadoClass}">${orden.estado}</td>
+                            <td>
+                                <a href="${detalleUrl}" class="btn btn-info btn-sm">
+                                    <i class="fas fa-search"></i>
+                                </a>
+                                <a href="${detalleUrl2}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-danger btn-sm btn-eliminar-orden" data-id="${orden.id}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                
+
+                                
+                            </td>
+                        </tr>
+                    `;
+                });
+                $('#ordenes-body').html(html);
+            },
+                complete: function() {
+                    // Ocultar el loader
+                    $('#loader').hide();
+                }
+            });
+        });
+
+        $('#ExportarReporte').on('click', function (e) {
+        e.preventDefault();
+
+        // Toma los valores del formulario (select2 incluido)
+        const params = {
+            cod_farmacia  : $('select[name="cod_farmacia"]').val() || '',
+            estado        : $('select[name="estado"]').val() || '',
+            userCreate    : $('select[name="userCreate"]').val() || '',
+            orden_de_compra: $('input[name="orden_de_compra"]').val() || '',
+            proveedor     : $('input[name="proveedor"]').val() || '',
+            fecha_desde   : $('input[name="fecha_desde"]').val() || '',
+            fecha_hasta   : $('input[name="fecha_hasta"]').val() || '',
+            // usa el name real del select de clasificación (ojo: en tu form es "clasi_orden")
+            clasi_orden   : $('select[name="clasi_orden"]').val() || ''
+        };
+
+        const qs = $.param(params);
+        console.log('qs export:', qs);
+
+        const url = "{{ route('ordenes.exportar') }}?" + qs;
+        window.location.href = url;
+        });
+
+        $('#ExportarReporteDetalle').on('click', function (e) {
+        e.preventDefault();
+
+        // Toma los valores del formulario (select2 incluido)
+        const params = {
+            cod_farmacia  : $('select[name="cod_farmacia"]').val() || '',
+            estado        : $('select[name="estado"]').val() || '',
+            userCreate    : $('select[name="userCreate"]').val() || '',
+            orden_de_compra: $('input[name="orden_de_compra"]').val() || '',
+            proveedor     : $('input[name="proveedor"]').val() || '',
+            fecha_desde   : $('input[name="fecha_desde"]').val() || '',
+            fecha_hasta   : $('input[name="fecha_hasta"]').val() || '',
+            // usa el name real del select de clasificación (ojo: en tu form es "clasi_orden")
+            clasi_orden   : $('select[name="clasi_orden"]').val() || ''
+        };
+
+        const qs = $.param(params);
+        console.log('qs export:', qs);
+
+        const url = "{{ route('ordenes.detalle.exportar') }}?" + qs;
+        window.location.href = url;
+        });
+
+        
+  
+        function fill_datatable1_resumen() {
+                $("#detalle").empty();
+                $("#detalle1").empty();
+                $("#detalle2").empty();
+                $("#detalle3").empty();
+                $("#detalle4").empty();
+            
+
+                $.ajax({
+                    url: "{{ route('ordenes.resumen') }}", // Nueva ruta
+                    dataType: "json",
+                    success: function(data) {
+                        $("#detalle").append(
+                            '<div class="small-box shadow-lg l-bg-blue-dark"><div class="inner">' +
+                            '<h5>TOTAL ORDENES</h5>' +
+                            '<p><h5> ' + data.total_ordenes + '</h5></p>'
+                            + '</div></div>'
+                        );
+
+                        $("#detalle1").append(
+                            '<div class="small-box shadow-lg l-bg-green-dark"><div class="inner">' +
+                            '<h5>ORDENES COMPLETAS</h5>' +
+                            '<p><h5> ' + data.completadas + '</h5></p>'
+                            + '</div></div>'
+                        );
+
+                        $("#detalle2").append(
+                            '<div class="small-box shadow-lg l-bg-orange-dark"><div class="inner">' +
+                            '<h5>ORDENES PENDIENTES</h5>' +
+                            '<p><h5> ' + data.pendientes + '</h5></p>'
+                            + '</div></div>'
+                        );
+
+                        $("#detalle3").append(
+                            '<div class="small-box shadow-lg l-bg-red-dark"><div class="inner">' +
+                            '<h5>ORDENES ANULADAS</h5>' +
+                            '<p><h5> ' + data.incumplidas + '</h5></p>'
+                            + '</div></div>'
+                        );
+
+                        $("#detalle4").append(
+                            '<div class="small-box shadow-lg l-bg-cyan"><div class="inner">' +
+                            '<h5>TOTAL VALOR</h5>' +
+                            '<p><h5> ' + formatterCOP.format(data.TotalValorOrdenes)  + '</h5></p>'
+                            + '</div></div>'
+                        );
+                    }
+                });
+            }
+
 
 
        function calcularTotales() {
@@ -204,9 +1024,6 @@
 
         // Actualizar los totales en la interfaz
 
-               
-
-
         $('#totalSubtotal').val(totalSubtotal.toLocaleString('es-CO', {
                                             style: 'currency',
                                             currency: 'COP'
@@ -224,9 +1041,6 @@
 
     }
         
-
-
-
             //Funcion que abre modal donde se deben seleccionar el articulo que se iran cargando en la factura
             $('#agregar_articulo').click(function() {
 
@@ -249,22 +1063,40 @@
             let molecula = null,
                 nombrea = null,
                 cums = null,
+                presentacion = null,
                 precio = null,
                 iva = null,
                 precio_compra_subtotal = null,
                 cantidad = null,
                 precio_compra_total = null;
                 
+                
+                if($('#cums').val() === ''){
+                    
+                    $('#cums').val('Sin Cums');
+                }
+
+                if($('#presentacion').val() === ''){
+                    $('#presentacion').val('Sin Presentación');
+                }
+                
                 molecula = $('#molecula').val();
                 nombrea = $('#nombrea').val();
                 cums = $('#cums').val();
+                presentacion = $('#presentacion').val();
                 precio = $('#precio_compra_subtotal_unitario').val();
-                iva = $('#iva').val();
+                
+                if ($('#iva').val() == null) {
+                    iva = 0;
+                } else {
+                    iva = $('#iva').val();
+                }
+                
                 precio_compra_subtotal = $('#precio_compra_subtotal').val();
                 cantidad = $('#cantidad').val();
                 precio_compra_total = $('#precio_compra_total').val();
 
-                const array = [codigo, nombrea, cums, precio,
+                const array = [codigo, nombrea, cums,presentacion, precio,
                     precio_compra_subtotal, cantidad, precio_compra_total
                 ];
 
@@ -326,15 +1158,16 @@
                             '<tr><td><button type="button" name="eliminar" class="btn-float bg-gradient-danger btn-sm tooltipsC" title="eliminar"><i class="fas fa-trash"></i></button></td>' +
                             '<td class="molecula">' + $('#molecula').val() + '</td>' +
                             '<td class="nombrea">' + $('#nombrea').val() + '</td>' +
+                            '<td class="presentacion">' + $('#presentacion').val() + '</td>' +
                             '<td class="marca">' + $('#marca').val() + '</td>' +
                             '<td class="cums">' + $('#cums').val() + '</td>' +
                             '<td class="precio">' + valordelpagocompraFormatted + '</td>' +
                             '<td class="ivab">' + $('#ivab').val() + '</td>' +
-                            '<td class="iva">' + valordelivaFormatted + '</td>' +
+                            '<td class="iva">' + $('#iva').val() + '</td>' +
                             '<td class="cantidad">' + $('#cantidad').val() + '</td>' +
-                            '<td class="precio_compra_subtotal">' +  valordelpagosubtotalFormatted + '</td>' +
-                            '<td class="cantidad_iva_total">' + valordelpagoivatotalFormatted + '</td>' +
-                            '<td class="precio_compra_total">' +valordelpagototalFormatted + '</td></tr>'  
+                            '<td class="precio_compra_subtotal">' +  $('#precio_compra_subtotal').val() + '</td>' +
+                            '<td class="cantidad_iva_total">' + $('#cantidad_iva_total').val() + '</td>' +
+                            '<td class="precio_compra_total">' +$('#precio_compra_total').val() + '</td></tr>'  
                           
                         );
                       
@@ -444,10 +1277,19 @@
                 base = base.replaceAll('.', '');
 
                 const resultado = (ivax * base) / 100;
+                const resultadoFormateado = resultado.toLocaleString('es-CO', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    
                 const resultado1 = (ivax * base * cantidad) / 100;
+                const resultado1Formateado = resultado1.toLocaleString('es-CO', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
 
-                $('#iva').val(resultado);
-                $('#cantidad_iva_total').val(resultado1);
+                $('#iva').val(resultadoFormateado);
+                $('#cantidad_iva_total').val(resultado1Formateado);
 
 
             }
@@ -466,15 +1308,23 @@
 
                 preciouni = preciouni.replaceAll('.', '');
                 preciosubtotal = parseInt(preciouni) * parseInt(cantidad);
+                const preciosubtotalFormateado = preciosubtotal.toLocaleString('es-CO', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
 
                 let ivax = $('#cantidad_iva_total').val();
                 ivax = ivax.replaceAll('.', '');
 
 
                 const preciototal = (parseInt(ivax) + parseInt(preciosubtotal));
+                const preciototallFormateado = preciototal.toLocaleString('es-CO', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
 
-                $('#precio_compra_subtotal').val(preciosubtotal);
-                $('#precio_compra_total').val(preciototal);
+                $('#precio_compra_subtotal').val(preciosubtotalFormateado);
+                $('#precio_compra_total').val(preciototallFormateado);
 
 
             }
@@ -508,7 +1358,7 @@
 
                                 return {
 
-                                    text: datas.codigo + "=>" + datas.nombre,
+                                    text: datas.codigo + "=>" + datas.nombre + "=>" + datas.marca,
                                     id: datas.id
 
                                 }
@@ -528,9 +1378,12 @@
                 $("#cums").val('');
                 $("#marca").val('');
                 $("#nombrea").val('');
+                $("#presentacion").val('');
 
                 const ids1 = $('#codigo').val();
-                var url = "/public_apiws/detallearticulos3/" + ids1;
+               
+             
+                const url =  "{{ route('detallearticulos3', ':id') }}".replace(':id', ids1);
 
                 $.ajax({
                     url: url,
@@ -543,6 +1396,7 @@
                             $("#cums").val(items.cums);
                             $("#marca").val(items.marca);
                             $("#nombrea").val(items.nombre);
+                            $("#presentacion").val(items.forma);
 
                         });
                     }
@@ -551,38 +1405,7 @@
 
          
             //Cargar select del iva
-            $("#ivab").select2({
-                language: "es",
-                theme: "bootstrap4",
-                placeholder: 'iva',
-                allowClear: true,
-                ajax: {
-                    url: "{{ route('selectlist') }}",
-                    dataType: 'json',
-                    delay: 250,
-                    data: function(params) {
-                        return {
-                            q: params.term,
-                            id: 4
-                        };
-                    },
-                    processResults: function(data) {
-                        return {
-                            results: $.map(data.array[0], function(datas) {
-
-                                return {
-
-                                    text: datas.nombre,
-                                    id: datas.nombre
-
-                                }
-                            })
-                        };
-                    },
-                    cache: true
-                }
-            }).trigger('change');
-
+            
 
             //Select para cargar los proveedores de la tabla
 
@@ -627,9 +1450,8 @@
 
                 const ids1 = $('#proveedor_id').val();
 
-                var url = "/public_apiws/detalleproveedores3/" + ids1;
-
-                console.log(ids1);
+                const url = "{{ route('proveedor3', ':id') }}".replace(':id', ids1);
+                
                 $.ajax({
                     url: url,
                     type: "get",
@@ -650,6 +1472,13 @@
                 });
             }
 
+            $("#farmacia").select2({
+                language: "es",
+                theme: "bootstrap4",
+                placeholder: 'Buscar farmacia....',
+                allowClear: true,
+                
+            });
 
             // Función para traer el contrato de la tabla listas detalle
             $("#contrato").select2({
@@ -664,7 +1493,7 @@
                     data: function(params) {
                         return {
                             q: params.term,
-                            id: 37 //,id2:38, id3:39, id4:40
+                            id: 37 ,id2:38, id3:39, id4:40
     
                         };
                     },
@@ -679,6 +1508,30 @@
     
                                 }
                             })
+                        };
+                    },
+                    cache: true
+                }
+            });
+            
+            $('#userCreate').select2({
+                language: "es",
+                theme: "bootstrap4",
+                placeholder: 'Buscar Usuario....',
+                allowClear: true,
+                ajax: {
+                    url: "{{ route('selectusuario') }}",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            rol: 5
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results
                         };
                     },
                     cache: true
@@ -713,7 +1566,7 @@
 
                                 return {
 
-                                    text: datas.documento,
+                                    text: datas.documento + '-' + datas.observacion,
                                     id: datas.documento
 
                                 }
@@ -732,8 +1585,10 @@
                 $("#consecutivo").val('');
 
                 const ids1 = $('#documento').val();
-
-                var url = "/public_apiws/detalledocumento3/" + ids1;
+                
+                const url = "{{ route('detalledocumento3', ':id') }}".replace(':id', ids1);
+             
+                
               
                 $.ajax({
                     url: url,
@@ -749,130 +1604,8 @@
                 });
             }
 
-            var myTable =
-                $('#ordenes').DataTable({
-                    language: idioma_espanol,
-                    processing: true,
-                    lengthMenu: [
-                        [25, 50, 100, 500, -1],
-                        [25, 50, 100, 500, "Mostrar Todo"]
-                    ],
-                    processing: true,
-                    serverSide: true,
-                    aaSorting: [
-                        [1, "asc"]
-                    ],
+            
 
-                    ajax: {
-                        url: "{{ route('comprasli3') }}",
-                    },
-                    columns: [{
-                            data: 'action',
-                            name: 'action',
-                            orderable: false
-                        },
-                        
-                        {
-                            data: 'documentoOrden',
-                            name: 'documentoOrden'
-                        },
-                        {
-                            data: 'numeroOrden',
-                            name: 'numeroOrden'
-                        },
-                        {
-                            data: 'proveedor_nombre',
-                            name: 'proveedor_nombre'
-                        },
-                        {
-                            data: 'created_at',
-                            name: 'created_at'
-                        },
-                        {
-                            data: 'usuario_id',
-                            name: 'usuario_id'
-                        }
-
-                    ],
-
-                    //Botones----------------------------------------------------------------------
-
-                    "dom": '<"row"<"col-xs-1 form-inline"><"col-md-4 form-inline"l><"col-md-5 form-inline"f><"col-md-3 form-inline"B>>rt<"row"<"col-md-8 form-inline"i> <"col-md-4 form-inline"p>>',
-
-
-                    buttons: [{
-
-                            extend: 'copyHtml5',
-                            titleAttr: 'Copiar Registros',
-                            title: "seguimiento",
-                            className: "btn  btn-outline-primary btn-sm"
-
-
-                        },
-                        {
-
-                            extend: 'excelHtml5',
-                            titleAttr: 'Exportar Excel',
-                            title: "seguimiento",
-                            className: "btn  btn-outline-success btn-sm"
-
-
-                        },
-                        {
-
-                            extend: 'csvHtml5',
-                            titleAttr: 'Exportar csv',
-                            className: "btn  btn-outline-warning btn-sm"
-                            //text: '<i class="fas fa-file-excel"></i>'
-
-                        },
-                        {
-
-                            extend: 'pdfHtml5',
-                            titleAttr: 'Exportar pdf',
-                            className: "btn  btn-outline-secondary btn-sm"
-
-
-                        }
-                    ]
-
-                    // "columnDefs": [{
-
-                    //         "render": function(data, type, row) {
-                    //             if (row["activo"] == 1) {
-                    //                 return data + ' - Activo';
-                    //             } else {
-
-                    //                 return data + ' - Inactivo';
-
-                    //             }
-
-                    //         },
-                    //         "targets": [11]
-                    //     },
-                    //],
-
-                    // "createdRow": function(row, data, dataIndex) {
-                    //     if (data["activo"] == 1) {
-                    //         $($(row).find("td")[11]).addClass("btn btn-sm btn-success rounded-lg");
-                    //     } else {
-                    //         $($(row).find("td")[11]).addClass("btn btn-sm btn-warning rounded-lg");
-                    //     }
-                    //     if (data["type_salary"] == 1) {
-                    //         $($(row).find("td")[15]).addClass("btn btn-sm btn-info rounded-lg");
-                    //     } else {
-                    //         $($(row).find("td")[15]).addClass("btn btn-sm btn-dark rounded-lg");
-                    //     }
-
-                    // }
-
-
-
-                });
-
-            //     });
-
-            // });
 
 
             $(document).on('click', '.create_cuenta', function() {
@@ -1210,7 +1943,7 @@
                                 return el != "undefined<br>";
                             });
 
-                            console.log(filtered);
+                            
                             Swal.fire({
                                 icon: 'error',
                                 title: 'El formulario contiene errores',
@@ -1228,270 +1961,12 @@
 
         });
         
-        
-         $('#guardar_entrada').click(function() {
+    
 
-            var url = "{{ route('entradasstore_3') }}";
-    
-            var entrada = [];
-    
-            var entradainput = {};
-    
-            entradainput.documentoOrden = $('#documento').val();
-            entradainput.numeroOrden = $('#consecutivo').val();
-            entradainput.proveedor_id = $('#proveedor_id').val();
-            entradainput.created_at = $('#fecha_facturae').val();
-            entradainput.contrato = $('#contrato').val();
-            entradainput.usuario_id = $('#user_ids').val();
-            entradainput.observaciones = $('#descripcion1').val();
-    
-            entrada.push(entradainput);
-    
-            var entradadetalle = [];
-    
-            $("#tcups > tbody > tr").each(function() {
-                var itemdetalle = {};
-                var tds = $(this).find("td");
-    
-                itemdetalle.codigo = tds.eq(1).text();
-                itemdetalle.nombre = tds.eq(2).text();
-                itemdetalle.marca = tds.eq(3).text();
-                itemdetalle.cums = tds.eq(4).text();
-    
-                let subtotalunitext = tds.eq(5).text();
-                let subtotalunisin = subtotalunitext.replace(/[$.]/g, "").replace(',', '.');
-                itemdetalle.precio = parseInt(subtotalunisin);
-    
-                let valorIvaUnitext = tds.eq(7).text();
-                let valorIvaUnisin = valorIvaUnitext.replace(/[$.]/g, "").replace(',', '.');
-                itemdetalle.iva = parseInt(valorIvaUnisin);
-    
-                itemdetalle.cantidad = parseInt(tds.eq(8).text());
-    
-                let subtotaltext = tds.eq(9).text();
-                let subtotalsin = subtotaltext.replace(/[$.]/g, "").replace(',', '.');
-                itemdetalle.subtotal = parseInt(subtotalsin);
-    
-                let ivaTotaltext = tds.eq(10).text();
-                let ivaTotalsin = ivaTotaltext.replace(/[$.]/g, "").replace(',', '.');
-                itemdetalle.cantidad_iva_total = parseInt(ivaTotalsin);
-    
-                let totaltext = tds.eq(11).text();
-                let totalsin = totaltext.replace(/[$.]/g, "").replace(',', '.');
-                itemdetalle.precio_compra_total = parseInt(totalsin);
-    
-                itemdetalle.documentoOrden = $('#documento').val();
-                itemdetalle.numeroOrden = $('#consecutivo').val();
-                itemdetalle.proveedor_id = $('#proveedor_id').val();
-                itemdetalle.created_at = $('#fecha_facturae').val();
-                itemdetalle.contrato = $('#contrato').val();
-                itemdetalle.usuario_id = $('#user_ids').val();
-                itemdetalle.observaciones = $('#descripcion1').val();
-    
-                itemdetalle = {
-                    ...itemdetalle,
-                    ...entrada
-                };
-    
-                entradadetalle.push(itemdetalle);
-            });
-    
-            Swal.fire({
-                title: "¿Estás seguro?",
-                text: "Vas a realizar una entrada",
-                type: "warning",
-                showCancelButton: true,
-                showCloseButton: true,
-                confirmButtonText: 'Aceptar',
-            }).then((result) => {
-                if (result.value) {
-                    Swal.fire({
-                        type: "info",
-                        title: 'Espere por favor !',
-                        html: 'Realizando la entrada..',
-                        showConfirmButton: false,
-                        allowOutsideClick: false,
-                        willOpen: () => {
-                            Swal.showLoading()
-                        },
-                    });
-    
-                    $.ajax({
-                        beforeSend: function() {
-                            $('.loader').css("visibility", "visible");
-                        },
-                        url: url,
-                        dataType: 'json',
-                        method: 'post',
-                        data: {
-                            data: entradadetalle,
-                            "_token": $("meta[name='csrf-token']").attr("content")
-                        },
-                        success: function(data) {
-                            Swal.close(); // Cerrar la alerta de carga
-    
-                            if (data.errors) {
-                                Swal.fire({
-                                    icon: 'error',
-                                    type: "error",
-                                    title: 'Error',
-                                    text: data.errors.join(', '),
-                                    showConfirmButton: true
-                                });
-                            } else if (data.success == 'ok') {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        type: 'success',
-                                        title: "Orden realizada correctamente",
-                                        text: `Documento: ${data.documento}, Número de Orden: ${data.numeroOrden}`,
-                                        showConfirmButton: true
-                                    }).then(() => { 
-                                        
-                                        location.reload(); // Refrescar la página completa
-        
-                                    });
-                                }
-                        },
-                        complete: function() {
-                            $('.loader').css("visibility", "hidden");
-                        }
-                    });
-                }
-            });
-        });
+            
         
         
     // Función que envía los datos de listas al controlador ademas controla los input con sweat alert2
-    $('#subir').click(function() {
-        
-        let text = 'Vas a importar una orden de compra';
-
-        var formData = new FormData(document.getElementById("form-importar"));
-        var proveedor = $("#codigop").val();
-        
-        // Agregar el valor del proveedor al FormData
-        formData.append('proveedor', proveedor);
-         
-        console.log(formData);
-        
-        if(proveedor != null && formData != null){
-            
-        Swal.fire({
-     target: document.getElementById('modal-pd'),
-     title: "¿Estás seguro?",
-     text: text,
-     icon: "info", 
-     showCancelButton: true,
-     showCloseButton: true,
-     allowOutsideClick: false,
-     confirmButtonText: 'Aceptar',
-      }).then((result)=>{
-     if(result.value){
-         Swal.fire({
-                target: document.getElementById('modal-pd'),
-                title: 'Espere por favor !',
-                html: 'Realizando el pago',// add html attribute if you want or remove
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                willOpen: () => {
-                    Swal.showLoading()
-                },
-            }),    
-            
-            
-        $.ajax({
-            beforeSend: function() {
-                $('.loader').css("visibility", "visible");
-            },
-            url: "{{ route('importarchivo3') }}",
-            method: 'post',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(response) {
-
-                if (response.mensaje == 'ok') {
-                    $('#importarModal').modal('hide');
-                    
-                    
-                    AgregarMedicamentosMasivos(response.data);
-                    
-                    
-                    Apiws.notificaciones('Archivo cargado exitosamente',
-                        'Compras Medcol', 'success');
-                        
-                   
-                } else if (response.mensaje == 'vacio') {
-
-                    Apiws.notificaciones('No seleccionaste ningun arhivo',
-                        'Compras Medcol', 'info');
-                } else if (response.mensaje == 'ng') {
-                    $('#importarModal').modal('hide');
-                    Apiws.notificaciones('Registros duplicados en base de datos',
-                        'Compras Medcol', 'warning');
-                   
-
-                }
-            },
-
-            complete: function() {
-                $('.loader').css("visibility", "hidden");
-            }
-
-        }).fail(function(jqXHR, textStatus, errorThrown) {
-
-            if (jqXHR.status === 0) {
-
-                alert('Not connect: Verify Network.');
-
-            } else if (jqXHR.status == 404) {
-
-                alert('Requested page not found [404]');
-
-            } else if (jqXHR.status == 500) {
-
-                Apiws.notificaciones('El archivo no tienen la estructura adecuada',
-                    'Compras Medcol', 'warning');
-                // $('#tarchivos').DataTable().ajax.reload();
-
-            } else if (textStatus === 'parsererror') {
-
-                alert('Requested JSON parse failed.');
-
-            } else if (textStatus === 'timeout') {
-
-                alert('Time out error.');
-
-            } else if (textStatus === 'abort') {
-
-                alert('Ajax request aborted.');
-
-            } else {
-
-                Apiws.notificaciones(
-                    'El campo file debe ser un archivo de tipo: xls, xlsx',
-                    'Compras Medcol', 'warning');
-                // $('#tarchivos').DataTable().ajax.reload();
-            }
-
-        });
-        
-     }
-        
-     });
-     
-     
-        
-    }else{
-        
-         Apiws.notificaciones('Debes seleccionar el proveedor',
-                    'Compras Medcol', 'warning');
-    }
-    
-     
-
-    });
-    
     
       //Funcion que abre modal donde se deben seleccionar el articulo que se iran cargando en la factura
             $('#agregar_articulo').click(function() {
@@ -1512,45 +1987,41 @@
             // Agregar filas a tabla para guardar
     function AgregarMedicamentosMasivos(data) {
     data.forEach(function(item) {
-        
-        
-             const total = parseFloat(item.cantidad * item.precio);
-             
-                    var valordelpagosubtotalFormatted = parseFloat(total)
-                        .toLocaleString('es-CO', {
-                            style: 'currency',
-                            currency: 'COP'
-                        });
+        let precio = parseFloat(item.precio) || 0;
+        let iva = parseFloat(item.iva) || 0;
+        let cantidad = parseFloat(item.cantidad) || 0;
 
-                   
+        let porcentajeiva = iva / 100;
 
-                    var valordelpagoivatotalFormatted = parseFloat(0)
-                    .toLocaleString('es-CO', {
-                        style: 'currency',
-                        currency: 'COP'
-                    });
+        let valorIvaNumerico = precio * porcentajeiva;
+        let IvaTotalNumerico = valorIvaNumerico * cantidad;
+        let subtotalNumerico = precio * cantidad;
+        let precioCompraTotalNumerico = subtotalNumerico + IvaTotalNumerico;
 
-
-        let valordelpagocompraFormatted = parseFloat(item.precio)
-            .toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
+        // Formateos
+        let valordelpagocompraFormatted = precio.toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
+        let valorIvaFormatted = valorIvaNumerico.toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
+        let IvaTotalFormatted = IvaTotalNumerico.toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
+        let subtotalFormatted = subtotalNumerico.toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
+        let precioCompraTotalFormatted = precioCompraTotalNumerico.toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
 
         $('#tcups> tbody:last-child').append(
             '<tr>' +
             '<td><button type="button" name="eliminar" class="btn-float bg-gradient-danger btn-sm tooltipsC" title="eliminar"><i class="fas fa-trash"></i></button></td>' +
-            '<td class="molecula">' + item.codigo + '</td>' +
+            '<td class="molecula">' + (item.codigo ? item.codigo : 'Sin Código') + '</td>' +
             '<td class="nombrea">' + item.nombre + '</td>' +
+            '<td class="presentacion">' + item.presentacion + '</td>' +
             '<td class="marca">' + item.marca + '</td>' +
-            '<td class="cums">' + item.cums + '</td>' +
+            '<td class="cums">' + (item.cums ? item.cums : "Sin Cums") + '</td>' +
             '<td class="precio">' + valordelpagocompraFormatted + '</td>' +
-            '<td class="ivab">' + 0 + '</td>' +
-            '<td class="iva">' + 0 + '</td>' +
+            '<td class="ivab">' + item.iva + '</td>' +
+            '<td class="iva">' + valorIvaFormatted + '</td>' +
             '<td class="cantidad">' + item.cantidad + '</td>' +
-            '<td class="precio_compra_subtotal">' + valordelpagosubtotalFormatted + '</td>' +
-            '<td class="cantidad_iva_total">' + valordelpagoivatotalFormatted + '</td>' +
-            '<td class="precio_compra_total">' +valordelpagosubtotalFormatted + '</td></tr>'  +
+            '<td class="precio_compra_subtotal">' + subtotalFormatted + '</td>' +
+            '<td class="cantidad_iva_total">' + IvaTotalFormatted + '</td>' +
+            '<td class="precio_compra_total">' + precioCompraTotalFormatted + '</td>' +
             '</tr>'
         );
-        
     });
 
     calcularTotales();
@@ -1662,4 +2133,3 @@
         }
     </script>
 @endsection
-

@@ -5,11 +5,13 @@
         <span id="form_result"></span>
         <div id="card-drawel" class="card card-info">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="card-title">Dolor - Generar Ordenes</h3>
+                <h3 class="card-title">Administrar Ordenes</h3>
                 <div class="ml-auto d-flex">
                     <button type="button" class="btn btn-primary mx-1" name="importar_orden" id="importar_orden" data-toggle="modal" data-target="#importarModal"><i class="fa fa-file-import"></i> Importar</button>
-                    <button type="button" class="btn btn-secondary mx-1" name="proveedores" id="proveedores" data-toggle="modal" data-target="#proveedoresModal"><i class="fa fa-users"></i> Proveedores</button>
-                    <button type="button" class="btn btn-info mx-1" name="articulos" id="articulos" data-toggle="modal" data-target="#articulosModal"><i class="fa fa-box"></i> Artículos</button>
+                     @if(Auth::user()->rol == '1')
+                    <button type="button" class="btn btn-secondary mx-1" name="proveedores" id="proveedores" data-toggle="modal" data-target="#"><i class="fa fa-users"></i> Proveedores</button>
+                    <button type="button" class="btn btn-info mx-1" name="articulos" id="articulos" data-toggle="modal" data-target="#"><i class="fa fa-box"></i> Artículos</button>
+                    @endif
                     <button type="reset" class="btn btn-success mx-1" name="nuevo" id="reset" value ="reset" ><i class="fa fa-plus-circle"></i> Nuevo</button>
                 </div>
             </div>

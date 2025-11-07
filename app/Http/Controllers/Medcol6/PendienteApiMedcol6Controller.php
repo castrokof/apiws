@@ -2094,10 +2094,14 @@ class PendienteApiMedcol6Controller extends Controller
                 'FRJA' => 'FRJA',
                 'FRIO' => 'FRIO',
                 'INY' => 'INY',
-                // Agregar más mapeos según sea necesario
                 'SALUD' => 'SM01',
                 'DOLOR' => 'DLR1',
-                'FRIP' => 'FRIP'
+                'FRIP' => 'FRIP',
+                'F24H' => 'F24H',
+                'FRMP' => 'FRMP',
+                'FRPE' => 'FRPE',
+                'EVIO' => 'EVIO',
+                'EVSM' => 'EVSM'
             ];
 
             $codigo = trim($request->input('codigo'));

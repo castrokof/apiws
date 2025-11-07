@@ -1,9 +1,11 @@
 <?php
 namespace App\Exports;
 use App\Models\Medcol6\DispensadoApiMedcol6;
+use App\Models\Listas\ListasDetalle;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Illuminate\Support\Facades\DB;
 
 class DataExport implements FromQuery, WithHeadings, WithMapping
 {
@@ -12,10 +14,14 @@ class DataExport implements FromQuery, WithHeadings, WithMapping
     public function __construct($filters)
     {
         $this->filters = $filters;
+        
+       
     }
     
     public function query()
     {
+        
+        
         return DispensadoApiMedcol6::query()
             ->select([
                 'idusuario',
@@ -50,8 +56,8 @@ class DataExport implements FromQuery, WithHeadings, WithMapping
                 'fecha_ordenamiento',
                 'fecha_suministro',
                 'dx',
-                'nitips',
-                'ips',
+                'listasdetalle.slug as nitips',
+                'listasdetalle.nombre as ips',
                 'autorizacion',
                 'mipres',
                 'reporte_entrega_nopbs',
@@ -65,7 +71,7 @@ class DataExport implements FromQuery, WithHeadings, WithMapping
                 'centroprod',
                 'drogueria',
                 'cajero',
-                'user_id',
+                'dispensado_medcol6.user_id',
                 'frecuencia',
                 'dosis',
                 'duracion_tratamiento',
@@ -76,14 +82,17 @@ class DataExport implements FromQuery, WithHeadings, WithMapping
                 'via',
                 'ciudad'
             ])
+            ->leftJoin('listasdetalle', 'listasdetalle.id', '=', 'dispensado_medcol6.ips')
+            ->whereNotIn('codigo', ['1010', '1011', '1012']) // Nuevo filtro agregado, para que al exportar el excel no muestre los codigos comodin
+            ->whereIn('estado', ['REVISADO','DISPENSADO']) // Nuevo filtro agregado
             ->when(isset($this->filters['fechaini']), function ($query) {
                 $query->where('fecha_suministro', '>=', $this->filters['fechaini']);
             })
             ->when(isset($this->filters['fechafin']), function ($query) {
-                $query->where('fecha_suministro', '<=', $this->filters['fechafin']);
+                $query->where('fecha_suministro', '<=', $this->filters['fechafin'].' 23:59:59');
             })
             ->when(isset($this->filters['contrato']), function ($query) {
-                $query->where('centroprod', $this->filters['contrato']);
+                $query->whereIn('centroprod', $this->filters['contrato']);
             });
     }
 
@@ -158,7 +167,7 @@ class DataExport implements FromQuery, WithHeadings, WithMapping
             'Facturad',
             'Factura',
             'Tipo Documento',
-            'Historia',
+            'Documento',
             'CUMS',
             'Expediente',
             'Consecutivo',

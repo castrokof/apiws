@@ -17,16 +17,17 @@ $id= Session()->get('usuario_id');
                     <thead>
                         <tr>
                             <th>Acciones</th>
-                            <th>Codigo Articulo</th>
-                            <th>Articulo/Producto</th>
+                            <th>Código Articulo</th>
+                            <th>Articulo / Producto</th>
+                            <th>Presentacion</th>
                             <th>Marca</th>
                             <th>Cums</th>
-                            <th>Vlr Unitario</th>
-                            <th>Iva%</th>
+                            <th>Valor Unitario</th>
+                            <th>Iva %</th>
                             <th>Valor Iva Uni</th>
                             <th>Cantidad</th>
                             <th>Subtotal</th>
-                            <th>Ivatotal</th>
+                            <th>Iva total</th>
                             <th>Total</th>
                         </tr>
                     </thead>

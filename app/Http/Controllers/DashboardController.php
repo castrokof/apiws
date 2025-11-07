@@ -731,10 +731,8 @@ class DashboardController extends Controller
                 })
                 ->sum(DB::raw('
                     CASE
-                        WHEN a.valor_unitario IS NOT NULL AND a.valor_unitario > 0
-                        THEN a.valor_unitario * d.numero_unidades
-                        WHEN d.precio_unitario IS NOT NULL AND d.precio_unitario > 0
-                        THEN d.precio_unitario * d.numero_unidades
+                        WHEN a.valor_unitario IS NOT NULL AND a.valor_unitario > 0 THEN a.valor_unitario * d.numero_unidades
+                        WHEN d.precio_unitario IS NOT NULL AND d.precio_unitario > 0 THEN d.precio_unitario * d.numero_unidades
                         ELSE CAST(REPLACE(d.valor_total, ",", "") as DECIMAL(15,2))
                     END
                 '));
