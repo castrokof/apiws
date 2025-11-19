@@ -13,6 +13,119 @@ Sistema web desarrollado en Laravel 7.x para la gestión de dispensación de med
 
 ## 📋 Changelog
 
+### v2.8 (Noviembre 2025) - Actualización Masiva de Pendientes Entregados desde Excel
+
+**🚀 Nuevas Funcionalidades:**
+- **Script Automatizado de Actualización Masiva**: Herramienta Python para generar consultas SQL UPDATE desde archivos Excel
+- **Procesamiento de 2,450+ Registros**: Capacidad de actualizar miles de registros en una sola consulta optimizada
+- **Extracción Inteligente de Datos**: Parser automático que extrae información de múltiples columnas Excel
+- **Manejo de Fechas Excel**: Conversión automática de formatos numéricos de Excel a fechas MySQL
+- **Validación de Integridad**: Sistema de validación que garantiza coincidencia correcta usando concatenación de campos
+
+**🔧 Arquitectura Implementada:**
+- **Scripts de Procesamiento**:
+  - `generate_update_query.py`: Script principal que genera la consulta SQL desde Excel
+  - `read_excel_sheets.py`: Lector optimizado para archivos Excel grandes con múltiples hojas
+- **Archivos Generados**:
+  - `update_pendientes_entregados.sql`: Consulta UPDATE optimizada (1.1 MB, 2,450 registros)
+  - `RESUMEN_CONSULTA_SQL.md`: Documentación completa con ejemplos y guía de uso
+  - `verificar_antes_de_actualizar.sql`: Script de verificación pre-ejecución
+  - `verificar_despues_de_actualizar.sql`: Script de verificación post-ejecución
+- **Formato de Entrada**: Excel con hoja "Hoja1" conteniendo:
+  - `unicos`: Campo de validación (documento+factura+codigo)
+  - `Dispensación`: Formato CDIO66615 (letras + números)
+  - `Fecha entrega`: Fecha en múltiples formatos soportados
+
+**🎯 Campos Actualizados:**
+La consulta actualiza 6 campos de la tabla `pendiente_api_medcol6`:
+1. **estado**: Se establece en `'ENTREGADO'`
+2. **usuario**: Se establece en `'SYSTEM'`
+3. **fecha_entrega**: Extraída del campo "Fecha entrega" del Excel
+4. **doc_entrega**: Letras del campo "Dispensación" (ej: CDIO)
+5. **factura_entrega**: Números del campo "Dispensación" (ej: 66615)
+6. **updated_at**: Se establece en `NOW()`
+
+**🔍 Sistema de Validación:**
+```sql
+-- WHERE clause con concatenación de campos
+WHERE CONCAT(documento, factura, codigo) IN (
+    'MPE30187M000447-01',
+    'MPE30310M000891-03',
+    ...
+)
+```
+- **Campo Excel "unicos"**: Se compara con `CONCAT(documento, factura, codigo)` de la tabla
+- **Garantía de Precisión**: Solo se actualizan registros que coinciden exactamente
+
+**📊 Extracción Inteligente:**
+```python
+# Del campo "Dispensación" (formato: CDIO66615)
+regex = r'^([A-Za-z]+)(\d+)$'
+# Resultado:
+#   doc_entrega = 'CDIO'        (letras)
+#   factura_entrega = '66615'    (números)
+```
+
+**🗓️ Manejo Avanzado de Fechas:**
+El script maneja 3 formatos de fecha automáticamente:
+1. **Formato datetime**: `2025-10-15 00:00:00` → Sin conversión
+2. **Formato fecha**: `2025-10-15` → Se añade `00:00:00`
+3. **Formato numérico Excel**: `45959` → Conversión desde época 1899-12-30
+
+**💪 Optimizaciones Técnicas:**
+- **CASE Statements**: Uso de CASE para actualización condicional eficiente
+- **Single Query**: Todos los registros en una sola consulta (evita 2,450 UPDATEs individuales)
+- **Tamaño Optimizado**: 1.1 MB para 2,450 registros con validación completa
+- **Memory Efficient**: Script Python con límite de memoria de 2048M
+
+**🛡️ Seguridad y Validación:**
+```bash
+# Flujo de trabajo recomendado
+1. Backup de tabla:
+   mysqldump -u usuario -p database pendiente_api_medcol6 > backup.sql
+
+2. Verificación pre-ejecución:
+   mysql -u usuario -p database < verificar_antes_de_actualizar.sql
+
+3. Ajustar max_allowed_packet:
+   SET GLOBAL max_allowed_packet = 16777216;
+
+4. Ejecutar UPDATE:
+   mysql -u usuario -p database < update_pendientes_entregados.sql
+
+5. Verificación post-ejecución:
+   mysql -u usuario -p database < verificar_despues_de_actualizar.sql
+```
+
+**📈 Beneficios Operativos:**
+- **Velocidad**: Actualización de 2,450 registros en segundos vs. minutos con updates individuales
+- **Confiabilidad**: Validación estricta previene actualizaciones incorrectas
+- **Trazabilidad**: Scripts de verificación permiten auditar antes y después
+- **Reutilizable**: Script Python puede procesar cualquier archivo Excel con estructura similar
+- **Documentación Completa**: README con ejemplos, casos de uso y troubleshooting
+
+**🐛 Características de Robustez:**
+- **Manejo de Errores**: Validación de datos antes de generar SQL
+- **Logs Detallados**: Registro de registros procesados vs. omitidos
+- **Formato Consistente**: Escapado correcto de comillas y caracteres especiales
+- **Fechas Validadas**: Detección y conversión de múltiples formatos de fecha
+
+**📚 Archivos de Documentación:**
+- `RESUMEN_CONSULTA_SQL.md`: Guía completa con:
+  - Estructura de la consulta generada
+  - Mapeo de campos Excel → Base de datos
+  - Ejemplos de uso con outputs esperados
+  - Comandos de verificación y rollback
+  - Troubleshooting para problemas comunes
+
+**🔄 Casos de Uso:**
+1. **Sincronización Masiva**: Actualizar estados desde sistemas externos vía Excel
+2. **Migración de Datos**: Importar entregas históricas desde hojas de cálculo
+3. **Corrección en Lote**: Actualizar registros con información corregida
+4. **Integración Legacy**: Procesar datos de sistemas antiguos que exportan a Excel
+
+---
+
 ### v2.7 (Octubre 2025) - Sistema de Roles y Permisos con Menú Moderno
 
 **🚀 Nuevas Funcionalidades:**
@@ -1211,6 +1324,175 @@ Para contribuir al proyecto:
 3. Commit tus cambios (`git commit -am 'Agregar nueva funcionalidad'`)
 4. Push a tu rama (`git push origin feature/nueva-funcionalidad`)
 5. Crea un Pull Request
+
+## 🔧 Herramientas y Scripts Auxiliares
+
+### 📊 Actualización Masiva desde Excel (v2.8)
+
+#### Descripción
+Herramienta completa para actualizar masivamente registros de `pendiente_api_medcol6` desde archivos Excel, con validación automática y scripts de verificación.
+
+#### Archivos Involucrados
+```
+📁 Raíz del proyecto
+├── 📄 generate_update_query.py          # Script principal generador
+├── 📄 read_excel_sheets.py              # Lector de Excel multi-hoja
+├── 📄 update_pendientes_entregados.sql  # Consulta SQL generada
+├── 📄 RESUMEN_CONSULTA_SQL.md           # Documentación completa
+├── 📄 verificar_antes_de_actualizar.sql # Verificación pre-UPDATE
+└── 📄 verificar_despues_de_actualizar.sql # Verificación post-UPDATE
+```
+
+#### Uso Rápido
+
+**1. Preparar archivo Excel:**
+```
+Requisitos del Excel (Hoja1):
+- Columna "unicos": Valor único concatenado (documento+factura+codigo)
+- Columna "Dispensación": Formato CDIO66615 (letras + números)
+- Columna "Fecha entrega": Fecha de entrega (múltiples formatos soportados)
+```
+
+**2. Generar consulta SQL:**
+```bash
+# Desde el directorio raíz del proyecto
+python generate_update_query.py
+
+# Salida esperada:
+# ✓ Consulta SQL generada exitosamente
+# - Archivo: update_pendientes_entregados.sql
+# - Registros procesados: 2,450
+```
+
+**3. Verificar antes de ejecutar:**
+```bash
+mysql -u usuario -p database < verificar_antes_de_actualizar.sql
+
+# Revisa:
+# - Total de registros que se actualizarán
+# - Estado actual de los primeros 10 registros
+# - Distribución por estado actual
+```
+
+**4. Backup obligatorio:**
+```bash
+mysqldump -u usuario -p database pendiente_api_medcol6 > backup_$(date +%Y%m%d_%H%M%S).sql
+```
+
+**5. Ejecutar actualización:**
+```bash
+# Si la consulta es > 1MB, aumentar límite primero
+mysql -u usuario -p -e "SET GLOBAL max_allowed_packet = 16777216;"
+
+# Ejecutar el UPDATE
+mysql -u usuario -p database < update_pendientes_entregados.sql
+```
+
+**6. Verificar después:**
+```bash
+mysql -u usuario -p database < verificar_despues_de_actualizar.sql
+
+# Revisa:
+# - Registros actualizados correctamente
+# - Campos doc_entrega y factura_entrega llenos
+# - Distribución de fechas de entrega
+```
+
+#### Ejemplo de Transformación
+
+**Datos en Excel:**
+| unicos | Dispensación | Fecha entrega |
+|--------|--------------|---------------|
+| MPE30187M000447-01 | CDIO66615 | 2025-10-15 00:00:00 |
+
+**Query SQL generada:**
+```sql
+UPDATE pendiente_api_medcol6
+SET
+    estado = CASE
+        WHEN CONCAT(documento, factura, codigo) = 'MPE30187M000447-01' THEN 'ENTREGADO'
+        ELSE estado
+    END,
+    usuario = CASE
+        WHEN CONCAT(documento, factura, codigo) = 'MPE30187M000447-01' THEN 'SYSTEM'
+        ELSE usuario
+    END,
+    fecha_entrega = CASE
+        WHEN CONCAT(documento, factura, codigo) = 'MPE30187M000447-01' THEN '2025-10-15 00:00:00'
+        ELSE fecha_entrega
+    END,
+    doc_entrega = CASE
+        WHEN CONCAT(documento, factura, codigo) = 'MPE30187M000447-01' THEN 'CDIO'
+        ELSE doc_entrega
+    END,
+    factura_entrega = CASE
+        WHEN CONCAT(documento, factura, codigo) = 'MPE30187M000447-01' THEN '66615'
+        ELSE factura_entrega
+    END,
+    updated_at = NOW()
+WHERE CONCAT(documento, factura, codigo) IN ('MPE30187M000447-01', ...);
+```
+
+**Resultado en BD:**
+| documento | factura | codigo | estado | usuario | fecha_entrega | doc_entrega | factura_entrega |
+|-----------|---------|--------|--------|---------|---------------|-------------|-----------------|
+| MPE | 30187 | M000447-01 | ENTREGADO | SYSTEM | 2025-10-15 00:00:00 | CDIO | 66615 |
+
+#### Troubleshooting
+
+**Error: "Packet too large"**
+```sql
+-- Aumentar el límite de paquetes
+SET GLOBAL max_allowed_packet = 16777216; -- 16MB
+-- O en my.cnf/my.ini:
+[mysqld]
+max_allowed_packet = 16M
+```
+
+**Error: "No se pudo decodificar el JSON"**
+```bash
+# Regenerar el JSON limpio desde Excel
+python read_excel_sheets.py
+```
+
+**Error: "Registros omitidos: X"**
+- Revisar formato de campo "Dispensación" (debe ser letras + números)
+- Verificar formato de fechas en Excel
+- Consultar logs para ver qué registros fallaron
+
+#### Parámetros Personalizables
+
+Para adaptar el script a otras tablas o campos:
+
+```python
+# En generate_update_query.py
+
+# Cambiar tabla destino (línea 103)
+sql = "UPDATE pendiente_api_medcol6\n"  # ← Cambiar aquí
+
+# Cambiar campos a actualizar (líneas 48-68)
+# Modificar el regex de extracción (línea 36)
+match = re.match(r'^([A-Za-z]+)(\d+)$', dispensacion)
+
+# Cambiar validación WHERE (línea 127)
+sql += "WHERE CONCAT(documento, factura, codigo) IN (\n"
+```
+
+#### Logs y Debugging
+
+**Backend (storage/logs/laravel.log):**
+```bash
+# Ver logs en tiempo real
+tail -f storage/logs/laravel.log | grep "Actualización masiva"
+```
+
+**Frontend (Console del navegador):**
+```javascript
+// En caso de ejecutar vía web interface
+console.log('Datos procesados:', datosFinales);
+```
+
+---
 
 ## Licencia
 
