@@ -1,45 +1,58 @@
-@extends("theme.$theme.layout")
+@extends('layouts.admin')
 
-@section('titulo')
-    Crear Molécula
-@endsection
+@section('title', 'Crear Molécula')
 
-@section('styles')
-<link href="{{ asset("assets/$theme/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css") }}" rel="stylesheet" type="text/css" />
-<link href="{{ asset('assets/css/select2-bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
-<link href="{{ asset('assets/css/select2.min.css') }}" rel="stylesheet" type="text/css" />
-@endsection
-
-@section('contenido')
-<div class="row">
-    <div class="col-lg-12">
-        @include('includes.form-error')
-        @include('includes.form-mensaje')
-        <span id="form_result"></span>
-
-        <div id="card-drawel" class="card card-info">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="card-title">@yield('titulo')</h3>
-                <div class="ml-auto d-flex">
-                    <a href="{{ route('moleculas.index') }}" class="btn btn-danger mx-1">
-                        <i class="fa fa-arrow-left"></i> Atrás
-                    </a>
-                </div>
-            </div>
-        </div>
+@section('content')
+<!-- Content Header (Page header) -->
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="m-0">Crear Molécula</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Inicio</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('compras.medcol3') }}">Órdenes de Compra</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('moleculas.index') }}">Moléculas</a></li>
+          <li class="breadcrumb-item active">Crear</li>
+        </ol>
+      </div>
     </div>
+  </div>
 </div>
 
-<div class="container mt-3">
-    <form method="POST" action="{{ route('moleculas.store') }}">
-        @csrf
-        @include('moleculas.partials.form', ['molecula' => new \App\Models\Compras\Molecula])
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-8 offset-md-2">
+        <!-- Card -->
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-plus"></i> Nueva Molécula</h3>
+          </div>
 
-        <div class="mt-3">
-            <button type="submit" class="btn btn-primary">
-                <i class="fa fa-save"></i> Guardar
-            </button>
+          <!-- Form -->
+          <form method="POST" action="{{ route('moleculas.store') }}">
+            @csrf
+
+            <div class="card-body">
+              @include('moleculas.partials.form', ['molecula' => new \App\Models\Compras\Molecula])
+            </div>
+
+            <div class="card-footer">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Guardar
+              </button>
+              <a href="{{ route('moleculas.index') }}" class="btn btn-default">
+                <i class="fas fa-times"></i> Cancelar
+              </a>
+            </div>
+          </form>
         </div>
-    </form>
-</div>
+      </div>
+    </div>
+  </div>{{-- /container-fluid --}}
+</section>{{-- /.content --}}
 @endsection

@@ -101,13 +101,12 @@
 
                 <!-- Órdenes de Compra -->
                 @if(Auth::user()->hasAnyPermission(['inventario.view', 'compras.view', 'inventario.manage']))
-                <li class="nav-item {{ request()->is('medcol3/compras*') || request()->is('ordenes*') || request()->is('informeTarjetasCompras*') || request()->is('BuscarOrdenesDeCompra*') ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link {{ request()->is('medcol3/compras*') || request()->is('ordenes*') || request()->is('informeTarjetasCompras*') || request()->is('BuscarOrdenesDeCompra*') ? 'active' : '' }}">
+                <li class="nav-item {{ request()->is('medcol3/compras*') || request()->is('ordenes*') || request()->is('informeTarjetasCompras*') || request()->is('BuscarOrdenesDeCompra*') || request()->is('moleculas*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('medcol3/compras*') || request()->is('ordenes*') || request()->is('informeTarjetasCompras*') || request()->is('BuscarOrdenesDeCompra*') || request()->is('moleculas*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-shopping-cart text-success"></i>
                         <p>
                             Órdenes de Compra
                             <i class="right fas fa-angle-left"></i>
-                            <span class="badge badge-success right">3</span>
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
@@ -118,6 +117,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="{{ route('moleculas.index') }}" class="nav-link {{ request()->routeIs('moleculas.*') || request()->is('moleculas*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-warning"></i>
+                                <p>Moléculas</p>
+                            </a>
+                        </li>
+                        <!-- <li class="nav-item">
                             <a href="{{ route('ordenes.resumen') }}" class="nav-link {{ request()->routeIs('ordenes.resumen') ? 'active' : '' }}">
                                 <i class="far fa-circle nav-icon text-info"></i>
                                 <p>Resumen de Compras</p>
@@ -128,7 +133,7 @@
                                 <i class="far fa-circle nav-icon text-success"></i>
                                 <p>Buscar Órdenes</p>
                             </a>
-                        </li>
+                        </li> -->
                     </ul>
                 </li>
                 @endif

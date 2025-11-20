@@ -14,6 +14,9 @@
     <link rel="stylesheet" href="{{ asset('assets/lte/dist/css/adminlte.min.css') }}">
     <!-- Toastr -->
     <link rel="stylesheet" href="{{ asset('assets/lte/plugins/toastr/toastr.min.css') }}">
+    <!-- Select2 -->
+    <link rel="stylesheet" href="{{ asset('assets/lte/plugins/select2/css/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/lte/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
     <!-- Custom Sidebar CSS -->
     <link rel="stylesheet" href="{{ asset('css/modern-sidebar.css') }}">
 
@@ -284,7 +287,7 @@
     <!-- Moment.js -->
     <script src="{{ asset('assets/lte/plugins/moment/moment.min.js') }}"></script>
     <!-- Select2 -->
-    <script src="{{ asset('assets/js/jquery-select2/select2.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('assets/lte/plugins/select2/js/select2.full.min.js') }}"></script>
     <!-- jQuery Validation -->
     <script src="{{ asset('assets/js/jquery-validation/jquery.validate.min.js') }}"></script>
     <script src="{{ asset('assets/js/jquery-validation/localization/messages_es.min.js') }}"></script>

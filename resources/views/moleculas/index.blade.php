@@ -1,78 +1,102 @@
-@extends("theme.$theme.layout")
+@extends('layouts.admin')
 
-@section('titulo') Administrar Moléculas @endsection
+@section('title', 'Administrar Moléculas')
 
-@section('styles')
-<link href="{{ asset("assets/$theme/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css") }}" rel="stylesheet" type="text/css" />
-<link href="{{ asset('assets/css/select2-bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
-<link href="{{ asset('assets/css/select2.min.css') }}" rel="stylesheet" type="text/css" />
-@endsection
+@section('content')
+<!-- Content Header (Page header) -->
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="m-0">Administrar Moléculas</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Inicio</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('compras.medcol3') }}">Órdenes de Compra</a></li>
+          <li class="breadcrumb-item active">Moléculas</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
 
-@section('contenido')
-{{-- Header / Card con botón Atrás --}}
-<div class="row">
-  <div class="col-lg-12">
-    <div id="card-drawel" class="card card-info">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h3 class="card-title">@yield('titulo')</h3>
-        <div class="ml-auto d-flex">
-          <a href="{{ route('moleculas.import.form') }}" class="btn btn-info mx-1">
-            <i class="fa fa-file"></i> Cargar Proveedores
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+    {{-- Botones de acción --}}
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="btn-group">
+          <a href="{{ route('moleculas.create') }}" class="btn btn-success">
+            <i class="fa fa-plus"></i> Nueva Molécula
           </a>
-          <a href="{{ route('submenu') }}" class="btn btn-danger mx-1">
+          <a href="{{ route('moleculas.import.form') }}" class="btn btn-info">
+            <i class="fa fa-file-excel"></i> Cargar Proveedores
+          </a>
+          <a href="{{ route('compras.medcol3') }}" class="btn btn-danger">
             <i class="fa fa-arrow-left"></i> Atrás
           </a>
         </div>
       </div>
     </div>
-  </div>
-</div>
-
-<div class="container mt-3">
-  @include('includes.form-mensaje')
-  @include('includes.form-error')
 
   {{-- Filtros --}}
-  <form id="frmFiltros" method="GET" class="mb-3">
-    <div class="form-row">
-      <div class="col-md-3 mb-2">
-        <label class="mb-0">Buscar</label>
-        <input type="text" name="q" class="form-control form-control-sm" value="{{ request('q') }}" placeholder="Código o descripción">
-      </div>
-      <div class="col-md-2 mb-2">
-        <label class="mb-0">Código</label>
-        <input type="text" name="codigo" class="form-control form-control-sm" value="{{ request('codigo') }}">
-      </div>
-      <div class="col-md-3 mb-2">
-        <label class="mb-0">Descripción</label>
-        <input type="text" name="descripcion" class="form-control form-control-sm" value="{{ request('descripcion') }}">
-      </div>
-      <div class="col-md-2 mb-2">
-        <label class="mb-0">Marca</label>
-        <input type="text" name="marca" class="form-control form-control-sm" value="{{ request('marca') }}">
-      </div>
-      <div class="col-md-2 mb-2">
-        <label class="mb-0">Presentación</label>
-        <input type="text" name="presentacion" class="form-control form-control-sm" value="{{ request('presentacion') }}">
-      </div>
-  
-      <div class="col-md-2 mb-2 d-flex align-items-end">
-        <button class="btn btn-info btn-sm mr-2" id="btnBuscar" type="submit">
-          <i class="fa fa-search"></i> Buscar
+  <div class="card card-secondary collapsed-card mb-3">
+    <div class="card-header">
+      <h3 class="card-title"><i class="fas fa-filter"></i> Filtros de Búsqueda</h3>
+      <div class="card-tools">
+        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+          <i class="fas fa-plus"></i>
         </button>
-        <a href="{{ route('moleculas.index') }}" class="btn btn-secondary btn-sm" id="btnLimpiar">Limpiar</a>
       </div>
     </div>
-  </form>
+    <div class="card-body" style="display: none;">
+      <form id="frmFiltros" method="GET">
+        <div class="row">
+          <div class="col-md-3 mb-2">
+            <label class="mb-0 small">Buscar</label>
+            <input type="text" name="q" class="form-control form-control-sm" value="{{ request('q') }}" placeholder="Código o descripción">
+          </div>
+          <div class="col-md-2 mb-2">
+            <label class="mb-0 small">Código</label>
+            <input type="text" name="codigo" class="form-control form-control-sm" value="{{ request('codigo') }}">
+          </div>
+          <div class="col-md-3 mb-2">
+            <label class="mb-0 small">Descripción</label>
+            <input type="text" name="descripcion" class="form-control form-control-sm" value="{{ request('descripcion') }}">
+          </div>
+          <div class="col-md-2 mb-2">
+            <label class="mb-0 small">Marca</label>
+            <input type="text" name="marca" class="form-control form-control-sm" value="{{ request('marca') }}">
+          </div>
+          <div class="col-md-2 mb-2">
+            <label class="mb-0 small">Presentación</label>
+            <input type="text" name="presentacion" class="form-control form-control-sm" value="{{ request('presentacion') }}">
+          </div>
 
-  {{-- Contenedor de tabla y paginación (se actualizan por AJAX) --}}
-  <div id="tablaWrap">
-    @include('moleculas.partials.table', ['moleculas' => $moleculas])
+          <div class="col-md-12 mb-2 d-flex align-items-end justify-content-end">
+            <button class="btn btn-info btn-sm mr-2" id="btnBuscar" type="submit">
+              <i class="fa fa-search"></i> Buscar
+            </button>
+            <a href="{{ route('moleculas.index') }}" class="btn btn-secondary btn-sm" id="btnLimpiar">
+              <i class="fa fa-eraser"></i> Limpiar
+            </a>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
-  <div id="paginacionWrap">
-    @include('moleculas.partials.pagination', ['moleculas' => $moleculas])
-  </div>
-</div>
+
+    {{-- Contenedor de tabla y paginación (se actualizan por AJAX) --}}
+    <div id="tablaWrap">
+      @include('moleculas.partials.table', ['moleculas' => $moleculas])
+    </div>
+    <div id="paginacionWrap">
+      @include('moleculas.partials.pagination', ['moleculas' => $moleculas])
+    </div>
+  </div>{{-- /container-fluid --}}
+</section>{{-- /.content --}}
 @endsection
 
 @section('scripts')
