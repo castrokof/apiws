@@ -99,6 +99,16 @@
                 </li>
                 @endif
 
+                <!-- Smart Pendi -->
+                @if(Auth::user()->hasAnyPermission(['smart.pendi.view', 'medcol2.pendientes.view', 'medcol6.pendientes.view']))
+                <li class="nav-item">
+                    <a href="{{ route('smart.pendi') }}" class="nav-link {{ request()->routeIs('smart.pendi*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-brain text-info"></i>
+                        <p>Smart Pendi</p>
+                    </a>
+                </li>
+                @endif
+
                 <!-- Órdenes de Compra -->
                 @if(Auth::user()->hasAnyPermission(['inventario.view', 'compras.view', 'inventario.manage']))
                 <li class="nav-item {{ request()->is('medcol3/compras*') || request()->is('ordenes*') || request()->is('informeTarjetasCompras*') || request()->is('BuscarOrdenesDeCompra*') || request()->is('moleculas*') ? 'menu-open' : '' }}">
@@ -140,8 +150,8 @@
 
                 <!-- Medcol2 -->
                 @if(Auth::user()->hasAnyPermission(['medcol2.pendientes.view', 'medcol2.dispensado.view']))
-                <li class="nav-item {{ request()->is('medcol2/*') ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link {{ request()->is('medcol2/*') ? 'active' : '' }}">
+                <li class="nav-item {{ request()->is('medcol2/*') || request()->is('medcol6/*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('medcol2/*') || request()->is('medcol6/*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-pills"></i>
                         <p>
                             API Medcol
@@ -170,6 +180,14 @@
                             <a href="{{ route('medcol6.informes') }}" class="nav-link {{ request()->is('medcol6/informes') ? 'active' : '' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Informes</p>
+                            </a>
+                        </li>
+                        @endif
+                        @if(Auth::user()->hasPermission('medcol6.saldos.view'))
+                        <li class="nav-item">
+                            <a href="{{ route('medcol6.saldos') }}" class="nav-link {{ request()->is('medcol6/saldos*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Saldos</p>
                             </a>
                         </li>
                         @endif

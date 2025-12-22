@@ -597,6 +597,14 @@
                     <div class="menu-item-title">Reportes de Pacientes</div>
                     <div class="menu-item-description">Análisis por paciente, historias clínicas y valores facturados</div>
                 </div>
+
+                <div class="menu-item warning" data-section="ordenes-compra" data-type="warning">
+                    <div class="menu-item-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="menu-item-title">Órdenes de Compra Medcol3</div>
+                    <div class="menu-item-description">Resumen de órdenes de compra, valores totales y análisis por proveedor</div>
+                </div>
             </div>
         </div>
 
@@ -887,6 +895,64 @@
                 </div>
             </div>
         </div>
+
+        <!-- Órdenes de Compra Medcol3 -->
+        <div id="content-ordenes-compra" class="content-area">
+            <div class="content-header">
+                <h3>
+                    <i class="fas fa-shopping-cart"></i>
+                    Órdenes de Compra - Medcol3
+                </h3>
+            </div>
+            <div class="content-body">
+                <!-- Estadísticas principales -->
+                <div class="stats-grid" id="ordenes-compra-stats">
+                    <!-- Se cargarán dinámicamente -->
+                </div>
+
+                <!-- Gráficas -->
+                <div class="charts-grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem;">
+                    <!-- Gráfica de Top 5 Proveedores -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">
+                                <i class="fas fa-chart-bar"></i>
+                                Top 5 Proveedores
+                            </h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chartTopProveedores"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Gráfica de Top 5 Medicamentos -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">
+                                <i class="fas fa-pills"></i>
+                                Top 5 Medicamentos Más Comprados
+                            </h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chartTopMedicamentos"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfica de Órdenes por Mes -->
+                <div class="chart-card" style="margin-top: 1.5rem;">
+                    <div class="chart-header">
+                        <h3 class="chart-title">
+                            <i class="fas fa-chart-line"></i>
+                            Tendencia Mensual de Órdenes de Compra
+                        </h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chartOrdenesPorMes"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
@@ -1016,6 +1082,9 @@
                         break;
                     case 'reportes-pacientes':
                         loadReportesPacientes(filters);
+                        break;
+                    case 'ordenes-compra':
+                        loadOrdenesCompra(filters);
                         break;
                 }
             }
@@ -2642,6 +2711,307 @@
                 });
 
                 console.log('Tabla de medicamentos pendientes cargada correctamente');
+            }
+
+            // ============================================
+            // ÓRDENES DE COMPRA MEDCOL3
+            // ============================================
+
+            // Variable global para almacenar las instancias de los gráficos
+            const chartsOrdenesCompra = {
+                topProveedores: null,
+                topMedicamentos: null,
+                ordenesPorMes: null
+            };
+
+            // Cargar datos de órdenes de compra
+            function loadOrdenesCompra(filters) {
+                showLoading('ordenes-compra-stats');
+
+                $.ajax({
+                    url: "{{ route('dashboard.ordenes-compra-medcol3') }}",
+                    method: 'GET',
+                    data: {
+                        fecha_inicio: filters.fecha_inicio,
+                        fecha_fin: filters.fecha_fin
+                    },
+                    success: function(data) {
+                        console.log('Datos de órdenes de compra recibidos:', data);
+                        renderOrdenesCompraStats(data);
+                        updateChartTopProveedores(data.top_proveedores);
+                        updateChartTopMedicamentos(data.top_medicamentos);
+                        updateChartOrdenesPorMes(data.ordenes_por_mes);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error al cargar órdenes de compra:', error);
+                        showError('ordenes-compra-stats', 'Error al cargar las órdenes de compra');
+                    }
+                });
+            }
+
+            // Renderizar estadísticas de órdenes de compra
+            function renderOrdenesCompraStats(data) {
+                const container = $('#ordenes-compra-stats');
+
+                const html = `
+                    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">${data.total_ordenes.toLocaleString('es-ES')}</div>
+                            <div class="stat-label">Total Órdenes de Compra</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                        <div class="stat-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">$${parseFloat(data.valor_total).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                            <div class="stat-label">Valor Total</div>
+                        </div>
+                    </div>
+                `;
+
+                container.html(html);
+            }
+
+            // Gráfica de Top 5 Proveedores
+            function updateChartTopProveedores(data) {
+                const ctx = document.getElementById('chartTopProveedores');
+                if (!ctx) return;
+
+                // Destruir gráfico anterior si existe
+                if (chartsOrdenesCompra.topProveedores) {
+                    chartsOrdenesCompra.topProveedores.destroy();
+                }
+
+                if (!data || data.length === 0) {
+                    ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+                    return;
+                }
+
+                const labels = data.map(item => item.proveedor || 'Sin proveedor');
+                const valores = data.map(item => parseFloat(item.total_valor));
+
+                chartsOrdenesCompra.topProveedores = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Valor Total',
+                            data: valores,
+                            backgroundColor: [
+                                'rgba(99, 102, 241, 0.8)',
+                                'rgba(16, 185, 129, 0.8)',
+                                'rgba(245, 158, 11, 0.8)',
+                                'rgba(239, 68, 68, 0.8)',
+                                'rgba(6, 182, 212, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(99, 102, 241, 1)',
+                                'rgba(16, 185, 129, 1)',
+                                'rgba(245, 158, 11, 1)',
+                                'rgba(239, 68, 68, 1)',
+                                'rgba(6, 182, 212, 1)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Valor: $' + context.parsed.y.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value.toLocaleString('es-ES');
+                                    }
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                });
+
+                console.log('Gráfica de top proveedores renderizada');
+            }
+
+            // Gráfica de Top 5 Medicamentos Más Comprados
+            function updateChartTopMedicamentos(data) {
+                const ctx = document.getElementById('chartTopMedicamentos');
+                if (!ctx) return;
+
+                // Destruir gráfico anterior si existe
+                if (chartsOrdenesCompra.topMedicamentos) {
+                    chartsOrdenesCompra.topMedicamentos.destroy();
+                }
+
+                if (!data || data.length === 0) {
+                    ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+                    return;
+                }
+
+                const labels = data.map(item => item.nombre);
+                const valores = data.map(item => parseFloat(item.total_valor));
+
+                chartsOrdenesCompra.topMedicamentos = new Chart(ctx, {
+                    type: 'horizontalBar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Valor Total',
+                            data: valores,
+                            backgroundColor: [
+                                'rgba(139, 92, 246, 0.8)',
+                                'rgba(16, 185, 129, 0.8)',
+                                'rgba(245, 158, 11, 0.8)',
+                                'rgba(239, 68, 68, 0.8)',
+                                'rgba(6, 182, 212, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(139, 92, 246, 1)',
+                                'rgba(16, 185, 129, 1)',
+                                'rgba(245, 158, 11, 1)',
+                                'rgba(239, 68, 68, 1)',
+                                'rgba(6, 182, 212, 1)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const cantidad = data[context.dataIndex].total_cantidad;
+                                        return [
+                                            'Valor: $' + context.parsed.x.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}),
+                                            'Cantidad: ' + parseFloat(cantidad).toLocaleString('es-ES') + ' unidades'
+                                        ];
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value.toLocaleString('es-ES');
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                console.log('Gráfica de top medicamentos renderizada');
+            }
+
+            // Gráfica de Órdenes por Mes
+            function updateChartOrdenesPorMes(data) {
+                const ctx = document.getElementById('chartOrdenesPorMes');
+                if (!ctx) return;
+
+                // Destruir gráfico anterior si existe
+                if (chartsOrdenesCompra.ordenesPorMes) {
+                    chartsOrdenesCompra.ordenesPorMes.destroy();
+                }
+
+                if (!data || data.length === 0) {
+                    ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+                    return;
+                }
+
+                const labels = data.map(item => {
+                    const [year, month] = item.mes.split('-');
+                    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                    return monthNames[parseInt(month) - 1] + ' ' + year;
+                });
+                const valores = data.map(item => parseFloat(item.total_valor));
+
+                chartsOrdenesCompra.ordenesPorMes = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Valor Total',
+                            data: valores,
+                            borderColor: 'rgba(99, 102, 241, 1)',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 7
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Valor: $' + context.parsed.y.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value.toLocaleString('es-ES');
+                                    }
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                });
+
+                console.log('Gráfica de órdenes por mes renderizada');
             }
 
             // Event listeners para filtros

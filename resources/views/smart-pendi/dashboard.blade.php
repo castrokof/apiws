@@ -143,6 +143,14 @@
                                 <small class="d-block text-muted">Gestión y Seguimiento</small>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="frecuencia-tab" data-toggle="tab" href="#frecuencia-panel" role="tab">
+                                <i class="fas fa-chart-line text-purple mr-1"></i>
+                                <span class="d-none d-md-inline">Análisis de Frecuencia</span>
+                                <span class="d-md-none">Frecuencia</span>
+                                <small class="d-block text-muted">Medicamentos por Paciente</small>
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 <div class="card-body p-0">
@@ -203,6 +211,46 @@
                                         Actualizar Sugerencias
                                     </button>
                                 </div>
+
+                                <!-- Search by Historia Number -->
+                                <div class="card mb-3 border-primary">
+                                    <div class="card-body p-3">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-3">
+                                                <label class="mb-0 font-weight-bold text-primary">
+                                                    <i class="fas fa-search mr-1"></i>
+                                                    Buscar por Historia:
+                                                </label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <input type="text"
+                                                       id="suggestions-search-historia"
+                                                       class="form-control"
+                                                       placeholder="Ingrese número de historia (ej: 12345678)">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button"
+                                                        class="btn btn-primary btn-block"
+                                                        id="btn-search-suggestions">
+                                                    <i class="fas fa-filter mr-1"></i>
+                                                    Filtrar
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-2">
+                                            <div class="col-12">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-secondary"
+                                                        id="btn-clear-suggestions-filter">
+                                                    <i class="fas fa-times mr-1"></i>
+                                                    Limpiar Filtro
+                                                </button>
+                                                <span class="ml-2 text-muted small" id="suggestions-filter-status"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="alert alert-info">
                                     <i class="fas fa-info-circle mr-2"></i>
                                     <strong>Información:</strong> Estas sugerencias priorizan pacientes con múltiples medicamentos pendientes para optimizar las entregas consolidadas.
@@ -321,6 +369,68 @@
                                 <!-- Patient History Detail Section -->
                                 <div id="patient-history-detail" style="display: none;">
                                     <!-- Patient history timeline will be loaded here via JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FASE 12: Análisis de Frecuencia de Medicamentos Tab -->
+                        <div class="tab-pane fade" id="frecuencia-panel" role="tabpanel">
+                            <div class="p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-chart-line mr-2"></i>
+                                        Análisis de Frecuencia de Medicamentos por Paciente
+                                    </h6>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="refresh-frecuencia">
+                                        <i class="fas fa-sync-alt mr-1"></i>
+                                        Actualizar
+                                    </button>
+                                </div>
+
+                                <!-- Info Alert -->
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    <strong>Información:</strong> Esta sección analiza qué medicamentos genera más pendientes cada paciente y el patrón de tiempo entre entregas del mismo medicamento.
+                                </div>
+
+                                <!-- Patient Search Section -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-search mr-2"></i>
+                                            Buscar Paciente para Análisis
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-group mb-0">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-user-injured"></i>
+                                                    </span>
+                                                </div>
+                                                <input type="text"
+                                                       class="form-control"
+                                                       id="frecuencia-search-input"
+                                                       placeholder="Ingrese número de historia del paciente">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-primary" type="button" id="btn-search-frecuencia">
+                                                        <i class="fas fa-chart-bar mr-1"></i>
+                                                        Analizar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <small class="form-text text-muted">
+                                                <i class="fas fa-info-circle mr-1"></i>
+                                                Ingrese la historia clínica del paciente para ver el análisis de frecuencia
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Frequency Analysis Results -->
+                                <div id="frecuencia-results" style="display: none;">
+                                    <!-- Results will be loaded here via JavaScript -->
                                 </div>
                             </div>
                         </div>
@@ -478,6 +588,8 @@
 
 <script>
     let pendientesTable;
+    let allSuggestions = []; // Store all suggestions for filtering
+    let currentFilteredHistoria = null; // Current filtered historia
 
     $(document).ready(function() {
         loadStatistics();
@@ -654,8 +766,11 @@
         $.get('{{ route("smart.pendi.suggestions") }}')
             .done(function(response) {
                 if (response.success) {
-                    displaySuggestions(response.suggestions);
-                    displayInventoryBasedSuggestions(response.suggestions);
+                    allSuggestions = response.suggestions; // Store all suggestions
+                    currentFilteredHistoria = null; // Reset filter
+                    displaySuggestions(allSuggestions);
+                    displayInventoryBasedSuggestions(allSuggestions);
+                    updateSuggestionsFilterStatus();
                 } else {
                     Swal.fire('Error', 'No se pudieron cargar las sugerencias', 'error');
                 }
@@ -681,8 +796,11 @@
         $.get('{{ route("smart.pendi.suggestions") }}')
             .done(function(response) {
                 if (response.success) {
-                    displaySuggestions(response.suggestions);
-                    displayInventoryBasedSuggestions(response.suggestions);
+                    allSuggestions = response.suggestions; // Store all suggestions
+                    currentFilteredHistoria = null; // Reset filter
+                    displaySuggestions(allSuggestions);
+                    displayInventoryBasedSuggestions(allSuggestions);
+                    updateSuggestionsFilterStatus();
                     showSuccessMessage('Sugerencias actualizadas');
                 } else {
                     Swal.fire('Error', 'No se pudieron cargar las sugerencias', 'error');
@@ -1354,23 +1472,50 @@
         $('#contactModal').modal('show');
     }
 
-    // View patient details
-    function viewPatientDetails(documento) {
+    /**
+     * View patient details - Load patient history
+     * Redirects to patient history tab and loads full history
+     */
+    function viewPatientDetails(historia) {
+        if (!historia) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se proporcionó la historia del paciente'
+            });
+            return;
+        }
+
+        // Show loading message
         Swal.fire({
-            title: 'Detalles del Paciente',
-            html: `
-                <div class="text-left">
-                    <p><strong>Documento:</strong> ${documento}</p>
-                    <p class="text-muted">Esta funcionalidad permitirá ver el historial completo del paciente y todos sus pendientes.</p>
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        En desarrollo: Integración con sistema de historiales
-                    </div>
-                </div>
-            `,
-            icon: 'info',
-            confirmButtonText: 'Entendido'
+            title: 'Cargando Histórico',
+            html: 'Obteniendo información del paciente...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
         });
+
+        // Switch to patient history tab
+        $('#historico-tab').tab('show');
+
+        // Wait a moment for tab animation to complete
+        setTimeout(function() {
+            // Load patient history
+            loadPatientHistory(historia);
+
+            // Close loading message
+            Swal.close();
+
+            // Show success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Histórico Cargado',
+                text: 'Mostrando el histórico del paciente: ' + historia,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }, 300);
     }
 
     // View details (placeholder)
@@ -1618,10 +1763,16 @@
                             <i class="fas fa-user-circle mr-2"></i>
                             ${paciente.nombre_completo}
                         </h5>
-                        <button class="btn btn-light btn-sm" onclick="showModalRegistrarGestion('${paciente.historia}')">
-                            <i class="fas fa-plus mr-1"></i>
-                            Registrar Gestión
-                        </button>
+                        <div>
+                            <button class="btn btn-light btn-sm mr-2" onclick="printPatientHistory('${paciente.historia}')">
+                                <i class="fas fa-file-pdf mr-1"></i>
+                                Exportar a PDF
+                            </button>
+                            <button class="btn btn-light btn-sm" onclick="showModalRegistrarGestion('${paciente.historia}')">
+                                <i class="fas fa-plus mr-1"></i>
+                                Registrar Gestión
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -1711,10 +1862,10 @@
                         <table class="table table-sm table-hover mb-0">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>Factura</th>
+                                    <th>Pendiente</th>
                                     <th>Medicamento</th>
                                     <th>Código</th>
-                                    <th>Cantidad</th>
+                                    <th>Cant. Pendiente</th>
                                     <th>Estado</th>
                                     <th>Fecha</th>
                                 </tr>
@@ -1725,7 +1876,7 @@
                                         <td>${p.factura || 'N/A'}</td>
                                         <td>${p.nombre || 'N/A'}</td>
                                         <td>${p.codigo || 'N/A'}</td>
-                                        <td>${p.cantidad || 'N/A'}</td>
+                                        <td>${p.cantord || 'N/A'}</td>
                                         <td><span class="badge badge-warning">${p.estado || 'N/A'}</span></td>
                                         <td>${p.fecha || 'N/A'}</td>
                                     </tr>
@@ -1860,6 +2011,165 @@
         $('#modalRegistrarGestion').modal('show');
     }
 
+    /**
+     * Open print view for patient history (FASE 11)
+     * Shows dialog to select report type
+     */
+    function printPatientHistory(historia) {
+        if (!historia) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se especificó la historia del paciente'
+            });
+            return;
+        }
+
+        // Show report type selection dialog
+        Swal.fire({
+            title: '<strong>Seleccione el Tipo de Informe</strong>',
+            icon: 'question',
+            html:
+                '<div class="text-left">' +
+                '<p class="mb-3">Elija el tipo de informe que desea generar:</p>' +
+                '<div class="card mb-2 border-primary">' +
+                    '<div class="card-body p-3">' +
+                        '<h6 class="text-primary mb-2"><i class="fas fa-file-alt mr-2"></i>Informe Resumen</h6>' +
+                        '<p class="mb-0 small text-muted">Incluye únicamente los datos del paciente y el histórico de eventos registrados.</p>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="card border-success">' +
+                    '<div class="card-body p-3">' +
+                        '<h6 class="text-success mb-2"><i class="fas fa-file-medical mr-2"></i>Informe Detallado</h6>' +
+                        '<p class="mb-0 small text-muted">Incluye datos del paciente, pendientes activos y el histórico completo de eventos.</p>' +
+                    '</div>' +
+                '</div>' +
+                '</div>',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-file-alt mr-2"></i>Resumen',
+            denyButtonText: '<i class="fas fa-file-medical mr-2"></i>Detallado',
+            cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancelar',
+            confirmButtonColor: '#007bff',
+            denyButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            width: '600px',
+            customClass: {
+                confirmButton: 'btn btn-primary btn-lg mx-1',
+                denyButton: 'btn btn-success btn-lg mx-1',
+                cancelButton: 'btn btn-secondary btn-lg mx-1'
+            }
+        }).then((result) => {
+            let tipo = null;
+
+            if (result.isConfirmed) {
+                tipo = 'resumen';
+            } else if (result.isDenied) {
+                tipo = 'detalle';
+            }
+
+            if (tipo) {
+                openPrintWindow(historia, tipo);
+            }
+        });
+    }
+
+    /**
+     * Open print window with specified report type
+     */
+    function openPrintWindow(historia, tipo) {
+        // Build URL for print view with tipo parameter
+        const printUrl = `/smart/pendi/patient-history-print/${historia}?tipo=${tipo}`;
+
+        // Open in new window/tab
+        const printWindow = window.open(printUrl, '_blank', 'width=1024,height=768');
+
+        if (!printWindow) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Bloqueador de Ventanas',
+                html: 'Por favor, permita las ventanas emergentes para este sitio.<br>' +
+                      'Luego haga clic en el botón "Exportar a PDF" nuevamente.'
+            });
+        }
+    }
+
+    /**
+     * Filter suggestions by historia number
+     */
+    function filterSuggestionsByHistoria(historia) {
+        if (!historia || historia.trim() === '') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campo Vacío',
+                text: 'Por favor ingrese un número de historia para filtrar'
+            });
+            return;
+        }
+
+        const filtered = allSuggestions.filter(function(suggestion) {
+            return suggestion.historia && suggestion.historia.toString().includes(historia.trim());
+        });
+
+        currentFilteredHistoria = historia.trim();
+
+        if (filtered.length === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Sin Resultados',
+                text: 'No se encontraron sugerencias para la historia: ' + historia
+            });
+            displaySuggestions([]);
+        } else {
+            displaySuggestions(filtered);
+            Swal.fire({
+                icon: 'success',
+                title: 'Filtro Aplicado',
+                text: 'Se encontraron ' + filtered.length + ' sugerencia(s) para la historia: ' + historia,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        updateSuggestionsFilterStatus();
+    }
+
+    /**
+     * Clear suggestions filter
+     */
+    function clearSuggestionsFilter() {
+        currentFilteredHistoria = null;
+        $('#suggestions-search-historia').val('');
+        displaySuggestions(allSuggestions);
+        updateSuggestionsFilterStatus();
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Filtro Limpiado',
+            text: 'Mostrando todas las sugerencias',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    }
+
+    /**
+     * Update filter status message
+     */
+    function updateSuggestionsFilterStatus() {
+        const statusEl = $('#suggestions-filter-status');
+
+        if (currentFilteredHistoria) {
+            statusEl.html(
+                '<i class="fas fa-filter text-primary mr-1"></i>' +
+                'Filtrando por historia: <strong>' + currentFilteredHistoria + '</strong>'
+            );
+            statusEl.removeClass('text-muted').addClass('text-primary');
+        } else {
+            statusEl.html('<i class="fas fa-list mr-1"></i>Mostrando todas las sugerencias');
+            statusEl.removeClass('text-primary').addClass('text-muted');
+        }
+    }
+
     // FASE 9: Modal event handlers
     $(document).ready(function() {
         // Toggle follow-up date field
@@ -1889,7 +2199,7 @@
                 titulo: $('#gestion-titulo').val(),
                 descripcion: $('#gestion-descripcion').val(),
                 resultado_contacto: $('#gestion-resultado').val() || null,
-                requiere_seguimiento: $('#gestion-requiere-seguimiento').is(':checked'),
+                requiere_seguimiento: $('#gestion-requiere-seguimiento').is(':checked') ? 1 : 0,
                 fecha_seguimiento: $('#gestion-fecha-seguimiento').val() || null
             };
 
@@ -1956,6 +2266,26 @@
                 }
             });
         });
+
+        // Suggestions Filter: Search button
+        $('#btn-search-suggestions').on('click', function() {
+            const historia = $('#suggestions-search-historia').val();
+            filterSuggestionsByHistoria(historia);
+        });
+
+        // Suggestions Filter: Clear button
+        $('#btn-clear-suggestions-filter').on('click', function() {
+            clearSuggestionsFilter();
+        });
+
+        // Suggestions Filter: Enter key on input
+        $('#suggestions-search-historia').on('keypress', function(e) {
+            if (e.which === 13) { // Enter key
+                e.preventDefault();
+                const historia = $(this).val();
+                filterSuggestionsByHistoria(historia);
+            }
+        });
     });
 
     // End of FASE 8 & 9 Functions
@@ -1989,6 +2319,280 @@
             "colvis": "Visibilidad"
         }
     }
+
+    // ===================================================================
+    // FASE 12: Medication Frequency Analysis JavaScript Functions
+    // ===================================================================
+
+    /**
+     * Search and analyze medication frequency for a patient
+     */
+    function analyzeFrequency() {
+        const historia = $('#frecuencia-search-input').val().trim();
+
+        if (!historia) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campo Vacío',
+                text: 'Por favor ingrese un número de historia'
+            });
+            return;
+        }
+
+        // Show loading
+        Swal.fire({
+            title: 'Analizando',
+            html: 'Obteniendo análisis de frecuencia de medicamentos...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        $.get(`/smart/pendi/medication-frequency/${historia}`)
+            .done(function(response) {
+                if (response.success) {
+                    displayFrequencyAnalysis(response.data);
+                    Swal.close();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message
+                    });
+                }
+            })
+            .fail(function(xhr) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: xhr.responseJSON?.message || 'Error al obtener el análisis'
+                });
+            });
+    }
+
+    /**
+     * Display frequency analysis results
+     */
+    function displayFrequencyAnalysis(data) {
+        const container = $('#frecuencia-results');
+        container.empty().show();
+
+        // Patient Info Header
+        const patientHeader = `
+            <div class="card mb-3 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-circle mr-2"></i>
+                        ${data.paciente.nombre_completo}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Historia:</strong> ${data.paciente.historia}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Documento:</strong> ${data.paciente.documento}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Total Pendientes:</strong> ${data.total_pendientes}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Summary Cards
+        const summaryCards = `
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="card border-left-primary shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Medicamentos Diferentes
+                                    </div>
+                                    <div class="h3 mb-0 font-weight-bold text-gray-800">
+                                        ${data.total_medicamentos_diferentes}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-pills fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-left-success shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Medicamento Más Frecuente
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        ${data.medicamentos[0]?.nombre || 'N/A'}
+                                    </div>
+                                    <small class="text-muted">${data.medicamentos[0]?.total_pendientes || 0} pendientes</small>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-chart-bar fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Medication Frequency Table
+        let tableRows = '';
+        data.medicamentos.forEach(function(med, index) {
+            const frecuenciaText = med.frecuencia_dias
+                ? `Cada ${med.frecuencia_dias} días`
+                : 'Solo 1 registro';
+
+            const badgeClass = med.total_pendientes > 5 ? 'danger' :
+                             (med.total_pendientes > 2 ? 'warning' : 'info');
+
+            tableRows += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><strong>${med.nombre}</strong><br><small class="text-muted">${med.codigo}</small></td>
+                    <td class="text-center">
+                        <span class="badge badge-${badgeClass} badge-pill">${med.total_pendientes}</span>
+                    </td>
+                    <td class="text-center">
+                        ${med.frecuencia_dias ? `<strong>${med.frecuencia_dias}</strong> días` : '<span class="text-muted">-</span>'}
+                    </td>
+                    <td class="text-center">${new Date(med.primera_fecha).toLocaleDateString('es-ES')}</td>
+                    <td class="text-center">${new Date(med.ultima_fecha).toLocaleDateString('es-ES')}</td>
+                    <td class="text-center">${med.dias_transcurridos} días</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-outline-info" onclick="showMedicationDetails(${index}, '${med.nombre}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        const table = `
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-table mr-2"></i>
+                        Análisis de Frecuencia por Medicamento
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Medicamento</th>
+                                    <th class="text-center">Total</th>
+                                    <th class="text-center">Frecuencia</th>
+                                    <th class="text-center">Primera Fecha</th>
+                                    <th class="text-center">Última Fecha</th>
+                                    <th class="text-center">Rango (días)</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        container.append(patientHeader + summaryCards + table);
+
+        // Store data globally for detail view
+        window.currentFrequencyData = data.medicamentos;
+    }
+
+    /**
+     * Show medication details in modal
+     */
+    function showMedicationDetails(index, nombre) {
+        const med = window.currentFrequencyData[index];
+
+        let pendientesRows = '';
+        med.pendientes.forEach(function(p, i) {
+            pendientesRows += `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${new Date(p.fecha).toLocaleDateString('es-ES')}</td>
+                    <td><span class="badge badge-${p.estado === 'ENTREGADO' ? 'success' : 'warning'}">${p.estado}</span></td>
+                    <td>${p.factura || 'N/A'}</td>
+                </tr>
+            `;
+        });
+
+        Swal.fire({
+            title: `<strong>${nombre}</strong>`,
+            html: `
+                <div class="text-left">
+                    <p><strong>Código:</strong> ${med.codigo}</p>
+                    <p><strong>Total de pendientes:</strong> ${med.total_pendientes}</p>
+                    <p><strong>Frecuencia promedio:</strong> ${med.frecuencia_dias ? `${med.frecuencia_dias} días` : 'N/A'}</p>
+                    <hr>
+                    <h6>Detalle de Pendientes:</h6>
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Factura</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${pendientesRows}
+                        </tbody>
+                    </table>
+                </div>
+            `,
+            width: '700px',
+            confirmButtonText: 'Cerrar'
+        });
+    }
+
+    // Event handlers for frequency analysis
+    $(document).ready(function() {
+        // Search button click
+        $('#btn-search-frecuencia').on('click', function() {
+            analyzeFrequency();
+        });
+
+        // Enter key in search input
+        $('#frecuencia-search-input').on('keypress', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                analyzeFrequency();
+            }
+        });
+
+        // Refresh button
+        $('#refresh-frecuencia').on('click', function() {
+            if ($('#frecuencia-search-input').val().trim()) {
+                analyzeFrequency();
+            } else {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Información',
+                    text: 'Primero realice una búsqueda para actualizar'
+                });
+            }
+        });
+    });
 </script>
 @endsection
 

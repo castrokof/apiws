@@ -1,40 +1,73 @@
-@extends('layouts.app', ['pageSlug' => 'saldos', 'titlePage' => __('Gestión de Saldos')])
+@extends('layouts.admin')
 
+@section('title', 'Gestión de Saldos - MEDCOL6')
+
+@section('styles')
+<!-- DataTables CSS -->
+<link href="{{ asset('assets/lte/plugins/datatables-bs4/css/dataTables.bootstrap4.css') }}" rel="stylesheet" type="text/css"/>
+<link href="{{ asset('assets/lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css"/>
+<!-- SweetAlert2 -->
+<link rel="stylesheet" href="{{ asset('assets/lte/plugins/sweetalert2/sweetalert2.min.css') }}">
+@endsection
 
 @section('content')
-    <div class="row">
-        <div class="col-12">
-            <div class="card card-chart">
-                <div class="card-header ">
-                    <div class="row">
-                        <div class="col-sm-6 text-left">
-                            <h5 class="card-category">📊 Consulta de Saldos</h5>
-                            <h2 class="card-title">Inventario de Medicamentos - MEDCOL6</h2>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="btn-group-sm btn-group-toggle float-right" data-toggle="buttons">
-                                <button type="button" class="btn btn-success" id="btn-sincronizar">
-                                    <i class="fas fa-sync"></i> Sincronizar Saldos
-                                </button>
-                                <button type="button" class="btn btn-warning" id="btn-probar-api">
-                                    <i class="fas fa-vials"></i> Probar API
-                                </button>
-                                <button type="button" class="btn btn-info" id="btn-estadisticas">
-                                    <i class="fas fa-chart-bar"></i> Estadísticas
-                                </button>
-                            </div>
-                        </div>
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0"><i class="fas fa-boxes"></i> Gestión de Saldos</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Inicio</a></li>
+                    <li class="breadcrumb-item">MEDCOL6</li>
+                    <li class="breadcrumb-item active">Saldos</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <!-- Card Principal -->
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h3 class="card-title">
+                            <i class="fas fa-pills"></i> Inventario de Medicamentos - MEDCOL6
+                        </h3>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <button type="button" class="btn btn-success btn-sm" id="btn-sincronizar">
+                            <i class="fas fa-sync"></i> Sincronizar Saldos
+                        </button>
+                        <button type="button" class="btn btn-warning btn-sm" id="btn-probar-api">
+                            <i class="fas fa-vials"></i> Probar API
+                        </button>
+                        <button type="button" class="btn btn-info btn-sm" id="btn-estadisticas">
+                            <i class="fas fa-chart-bar"></i> Estadísticas
+                        </button>
                     </div>
                 </div>
+            </div>
                 <div class="card-body">
                     <!-- Panel de Filtros -->
                     <div class="row mb-3">
                         <div class="col-md-12">
-                            <div class="card">
+                            <div class="card card-secondary collapsed-card">
                                 <div class="card-header">
-                                    <h6><i class="fas fa-filter"></i> Filtros de Búsqueda</h6>
+                                    <h3 class="card-title"><i class="fas fa-filter"></i> Filtros de Búsqueda</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="card-body">
+                                <div class="card-body" style="display: none;">
                                     <div class="row">
                                         <div class="col-md-3">
                                             <label for="filtro-deposito">Depósito:</label>
@@ -96,34 +129,46 @@
                     <!-- Panel de Estadísticas Rápidas -->
                     <div class="row mb-3" id="estadisticas-panel" style="display: none;">
                         <div class="col-md-12">
-                            <div class="card">
+                            <div class="card card-info">
                                 <div class="card-header">
-                                    <h6><i class="fas fa-chart-pie"></i> Estadísticas Rápidas</h6>
+                                    <h3 class="card-title"><i class="fas fa-chart-pie"></i> Estadísticas Rápidas</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-md-3">
-                                            <div class="text-center">
-                                                <h4 class="text-info" id="stat-total-productos">0</h4>
-                                                <small>Total Productos</small>
+                                        <div class="col-md-3 col-sm-6">
+                                            <div class="info-box">
+                                                <span class="info-box-icon bg-info"><i class="fas fa-boxes"></i></span>
+                                                <div class="info-box-content">
+                                                    <span class="info-box-text">Total Productos</span>
+                                                    <span class="info-box-number" id="stat-total-productos">0</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
-                                            <div class="text-center">
-                                                <h4 class="text-success" id="stat-con-saldo">0</h4>
-                                                <small>Con Saldo</small>
+                                        <div class="col-md-3 col-sm-6">
+                                            <div class="info-box">
+                                                <span class="info-box-icon bg-success"><i class="fas fa-check-circle"></i></span>
+                                                <div class="info-box-content">
+                                                    <span class="info-box-text">Con Saldo</span>
+                                                    <span class="info-box-number" id="stat-con-saldo">0</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
-                                            <div class="text-center">
-                                                <h4 class="text-warning" id="stat-proximos-vencer">0</h4>
-                                                <small>Próximos a Vencer</small>
+                                        <div class="col-md-3 col-sm-6">
+                                            <div class="info-box">
+                                                <span class="info-box-icon bg-warning"><i class="fas fa-exclamation-triangle"></i></span>
+                                                <div class="info-box-content">
+                                                    <span class="info-box-text">Próximos a Vencer</span>
+                                                    <span class="info-box-number" id="stat-proximos-vencer">0</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
-                                            <div class="text-center">
-                                                <h4 class="text-danger" id="stat-vencidos">0</h4>
-                                                <small>Vencidos</small>
+                                        <div class="col-md-3 col-sm-6">
+                                            <div class="info-box">
+                                                <span class="info-box-icon bg-danger"><i class="fas fa-times-circle"></i></span>
+                                                <div class="info-box-content">
+                                                    <span class="info-box-text">Vencidos</span>
+                                                    <span class="info-box-number" id="stat-vencidos">0</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -156,32 +201,40 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal para Ver Detalles -->
-    <div class="modal fade" id="modal-detalle-saldo" tabindex="-1" role="dialog" aria-labelledby="detalleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="detalleModalLabel">
-                        <i class="fas fa-info-circle"></i> Detalle del Producto
-                    </h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="detalle-contenido">
-                    <!-- Contenido será cargado dinámicamente -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <!-- Modal para Ver Detalles -->
+        <div class="modal fade" id="modal-detalle-saldo" tabindex="-1" role="dialog" aria-labelledby="detalleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <h5 class="modal-title" id="detalleModalLabel">
+                            <i class="fas fa-info-circle"></i> Detalle del Producto
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="detalle-contenido">
+                        <!-- Contenido será cargado dinámicamente -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fas fa-times"></i> Cerrar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
+</section>
 @endsection
 
-@section('scriptsPlugins')
+@section('scripts')
+<!-- DataTables Plugins -->
+<script src="{{ asset('assets/lte/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('assets/lte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('assets/lte/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
 <script>
 $(document).ready(function() {
     // Configurar CSRF token para AJAX

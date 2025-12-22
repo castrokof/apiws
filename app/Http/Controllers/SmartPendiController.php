@@ -834,7 +834,7 @@ class SmartPendiController extends Controller
                     'total_contactos_manuales' => $totalContactos,
                     'contactos_exitosos' => $contactosExitosos,
                     'tasa_exito_contacto' => $tasaExito,
-                    'ultimo_contacto' => $ultimoContacto ? [
+                    'ultimo_contacto' => ($ultimoContacto && $ultimoContacto->created_at) ? [
                         'fecha' => $ultimoContacto->created_at->format('Y-m-d H:i:s'),
                         'tipo' => $ultimoContacto->tipo_evento,
                         'titulo' => $ultimoContacto->titulo,
@@ -847,8 +847,8 @@ class SmartPendiController extends Controller
                     ] : null,
                     'eventos_por_tipo' => $eventosPorTipo,
                     'frecuencia_mensual' => $frecuenciaMensual,
-                    'primer_pendiente' => $primerPendiente ? $primerPendiente->created_at->format('Y-m-d') : null,
-                    'ultimo_pendiente' => $ultimoPendiente ? $ultimoPendiente->created_at->format('Y-m-d') : null
+                    'primer_pendiente' => ($primerPendiente && $primerPendiente->created_at) ? $primerPendiente->created_at->format('Y-m-d') : null,
+                    'ultimo_pendiente' => ($ultimoPendiente && $ultimoPendiente->created_at) ? $ultimoPendiente->created_at->format('Y-m-d') : null
                 ];
             });
 
@@ -873,6 +873,239 @@ class SmartPendiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener las métricas del paciente',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate printable HTML for patient history (for PDF export)
+     * FASE 11: Print/PDF Export with Report Type Selection
+     *
+     * @param string $historia Patient history number
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
+    public function printPatientHistory($historia, Request $request)
+    {
+        try {
+            // Get report type (default: detalle)
+            $tipo = $request->query('tipo', 'detalle');
+
+            // Validate tipo parameter
+            if (!in_array($tipo, ['resumen', 'detalle'])) {
+                $tipo = 'detalle';
+            }
+
+            // Get patient history
+            $eventos = GestionHistoricoMedcol6::where('historia', $historia)
+                ->with(['usuario:id,name', 'pendiente:id,factura,codigo,nombre'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Get patient info
+            $paciente = PendienteApiMedcol6::where('historia', $historia)
+                ->orderBy('id', 'desc')
+                ->first();
+
+            if (!$paciente) {
+                abort(404, 'Paciente no encontrado');
+            }
+
+            // Get pendientes based on report type
+            // Detallado: Only PENDIENTE status (active pending items)
+            // Resumen: Only ENTREGADO status (delivered items)
+            $pendientes = [];
+            $tituloSeccionPendientes = '';
+
+            if ($tipo === 'detalle') {
+                // Detailed report: Show only PENDING items
+                $pendientes = PendienteApiMedcol6::where('historia', $historia)
+                    ->where('estado', 'PENDIENTE')
+                    ->orderBy('fecha', 'desc')
+                    ->get();
+                $tituloSeccionPendientes = 'Pendientes Activos';
+            } else {
+                // Summary report: Show only DELIVERED items
+                $pendientes = PendienteApiMedcol6::where('historia', $historia)
+                    ->where('estado', 'ENTREGADO')
+                    ->orderBy('fecha', 'desc')
+                    ->get();
+                $tituloSeccionPendientes = 'Medicamentos Entregados';
+            }
+
+            // Calculate metrics
+            $totalPendientes = PendienteApiMedcol6::where('historia', $historia)->count();
+            $totalEventos = $eventos->count();
+            $totalContactos = $eventos->whereIn('tipo_evento', [
+                'CONTACTO_LLAMADA', 'CONTACTO_MENSAJE', 'CONTACTO_VISITA', 'OBSERVACION_GESTION'
+            ])->count();
+            $contactosExitosos = $eventos->where('resultado_contacto', 'EXITOSO')->count();
+            $tasaExito = $totalContactos > 0 ? round(($contactosExitosos / $totalContactos) * 100, 1) : 0;
+
+            // Format patient name
+            $nombreCompleto = trim(sprintf(
+                '%s %s %s %s',
+                $paciente->nombre1 ?? '',
+                $paciente->nombre2 ?? '',
+                $paciente->apellido1 ?? '',
+                $paciente->apellido2 ?? ''
+            ));
+
+            // Determine report type title
+            $tipoInforme = $tipo === 'resumen' ? 'RESUMEN' : 'DETALLADO';
+
+            return view('smart-pendi.patient-history-print', [
+                'paciente' => $paciente,
+                'nombreCompleto' => $nombreCompleto,
+                'eventos' => $eventos,
+                'pendientes' => $pendientes,
+                'tituloSeccionPendientes' => $tituloSeccionPendientes,
+                'totalPendientes' => $totalPendientes,
+                'totalEventos' => $totalEventos,
+                'totalContactos' => $totalContactos,
+                'contactosExitosos' => $contactosExitosos,
+                'tasaExito' => $tasaExito,
+                'fechaGeneracion' => now()->format('d/m/Y H:i:s'),
+                'tipo' => $tipo,
+                'tipoInforme' => $tipoInforme
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al generar vista de impresión del histórico', [
+                'historia' => $historia,
+                'error' => $e->getMessage()
+            ]);
+
+            abort(500, 'Error al generar el documento de impresión');
+        }
+    }
+
+    /**
+     * Get medication frequency analysis for a patient
+     * FASE 12: Medication Frequency Analysis
+     *
+     * @param string $historia Patient history number
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getMedicationFrequency($historia)
+    {
+        try {
+            // Get all pendientes for this patient (ordered by date)
+            $pendientes = PendienteApiMedcol6::where('historia', $historia)
+                ->select('codigo', 'nombre', 'fecha', 'estado', 'factura')
+                ->orderBy('fecha', 'asc')
+                ->get();
+
+            if ($pendientes->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontraron pendientes para esta historia'
+                ], 404);
+            }
+
+            // Group by medication (codigo)
+            $medicationGroups = $pendientes->groupBy('codigo');
+
+            $frequencyAnalysis = [];
+
+            foreach ($medicationGroups as $codigo => $items) {
+                $totalOccurrences = $items->count();
+
+                // Skip if only one occurrence
+                if ($totalOccurrences < 2) {
+                    $frequencyAnalysis[] = [
+                        'codigo' => $codigo,
+                        'nombre' => $items->first()->nombre,
+                        'total_pendientes' => $totalOccurrences,
+                        'frecuencia_dias' => null,
+                        'primera_fecha' => $items->first()->fecha,
+                        'ultima_fecha' => $items->first()->fecha,
+                        'dias_transcurridos' => 0,
+                        'pendientes' => $items->map(function($item) {
+                            return [
+                                'fecha' => $item->fecha,
+                                'estado' => $item->estado,
+                                'factura' => $item->factura
+                            ];
+                        })->values()
+                    ];
+                    continue;
+                }
+
+                // Calculate time between occurrences
+                $fechas = $items->pluck('fecha')->map(function($fecha) {
+                    return \Carbon\Carbon::parse($fecha);
+                })->sort()->values();
+
+                $primeraFecha = $fechas->first();
+                $ultimaFecha = $fechas->last();
+                $diasTranscurridos = $primeraFecha->diffInDays($ultimaFecha);
+
+                // Calculate average frequency (days between pendientes)
+                $frecuenciaDias = $totalOccurrences > 1
+                    ? round($diasTranscurridos / ($totalOccurrences - 1), 1)
+                    : null;
+
+                $frequencyAnalysis[] = [
+                    'codigo' => $codigo,
+                    'nombre' => $items->first()->nombre,
+                    'total_pendientes' => $totalOccurrences,
+                    'frecuencia_dias' => $frecuenciaDias,
+                    'primera_fecha' => $primeraFecha->format('Y-m-d'),
+                    'ultima_fecha' => $ultimaFecha->format('Y-m-d'),
+                    'dias_transcurridos' => $diasTranscurridos,
+                    'pendientes' => $items->map(function($item) {
+                        return [
+                            'fecha' => $item->fecha,
+                            'estado' => $item->estado,
+                            'factura' => $item->factura
+                        ];
+                    })->values()
+                ];
+            }
+
+            // Sort by total occurrences descending
+            usort($frequencyAnalysis, function($a, $b) {
+                return $b['total_pendientes'] - $a['total_pendientes'];
+            });
+
+            // Get patient info
+            $paciente = $pendientes->first();
+            $pacienteInfo = PendienteApiMedcol6::where('historia', $historia)
+                ->select('historia', 'documento', 'nombre1', 'nombre2', 'apellido1', 'apellido2')
+                ->first();
+
+            $nombreCompleto = trim(sprintf(
+                '%s %s %s %s',
+                $pacienteInfo->nombre1 ?? '',
+                $pacienteInfo->nombre2 ?? '',
+                $pacienteInfo->apellido1 ?? '',
+                $pacienteInfo->apellido2 ?? ''
+            ));
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'paciente' => [
+                        'historia' => $historia,
+                        'documento' => $pacienteInfo->documento ?? 'N/A',
+                        'nombre_completo' => $nombreCompleto
+                    ],
+                    'medicamentos' => $frequencyAnalysis,
+                    'total_medicamentos_diferentes' => count($frequencyAnalysis),
+                    'total_pendientes' => $pendientes->count()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al obtener análisis de frecuencia', [
+                'historia' => $historia,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener el análisis de frecuencia',
                 'error' => $e->getMessage()
             ], 500);
         }

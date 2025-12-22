@@ -73,6 +73,7 @@ class RolesAndPermissionsSeeder extends Seeder
             ['name' => 'Ver Dispensación Múltiple', 'slug' => 'medcol6.informes.multiple', 'module' => 'Medcol6', 'description' => 'Ver informe de dispensación múltiple'],
             ['name' => 'Ver Resumen por Sede', 'slug' => 'medcol6.informes.sede', 'module' => 'Medcol6', 'description' => 'Ver resumen de dispensación por sede'],
             ['name' => 'Exportar Informes', 'slug' => 'medcol6.informes.export', 'module' => 'Medcol6', 'description' => 'Exportar informes a Excel/PDF'],
+            ['name' => 'Ver Saldos Medcol6', 'slug' => 'medcol6.saldos.view', 'module' => 'Medcol6', 'description' => 'Ver gestión de saldos Medcol6'],
 
             // Medcold (Dolor)
             ['name' => 'Ver Medcold Pendientes', 'slug' => 'medcold.pendientes.view', 'module' => 'Medcold', 'description' => 'Ver listado de pendientes Medcold/Dolor'],

@@ -657,6 +657,12 @@ Route::get('/smart/pendi/search-patients', 'SmartPendiController@searchPatients'
 Route::post('/smart/pendi/register-manual-gestion', 'SmartPendiController@registerManualGestion')->name('smart.pendi.register.gestion')->middleware('verified')->middleware('verifyuser');
 Route::get('/smart/pendi/patient-metrics/{historia}', 'SmartPendiController@getPatientMetrics')->name('smart.pendi.patient.metrics')->middleware('verified')->middleware('verifyuser');
 
+// FASE 11: Print/PDF Export Route
+Route::get('/smart/pendi/patient-history-print/{historia}', 'SmartPendiController@printPatientHistory')->name('smart.pendi.patient.history.print')->middleware('verified')->middleware('verifyuser');
+
+// FASE 12: Medication Frequency Analysis Route
+Route::get('/smart/pendi/medication-frequency/{historia}', 'SmartPendiController@getMedicationFrequency')->name('smart.pendi.medication.frequency')->middleware('verified')->middleware('verifyuser');
+
 // Análisis NT Routes - Gestión de Medicamentos por Contrato/Nota Técnica
 Route::get('/analisis-nt', 'AnalisisNtController@index')->name('analisis-nt.index')->middleware('verified')->middleware('verifyuser');
 Route::get('/analisis-nt/create', 'AnalisisNtController@create')->name('analisis-nt.create')->middleware('verified')->middleware('verifyuser');

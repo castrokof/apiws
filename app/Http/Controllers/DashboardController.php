@@ -1224,4 +1224,77 @@ class DashboardController extends Controller
             'nota' => 'Optimizado: solo analiza códigos usados en pendientes del rango de fechas. Máximo 1000 códigos.'
         ]);
     }
+
+    /**
+     * Endpoint para obtener resumen de órdenes de compra Medcol3
+     */
+    public function getOrdenesCompraMedcol3(Request $request)
+    {
+        $fechaInicio = $request->get('fecha_inicio');
+        $fechaFin = $request->get('fecha_fin');
+
+        $cacheKey = "ordenes_compra_medcol3_{$fechaInicio}_{$fechaFin}";
+
+        $data = Cache::remember($cacheKey, 1800, function () use ($fechaInicio, $fechaFin) {
+            // Total de órdenes de compra en el rango de fechas
+            $totalOrdenes = DB::table('orden_compra_medcol3')
+                ->whereBetween('created_at', [$fechaInicio . ' 00:00:00', $fechaFin . ' 23:59:59'])
+                ->count();
+
+            // Valor total de las órdenes (subtotal + iva)
+            $valorTotal = DB::table('orden_compra_medcol3')
+                ->whereBetween('created_at', [$fechaInicio . ' 00:00:00', $fechaFin . ' 23:59:59'])
+                ->select(DB::raw('SUM(CAST(subtotal as DECIMAL(15,2)) + CAST(iva as DECIMAL(15,2))) as total'))
+                ->first();
+
+            // Top 5 proveedores con mayor valor
+            $topProveedores = DB::table('orden_compra_medcol3 as o')
+                ->leftJoin('terceros_api_medcol3 as t', 'o.proveedor_id', '=', 't.id')
+                ->whereBetween('o.created_at', [$fechaInicio . ' 00:00:00', $fechaFin . ' 23:59:59'])
+                ->select(
+                    't.nombre_sucursal as proveedor',
+                    DB::raw('COUNT(*) as cantidad_ordenes'),
+                    DB::raw('SUM(CAST(o.subtotal as DECIMAL(15,2)) + CAST(o.iva as DECIMAL(15,2))) as total_valor')
+                )
+                ->groupBy('t.id', 't.nombre_sucursal')
+                ->orderBy('total_valor', 'desc')
+                ->limit(5)
+                ->get();
+
+            // Órdenes por mes
+            $ordenesPorMes = DB::table('orden_compra_medcol3')
+                ->whereBetween('created_at', [$fechaInicio . ' 00:00:00', $fechaFin . ' 23:59:59'])
+                ->select(
+                    DB::raw('DATE_FORMAT(created_at, "%Y-%m") as mes'),
+                    DB::raw('COUNT(*) as cantidad'),
+                    DB::raw('SUM(CAST(subtotal as DECIMAL(15,2)) + CAST(iva as DECIMAL(15,2))) as total_valor')
+                )
+                ->groupBy('mes')
+                ->orderBy('mes')
+                ->get();
+
+            // Top 5 medicamentos más comprados (por cantidad)
+            $topMedicamentos = DB::table('orden_compra_medcol3')
+                ->whereBetween('created_at', [$fechaInicio . ' 00:00:00', $fechaFin . ' 23:59:59'])
+                ->select(
+                    'nombre',
+                    DB::raw('SUM(CAST(cantidad as DECIMAL(15,2))) as total_cantidad'),
+                    DB::raw('SUM(CAST(subtotal as DECIMAL(15,2)) + CAST(iva as DECIMAL(15,2))) as total_valor')
+                )
+                ->groupBy('nombre')
+                ->orderBy('total_valor', 'desc')
+                ->limit(5)
+                ->get();
+
+            return [
+                'total_ordenes' => $totalOrdenes,
+                'valor_total' => $valorTotal->total ?? 0,
+                'top_proveedores' => $topProveedores,
+                'ordenes_por_mes' => $ordenesPorMes,
+                'top_medicamentos' => $topMedicamentos
+            ];
+        });
+
+        return response()->json($data);
+    }
 }
