@@ -13,6 +13,367 @@ Sistema web desarrollado en Laravel 7.x para la gestión de dispensación de med
 
 ## 📋 Changelog
 
+### v2.9 (Diciembre 2025) - Sistema de Seguimiento Histórico de Pendientes por Paciente
+
+**🚀 Nueva Funcionalidad Mayor:**
+Sistema completo de seguimiento y gestión histórica de pendientes por paciente en Smart Pendi, con registro automático de eventos, timeline interactiva y métricas avanzadas de gestión.
+
+#### 🎯 Características Principales
+
+**📊 Registro Automático de Eventos**
+- **Observer Pattern**: Sistema automático que registra todos los cambios en pendientes
+- **10 Tipos de Eventos**: CREACION_PENDIENTE, CAMBIO_ESTADO, CONTACTO_LLAMADA, CONTACTO_MENSAJE, CONTACTO_VISITA, OBSERVACION_GESTION, CAMBIO_SALDO, ANULACION, ENTREGA_EXITOSA, REPROGRAMACION
+- **Trazabilidad Completa**: Cada cambio de estado se registra automáticamente con usuario y timestamp
+- **Metadata JSON**: Información adicional almacenada en formato JSON flexible
+
+**🔍 Búsqueda Inteligente de Pacientes**
+- **Búsqueda Multifiltro**: Por historia clínica, documento o nombre (mínimo 3 caracteres)
+- **Búsqueda en Tiempo Real**: Debounce de 500ms para optimizar consultas
+- **Resultados Detallados**: Tabla con 8 columnas mostrando pendientes activos y eventos registrados
+- **Validación Client-Side**: Previene búsquedas con menos de 3 caracteres
+
+**📈 Timeline Interactiva de Eventos**
+- **Visualización Temporal**: Línea de tiempo vertical con todos los eventos del paciente
+- **Iconografía Diferenciada**: 10 iconos únicos según tipo de evento (FontAwesome)
+- **Badges de Colores**: 6 esquemas de color para identificación rápida
+- **Información Detallada**: Cada evento muestra título, descripción, usuario, resultados y metadata
+- **Animaciones Suaves**: Efectos fadeInUp y hover para mejor UX
+
+**💹 Métricas Calculadas Automáticamente**
+- **Total de Pendientes**: Histórico completo del paciente
+- **Tiempo Promedio de Entrega**: Calculado desde creación hasta entrega (en días)
+- **Total de Contactos Manuales**: Llamadas, mensajes y visitas registradas
+- **Tasa de Éxito**: Porcentaje de contactos exitosos
+- **Frecuencia Mensual**: Pendientes por mes para identificar patrones
+- **Seguimientos Programados**: Próximo seguimiento con días restantes
+
+**📝 Registro Manual de Gestiones**
+- **Modal Completo**: Formulario con validación para registrar contactos
+- **5 Tipos de Contacto**: Llamada, mensaje, visita, observación, reprogramación
+- **6 Resultados Posibles**: Exitoso, no contesta, teléfono inválido, reagendar, rechazado, otro
+- **Sistema de Seguimiento**: Checkbox para programar seguimientos futuros con fecha
+- **Contador de Caracteres**: Límite de 2000 caracteres para descripciones
+- **Validación Completa**: Client-side y server-side con mensajes claros
+
+#### 🔧 Arquitectura Implementada
+
+**🗄️ Base de Datos (FASE 1)**
+```sql
+-- Nueva tabla gestion_historico_medcol6
+CREATE TABLE gestion_historico_medcol6 (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    pendiente_id BIGINT UNSIGNED NULL,
+    historia VARCHAR(50) NOT NULL INDEX,
+    usuario_id BIGINT UNSIGNED NULL,
+    tipo_evento ENUM(...) NOT NULL INDEX,
+    titulo VARCHAR(255) NOT NULL,
+    descripcion TEXT NULL,
+    estado_anterior VARCHAR(255) NULL,
+    estado_nuevo VARCHAR(255) NULL,
+    metadata JSON NULL,
+    resultado_contacto ENUM(...) NULL,
+    requiere_seguimiento BOOLEAN DEFAULT FALSE,
+    fecha_seguimiento DATETIME NULL,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+-- 6 Índices Compuestos para Optimización
+INDEX idx_historia_fecha (historia, created_at)
+INDEX idx_tipo_fecha (tipo_evento, created_at)
+INDEX idx_pendiente_tipo (pendiente_id, tipo_evento)
+INDEX idx_usuario_fecha (usuario_id, created_at)
+INDEX idx_requiere_seguimiento (requiere_seguimiento)
+```
+
+**📦 Modelos y Relaciones (FASE 2)**
+```php
+// Nuevo modelo GestionHistoricoMedcol6
+class GestionHistoricoMedcol6 extends Model {
+    // Relaciones
+    - belongsTo(PendienteApiMedcol6)
+    - belongsTo(User)
+
+    // 6 Scopes de Consulta
+    - scopePorPaciente($query, $historia)
+    - scopePorTipo($query, $tipo)
+    - scopeEntreFechas($query, $inicio, $fin)
+    - scopeEventosManuales($query)
+    - scopeEventosAutomaticos($query)
+    - scopeRequierenSeguimiento($query)
+
+    // 2 Accessors Visuales
+    - getIconoEventoAttribute()
+    - getColorBadgeAttribute()
+}
+
+// Modelo PendienteApiMedcol6 actualizado
+- hasMany(GestionHistoricoMedcol6::class, 'pendiente_id')
+```
+
+**🔭 Observer Pattern (FASE 3)**
+```php
+// app/Observers/PendienteApiMedcol6Observer.php
+class PendienteApiMedcol6Observer {
+    public function created($pendiente) {
+        // Registra evento CREACION_PENDIENTE
+    }
+
+    public function updating($pendiente) {
+        // Detecta cambios con isDirty('estado')
+        // Registra CAMBIO_ESTADO, ENTREGA_EXITOSA, ANULACION
+        // Detecta cambios de cantidad para CAMBIO_SALDO
+    }
+
+    public function deleted($pendiente) {
+        // Registra evento ANULACION
+    }
+}
+```
+
+**🌐 API REST Endpoints (FASES 4-6)**
+```php
+// 4 Nuevos Endpoints en SmartPendiController
+
+// 1. Búsqueda de Pacientes
+GET /smart/pendi/search-patients?query={texto}
+Response: {
+    success: true,
+    data: [{historia, documento, nombre_completo, telefono, total_pendientes, total_eventos}],
+    total: 15
+}
+
+// 2. Histórico del Paciente
+GET /smart/pendi/patient-history/{historia}
+Response: {
+    success: true,
+    data: {
+        paciente: {historia, nombre_completo, documento, telefono, direccion},
+        eventos: [{id, tipo_evento, titulo, descripcion, usuario, created_at}],
+        pendientes_activos: [...]
+    },
+    total_eventos: 25
+}
+
+// 3. Métricas del Paciente
+GET /smart/pendi/patient-metrics/{historia}
+Response: {
+    success: true,
+    data: {
+        total_pendientes: 12,
+        tiempo_promedio_entrega_dias: 3.5,
+        total_contactos_manuales: 8,
+        tasa_exito_contacto: 75.0,
+        ultimo_contacto: {...},
+        proximo_seguimiento: {...}
+    }
+}
+
+// 4. Registro Manual de Gestión
+POST /smart/pendi/register-manual-gestion
+Body: {
+    historia: "12345",
+    tipo_evento: "CONTACTO_LLAMADA",
+    titulo: "Confirmación de entrega",
+    descripcion: "Se contactó al paciente...",
+    resultado_contacto: "EXITOSO",
+    requiere_seguimiento: true,
+    fecha_seguimiento: "2025-12-25"
+}
+Response: {
+    success: true,
+    message: "Gestión registrada exitosamente",
+    data: {evento_id, created_at, tipo_evento, titulo}
+}
+```
+
+**⚡ Sistema de Caché Optimizado**
+```php
+// Cache estratégico para mejor rendimiento
+Cache::remember("patient_history_{$historia}", 300, function() {...});    // 5 min
+Cache::remember("patient_metrics_{$historia}", 600, function() {...});    // 10 min
+Cache::forget("patient_history_{$historia}");  // Invalidación al registrar gestión
+```
+
+**🎨 Frontend Completo (FASES 7-10)**
+
+**Pestaña "Histórico de Pacientes"**
+```html
+<!-- Nueva pestaña en dashboard Smart Pendi -->
+<li class="nav-item">
+    <a class="nav-link" id="historico-tab" href="#historico-panel">
+        <i class="fas fa-history text-success"></i>
+        Histórico de Pacientes
+    </a>
+</li>
+```
+
+**Componentes UI**
+- **Buscador**: Input con validación y botón de búsqueda
+- **Tabla de Resultados**: 8 columnas con información detallada
+- **Header del Paciente**: Card con datos demográficos y botón "Registrar Gestión"
+- **4 Tarjetas de Métricas**: Small-boxes con iconos y gradientes
+- **Pendientes Activos**: Tabla con medicamentos en estado PENDIENTE
+- **Timeline de Eventos**: Línea vertical con markers y tarjetas de contenido
+
+**JavaScript (500+ líneas)**
+```javascript
+// Funciones principales implementadas
+- searchPatients()                      // AJAX a endpoint de búsqueda
+- displayPatientSearchResults()         // Renderiza tabla de resultados
+- loadPatientHistory(historia)          // Carga paralela con Promise.all
+- displayPatientHistoryDetail()         // Renderiza timeline y métricas
+- showModalRegistrarGestion(historia)   // Abre modal con historia precargada
+- getEventIcon(tipoEvento)             // Mapeo de iconos FontAwesome
+- getEventBadge(tipoEvento)            // Mapeo de colores de badge
+```
+
+**Modal de Registro**
+```html
+<!-- Modal completo con validación -->
+<form id="formRegistrarGestion">
+    <select name="tipo_evento" required>...</select>
+    <input name="titulo" maxlength="255" required>
+    <textarea name="descripcion" maxlength="2000" required></textarea>
+    <select name="resultado_contacto">...</select>
+    <input type="checkbox" name="requiere_seguimiento">
+    <input type="date" name="fecha_seguimiento">
+</form>
+```
+
+**CSS Personalizado (300+ líneas)**
+```css
+/* Timeline vertical con línea gradient */
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 30px;
+    width: 3px;
+    background: linear-gradient(180deg, #e9ecef, #dee2e6);
+}
+
+/* Markers circulares con gradientes */
+.timeline-marker {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.timeline-marker.badge-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+/* Tarjetas de contenido con flechas */
+.timeline-content::before {
+    /* Flecha apuntando al marker */
+}
+
+/* Animación de entrada */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .timeline-marker { width: 35px; height: 35px; }
+}
+```
+
+#### 📁 Archivos Creados y Modificados
+
+**Nuevos (4 archivos):**
+1. `database/migrations/2025_12_19_205748_create_gestion_historico_medcol6_table.php` (99 líneas)
+2. `app/Models/Medcol6/GestionHistoricoMedcol6.php` (160 líneas)
+3. `app/Observers/PendienteApiMedcol6Observer.php` (219 líneas)
+4. `app/Observers/` (directorio nuevo)
+
+**Modificados (5 archivos):**
+1. `app/Http/Controllers/SmartPendiController.php` (+399 líneas)
+   - 4 métodos nuevos: getPatientHistory, searchPatients, registerManualGestion, getPatientMetrics
+   - Caché optimizado con TTL de 5-10 minutos
+   - Validación completa de inputs
+
+2. `resources/views/smart-pendi/dashboard.blade.php` (+1,049 líneas)
+   - Nueva pestaña "Histórico de Pacientes"
+   - Modal completo de registro de gestiones
+   - 500+ líneas de JavaScript
+   - 300+ líneas de CSS personalizado
+
+3. `app/Models/Medcol6/PendienteApiMedcol6.php` (+8 líneas)
+   - Relación hasMany con GestionHistoricoMedcol6
+
+4. `routes/web.php` (+7 líneas)
+   - 4 rutas nuevas: patient-history, search-patients, register-manual-gestion, patient-metrics
+
+5. `app/Providers/AppServiceProvider.php` (+5 líneas)
+   - Registro del Observer PendienteApiMedcol6Observer
+
+**Total: 1,945 líneas de código agregadas en 9 archivos**
+
+#### 🎯 Funcionalidades Disponibles
+
+**Para Usuarios Finales:**
+1. **Búsqueda Rápida**: Encuentra pacientes por historia, documento o nombre
+2. **Vista Completa**: Acceso al histórico completo de pendientes del paciente
+3. **Registro de Contactos**: Documenta llamadas, mensajes, visitas y observaciones
+4. **Programación de Seguimientos**: Agenda recordatorios para contactos futuros
+5. **Visualización de Métricas**: Indicadores clave de gestión en tiempo real
+
+**Para el Sistema:**
+1. **Tracking Automático**: Todos los cambios de estado se registran sin intervención
+2. **Auditoría Completa**: Trazabilidad de quién hizo qué y cuándo
+3. **Reporting Mejorado**: Datos estructurados para análisis posterior
+4. **Optimización de Gestión**: Identificación de patrones y oportunidades de mejora
+
+#### 📊 Beneficios Operativos
+
+**💼 Gestión Mejorada**
+- **Trazabilidad Completa**: Histórico detallado de todos los pendientes por paciente
+- **Seguimiento Eficiente**: Visualización rápida de contactos y resultados
+- **Métricas en Tiempo Real**: Indicadores clave para toma de decisiones
+- **Programación Inteligente**: Sistema de seguimientos con recordatorios
+
+**⚡ Rendimiento Optimizado**
+- **Caché Estratégico**: Respuestas rápidas con TTL de 5-10 minutos
+- **Consultas Optimizadas**: 6 índices compuestos para queries eficientes
+- **Carga Paralela**: Promise.all para obtener histórico y métricas simultáneamente
+- **Validación Client-Side**: Reduce carga del servidor con validaciones en navegador
+
+**👥 Experiencia de Usuario**
+- **Interfaz Intuitiva**: Diseño moderno con AdminLTE y Bootstrap 4
+- **Búsqueda Rápida**: Resultados en tiempo real con debounce optimizado
+- **Timeline Visual**: Línea de tiempo clara y fácil de interpretar
+- **Feedback Inmediato**: Mensajes de éxito/error con SweetAlert2
+
+**🔒 Seguridad y Validación**
+- **CSRF Protection**: Tokens en todos los formularios POST
+- **Validación Dual**: Client-side y server-side en todos los inputs
+- **Foreign Keys**: Relaciones con CASCADE y SET NULL apropiados
+- **Logs Completos**: Registro detallado de errores en Laravel logs
+
+#### 🚀 Próximos Pasos
+
+Para usar la nueva funcionalidad:
+
+1. Ejecutar migración: `php artisan migrate`
+2. Navegar a `/smart/pendi`
+3. Hacer clic en la pestaña "Histórico de Pacientes"
+4. Buscar un paciente por historia (ej: 12345)
+5. Visualizar timeline y métricas
+6. Registrar gestiones manuales según necesidad
+
+#### 🐛 Notas Técnicas
+
+- **Laravel 7.x Compatible**: Utiliza User en namespace App\ (no App\Models\)
+- **Cache Driver**: Compatible con file, redis, memcached
+- **Browser Support**: Chrome 80+, Firefox 75+, Safari 13+, Edge 85+
+- **Mobile Responsive**: Breakpoints optimizados para 320px - 4K
+
+---
+
 ### v2.8 (Noviembre 2025) - Actualización Masiva de Pendientes Entregados desde Excel
 
 **🚀 Nuevas Funcionalidades:**
