@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Blade;
+use App\Models\Medcol6\PendienteApiMedcol6;
+use App\Observers\PendienteApiMedcol6Observer;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -69,5 +71,8 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('unlesspermission', function ($permission) {
             return auth()->check() && !auth()->user()->hasPermission($permission);
         });
+
+        // Registrar Observer para PendienteApiMedcol6
+        PendienteApiMedcol6::observe(PendienteApiMedcol6Observer::class);
     }
 }

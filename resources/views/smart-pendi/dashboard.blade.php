@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Smart Pendi - Análisis Predictivo')
 
@@ -135,6 +135,14 @@
                                 <small class="d-block text-muted">Estado de Saldo</small>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="historico-tab" data-toggle="tab" href="#historico-panel" role="tab">
+                                <i class="fas fa-history text-success mr-1"></i>
+                                <span class="d-none d-md-inline">Histórico de Pacientes</span>
+                                <span class="d-md-none">Histórico</span>
+                                <small class="d-block text-muted">Gestión y Seguimiento</small>
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 <div class="card-body p-0">
@@ -259,6 +267,63 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- FASE 7: Histórico de Pacientes Tab -->
+                        <div class="tab-pane fade" id="historico-panel" role="tabpanel">
+                            <div class="p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-history mr-2"></i>
+                                        Histórico de Gestión por Paciente
+                                    </h6>
+                                </div>
+
+                                <!-- Patient Search Section -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-search mr-2"></i>
+                                            Buscar Paciente
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-group mb-0">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-user"></i>
+                                                    </span>
+                                                </div>
+                                                <input type="text"
+                                                       class="form-control"
+                                                       id="patient-search-input"
+                                                       placeholder="Buscar por historia, documento o nombre (mínimo 3 caracteres)">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-primary" type="button" id="btn-search-patient">
+                                                        <i class="fas fa-search mr-1"></i>
+                                                        Buscar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <small class="form-text text-muted">
+                                                <i class="fas fa-info-circle mr-1"></i>
+                                                Ingrese al menos 3 caracteres para realizar la búsqueda
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Search Results Section -->
+                                <div id="patient-search-results" style="display: none;">
+                                    <!-- Results will be loaded here via JavaScript -->
+                                </div>
+
+                                <!-- Patient History Detail Section -->
+                                <div id="patient-history-detail" style="display: none;">
+                                    <!-- Patient history timeline will be loaded here via JavaScript -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -298,6 +363,101 @@
                     Llamar Ahora
                 </button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- FASE 9: Modal for Manual Management Registration -->
+<div class="modal fade" id="modalRegistrarGestion" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle mr-2"></i>
+                    Registrar Gestión Manual
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form id="formRegistrarGestion">
+                <div class="modal-body">
+                    <input type="hidden" id="gestion-historia" name="historia">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="gestion-tipo-evento">Tipo de Evento <span class="text-danger">*</span></label>
+                                <select class="form-control" id="gestion-tipo-evento" name="tipo_evento" required>
+                                    <option value="">Seleccione un tipo...</option>
+                                    <option value="CONTACTO_LLAMADA">Contacto - Llamada Telefónica</option>
+                                    <option value="CONTACTO_MENSAJE">Contacto - Mensaje/WhatsApp</option>
+                                    <option value="CONTACTO_VISITA">Contacto - Visita Domiciliaria</option>
+                                    <option value="OBSERVACION_GESTION">Observación de Gestión</option>
+                                    <option value="REPROGRAMACION">Reprogramación de Entrega</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="gestion-resultado">Resultado del Contacto</label>
+                                <select class="form-control" id="gestion-resultado" name="resultado_contacto">
+                                    <option value="">No aplica</option>
+                                    <option value="EXITOSO">Exitoso</option>
+                                    <option value="NO_CONTESTA">No Contesta</option>
+                                    <option value="TELEFONO_INVALIDO">Teléfono Inválido</option>
+                                    <option value="REAGENDAR">Reagendar</option>
+                                    <option value="RECHAZADO">Rechazado</option>
+                                    <option value="OTRO">Otro</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gestion-titulo">Título <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="gestion-titulo" name="titulo"
+                               placeholder="Ej: Llamada para confirmar entrega" maxlength="255" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gestion-descripcion">Descripción <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="gestion-descripcion" name="descripcion"
+                                  rows="4" placeholder="Describa detalladamente la gestión realizada..."
+                                  maxlength="2000" required></textarea>
+                        <small class="form-text text-muted">
+                            <span id="descripcion-contador">0</span>/2000 caracteres
+                        </small>
+                    </div>
+
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="checkbox" class="custom-control-input" id="gestion-requiere-seguimiento" name="requiere_seguimiento">
+                        <label class="custom-control-label" for="gestion-requiere-seguimiento">
+                            <i class="fas fa-bell mr-1"></i>
+                            Requiere seguimiento posterior
+                        </label>
+                    </div>
+
+                    <div class="form-group" id="fecha-seguimiento-group" style="display: none;">
+                        <label for="gestion-fecha-seguimiento">Fecha de Seguimiento</label>
+                        <input type="date" class="form-control" id="gestion-fecha-seguimiento" name="fecha_seguimiento"
+                               min="{{ date('Y-m-d', strtotime('+1 day')) }}">
+                        <small class="form-text text-muted">
+                            Fecha en la que debe realizarse el seguimiento
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success" id="btn-guardar-gestion">
+                        <i class="fas fa-save mr-1"></i>
+                        Guardar Gestión
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -1218,6 +1378,589 @@
         Swal.fire('Info', `Ver detalles del pendiente ID: ${id}`, 'info');
     }
 
+    // ===================================================================
+    // FASE 8: Patient History & Management JavaScript Functions
+    // ===================================================================
+
+    // Event listeners for patient search
+    $(document).ready(function() {
+        // Search button click
+        $('#btn-search-patient').on('click', function() {
+            searchPatients();
+        });
+
+        // Enter key press in search input
+        $('#patient-search-input').on('keypress', function(e) {
+            if (e.which === 13) { // Enter key
+                searchPatients();
+            }
+        });
+
+        // Real-time search (optional - debounced)
+        let searchTimeout;
+        $('#patient-search-input').on('input', function() {
+            clearTimeout(searchTimeout);
+            const query = $(this).val().trim();
+
+            if (query.length >= 3) {
+                searchTimeout = setTimeout(function() {
+                    searchPatients();
+                }, 500); // Wait 500ms after user stops typing
+            } else if (query.length === 0) {
+                // Clear results when input is empty
+                $('#patient-search-results').hide().html('');
+                $('#patient-history-detail').hide().html('');
+            }
+        });
+    });
+
+    /**
+     * Search patients by historia, documento or name
+     */
+    function searchPatients() {
+        const query = $('#patient-search-input').val().trim();
+
+        if (query.length < 3) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Búsqueda incompleta',
+                text: 'Por favor ingrese al menos 3 caracteres para buscar',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+
+        // Show loading state
+        $('#btn-search-patient').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Buscando...');
+
+        $.ajax({
+            url: '{{ route("smart.pendi.search.patients") }}',
+            method: 'GET',
+            data: { query: query },
+            success: function(response) {
+                if (response.success) {
+                    displayPatientSearchResults(response.data, query);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error en la búsqueda',
+                        text: response.message || 'No se pudo realizar la búsqueda',
+                        confirmButtonText: 'Aceptar'
+                    });
+                }
+            },
+            error: function(xhr) {
+                console.error('Error searching patients:', xhr);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error del servidor',
+                    text: 'Ocurrió un error al buscar pacientes. Por favor intente nuevamente.',
+                    confirmButtonText: 'Aceptar'
+                });
+            },
+            complete: function() {
+                // Restore button state
+                $('#btn-search-patient').prop('disabled', false).html('<i class="fas fa-search mr-1"></i> Buscar');
+            }
+        });
+    }
+
+    /**
+     * Display patient search results
+     */
+    function displayPatientSearchResults(patients, query) {
+        const resultsContainer = $('#patient-search-results');
+
+        if (!patients || patients.length === 0) {
+            resultsContainer.html(`
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    No se encontraron pacientes con el criterio de búsqueda: <strong>${query}</strong>
+                </div>
+            `).show();
+            $('#patient-history-detail').hide();
+            return;
+        }
+
+        let html = `
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-users mr-2"></i>
+                        Resultados de Búsqueda (${patients.length} paciente${patients.length !== 1 ? 's' : ''})
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Historia</th>
+                                    <th>Documento</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Teléfono</th>
+                                    <th>Municipio</th>
+                                    <th class="text-center">Pendientes</th>
+                                    <th class="text-center">Eventos</th>
+                                    <th class="text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+        `;
+
+        patients.forEach(patient => {
+            html += `
+                <tr>
+                    <td><strong>${patient.historia || 'N/A'}</strong></td>
+                    <td>${patient.documento || 'N/A'}</td>
+                    <td>${patient.nombre_completo || 'N/A'}</td>
+                    <td>${patient.telefres || 'N/A'}</td>
+                    <td>${patient.municipio || 'N/A'}</td>
+                    <td class="text-center">
+                        <span class="badge badge-info">${patient.total_pendientes || 0}</span>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge badge-success">${patient.total_eventos || 0}</span>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-primary" onclick="loadPatientHistory('${patient.historia}')">
+                            <i class="fas fa-eye mr-1"></i>
+                            Ver Histórico
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        resultsContainer.html(html).show();
+    }
+
+    /**
+     * Load patient history with all events and metrics
+     */
+    function loadPatientHistory(historia) {
+        // Show loading state
+        const detailContainer = $('#patient-history-detail');
+        detailContainer.html(`
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Cargando...</span>
+                </div>
+                <p class="mt-3 text-muted">Cargando histórico del paciente...</p>
+            </div>
+        `).show();
+
+        // Scroll to detail section
+        $('html, body').animate({
+            scrollTop: detailContainer.offset().top - 100
+        }, 500);
+
+        // Load both history and metrics in parallel
+        Promise.all([
+            $.ajax({
+                url: `/smart/pendi/patient-history/${historia}`,
+                method: 'GET'
+            }),
+            $.ajax({
+                url: `/smart/pendi/patient-metrics/${historia}`,
+                method: 'GET'
+            })
+        ])
+        .then(([historyResponse, metricsResponse]) => {
+            if (historyResponse.success && metricsResponse.success) {
+                displayPatientHistoryDetail(historyResponse.data, metricsResponse.data);
+            } else {
+                throw new Error('Error loading patient data');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading patient history:', error);
+            detailContainer.html(`
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Error:</strong> No se pudo cargar el histórico del paciente.
+                    Por favor intente nuevamente.
+                </div>
+            `);
+        });
+    }
+
+    /**
+     * Display patient history detail with timeline and metrics
+     */
+    function displayPatientHistoryDetail(historyData, metricsData) {
+        const { paciente, eventos, pendientes_activos } = historyData;
+
+        if (!paciente) {
+            $('#patient-history-detail').html(`
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    No se encontró información del paciente.
+                </div>
+            `);
+            return;
+        }
+
+        let html = `
+            <!-- Patient Header -->
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-circle mr-2"></i>
+                            ${paciente.nombre_completo}
+                        </h5>
+                        <button class="btn btn-light btn-sm" onclick="showModalRegistrarGestion('${paciente.historia}')">
+                            <i class="fas fa-plus mr-1"></i>
+                            Registrar Gestión
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>Historia:</strong> ${paciente.historia}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Documento:</strong> ${paciente.documento || 'N/A'}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Teléfono:</strong> ${paciente.telefono || 'N/A'}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Municipio:</strong> ${paciente.municipio || 'N/A'}
+                        </div>
+                    </div>
+                    ${paciente.direccion ? `
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <strong>Dirección:</strong> ${paciente.direccion}
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+
+            <!-- Metrics Cards -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>${metricsData.total_pendientes || 0}</h3>
+                            <p>Total Pendientes</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-list-alt"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>${metricsData.tiempo_promedio_entrega_dias !== null ? metricsData.tiempo_promedio_entrega_dias + ' días' : 'N/A'}</h3>
+                            <p>Tiempo Promedio Entrega</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>${metricsData.total_contactos_manuales || 0}</h3>
+                            <p>Contactos Realizados</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>${metricsData.tasa_exito_contacto || 0}%</h3>
+                            <p>Tasa de Éxito</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Pendientes -->
+            ${pendientes_activos && pendientes_activos.length > 0 ? `
+            <div class="card mb-3">
+                <div class="card-header bg-warning">
+                    <h6 class="mb-0">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        Pendientes Activos (${pendientes_activos.length})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Factura</th>
+                                    <th>Medicamento</th>
+                                    <th>Código</th>
+                                    <th>Cantidad</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${pendientes_activos.map(p => `
+                                    <tr>
+                                        <td>${p.factura || 'N/A'}</td>
+                                        <td>${p.nombre || 'N/A'}</td>
+                                        <td>${p.codigo || 'N/A'}</td>
+                                        <td>${p.cantidad || 'N/A'}</td>
+                                        <td><span class="badge badge-warning">${p.estado || 'N/A'}</span></td>
+                                        <td>${p.fecha || 'N/A'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- Timeline -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-history mr-2"></i>
+                        Línea de Tiempo de Eventos (${eventos.length} evento${eventos.length !== 1 ? 's' : ''})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    ${eventos && eventos.length > 0 ? `
+                        <div class="timeline">
+                            ${eventos.map(evento => {
+                                const iconClass = getEventIcon(evento.tipo_evento);
+                                const badgeClass = getEventBadge(evento.tipo_evento);
+                                const fecha = new Date(evento.created_at);
+                                const fechaFormato = fecha.toLocaleString('es-ES');
+
+                                return `
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker ${badgeClass}">
+                                            <i class="${iconClass}"></i>
+                                        </div>
+                                        <div class="timeline-content">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <h6 class="mb-1">
+                                                    ${evento.titulo}
+                                                    <span class="badge ${badgeClass} ml-2">${evento.tipo_evento.replace(/_/g, ' ')}</span>
+                                                </h6>
+                                                <small class="text-muted">${fechaFormato}</small>
+                                            </div>
+                                            <p class="mb-1">${evento.descripcion || 'Sin descripción'}</p>
+                                            ${evento.usuario ? `
+                                                <small class="text-muted">
+                                                    <i class="fas fa-user mr-1"></i>
+                                                    ${evento.usuario.name}
+                                                </small>
+                                            ` : ''}
+                                            ${evento.resultado_contacto ? `
+                                                <div class="mt-2">
+                                                    <span class="badge badge-secondary">
+                                                        Resultado: ${evento.resultado_contacto}
+                                                    </span>
+                                                </div>
+                                            ` : ''}
+                                            ${evento.estado_anterior || evento.estado_nuevo ? `
+                                                <div class="mt-2">
+                                                    <small class="text-muted">
+                                                        ${evento.estado_anterior ? `Estado anterior: <strong>${evento.estado_anterior}</strong>` : ''}
+                                                        ${evento.estado_anterior && evento.estado_nuevo ? ' → ' : ''}
+                                                        ${evento.estado_nuevo ? `Estado nuevo: <strong>${evento.estado_nuevo}</strong>` : ''}
+                                                    </small>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    ` : `
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            No se encontraron eventos registrados para este paciente.
+                        </div>
+                    `}
+                </div>
+            </div>
+        `;
+
+        $('#patient-history-detail').html(html).show();
+    }
+
+    /**
+     * Get icon class for event type
+     */
+    function getEventIcon(tipoEvento) {
+        const iconos = {
+            'CAMBIO_ESTADO': 'fas fa-exchange-alt',
+            'CONTACTO_LLAMADA': 'fas fa-phone',
+            'CONTACTO_MENSAJE': 'fas fa-sms',
+            'CONTACTO_VISITA': 'fas fa-walking',
+            'OBSERVACION_GESTION': 'fas fa-sticky-note',
+            'CAMBIO_SALDO': 'fas fa-boxes',
+            'CREACION_PENDIENTE': 'fas fa-plus-circle',
+            'ANULACION': 'fas fa-ban',
+            'ENTREGA_EXITOSA': 'fas fa-check-circle',
+            'REPROGRAMACION': 'fas fa-calendar-alt'
+        };
+        return iconos[tipoEvento] || 'fas fa-circle';
+    }
+
+    /**
+     * Get badge class for event type
+     */
+    function getEventBadge(tipoEvento) {
+        const colores = {
+            'CAMBIO_ESTADO': 'badge-info',
+            'CONTACTO_LLAMADA': 'badge-primary',
+            'CONTACTO_MENSAJE': 'badge-primary',
+            'CONTACTO_VISITA': 'badge-warning',
+            'OBSERVACION_GESTION': 'badge-secondary',
+            'CAMBIO_SALDO': 'badge-success',
+            'CREACION_PENDIENTE': 'badge-info',
+            'ANULACION': 'badge-danger',
+            'ENTREGA_EXITOSA': 'badge-success',
+            'REPROGRAMACION': 'badge-warning'
+        };
+        return colores[tipoEvento] || 'badge-secondary';
+    }
+
+    /**
+     * Show modal to register manual management (FASE 9)
+     */
+    function showModalRegistrarGestion(historia) {
+        // Reset form
+        $('#formRegistrarGestion')[0].reset();
+        $('#gestion-historia').val(historia);
+        $('#fecha-seguimiento-group').hide();
+        $('#descripcion-contador').text('0');
+
+        // Show modal
+        $('#modalRegistrarGestion').modal('show');
+    }
+
+    // FASE 9: Modal event handlers
+    $(document).ready(function() {
+        // Toggle follow-up date field
+        $('#gestion-requiere-seguimiento').on('change', function() {
+            if ($(this).is(':checked')) {
+                $('#fecha-seguimiento-group').slideDown();
+                $('#gestion-fecha-seguimiento').prop('required', true);
+            } else {
+                $('#fecha-seguimiento-group').slideUp();
+                $('#gestion-fecha-seguimiento').prop('required', false).val('');
+            }
+        });
+
+        // Character counter for description
+        $('#gestion-descripcion').on('input', function() {
+            const length = $(this).val().length;
+            $('#descripcion-contador').text(length);
+        });
+
+        // Form submission
+        $('#formRegistrarGestion').on('submit', function(e) {
+            e.preventDefault();
+
+            const formData = {
+                historia: $('#gestion-historia').val(),
+                tipo_evento: $('#gestion-tipo-evento').val(),
+                titulo: $('#gestion-titulo').val(),
+                descripcion: $('#gestion-descripcion').val(),
+                resultado_contacto: $('#gestion-resultado').val() || null,
+                requiere_seguimiento: $('#gestion-requiere-seguimiento').is(':checked'),
+                fecha_seguimiento: $('#gestion-fecha-seguimiento').val() || null
+            };
+
+            // Show loading state
+            const btnGuardar = $('#btn-guardar-gestion');
+            const btnOriginal = btnGuardar.html();
+            btnGuardar.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...');
+
+            $.ajax({
+                url: '{{ route("smart.pendi.register.gestion") }}',
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                data: formData,
+                success: function(response) {
+                    if (response.success) {
+                        // Close modal
+                        $('#modalRegistrarGestion').modal('hide');
+
+                        // Show success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Gestión Registrada',
+                            text: 'La gestión se registró exitosamente',
+                            confirmButtonText: 'Aceptar'
+                        }).then(() => {
+                            // Reload patient history
+                            loadPatientHistory(formData.historia);
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message || 'No se pudo registrar la gestión',
+                            confirmButtonText: 'Aceptar'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error registering management:', xhr);
+
+                    let errorMessage = 'Ocurrió un error al registrar la gestión';
+
+                    if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                        // Validation errors
+                        const errors = xhr.responseJSON.errors;
+                        const errorList = Object.values(errors).flat().join('<br>');
+                        errorMessage = `<div class="text-left"><strong>Errores de validación:</strong><br>${errorList}</div>`;
+                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error al guardar',
+                        html: errorMessage,
+                        confirmButtonText: 'Aceptar'
+                    });
+                },
+                complete: function() {
+                    // Restore button state
+                    btnGuardar.prop('disabled', false).html(btnOriginal);
+                }
+            });
+        });
+    });
+
+    // End of FASE 8 & 9 Functions
+    // ===================================================================
+
     var idioma_espanol = {
         "sProcessing": "Procesando...",
         "sLengthMenu": "Mostrar _MENU_ registros",
@@ -1750,5 +2493,309 @@
         font-weight: 600;
         border-bottom: 2px solid #dee2e6;
     }
+
+    /* ================================================================== */
+    /* FASE 10: Timeline Styles for Patient History */
+    /* ================================================================== */
+
+    /* Timeline Container */
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+        list-style: none;
+    }
+
+    /* Timeline Vertical Line */
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 30px;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(180deg, #e9ecef 0%, #dee2e6 100%);
+        border-radius: 2px;
+    }
+
+    /* Timeline Item */
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+        padding-left: 80px;
+        animation: fadeInUp 0.5s ease;
+    }
+
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Timeline Marker (Circle with Icon) */
+    .timeline-marker {
+        position: absolute;
+        left: 8px;
+        top: 0;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 16px;
+        z-index: 2;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+
+    .timeline-marker:hover {
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    /* Badge Colors for Timeline Markers */
+    .timeline-marker.badge-primary {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+    }
+
+    .timeline-marker.badge-success {
+        background: linear-gradient(135deg, #28a745, #1e7e34);
+    }
+
+    .timeline-marker.badge-info {
+        background: linear-gradient(135deg, #17a2b8, #117a8b);
+    }
+
+    .timeline-marker.badge-warning {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+    }
+
+    .timeline-marker.badge-danger {
+        background: linear-gradient(135deg, #dc3545, #bd2130);
+    }
+
+    .timeline-marker.badge-secondary {
+        background: linear-gradient(135deg, #6c757d, #545b62);
+    }
+
+    /* Timeline Content Card */
+    .timeline-content {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .timeline-content:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+
+    /* Timeline Content Arrow */
+    .timeline-content::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 15px;
+        width: 0;
+        height: 0;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+        border-right: 8px solid #e9ecef;
+    }
+
+    .timeline-content::after {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 16px;
+        width: 0;
+        height: 0;
+        border-top: 7px solid transparent;
+        border-bottom: 7px solid transparent;
+        border-right: 7px solid white;
+    }
+
+    /* Timeline Content Typography */
+    .timeline-content h6 {
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .timeline-content p {
+        margin-bottom: 0;
+        color: #6c757d;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    /* Metrics Small Boxes */
+    .small-box {
+        border-radius: 8px;
+        position: relative;
+        display: block;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .small-box:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    }
+
+    .small-box .inner {
+        padding: 15px;
+    }
+
+    .small-box .inner h3 {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0 0 10px 0;
+        color: white;
+    }
+
+    .small-box .inner p {
+        font-size: 0.9rem;
+        margin: 0;
+        color: rgba(255,255,255,0.9);
+    }
+
+    .small-box .icon {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 3.5rem;
+        color: rgba(0,0,0,0.1);
+    }
+
+    .small-box.bg-info {
+        background: linear-gradient(135deg, #17a2b8, #117a8b);
+        color: white;
+    }
+
+    .small-box.bg-success {
+        background: linear-gradient(135deg, #28a745, #1e7e34);
+        color: white;
+    }
+
+    .small-box.bg-warning {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+        color: white;
+    }
+
+    .small-box.bg-danger {
+        background: linear-gradient(135deg, #dc3545, #bd2130);
+        color: white;
+    }
+
+    /* Character Counter */
+    #descripcion-contador {
+        font-weight: 600;
+        color: #007bff;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Timeline */
+    @media (max-width: 768px) {
+        .timeline::before {
+            left: 20px;
+        }
+
+        .timeline-item {
+            padding-left: 60px;
+        }
+
+        .timeline-marker {
+            left: 3px;
+            width: 35px;
+            height: 35px;
+            font-size: 14px;
+        }
+
+        .small-box .icon {
+            font-size: 2.5rem;
+        }
+
+        .small-box .inner h3 {
+            font-size: 1.5rem;
+        }
+    }
+
+    /* Patient Search Results Hover Effect */
+    #patient-search-results .table tbody tr {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    #patient-search-results .table tbody tr:hover {
+        background-color: #f8f9fa;
+        transform: scale(1.01);
+    }
+
+    /* Loading Spinner Enhancement */
+    .spinner-border {
+        animation: spinner-border 0.75s linear infinite;
+    }
+
+    /* Badge Enhancements */
+    .badge {
+        font-weight: 600;
+        padding: 0.35em 0.65em;
+        border-radius: 0.25rem;
+    }
+
+    .badge-primary {
+        background-color: #007bff;
+    }
+
+    .badge-success {
+        background-color: #28a745;
+    }
+
+    .badge-info {
+        background-color: #17a2b8;
+    }
+
+    .badge-warning {
+        background-color: #ffc107;
+        color: #212529;
+    }
+
+    .badge-danger {
+        background-color: #dc3545;
+    }
+
+    .badge-secondary {
+        background-color: #6c757d;
+    }
+
+    /* Form Enhancements */
+    #modalRegistrarGestion .form-control:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40,167,69,0.25);
+    }
+
+    #modalRegistrarGestion .custom-control-input:checked ~ .custom-control-label::before {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    /* End of FASE 10 Styles */
+    /* ================================================================== */
 </style>
 @endsection

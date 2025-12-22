@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Medcol6\PendienteApiMedcol6;
 use App\Models\Medcol6\SaldosMedcol6;
+use App\Models\Medcol6\GestionHistoricoMedcol6;
 use App\Helpers\DeliveryMetricsHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -476,6 +477,404 @@ class SmartPendiController extends Controller
             case "12": return 'EVEN';
             case "13": return 'FRJA';
             default: return '';
+        }
+    }
+
+    /**
+     * FASE 4: Get patient history with all events
+     *
+     * @param string $historia Patient history number
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getPatientHistory($historia)
+    {
+        try {
+            // Cache key for patient history
+            $cacheKey = "patient_history_{$historia}";
+
+            // Cache for 5 minutes (300 seconds)
+            $data = Cache::remember($cacheKey, 300, function () use ($historia) {
+                // Get all historical events for this patient
+                $eventos = GestionHistoricoMedcol6::where('historia', $historia)
+                    ->with(['usuario:id,name', 'pendiente:id,factura,codigo,nombre'])
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+                // Get current pending medications for this patient
+                $pendientesActivos = PendienteApiMedcol6::where('historia', $historia)
+                    ->whereIn('estado', ['PENDIENTE', 'DIRECCIONADO', 'PROGRAMADO'])
+                    ->orderBy('fecha', 'desc')
+                    ->get();
+
+                // Get patient info from the first pendiente found
+                $paciente = PendienteApiMedcol6::where('historia', $historia)
+                    ->orderBy('id', 'desc')
+                    ->first();
+
+                return [
+                    'eventos' => $eventos,
+                    'pendientes_activos' => $pendientesActivos,
+                    'paciente' => $paciente ? [
+                        'historia' => $paciente->historia,
+                        'documento' => $paciente->documento,
+                        'nombre_completo' => trim(sprintf(
+                            '%s %s %s %s',
+                            $paciente->nombre1 ?? '',
+                            $paciente->nombre2 ?? '',
+                            $paciente->apellido1 ?? '',
+                            $paciente->apellido2 ?? ''
+                        )),
+                        'telefono' => $paciente->telefres,
+                        'direccion' => $paciente->direcres,
+                        'municipio' => $paciente->municipio,
+                    ] : null
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $data,
+                'total_eventos' => $data['eventos']->count(),
+                'pendientes_activos' => $data['pendientes_activos']->count()
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al obtener histórico del paciente', [
+                'historia' => $historia,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener el histórico del paciente',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * FASE 4: Search patients by historia, documento or name
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function searchPatients(Request $request)
+    {
+        try {
+            $query = $request->input('query', '');
+
+            // Validate minimum query length
+            if (strlen($query) < 3) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La búsqueda debe tener al menos 3 caracteres',
+                    'data' => []
+                ], 422);
+            }
+
+            // Search in pendiente_api_medcol6 table
+            $pacientes = PendienteApiMedcol6::select(
+                'historia',
+                'documento',
+                'nombre1',
+                'nombre2',
+                'apellido1',
+                'apellido2',
+                'telefres',
+                'municipio',
+                DB::raw('MAX(created_at) as ultima_actualizacion'),
+                DB::raw('COUNT(*) as total_pendientes')
+            )
+                ->where(function ($q) use ($query) {
+                    $q->where('historia', 'LIKE', "%{$query}%")
+                        ->orWhere('documento', 'LIKE', "%{$query}%")
+                        ->orWhere('nombre1', 'LIKE', "%{$query}%")
+                        ->orWhere('apellido1', 'LIKE', "%{$query}%")
+                        ->orWhere(DB::raw("CONCAT(nombre1, ' ', apellido1)"), 'LIKE', "%{$query}%")
+                        ->orWhere(DB::raw("CONCAT(nombre1, ' ', nombre2, ' ', apellido1, ' ', apellido2)"), 'LIKE', "%{$query}%");
+                })
+                ->groupBy('historia', 'documento', 'nombre1', 'nombre2', 'apellido1', 'apellido2', 'telefres', 'municipio')
+                ->orderBy('ultima_actualizacion', 'desc')
+                ->limit(20)
+                ->get();
+
+            // Add event count for each patient
+            $pacientes->each(function ($paciente) {
+                $paciente->total_eventos = GestionHistoricoMedcol6::where('historia', $paciente->historia)
+                    ->count();
+                $paciente->nombre_completo = trim(sprintf(
+                    '%s %s %s %s',
+                    $paciente->nombre1 ?? '',
+                    $paciente->nombre2 ?? '',
+                    $paciente->apellido1 ?? '',
+                    $paciente->apellido2 ?? ''
+                ));
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $pacientes,
+                'total' => $pacientes->count(),
+                'query' => $query
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al buscar pacientes', [
+                'query' => $request->input('query'),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al buscar pacientes',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * FASE 5: Register manual management event (contact, observation, etc.)
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function registerManualGestion(Request $request)
+    {
+        try {
+            // Validate input
+            $validated = $request->validate([
+                'historia' => 'required|string|max:50',
+                'pendiente_id' => 'nullable|exists:pendiente_api_medcol6,id',
+                'tipo_evento' => 'required|in:CONTACTO_LLAMADA,CONTACTO_MENSAJE,CONTACTO_VISITA,OBSERVACION_GESTION,REPROGRAMACION',
+                'titulo' => 'required|string|max:255',
+                'descripcion' => 'required|string|max:2000',
+                'resultado_contacto' => 'nullable|in:EXITOSO,NO_CONTESTA,TELEFONO_INVALIDO,REAGENDAR,RECHAZADO,OTRO',
+                'requiere_seguimiento' => 'nullable|boolean',
+                'fecha_seguimiento' => 'nullable|date|after:today',
+                'metadata' => 'nullable|array'
+            ]);
+
+            // Verify patient exists
+            $paciente = PendienteApiMedcol6::where('historia', $validated['historia'])
+                ->orderBy('id', 'desc')
+                ->first();
+
+            if (!$paciente) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontró información del paciente con la historia especificada'
+                ], 404);
+            }
+
+            // Create historical event
+            $evento = GestionHistoricoMedcol6::create([
+                'pendiente_id' => $validated['pendiente_id'] ?? null,
+                'historia' => $validated['historia'],
+                'usuario_id' => Auth::id(),
+                'tipo_evento' => $validated['tipo_evento'],
+                'titulo' => $validated['titulo'],
+                'descripcion' => $validated['descripcion'],
+                'estado_anterior' => null,
+                'estado_nuevo' => null,
+                'metadata' => array_merge($validated['metadata'] ?? [], [
+                    'paciente_nombre' => trim(sprintf(
+                        '%s %s %s %s',
+                        $paciente->nombre1 ?? '',
+                        $paciente->nombre2 ?? '',
+                        $paciente->apellido1 ?? '',
+                        $paciente->apellido2 ?? ''
+                    )),
+                    'telefono' => $paciente->telefres,
+                    'usuario_registro' => Auth::user()->name ?? 'Sistema'
+                ]),
+                'resultado_contacto' => $validated['resultado_contacto'] ?? null,
+                'requiere_seguimiento' => $validated['requiere_seguimiento'] ?? false,
+                'fecha_seguimiento' => $validated['fecha_seguimiento'] ?? null
+            ]);
+
+            // Clear patient history cache
+            Cache::forget("patient_history_{$validated['historia']}");
+
+            // Log successful registration
+            \Log::info('Gestión manual registrada exitosamente', [
+                'evento_id' => $evento->id,
+                'tipo_evento' => $validated['tipo_evento'],
+                'historia' => $validated['historia'],
+                'usuario_id' => Auth::id()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Gestión registrada exitosamente',
+                'data' => [
+                    'evento_id' => $evento->id,
+                    'created_at' => $evento->created_at->format('Y-m-d H:i:s'),
+                    'tipo_evento' => $evento->tipo_evento,
+                    'titulo' => $evento->titulo
+                ]
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error al registrar gestión manual', [
+                'request_data' => $request->all(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al registrar la gestión',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * FASE 6: Get patient metrics and statistics
+     *
+     * @param string $historia Patient history number
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getPatientMetrics($historia)
+    {
+        try {
+            // Cache key for patient metrics
+            $cacheKey = "patient_metrics_{$historia}";
+
+            // Cache for 10 minutes (600 seconds)
+            $metrics = Cache::remember($cacheKey, 600, function () use ($historia) {
+                // Get all pendientes for this patient
+                $pendientes = PendienteApiMedcol6::where('historia', $historia)->get();
+
+                if ($pendientes->isEmpty()) {
+                    return null;
+                }
+
+                // Total pendientes
+                $totalPendientes = $pendientes->count();
+
+                // Pendientes by status
+                $porEstado = $pendientes->groupBy('estado')->map(function ($group) {
+                    return $group->count();
+                })->toArray();
+
+                // Calculate average delivery time (days from creation to delivery)
+                $entregados = $pendientes->filter(function ($p) {
+                    return $p->estado === 'ENTREGADO' && $p->fecha_entrega;
+                });
+
+                $tiempoPromedioEntrega = null;
+                if ($entregados->isNotEmpty()) {
+                    $tiempos = $entregados->map(function ($p) {
+                        $fechaCreacion = Carbon::parse($p->fecha ?? $p->created_at);
+                        $fechaEntrega = Carbon::parse($p->fecha_entrega);
+                        return $fechaCreacion->diffInDays($fechaEntrega);
+                    });
+
+                    $tiempoPromedioEntrega = round($tiempos->average(), 1);
+                }
+
+                // Get manual contacts from historical events
+                $contactos = GestionHistoricoMedcol6::where('historia', $historia)
+                    ->whereIn('tipo_evento', [
+                        'CONTACTO_LLAMADA',
+                        'CONTACTO_MENSAJE',
+                        'CONTACTO_VISITA',
+                        'OBSERVACION_GESTION'
+                    ])
+                    ->get();
+
+                $totalContactos = $contactos->count();
+
+                // Calculate contact success rate
+                $contactosExitosos = $contactos->where('resultado_contacto', 'EXITOSO')->count();
+                $tasaExito = $totalContactos > 0 ? round(($contactosExitosos / $totalContactos) * 100, 1) : 0;
+
+                // Last contact
+                $ultimoContacto = $contactos->sortByDesc('created_at')->first();
+
+                // Next scheduled follow-up
+                $proximoSeguimiento = GestionHistoricoMedcol6::where('historia', $historia)
+                    ->where('requiere_seguimiento', true)
+                    ->where('fecha_seguimiento', '>', now())
+                    ->orderBy('fecha_seguimiento', 'asc')
+                    ->first();
+
+                // Get all events count by type
+                $eventosPorTipo = GestionHistoricoMedcol6::where('historia', $historia)
+                    ->select('tipo_evento', DB::raw('COUNT(*) as total'))
+                    ->groupBy('tipo_evento')
+                    ->get()
+                    ->pluck('total', 'tipo_evento')
+                    ->toArray();
+
+                // Calculate frequency (pendientes per month)
+                $primerPendiente = $pendientes->sortBy('created_at')->first();
+                $ultimoPendiente = $pendientes->sortByDesc('created_at')->first();
+
+                $frecuenciaMensual = null;
+                if ($primerPendiente && $ultimoPendiente) {
+                    $mesesTranscurridos = Carbon::parse($primerPendiente->created_at)
+                        ->diffInMonths(Carbon::parse($ultimoPendiente->created_at));
+
+                    if ($mesesTranscurridos > 0) {
+                        $frecuenciaMensual = round($totalPendientes / $mesesTranscurridos, 2);
+                    }
+                }
+
+                return [
+                    'total_pendientes' => $totalPendientes,
+                    'pendientes_por_estado' => $porEstado,
+                    'tiempo_promedio_entrega_dias' => $tiempoPromedioEntrega,
+                    'total_contactos_manuales' => $totalContactos,
+                    'contactos_exitosos' => $contactosExitosos,
+                    'tasa_exito_contacto' => $tasaExito,
+                    'ultimo_contacto' => $ultimoContacto ? [
+                        'fecha' => $ultimoContacto->created_at->format('Y-m-d H:i:s'),
+                        'tipo' => $ultimoContacto->tipo_evento,
+                        'titulo' => $ultimoContacto->titulo,
+                        'resultado' => $ultimoContacto->resultado_contacto
+                    ] : null,
+                    'proximo_seguimiento' => $proximoSeguimiento ? [
+                        'fecha' => $proximoSeguimiento->fecha_seguimiento,
+                        'titulo' => $proximoSeguimiento->titulo,
+                        'dias_restantes' => now()->diffInDays($proximoSeguimiento->fecha_seguimiento, false)
+                    ] : null,
+                    'eventos_por_tipo' => $eventosPorTipo,
+                    'frecuencia_mensual' => $frecuenciaMensual,
+                    'primer_pendiente' => $primerPendiente ? $primerPendiente->created_at->format('Y-m-d') : null,
+                    'ultimo_pendiente' => $ultimoPendiente ? $ultimoPendiente->created_at->format('Y-m-d') : null
+                ];
+            });
+
+            if (!$metrics) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontró información del paciente'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $metrics
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al obtener métricas del paciente', [
+                'historia' => $historia,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener las métricas del paciente',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }

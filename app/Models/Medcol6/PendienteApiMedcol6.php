@@ -66,4 +66,12 @@ class PendienteApiMedcol6 extends Model
     {
         return $this->hasMany(ObservacionesApiMedcol6::class, 'pendiente_id');
     }
+
+    /**
+     * Relación con histórico de gestiones
+     */
+    public function historico()
+    {
+        return $this->hasMany(GestionHistoricoMedcol6::class, 'pendiente_id');
+    }
 }

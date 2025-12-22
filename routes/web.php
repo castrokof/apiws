@@ -97,6 +97,7 @@ Route::get('/dashboard/analisis-distribucion', 'DashboardController@getAnalisisD
 Route::get('/dashboard/tendencias-pendientes', 'DashboardController@getAnalisisTendenciasPendientes')->name('dashboard.tendencias-pendientes')->middleware('verified')->middleware('verifyuser');
 Route::get('/dashboard/reportes-detallados', 'DashboardController@getReportesDetallados')->name('dashboard.reportes-detallados')->middleware('verified')->middleware('verifyuser');
 Route::get('/dashboard/valor-por-contrato', 'DashboardController@getValorPorContrato')->name('dashboard.valor-por-contrato')->middleware('verified')->middleware('verifyuser');
+Route::get('/dashboard/ordenes-compra-medcol3', 'DashboardController@getOrdenesCompraMedcol3')->name('dashboard.ordenes-compra-medcol3')->middleware('verified')->middleware('verifyuser');
 
 //Ruta para consultar lo direccionado por la EPS
 Route::get('/home', 'HomeController@index')->name('home')->middleware('verified')->middleware('verifyuser');
@@ -649,6 +650,12 @@ Route::get('/smart/pendi/analysis', 'SmartPendiController@getPendientesAnalysis'
 Route::get('/smart/pendi/suggestions', 'SmartPendiController@getPredictiveSuggestions')->name('smart.pendi.suggestions')->middleware('verified')->middleware('verifyuser');
 Route::get('/smart/pendi/statistics', 'SmartPendiController@getStatistics')->name('smart.pendi.statistics')->middleware('verified')->middleware('verifyuser');
 Route::get('/smart/pendi/summary', 'SmartPendiController@getSummary')->name('smart.pendi.summary')->middleware('verified')->middleware('verifyuser');
+
+// FASE 4, 5 & 6: Patient History & Management Routes
+Route::get('/smart/pendi/patient-history/{historia}', 'SmartPendiController@getPatientHistory')->name('smart.pendi.patient.history')->middleware('verified')->middleware('verifyuser');
+Route::get('/smart/pendi/search-patients', 'SmartPendiController@searchPatients')->name('smart.pendi.search.patients')->middleware('verified')->middleware('verifyuser');
+Route::post('/smart/pendi/register-manual-gestion', 'SmartPendiController@registerManualGestion')->name('smart.pendi.register.gestion')->middleware('verified')->middleware('verifyuser');
+Route::get('/smart/pendi/patient-metrics/{historia}', 'SmartPendiController@getPatientMetrics')->name('smart.pendi.patient.metrics')->middleware('verified')->middleware('verifyuser');
 
 // Análisis NT Routes - Gestión de Medicamentos por Contrato/Nota Técnica
 Route::get('/analisis-nt', 'AnalisisNtController@index')->name('analisis-nt.index')->middleware('verified')->middleware('verifyuser');
