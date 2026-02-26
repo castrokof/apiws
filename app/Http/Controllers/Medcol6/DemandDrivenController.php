@@ -77,7 +77,10 @@ class DemandDrivenController extends Controller
         // ── 2. Saldo actual por código ────────────────────────────────────────
         $saldos = $this->getSaldos($deposito);
 
-        // ── 3. Calcular métricas Demand Driven ───────────────────────────────
+        // ── 3. Marcas por código ──────────────────────────────────────────────
+        $marcas = $this->getMarcas();
+
+        // ── 4. Calcular métricas Demand Driven ───────────────────────────────
         $result = [];
 
         foreach ($stats as $row) {
@@ -119,6 +122,7 @@ class DemandDrivenController extends Controller
             $result[] = [
                 'codigo'           => $row->codigo,
                 'nombre_generico'  => $row->nombre_generico ?? '',
+                'marca'            => $marcas[$row->codigo] ?? '',
                 'total_unidades'   => (int) round($total),
                 'dias_con_demanda' => $n,
                 'promedio_diario'  => round($d,     2),
@@ -227,6 +231,15 @@ class DemandDrivenController extends Controller
             ->groupBy('deposito', 'nombre_deposito')
             ->orderBy('deposito')
             ->get()
+            ->toArray();
+    }
+
+    private function getMarcas(): array
+    {
+        return DB::table('medicamentos_api_medcol3')
+            ->whereNotNull('codigo')
+            ->where('codigo', '<>', '')
+            ->pluck('marca', 'codigo')
             ->toArray();
     }
 }

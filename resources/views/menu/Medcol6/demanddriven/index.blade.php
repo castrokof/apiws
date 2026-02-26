@@ -322,6 +322,7 @@ tr.row-sobrestock td { background-color: rgba(0,123,255,.05)  !important; }
                         <tr class="thead-dark">
                             <th>Código</th>
                             <th style="min-width:210px">Medicamento</th>
+                            <th>Marca</th>
                             <th class="text-right">Prom.<br>Diario</th>
                             <th class="text-right">σ Desv.</th>
                             <th class="text-right">Stock<br>Seg. (SS)</th>
@@ -422,6 +423,7 @@ $(function () {
             columns: [
                 { data: 'codigo',          className: 'font-weight-bold' },
                 { data: 'nombre_generico', render: (d) => d ? escHtml(d) : '<span class="text-muted">—</span>' },
+                { data: 'marca',           render: (d) => d ? escHtml(d) : '<span class="text-muted small">—</span>' },
                 { data: 'promedio_diario', className: 'num-col', render: (d) => fmt(d, 2) },
                 { data: 'std_dev',         className: 'num-col', render: (d) => fmt(d, 2) },
                 { data: 'stock_seguridad', className: 'num-col font-weight-bold text-warning', render: (d) => fmt(d, 1) },
@@ -597,8 +599,8 @@ $(function () {
         $(this).addClass('active');
 
         if (!ddTable) return;
-        // Columna 9 = estado. search() usa el valor devuelto por render(type='filter')
-        ddTable.column(9).search(filtroEstado, false, false).draw();
+        // Columna 10 = estado (0→codigo, 1→nombre, 2→marca, 3→prom, 4→σ, 5→SS, 6→ROP, 7→EOQ, 8→saldo, 9→días, 10→estado)
+        ddTable.column(10).search(filtroEstado, false, false).draw();
     });
 
     /* ── Gráfico histórico ──────────────────────────────────────── */

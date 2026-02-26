@@ -38,7 +38,7 @@ class Molecula extends Model
     // Activas vs estado (ajústalo a tu regla: por ejemplo estado = 'ACTIVO')
     public function scopeActivas($q)
     {
-        return $q->where('estado', 'ACTIVO'); // o 1, o 'HABILITADO' según tu data
+        return $q->where('estado', '1'); // o 1, o 'HABILITADO' según tu data
     }
 
     // Antes: scopePorCodigo($codigo_rfast) -> ahora mapea a 'codigo'

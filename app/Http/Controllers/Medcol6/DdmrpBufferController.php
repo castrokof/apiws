@@ -82,6 +82,9 @@ class DdmrpBufferController extends Controller
         // ── Saldo actual ─────────────────────────────────────────────────────
         $saldos = $this->getSaldos($deposito);
 
+        // ── Marcas por código ─────────────────────────────────────────────────
+        $marcas = $this->getMarcas();
+
         // ── Calcular zonas DDMRP para cada ítem ──────────────────────────────
         $result = [];
 
@@ -132,6 +135,7 @@ class DdmrpBufferController extends Controller
             $result[] = [
                 'codigo'           => $row->codigo,
                 'nombre_generico'  => $row->nombre_generico ?? '',
+                'marca'            => $marcas[$row->codigo] ?? '',
                 'promedio_diario'  => round($ddp, 2),
                 'zona_roja'        => round($zonas['zonaRoja'],     1),
                 'zona_roja_base'   => round($zonas['zonaRojaBase'], 1),
@@ -220,6 +224,15 @@ class DdmrpBufferController extends Controller
             ->groupBy('deposito', 'nombre_deposito')
             ->orderBy('deposito')
             ->get()
+            ->toArray();
+    }
+
+    private function getMarcas(): array
+    {
+        return DB::table('medicamentos_api_medcol3')
+            ->whereNotNull('codigo')
+            ->where('codigo', '<>', '')
+            ->pluck('marca', 'codigo')
             ->toArray();
     }
 }

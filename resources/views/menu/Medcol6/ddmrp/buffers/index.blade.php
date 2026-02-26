@@ -8,7 +8,7 @@
 <link href="{{ asset('assets/lte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}" rel="stylesheet">
 <style>
 /* ── Tabla ── */
-#ddmrp-table { min-width: 1400px; }
+#ddmrp-table { min-width: 1550px; }
 #ddmrp-table th, #ddmrp-table td {
     white-space: nowrap;
     font-size: .81rem;
@@ -255,6 +255,7 @@ tr.row-sobrestock td { background-color: rgba(0,123,255,.05) !important; }
                         <tr class="thead-dark">
                             <th>Código</th>
                             <th style="min-width:200px">Medicamento</th>
+                            <th>Marca</th>
                             <th class="text-right">DDP<br><small class="font-weight-normal">prom/día</small></th>
                             <th class="text-right" style="color:#ff6b6b">Z. Roja</th>
                             <th class="text-right" style="color:#ffd93d">Z. Amarilla</th>
@@ -359,6 +360,7 @@ $(function () {
             columns: [
                 { data: 'codigo',          className: 'font-weight-bold' },
                 { data: 'nombre_generico', render: (d) => d ? escHtml(d) : '<span class="text-muted">—</span>' },
+                { data: 'marca',           render: (d) => d ? escHtml(d) : '<span class="text-muted small">—</span>' },
                 { data: 'promedio_diario', className: 'num-col', render: (d) => fmt(d, 2) },
                 { data: 'zona_roja',       className: 'num-col', render: (d) => `<span style="color:#dc3545;font-weight:600">${fmt(d, 1)}</span>` },
                 { data: 'zona_amarilla',   className: 'num-col', render: (d) => `<span style="color:#e67e22;font-weight:600">${fmt(d, 1)}</span>` },
@@ -411,7 +413,7 @@ $(function () {
                     extend: 'excelHtml5', text: '<i class="fas fa-file-excel mr-1"></i> Excel',
                     className: 'btn btn-success btn-sm',
                     exportOptions: {
-                        columns: ':not(:nth-child(9))',  // excluir columna Buffer (visual)
+                        columns: ':not(:nth-child(10))',  // excluir columna Buffer (visual, ahora col 10)
                         format: { body: (d) => d ? String(d).replace(/<[^>]+>/g, '') : '' }
                     },
                     title: function () {
@@ -428,13 +430,13 @@ $(function () {
                     extend: 'pdfHtml5', text: '<i class="fas fa-file-pdf mr-1"></i> PDF',
                     className: 'btn btn-danger btn-sm',
                     orientation: 'landscape', pageSize: 'A3',
-                    exportOptions: { columns: ':not(:nth-child(9))' },
+                    exportOptions: { columns: ':not(:nth-child(10))' },
                     title: function () { return 'DDMRP Buffers – ' + ($('#f-anio').val() || 'Todos'); },
                 },
                 {
                     extend: 'csvHtml5', text: '<i class="fas fa-file-csv mr-1"></i> CSV',
                     className: 'btn btn-secondary btn-sm',
-                    exportOptions: { columns: ':not(:nth-child(9))' },
+                    exportOptions: { columns: ':not(:nth-child(10))' },
                 },
             ],
             rowCallback: function (row, rowData) {
@@ -461,7 +463,8 @@ $(function () {
         const estado = $(this).data('estado');
         $('.btn-estado').removeClass('active');
         $(this).addClass('active');
-        if (ddTable) ddTable.column(9).search(estado, false, false).draw();
+        // Columna 10 = estado (0→codigo, 1→nombre, 2→marca, 3→DDP, 4→ZRoja, 5→ZAmarilla, 6→ZVerde, 7→TOG, 8→saldo, 9→buffer, 10→estado)
+        if (ddTable) ddTable.column(10).search(estado, false, false).draw();
     });
 
     /* ── Cargar / calcular ────────────────────────────────────────── */

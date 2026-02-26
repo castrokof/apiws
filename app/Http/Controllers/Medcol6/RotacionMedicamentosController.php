@@ -59,7 +59,10 @@ class RotacionMedicamentosController extends Controller
             ->orderBy('mes')
             ->get();
 
-        // ── 2. Último saldo por código (sumado sobre depósitos, o filtrado) ──
+        // ── 2. Marcas por código ──────────────────────────────────────────────
+        $marcas = $this->getMarcas();
+
+        // ── 3. Último saldo por código (sumado sobre depósitos, o filtrado) ──
         $subLatest = DB::table('saldos_medcol6')
             ->select('codigo', 'deposito', DB::raw('MAX(fecha_saldo) as max_fecha'))
             ->groupBy('codigo', 'deposito');
@@ -78,7 +81,7 @@ class RotacionMedicamentosController extends Controller
 
         $saldos = $saldosQ->groupBy('s.codigo')->pluck('saldo_total', 'codigo');
 
-        // ── 3. Pivot en PHP: una entrada por código ───────────────────────────
+        // ── 4. Pivot en PHP: una entrada por código ───────────────────────────
         $pivot = [];
 
         foreach ($dispensado as $row) {
@@ -90,6 +93,7 @@ class RotacionMedicamentosController extends Controller
                     'codigo'          => $codigo,
                     'agrupador'       => $agrupadorVal,
                     'nombre_generico' => $row->nombre_generico ?? '',
+                    'marca'           => $marcas[$codigo] ?? '',
                     'meses'           => array_fill(1, 12, null),
                 ];
             }
@@ -99,7 +103,7 @@ class RotacionMedicamentosController extends Controller
                 ($pivot[$codigo]['meses'][(int) $row->mes] ?? 0) + (float) $row->total;
         }
 
-        // ── 4. Calcular métricas ─────────────────────────────────────────────
+        // ── 5. Calcular métricas ─────────────────────────────────────────────
         $result = [];
 
         foreach ($pivot as $codigo => $data) {
@@ -116,6 +120,7 @@ class RotacionMedicamentosController extends Controller
                 'codigo'          => $data['codigo'],
                 'agrupador'       => $data['agrupador'],
                 'nombre_generico' => $data['nombre_generico'],
+                'marca'           => $data['marca'],
                 'promedio'        => round($promedio, 1),
                 'rango'           => number_format($minVal, 0, '.', '') . ' – ' . number_format($maxVal, 0, '.', ''),
                 'promedio_diario' => $promDiario,
@@ -151,20 +156,22 @@ class RotacionMedicamentosController extends Controller
         }
 
         $rows = DB::table('dispensado_medcol6')
+            ->leftJoin('medicamentos_api_medcol3 as m3', 'dispensado_medcol6.codigo', '=', 'm3.codigo')
             ->select([
-                'codigo',
-                'nombre_generico',
-                DB::raw('centroprod as farmacia'),
-                DB::raw("SUM(CAST(REPLACE(COALESCE(numero_unidades,'0'), ',', '') AS DECIMAL(15,2))) as total_unidades"),
-                DB::raw('COUNT(DISTINCT historia) as total_pacientes'),
+                'dispensado_medcol6.codigo',
+                'dispensado_medcol6.nombre_generico',
+                DB::raw('dispensado_medcol6.centroprod as farmacia'),
+                DB::raw("SUM(CAST(REPLACE(COALESCE(dispensado_medcol6.numero_unidades,'0'), ',', '') AS DECIMAL(15,2))) as total_unidades"),
+                DB::raw('COUNT(DISTINCT dispensado_medcol6.historia) as total_pacientes'),
+                DB::raw("COALESCE(m3.marca, '') as marca"),
             ])
-            ->when($anio, fn ($q) => $q->whereYear('fecha_suministro', $anio))
-            ->whereRaw("SUBSTRING_INDEX(codigo, '-', 1) = ?", [$agrupador])
-            ->when($deposito, fn ($q) => $q->where('centroprod', $deposito))
-            ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
-            ->whereNotIn('codigo', ['1010', '1011', '1012'])
-            ->groupBy('codigo', 'nombre_generico', 'centroprod')
-            ->orderBy('codigo')
+            ->when($anio, fn ($q) => $q->whereYear('dispensado_medcol6.fecha_suministro', $anio))
+            ->whereRaw("SUBSTRING_INDEX(dispensado_medcol6.codigo, '-', 1) = ?", [$agrupador])
+            ->when($deposito, fn ($q) => $q->where('dispensado_medcol6.centroprod', $deposito))
+            ->whereIn('dispensado_medcol6.estado', ['DISPENSADO', 'REVISADO'])
+            ->whereNotIn('dispensado_medcol6.codigo', ['1010', '1011', '1012'])
+            ->groupBy('dispensado_medcol6.codigo', 'dispensado_medcol6.nombre_generico', 'dispensado_medcol6.centroprod', 'm3.marca')
+            ->orderBy('dispensado_medcol6.codigo')
             ->get();
 
         return response()->json(['data' => $rows]);
@@ -202,6 +209,15 @@ class RotacionMedicamentosController extends Controller
             ->groupBy('deposito', 'nombre_deposito')
             ->orderBy('deposito')
             ->get()
+            ->toArray();
+    }
+
+    private function getMarcas(): array
+    {
+        return DB::table('medicamentos_api_medcol3')
+            ->whereNotNull('codigo')
+            ->where('codigo', '<>', '')
+            ->pluck('marca', 'codigo')
             ->toArray();
     }
 }

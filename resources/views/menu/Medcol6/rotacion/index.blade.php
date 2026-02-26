@@ -23,7 +23,7 @@
     }
     /* Tabla scroll horizontal gestionado por Bootstrap table-responsive */
     #rotacion-table {
-        min-width: 1400px;
+        min-width: 1500px;
     }
 
     /* Faltante destacado */
@@ -249,6 +249,7 @@
                             <tr>
                                 <th>Código</th>
                                 <th style="min-width:220px">Medicamento</th>
+                                <th>Marca</th>
                                 <th>Farmacia</th>
                                 <th class="text-right">Total Unidades</th>
                                 <th class="text-right">Pacientes Únicos</th>
@@ -257,7 +258,7 @@
                         <tbody id="detalle-tbody"></tbody>
                         <tfoot>
                             <tr class="font-weight-bold bg-light">
-                                <td colspan="3" class="text-right">Totales:</td>
+                                <td colspan="4" class="text-right">Totales:</td>
                                 <td class="text-right" id="detalle-total-unidades">—</td>
                                 <td class="text-right" id="detalle-total-pacientes">—</td>
                             </tr>
@@ -323,8 +324,10 @@ $(function () {
         // Columnas fijas iniciales
         cols.push({ data: 'codigo',          className: 'font-weight-bold' });
         cols.push({ data: 'nombre_generico', render: (d) => d ? escapeHtml(d) : '<span class="text-muted">—</span>' });
+        cols.push({ data: 'marca',           render: (d) => d ? escapeHtml(d) : '<span class="text-muted small">—</span>' });
         ths.push('<th>Código</th>');
         ths.push('<th style="min-width:200px">Medicamento</th>');
+        ths.push('<th>Marca</th>');
 
         // Columnas de meses (1–12)
         for (let m = 1; m <= 12; m++) {
@@ -611,7 +614,7 @@ $(function () {
 
                 if (rows.length === 0) {
                     $('#detalle-tbody').html(
-                        '<tr><td colspan="5" class="text-center text-muted">Sin registros para este agrupador.</td></tr>'
+                        '<tr><td colspan="6" class="text-center text-muted">Sin registros para este agrupador.</td></tr>'
                     );
                     $('#detalle-table').show();
                     return;
@@ -630,6 +633,7 @@ $(function () {
                     html += `<tr>
                         <td class="font-weight-bold">${escapeHtml(r.codigo)}</td>
                         <td>${r.nombre_generico ? escapeHtml(r.nombre_generico) : '<span class="text-muted">—</span>'}</td>
+                        <td>${r.marca ? escapeHtml(r.marca) : '<span class="text-muted small">—</span>'}</td>
                         <td>${r.farmacia ? escapeHtml(r.farmacia) : '<span class="text-muted">—</span>'}</td>
                         <td class="text-right">${unidades.toLocaleString('es-CO', {minimumFractionDigits:0, maximumFractionDigits:2})}</td>
                         <td class="text-right">${pacientes.toLocaleString('es-CO')}</td>
@@ -645,7 +649,7 @@ $(function () {
                 $('#modal-spinner').hide();
                 const msg = xhr.responseJSON?.message || 'Error al cargar el detalle.';
                 $('#detalle-tbody').html(
-                    `<tr><td colspan="5" class="text-center text-danger">${escapeHtml(msg)}</td></tr>`
+                    `<tr><td colspan="6" class="text-center text-danger">${escapeHtml(msg)}</td></tr>`
                 );
                 $('#detalle-table').show();
                 console.error('Error detalle rotación:', xhr);
