@@ -13,6 +13,218 @@ Sistema web desarrollado en Laravel 7.x para la gestión de dispensación de med
 
 ## 📋 Changelog
 
+### v3.0 (Febrero 2026) - Módulo DDMRP: Demand Driven MRP con Gestión de Buffers
+
+**🚀 Nuevas Funcionalidades Mayores:**
+Sistema completo de planificación de inventarios basado en los principios de **Demand Driven Material Requirements Planning (DDMRP)**, con tres módulos integrados: análisis de rotación mejorado, planificación Demand Driven con cálculos estadísticos, y gestión de buffers con zonas DDMRP.
+
+---
+
+#### 🔄 Mejoras al Módulo de Rotación de Medicamentos (`medcol6/rotacion`)
+
+**📊 Carga Completa de Datos al Ingreso**
+- Datos cargados automáticamente al entrar a la sección (sin necesidad de aplicar filtros primero)
+- Filtros aplican cambios dinámicamente sobre la tabla ya cargada
+- Soporte para análisis multi-año: opción **"— Todos los años —"** en el selector de año
+
+**🔍 Filtro por Agrupador (Código Base)**
+- Campo de texto con búsqueda por código base (ej: `M000673-01` → agrupa como `M000673`)
+- Debounce de 700ms para evitar consultas excesivas mientras se escribe
+- Activación con tecla Enter o botón de búsqueda
+- Botón de limpieza para resetear el filtro
+- Extracción automática: `SUBSTRING_INDEX(codigo, '-', 1)` a nivel de base de datos
+
+**🔍 Modal de Detalle por Agrupador**
+- Botón "Ver detalle" en cada fila de la tabla
+- Modal (extra-large) con tabla de todos los códigos del mismo agrupador
+- Columnas: Código, Nombre Genérico, Farmacia (centroprod), Total Unidades, Pacientes Únicos
+- Totales en pie de tabla (tfoot) calculados automáticamente
+- Ordenamiento por código para fácil comparación
+
+**🐛 Corrección: Thead Desalineado**
+- Causa: `scrollX: true` en DataTables crea dos tablas separadas (scrollHead + scrollBody) en conflicto con Bootstrap `table-responsive`
+- Solución: Se elimina `scrollX: true` y se agrega `min-width: 1400px` vía CSS; el scroll horizontal lo maneja `table-responsive`
+
+**📁 Archivos Modificados:**
+- `app/Http/Controllers/Medcol6/RotacionMedicamentosController.php`: filtros opcionales, endpoint `getDetalle()`, acumulación `+=` para multi-año
+- `resources/views/menu/Medcol6/rotacion/index.blade.php`: filtro agrupador como text input, modal de detalle, opción "Todos" en año
+- `routes/web.php`: nueva ruta `medcol6/rotacion/detalle`
+
+---
+
+#### 📈 Nuevo Módulo: Demand Driven (`medcol6/demand-driven`)
+
+**🎯 Cálculos Estadísticos de Demanda**
+
+Implementación de indicadores clave para planificación de reabastecimiento:
+
+| Indicador | Fórmula | Descripción |
+|-----------|---------|-------------|
+| **DDP** | AVG(unidades/día) | Demanda Diaria Promedio |
+| **σ (Desv. Estándar)** | STDDEV_SAMP(unidades/día) | Variabilidad de la demanda |
+| **SS (Stock de Seguridad)** | Z × σ × √LT | Colchón ante variabilidad |
+| **ROP (Punto de Reorden)** | DDP × LT + SS | Nivel para disparar pedido |
+| **EOQ (Cantidad Económica)** | √(2 × D × S / H) | Lote óptimo de pedido |
+
+**Constantes configuradas (ajustables en el controlador):**
+- LT = 7 días (Lead Time)
+- Z = 1.65 (nivel de servicio 95%)
+- S = $8,400 (costo de orden)
+- H = $1,500 (costo de mantenimiento unitario/año)
+
+**📊 Clasificación de Estado**
+
+| Estado | Condición |
+|--------|-----------|
+| `CRÍTICO` | Saldo actual ≤ SS |
+| `REORDENAR` | Saldo actual ≤ ROP |
+| `NORMAL` | Saldo actual ≤ ROP + EOQ |
+| `SOBRESTOCK` | Saldo actual > ROP + EOQ |
+| `SIN_DEMANDA` | DDP = 0 |
+
+**📊 Características de la Vista**
+- **5 tarjetas de resumen**: Total ítems, Crítico, Reordenar, Normal, Sobrestock
+- **Filtros rápidos** por estado (botones con badge contador)
+- **Filtros de datos**: Año (opcional), Depósito, Agrupador (texto con debounce)
+- **Gráfica histórica mensual**: Al hacer clic en una fila, despliega panel con Chart.js (línea azul actual + línea punteada promedio)
+- **Exportación**: Excel (con formato), PDF y CSV; título y metadatos dinámicos en el export
+
+**🐛 Correcciones Técnicas**
+- **Filtro CRÍTICO no filtraba**: `render` de la columna estado siempre retornaba HTML badge. Corregido con `if (type === 'filter' || type === 'sort') return d; return badgeEstado(d);`
+- **Botones Excel/PDF no visibles**: Faltaban dependencias JSZip y pdfmake. Solución: cargar `jszip.min.js`, `pdfmake.min.js`, `vfs_fonts.js` antes de `buttons.html5.min.js`
+
+**🔧 Arquitectura Implementada**
+```
+app/Http/Controllers/Medcol6/DemandDrivenController.php
+    ├── index()          → Vista principal con filtros
+    ├── getData()        → AJAX: cálculos SS/ROP/EOQ por medicamento
+    └── getHistorico()   → AJAX: historial mensual para gráfica
+
+resources/views/menu/Medcol6/demanddriven/index.blade.php
+    ├── Tarjetas resumen (5)
+    ├── Filtros + botones de estado
+    ├── Panel de gráfica histórica (Chart.js)
+    └── DataTable con exportación Excel/PDF/CSV
+```
+
+**📁 Archivos Creados:**
+- `app/Http/Controllers/Medcol6/DemandDrivenController.php`
+- `resources/views/menu/Medcol6/demanddriven/index.blade.php`
+- `routes/web.php`: 3 rutas nuevas (`medcol6/demand-driven`, `/data`, `/historico`)
+- `resources/views/components/sidebar.blade.php`: ítem "Demand Driven"
+
+---
+
+#### 🟢 Nuevo Módulo: DDMRP Buffers (`medcol6/ddmrp/buffers` y `medcol6/ddmrp/perfiles`)
+
+**🎯 Conceptos DDMRP Implementados**
+
+El sistema implementa las tres zonas del buffer DDMRP para cada medicamento:
+
+| Zona | Fórmula | Significado |
+|------|---------|-------------|
+| **Zona Roja Base** | DDP × LT × LTF | Protección base de lead time |
+| **Zona Roja Seg.** | Zona Roja Base × VF | Seguridad por variabilidad |
+| **Zona Roja (TOR)** | Roja Base + Roja Seg. | Top of Red — dispara pedido urgente |
+| **Zona Amarilla** | DDP × LT | Reabastecimiento en tránsito |
+| **Zona Verde** | MAX(DDP×OC, DDP×LT×LTF, MOQ) | Ciclo de pedido |
+| **TOY** | TOR + Zona Amarilla | Top of Yellow |
+| **TOG** | TOY + Zona Verde | Top of Green — nivel máximo |
+
+**Estados del buffer según saldo actual:**
+- 🔴 `ROJO`: Saldo ≤ TOR → Pedido urgente
+- 🟡 `AMARILLO`: Saldo ≤ TOY → Programar pedido
+- 🟢 `VERDE`: Saldo ≤ TOG → Stock adecuado
+- 🔵 `SOBRESTOCK`: Saldo > TOG → Exceso de inventario
+- ⚪ `SIN_DEMANDA`: DDP = 0
+
+**📋 Gestión de Perfiles de Buffer (`medcol6/ddmrp/perfiles`)**
+
+CRUD completo para configurar diferentes perfiles según tipo de medicamento:
+
+| Parámetro | Descripción | Rango |
+|-----------|-------------|-------|
+| `lead_time` | Tiempo de entrega del proveedor (días) | 1–180 |
+| `lead_time_factor` | Factor de ajuste del lead time | 0.1–3.0 |
+| `variability_factor` | Factor de variabilidad de la demanda | 0.00–1.00 |
+| `order_cycle` | Ciclo de reabastecimiento (días) | 1–180 |
+| `moq` | Cantidad mínima de pedido | ≥ 1 |
+
+- **Preview en tiempo real**: Al crear/editar un perfil, se recalculan las zonas con DDP de ejemplo (10 u/día)
+- **Activar/Desactivar perfiles**: Toggle sin eliminar el registro
+- **CRUD AJAX**: Crear, editar, eliminar sin recargar la página
+
+**📊 Vista de Buffers (`medcol6/ddmrp/buffers`)**
+
+- **Selector de perfil**: Aplica el perfil seleccionado a todos los cálculos; enlace directo al CRUD de perfiles
+- **Barra visual de buffer**: Representación gráfica proporcional de las zonas con un marcador de posición del saldo actual
+  ```
+  [■■■ ROJO ■■■][■■■■■■ AMARILLO ■■■■■■][■■■■■■■■ VERDE ■■■■■■■■]
+                                                   ↑ saldo actual
+  ```
+- **% de penetración**: Porcentaje de avance dentro de la zona activa
+- **Pedido sugerido**: Calculado automáticamente como `MAX(TOG - saldo, MOQ)` para estados ROJO/AMARILLO
+- **Días de cobertura**: Saldo / DDP
+- **Ordenamiento por prioridad**: ROJO → AMARILLO → VERDE → SOBRESTOCK → SIN_DEMANDA
+
+**🔧 Arquitectura Implementada**
+```
+database/migrations/
+    └── 2026_02_26_200000_create_buffer_profiles_table.php
+
+app/Models/Medcol6/BufferProfile.php
+    ├── scopeActive()
+    └── calcularZonas(float $ddp): array   // Toda la lógica DDMRP
+
+app/Http/Controllers/Medcol6/
+    ├── BufferPerfilController.php          // CRUD perfiles (index/store/show/update/destroy/toggle)
+    └── DdmrpBufferController.php           // Cálculo de buffers (index/getData/getSaldos)
+
+resources/views/menu/Medcol6/ddmrp/
+    ├── perfiles/index.blade.php            // CRUD con modal y preview en tiempo real
+    └── buffers/index.blade.php             // Vista principal con barra visual
+```
+
+**📁 Archivos Creados:**
+- `database/migrations/2026_02_26_200000_create_buffer_profiles_table.php`
+- `app/Models/Medcol6/BufferProfile.php`
+- `app/Http/Controllers/Medcol6/BufferPerfilController.php`
+- `app/Http/Controllers/Medcol6/DdmrpBufferController.php`
+- `resources/views/menu/Medcol6/ddmrp/perfiles/index.blade.php`
+- `resources/views/menu/Medcol6/ddmrp/buffers/index.blade.php`
+- `routes/web.php`: 8 rutas nuevas (6 para perfiles + 2 para buffers)
+- `resources/views/components/sidebar.blade.php`: ítems "DDMRP Buffers" y "Perfiles Buffer"
+
+---
+
+#### 📊 Resumen de Cambios v3.0
+
+| Módulo | Tipo | Archivos |
+|--------|------|----------|
+| Rotación Medicamentos | Mejora | 2 modificados |
+| Demand Driven | Nuevo | 2 creados, 2 modificados |
+| DDMRP Buffers | Nuevo | 6 creados, 2 modificados |
+| **Total** | | **8 archivos creados, 4 modificados** |
+
+#### 🚀 Acceso a los Nuevos Módulos
+
+```
+/medcol6/rotacion              → Rotación con filtros mejorados
+/medcol6/demand-driven         → Análisis SS/ROP/EOQ
+/medcol6/ddmrp/buffers         → Estado de buffers DDMRP
+/medcol6/ddmrp/perfiles        → Gestión de perfiles de buffer
+```
+
+#### 🐛 Notas Técnicas
+
+- **Patrón de filtros opcionales**: `$var = $request->get('field') ?: null;` + `->when($var, fn($q) => ...)`
+- **Patrón subquery MySQL**: `DB::table(function($q){}, 'alias')` para agregaciones anidadas con `STDDEV_SAMP` y `AVG`
+- **Render DataTables con HTML**: Siempre verificar `type` para retornar valor raw en `filter`/`sort`
+- **Dependencias DataTables Buttons**: Orden obligatorio: `jszip.min.js` → `pdfmake.min.js` → `vfs_fonts.js` → `buttons.html5.min.js`
+- **Tabla buffer_profiles**: Creada con migración `2026_02_26_200000_create_buffer_profiles_table.php`
+
+---
+
 ### v2.9 (Diciembre 2025) - Sistema de Seguimiento Histórico de Pendientes por Paciente
 
 **🚀 Nueva Funcionalidad Mayor:**
