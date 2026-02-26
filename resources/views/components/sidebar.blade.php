@@ -206,6 +206,24 @@
                                 <p>Rotación Medicamentos</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('medcol6.dd') }}" class="nav-link {{ request()->is('medcol6/demand-driven*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-purple"></i>
+                                <p>Demand Driven</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('medcol6.ddmrp.buffers') }}" class="nav-link {{ request()->is('medcol6/ddmrp/buffers*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-warning"></i>
+                                <p>DDMRP Buffers</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('medcol6.ddmrp.perfiles.index') }}" class="nav-link {{ request()->is('medcol6/ddmrp/perfiles*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-orange"></i>
+                                <p>Perfiles Buffer</p>
+                            </a>
+                        </li>
                         @endif
                     </ul>
                 </li>

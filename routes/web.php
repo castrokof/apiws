@@ -400,6 +400,23 @@ Route::get('medcol6/rotacion', 'Medcol6\RotacionMedicamentosController@index')->
 Route::get('medcol6/rotacion/data', 'Medcol6\RotacionMedicamentosController@getData')->name('medcol6.rotacion.data')->middleware('verified')->middleware('verifyuser');
 Route::get('medcol6/rotacion/detalle', 'Medcol6\RotacionMedicamentosController@getDetalle')->name('medcol6.rotacion.detalle')->middleware('verified')->middleware('verifyuser');
 
+// Rutas para Demand Driven
+Route::get('medcol6/demand-driven',           'Medcol6\DemandDrivenController@index')->name('medcol6.dd')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/demand-driven/data',      'Medcol6\DemandDrivenController@getData')->name('medcol6.dd.data')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/demand-driven/historico', 'Medcol6\DemandDrivenController@getHistorico')->name('medcol6.dd.historico')->middleware('verified')->middleware('verifyuser');
+
+// Rutas DDMRP – Perfiles de Buffer
+Route::get('medcol6/ddmrp/perfiles',              'Medcol6\BufferPerfilController@index')->name('medcol6.ddmrp.perfiles.index')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/ddmrp/perfiles',             'Medcol6\BufferPerfilController@store')->name('medcol6.ddmrp.perfiles.store')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/ddmrp/perfiles/{id}',         'Medcol6\BufferPerfilController@show')->name('medcol6.ddmrp.perfiles.show')->middleware('verified')->middleware('verifyuser');
+Route::put('medcol6/ddmrp/perfiles/{id}',         'Medcol6\BufferPerfilController@update')->name('medcol6.ddmrp.perfiles.update')->middleware('verified')->middleware('verifyuser');
+Route::delete('medcol6/ddmrp/perfiles/{id}',      'Medcol6\BufferPerfilController@destroy')->name('medcol6.ddmrp.perfiles.destroy')->middleware('verified')->middleware('verifyuser');
+Route::patch('medcol6/ddmrp/perfiles/{id}/toggle','Medcol6\BufferPerfilController@toggle')->name('medcol6.ddmrp.perfiles.toggle')->middleware('verified')->middleware('verifyuser');
+
+// Rutas DDMRP – Buffers (debe ir ANTES de la ruta genérica con {id})
+Route::get('medcol6/ddmrp/buffers/data', 'Medcol6\DdmrpBufferController@getData')->name('medcol6.ddmrp.buffers.data')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/ddmrp/buffers',      'Medcol6\DdmrpBufferController@index')->name('medcol6.ddmrp.buffers')->middleware('verified')->middleware('verifyuser');
+
 
 
 /*

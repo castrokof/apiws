@@ -49,6 +49,7 @@ class RotacionMedicamentosController extends Controller
             ->when($anio, fn ($q) => $q->whereYear('fecha_suministro', $anio))
             ->whereNotNull('codigo')
             ->where('codigo', '<>', '')
+            ->whereNotIn('codigo', ['1010', '1011', '1012'])
             ->when($deposito,  fn ($q) => $q->where('centroprod', $deposito))
             ->when($agrupador, fn ($q) => $q->whereRaw("SUBSTRING_INDEX(codigo, '-', 1) = ?", [$agrupador]))
             ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
@@ -161,6 +162,7 @@ class RotacionMedicamentosController extends Controller
             ->whereRaw("SUBSTRING_INDEX(codigo, '-', 1) = ?", [$agrupador])
             ->when($deposito, fn ($q) => $q->where('centroprod', $deposito))
             ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
+            ->whereNotIn('codigo', ['1010', '1011', '1012'])
             ->groupBy('codigo', 'nombre_generico', 'centroprod')
             ->orderBy('codigo')
             ->get();
