@@ -7,6 +7,7 @@ use App\Models\Medcol6\PendienteApiMedcol6;
 use App\Models\Medcol6\SaldosMedcol6;
 use App\Models\Medcol6\GestionHistoricoMedcol6;
 use App\Helpers\DeliveryMetricsHelper;
+use App\Paciente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -449,6 +450,129 @@ class SmartPendiController extends Controller
         return response()->json([
             'success' => true,
             'summary' => $summary
+        ]);
+    }
+
+    /**
+     * Pendientes de pacientes marcados como PQRS.
+     * Cruza pendiente_api_medcol6 (estado PENDIENTE) con la tabla pacientes (pqrs = 'SI').
+     * La unión se realiza sobre el campo historia.
+     * Sin restricción de ventana temporal: muestra TODOS los pendientes PQRS.
+     */
+    public function getPendientesPqrs(Request $request)
+    {
+        $drogueria = $this->getUserDrogueria();
+
+        // Historias de pacientes con PQRS = 'SI'
+        $historiasPqrs = Paciente::where('pqrs', 'SI')
+            ->whereNotNull('historia')
+            ->where('historia', '!=', '')
+            ->pluck('historia');
+
+        // Base query: pendientes en estado PENDIENTE cuya historia esté en PQRS
+        $query = PendienteApiMedcol6::query()
+            ->select([
+                'pendiente_api_medcol6.id',
+                'pendiente_api_medcol6.documento',
+                'pendiente_api_medcol6.historia',
+                'pendiente_api_medcol6.nombre1',
+                'pendiente_api_medcol6.nombre2',
+                'pendiente_api_medcol6.apellido1',
+                'pendiente_api_medcol6.apellido2',
+                'pendiente_api_medcol6.nombre',
+                'pendiente_api_medcol6.cantidad',
+                'pendiente_api_medcol6.fecha_factura',
+                'pendiente_api_medcol6.estado',
+                'pendiente_api_medcol6.factura',
+                'pendiente_api_medcol6.orden_externa',
+                'pendiente_api_medcol6.telefres',
+                'pendiente_api_medcol6.direcres',
+                'pendiente_api_medcol6.municipio',
+                'pendiente_api_medcol6.centroproduccion',
+                'pendiente_api_medcol6.observaciones',
+            ])
+            ->where('pendiente_api_medcol6.estado', 'PENDIENTE')
+            ->whereIn('pendiente_api_medcol6.historia', $historiasPqrs);
+
+        if (!empty($drogueria)) {
+            $query->where('pendiente_api_medcol6.centroproduccion', $drogueria);
+        }
+
+        // Parámetros DataTables server-side
+        $draw   = $request->get('draw', 1);
+        $start  = $request->get('start', 0);
+        $length = $request->get('length', 25);
+        $search = $request->get('search')['value'] ?? '';
+
+        $totalRecords = (clone $query)->count();
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('pendiente_api_medcol6.documento', 'LIKE', "%{$search}%")
+                  ->orWhere('pendiente_api_medcol6.historia',  'LIKE', "%{$search}%")
+                  ->orWhere('pendiente_api_medcol6.nombre1',   'LIKE', "%{$search}%")
+                  ->orWhere('pendiente_api_medcol6.apellido1', 'LIKE', "%{$search}%")
+                  ->orWhere('pendiente_api_medcol6.nombre',    'LIKE', "%{$search}%")
+                  ->orWhere('pendiente_api_medcol6.municipio', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $filteredRecords = (clone $query)->count();
+
+        // Ordenamiento
+        $colMap = ['fecha_factura', 'paciente', 'historia', 'nombre', 'fecha_factura', 'telefres', 'municipio', 'acciones'];
+        $orderIdx = $request->get('order')[0]['column'] ?? 0;
+        $orderDir = $request->get('order')[0]['dir']    ?? 'desc';
+        $orderCol = $colMap[$orderIdx] ?? 'pendiente_api_medcol6.fecha_factura';
+
+        if ($orderCol === 'paciente') {
+            $query->orderByRaw("CONCAT(pendiente_api_medcol6.nombre1,' ',pendiente_api_medcol6.apellido1) {$orderDir}");
+        } else {
+            $query->orderBy("pendiente_api_medcol6.{$orderCol}", $orderDir);
+        }
+
+        $pendientes = $query->skip($start)->take($length)->get();
+
+        // Enriquecer con datos de la tabla pacientes (programa, alto_costo)
+        $dataPacientes = Paciente::whereIn('historia', $pendientes->pluck('historia')->filter()->unique())
+            ->get(['historia', 'programa', 'alto_costo', 'estado'])
+            ->keyBy('historia');
+
+        $data = $pendientes->map(function ($p) use ($dataPacientes) {
+            $metrics      = DeliveryMetricsHelper::obtenerTodasLasMetricas($p->fecha_factura);
+            $infoPaciente = $dataPacientes->get($p->historia);
+
+            return [
+                'id'                => $p->id,
+                'paciente'          => trim("{$p->nombre1} {$p->nombre2} {$p->apellido1} {$p->apellido2}"),
+                'documento'         => $p->documento,
+                'historia'          => $p->historia ?? $p->documento,
+                'medicamento'       => $p->nombre,
+                'cantidad'          => $p->cantidad,
+                'fecha_factura'     => $p->fecha_factura,
+                'telefono'          => $p->telefres,
+                'direccion'         => $p->direcres,
+                'municipio'         => $p->municipio,
+                'centro_produccion' => $p->centroproduccion,
+                'estado'            => $p->estado ?: 'PENDIENTE',
+                'factura'           => $p->factura,
+                'orden_externa'     => $p->orden_externa,
+                'observaciones'     => $p->observaciones,
+                'programa'          => $infoPaciente->programa  ?? null,
+                'alto_costo'        => $infoPaciente->alto_costo ?? 'NO',
+                'estado_paciente'   => $infoPaciente->estado     ?? 'VIVO',
+                'horas_transcurridas'   => $metrics['horas_transcurridas'] ?? 0,
+                'dias_transcurridos'    => $metrics['dias_transcurridos'],
+                'fecha_estimada_entrega'=> $metrics['fecha_estimada_entrega'],
+                'estado_prioridad'      => $metrics['estado_prioridad'],
+            ];
+        });
+
+        return response()->json([
+            'draw'            => intval($draw),
+            'recordsTotal'    => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data'            => $data,
         ]);
     }
 

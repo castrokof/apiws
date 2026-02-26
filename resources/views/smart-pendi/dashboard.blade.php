@@ -151,6 +151,16 @@
                                 <small class="d-block text-muted">Medicamentos por Paciente</small>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pqrs-tab" data-toggle="tab" href="#pqrs-panel" role="tab">
+                                <i class="fas fa-exclamation-circle text-danger mr-1"></i>
+                                <span class="d-none d-md-inline">Pendientes PQRS</span>
+                                <span class="d-md-none">PQRS</span>
+                                <small class="d-block">
+                                    <span class="badge badge-danger" id="pqrs-count-badge" style="font-size:.7em;">0</span>
+                                </small>
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 <div class="card-body p-0">
@@ -434,6 +444,97 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- ══ PQRS Tab ══ -->
+                        <div class="tab-pane fade" id="pqrs-panel" role="tabpanel">
+                            <div class="p-4">
+
+                                <!-- Header -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-exclamation-circle text-danger mr-2"></i>
+                                        Pendientes de Pacientes con PQRS Activa
+                                    </h6>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" id="refresh-pqrs">
+                                        <i class="fas fa-sync-alt mr-1"></i>
+                                        Actualizar
+                                    </button>
+                                </div>
+
+                                <!-- Alert info -->
+                                <div class="alert alert-danger border-left border-danger" style="border-left-width:4px!important;">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    <strong>Atención:</strong> Estos pacientes tienen una PQRS activa.
+                                    Se listan <strong>todos</strong> sus medicamentos en estado <strong>PENDIENTE</strong>
+                                    sin límite de tiempo para que el equipo priorice su gestión.
+                                </div>
+
+                                <!-- Summary cards -->
+                                <div class="row mb-3" id="pqrs-summary-cards">
+                                    <div class="col-md-3 col-6 mb-2">
+                                        <div class="info-box shadow-sm mb-0">
+                                            <span class="info-box-icon bg-danger"><i class="fas fa-file-medical-alt"></i></span>
+                                            <div class="info-box-content">
+                                                <span class="info-box-text">Total Pendientes</span>
+                                                <span class="info-box-number" id="pqrs-total">—</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-2">
+                                        <div class="info-box shadow-sm mb-0">
+                                            <span class="info-box-icon bg-warning"><i class="fas fa-users"></i></span>
+                                            <div class="info-box-content">
+                                                <span class="info-box-text">Pacientes Únicos</span>
+                                                <span class="info-box-number" id="pqrs-pacientes">—</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-2">
+                                        <div class="info-box shadow-sm mb-0">
+                                            <span class="info-box-icon bg-info"><i class="fas fa-pills"></i></span>
+                                            <div class="info-box-content">
+                                                <span class="info-box-text">Medicamentos Distintos</span>
+                                                <span class="info-box-number" id="pqrs-medicamentos">—</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-2">
+                                        <div class="info-box shadow-sm mb-0">
+                                            <span class="info-box-icon bg-purple" style="background-color:#6f42c1!important"><i class="fas fa-star-of-life"></i></span>
+                                            <div class="info-box-content">
+                                                <span class="info-box-text">Alto Costo</span>
+                                                <span class="info-box-number" id="pqrs-alto-costo">—</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- DataTable -->
+                                <div class="table-responsive">
+                                    <table id="pqrs-table" class="table table-bordered table-hover table-sm mb-0">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th>Fecha Factura</th>
+                                                <th>Paciente</th>
+                                                <th>Historia</th>
+                                                <th>Medicamento</th>
+                                                <th>Cant.</th>
+                                                <th>Horas</th>
+                                                <th>Programa</th>
+                                                <th>Alto Costo</th>
+                                                <th>Teléfono</th>
+                                                <th>Municipio</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+                        <!-- ══ /PQRS Tab ══ -->
+
                     </div>
                 </div>
             </div>
@@ -588,6 +689,8 @@
 
 <script>
     let pendientesTable;
+    let pqrsTable;
+    let pqrsLoaded = false;
     let allSuggestions = []; // Store all suggestions for filtering
     let currentFilteredHistoria = null; // Current filtered historia
 
@@ -2592,7 +2695,215 @@
                 });
             }
         });
-    });
+
+        // ══════════════════════════════════════════════
+        // PQRS: cargar al activar el tab
+        // ══════════════════════════════════════════════
+        $('#pqrs-tab').on('shown.bs.tab', function () {
+            if (!pqrsLoaded) {
+                initializePqrsTable();
+                pqrsLoaded = true;
+            }
+        });
+
+        // Botón Actualizar del tab PQRS
+        $('#refresh-pqrs').on('click', function () {
+            if (pqrsTable) {
+                pqrsTable.ajax.reload(function (json) {
+                    updatePqrsSummaryCards(json.data);
+                }, false);
+            } else {
+                initializePqrsTable();
+                pqrsLoaded = true;
+            }
+        });
+
+    }); // fin $(document).ready
+
+    // ──────────────────────────────────────────────────
+    // Inicializar DataTable PQRS
+    // ──────────────────────────────────────────────────
+    function initializePqrsTable() {
+        if (pqrsTable) {
+            pqrsTable.destroy();
+            $('#pqrs-table tbody').empty();
+        }
+
+        pqrsTable = $('#pqrs-table').DataTable({
+            language: idioma_espanol,
+            pageLength: 25,
+            responsive: true,
+            serverSide: true,
+            processing: true,
+            lengthMenu: [[25, 50, 100, -1], [25, 50, 100, 'Todos']],
+            dom: '<"row"<"col-md-4"l><"col-md-4"f><"col-md-4"B>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            ajax: {
+                url: '{{ route("smart.pendi.pqrs") }}',
+                type: 'GET',
+                dataSrc: function (json) {
+                    updatePqrsSummaryCards(json.data);
+                    return json.data;
+                }
+            },
+            columns: [
+                {
+                    data: 'fecha_factura',
+                    name: 'fecha_factura',
+                    render: function (data) {
+                        return data ? new Date(data).toLocaleDateString('es-CO') : 'N/A';
+                    }
+                },
+                {
+                    data: 'paciente',
+                    name: 'paciente',
+                    render: function (data) {
+                        return '<strong>' + (data || 'N/A') + '</strong>';
+                    }
+                },
+                {
+                    data: 'historia',
+                    name: 'historia',
+                    render: function (data) {
+                        return '<span class="badge badge-danger">' + (data || 'N/A') + '</span>';
+                    }
+                },
+                {
+                    data: 'medicamento',
+                    name: 'nombre',
+                    render: function (data) {
+                        return '<span title="' + (data || '') + '" style="display:block;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (data || 'N/A') + '</span>';
+                    }
+                },
+                {
+                    data: 'cantidad',
+                    name: 'cantidad',
+                    className: 'text-center'
+                },
+                {
+                    data: 'horas_transcurridas',
+                    name: 'fecha_factura',
+                    className: 'text-center',
+                    render: function (data) {
+                        var h    = parseFloat(data) || 0;
+                        var cls  = h >= 72 ? 'danger' : (h >= 24 ? 'warning' : 'success');
+                        return '<span class="badge badge-' + cls + ' badge-pill">' + h + 'h</span>';
+                    }
+                },
+                {
+                    data: 'programa',
+                    name: 'programa',
+                    render: function (data) {
+                        if (!data) return '<span class="text-muted">—</span>';
+                        return '<span class="badge badge-info">' + data + '</span>';
+                    }
+                },
+                {
+                    data: 'alto_costo',
+                    name: 'alto_costo',
+                    className: 'text-center',
+                    render: function (data) {
+                        return data === 'SI'
+                            ? '<span class="badge badge-warning"><i class="fas fa-star mr-1"></i>SI</span>'
+                            : '<span class="badge badge-secondary">NO</span>';
+                    }
+                },
+                {
+                    data: 'telefono',
+                    name: 'telefres',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        if (data) {
+                            return '<button class="btn btn-sm btn-outline-primary" onclick="contactPatient(\'' +
+                                row.id + '\',\'' + row.paciente + '\',\'' + data + '\',\'' + row.medicamento + '\')">' +
+                                '<i class="fas fa-phone mr-1"></i>' + data + '</button>';
+                        }
+                        return '<span class="text-muted">No disponible</span>';
+                    }
+                },
+                {
+                    data: 'municipio',
+                    name: 'municipio',
+                    render: function (data) { return data || 'N/A'; }
+                },
+                {
+                    data: null,
+                    name: 'acciones',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return '<div class="btn-group btn-group-sm">' +
+                            '<button class="btn btn-outline-success" title="Registrar Gestión" ' +
+                            'onclick="openGestionModal(\'' + row.historia + '\')">' +
+                            '<i class="fas fa-clipboard-check"></i></button>' +
+                            '<button class="btn btn-outline-info" title="Ver Historial" ' +
+                            'onclick="loadPatientHistory(\'' + row.historia + '\')">' +
+                            '<i class="fas fa-history"></i></button>' +
+                            '</div>';
+                    }
+                }
+            ],
+            order: [[0, 'asc']],
+            buttons: [
+                {
+                    extend: 'excel',
+                    text: '<i class="fas fa-file-excel"></i> Excel',
+                    className: 'btn-success',
+                    title: 'Pendientes PQRS'
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="fas fa-file-pdf"></i> PDF',
+                    className: 'btn-danger',
+                    title: 'Pendientes PQRS'
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print"></i> Imprimir',
+                    className: 'btn-secondary',
+                    title: 'Pendientes PQRS'
+                }
+            ]
+        });
+    }
+
+    // Actualiza las tarjetas de resumen con los datos cargados en la página actual
+    function updatePqrsSummaryCards(data) {
+        if (!data || !data.length) {
+            $('#pqrs-total').text(0);
+            $('#pqrs-pacientes').text(0);
+            $('#pqrs-medicamentos').text(0);
+            $('#pqrs-alto-costo').text(0);
+            $('#pqrs-count-badge').text(0);
+            return;
+        }
+
+        // Cálculos sobre los datos de la página actual
+        var pacientesUnicos    = new Set(data.map(function (r) { return r.historia; })).size;
+        var medicamentosUnicos = new Set(data.map(function (r) { return r.medicamento; })).size;
+        var altoCosto          = data.filter(function (r) { return r.alto_costo === 'SI'; }).length;
+
+        $('#pqrs-total').text(data.length);
+        $('#pqrs-pacientes').text(pacientesUnicos);
+        $('#pqrs-medicamentos').text(medicamentosUnicos);
+        $('#pqrs-alto-costo').text(altoCosto);
+        $('#pqrs-count-badge').text(data.length);
+    }
+
+    // Abre el modal de gestión manual apuntando al historial del paciente PQRS
+    function openGestionModal(historia) {
+        $('#gestion-historia').val(historia);
+        $('#modalRegistrarGestion').modal('show');
+    }
+
+    // Navega al tab de histórico y carga el paciente
+    function loadPatientHistory(historia) {
+        $('#historico-tab').tab('show');
+        setTimeout(function () {
+            var $input = $('#patient-search-input');
+            if ($input.length) {
+                $input.val(historia).trigger('input');
+            }
+        }, 300);
+    }
 </script>
 @endsection
 

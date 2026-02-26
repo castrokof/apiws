@@ -395,6 +395,11 @@ Route::get('medcol6/saldos/{id}', 'Medcol6\SaldosMedcol6Controller@show')->name(
 Route::get('medcol6/statistics', 'Medcol6\StatisticsMedcol6Controller@index')->name('medcol6.statistics')->middleware('verified')->middleware('verifyuser');
 Route::get('medcol6/statistics/ajax', 'Medcol6\StatisticsMedcol6Controller@getEstadisticasAjax')->name('medcol6.statistics.ajax')->middleware('verified')->middleware('verifyuser');
 
+// Rutas para Rotación de Medicamentos
+Route::get('medcol6/rotacion', 'Medcol6\RotacionMedicamentosController@index')->name('medcol6.rotacion')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/rotacion/data', 'Medcol6\RotacionMedicamentosController@getData')->name('medcol6.rotacion.data')->middleware('verified')->middleware('verifyuser');
+Route::get('medcol6/rotacion/detalle', 'Medcol6\RotacionMedicamentosController@getDetalle')->name('medcol6.rotacion.detalle')->middleware('verified')->middleware('verifyuser');
+
 
 
 /*
@@ -660,6 +665,9 @@ Route::get('/smart/pendi/patient-metrics/{historia}', 'SmartPendiController@getP
 // FASE 11: Print/PDF Export Route
 Route::get('/smart/pendi/patient-history-print/{historia}', 'SmartPendiController@printPatientHistory')->name('smart.pendi.patient.history.print')->middleware('verified')->middleware('verifyuser');
 
+// PQRS: Pendientes de pacientes marcados como PQRS
+Route::get('/smart/pendi/pqrs', 'SmartPendiController@getPendientesPqrs')->name('smart.pendi.pqrs')->middleware('verified')->middleware('verifyuser');
+
 // FASE 12: Medication Frequency Analysis Route
 Route::get('/smart/pendi/medication-frequency/{historia}', 'SmartPendiController@getMedicationFrequency')->name('smart.pendi.medication.frequency')->middleware('verified')->middleware('verifyuser');
 
@@ -673,3 +681,9 @@ Route::put('/analisis-nt/{id}', 'AnalisisNtController@update')->name('analisis-n
 Route::delete('/analisis-nt/{id}', 'AnalisisNtController@destroy')->name('analisis-nt.destroy')->middleware('verified')->middleware('verifyuser');
 Route::post('/analisis-nt/import', 'AnalisisNtController@importExcel')->name('analisis-nt.import')->middleware('verified')->middleware('verifyuser');
 Route::get('/analisis-nt/datatable/data', 'AnalisisNtController@getDataTable')->name('analisis-nt.datatable')->middleware('verified')->middleware('verifyuser');
+
+// Rutas de Gestión de Pacientes
+Route::get('/pacientes', 'PacienteController@index')->name('pacientes.index')->middleware('verified')->middleware('verifyuser');
+Route::post('/pacientes', 'PacienteController@store')->name('pacientes.store')->middleware('verified')->middleware('verifyuser');
+Route::put('/pacientes/{id}', 'PacienteController@update')->name('pacientes.update')->middleware('verified')->middleware('verifyuser');
+Route::get('/pacientes/syncapi', 'PacienteController@syncPacientesApi')->name('pacientes.syncapi')->middleware('verified')->middleware('verifyuser');

@@ -109,6 +109,14 @@
                 </li>
                 @endif
 
+                <!-- Gestión de Pacientes -->
+                <li class="nav-item">
+                    <a href="{{ route('pacientes.index') }}" class="nav-link {{ request()->routeIs('pacientes.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-user-injured text-pink"></i>
+                        <p>Pacientes</p>
+                    </a>
+                </li>
+
                 <!-- Órdenes de Compra -->
                 @if(Auth::user()->hasAnyPermission(['inventario.view', 'compras.view', 'inventario.manage']))
                 <li class="nav-item {{ request()->is('medcol3/compras*') || request()->is('ordenes*') || request()->is('informeTarjetasCompras*') || request()->is('BuscarOrdenesDeCompra*') || request()->is('moleculas*') ? 'menu-open' : '' }}">
@@ -188,6 +196,14 @@
                             <a href="{{ route('medcol6.saldos') }}" class="nav-link {{ request()->is('medcol6/saldos*') ? 'active' : '' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Saldos</p>
+                            </a>
+                        </li>
+                        @endif
+                        @if(Auth::user()->hasAnyPermission(['medcol6.saldos.view', 'medcol2.dispensado.view']))
+                        <li class="nav-item">
+                            <a href="{{ route('medcol6.rotacion') }}" class="nav-link {{ request()->is('medcol6/rotacion*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-info"></i>
+                                <p>Rotación Medicamentos</p>
                             </a>
                         </li>
                         @endif
