@@ -51,7 +51,11 @@ class PendienteApiMedcol6 extends Model
         'nombre_comercial',
         'causa_pendiente',
         'lugar_entrega',
-        'secuencia_pendiente'
+        'secuencia_pendiente',
+        'numero_formula',
+        'fecha_ordenamiento',
+        'frecuencia_administracion',
+        'duracion_tratamiento',
     ];
 
     protected function serializeDate(DateTimeInterface $date)

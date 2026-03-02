@@ -3012,4 +3012,178 @@ class PendienteApiMedcol6Controller extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Busca todos los items de un pendiente por documento o factura (MPE131270).
+     * Devuelve los items agrupados con información del paciente y de contacto.
+     */
+    public function buscarPendientePorDocumentoFactura(Request $request)
+    {
+        $request->validate([
+            'termino' => 'required|string|min:3|max:100',
+        ]);
+
+        $termino = trim($request->input('termino'));
+
+        $items = PendienteApiMedcol6::where('orden_externa', $termino)
+            ->orWhere('documento', $termino)
+            ->orWhere('factura', $termino)
+            ->orderBy('factura')
+            ->orderBy('id')
+            ->get();
+
+        if ($items->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontraron pendientes con el término: ' . $termino,
+            ]);
+        }
+
+        // Usar el primer item para datos del paciente (son los mismos para todo el grupo)
+        $primero = $items->first();
+
+        $paciente = [
+            'historia'      => $primero->historia,
+            'orden_externa'     => $primero->orden_externa,
+            'nombre'        => trim("{$primero->nombre1} {$primero->nombre2} {$primero->apellido1} {$primero->apellido2}"),
+            'direcres'      => $primero->direcres,
+            'telefres'      => $primero->telefres,
+            'municipio'     => $primero->municipio,
+        ];
+
+        $medicamentos = $items->map(function ($item) {
+            return [
+                'id'                      => $item->id,
+                'factura'                 => $item->factura,
+                'fecha_factura'           => $item->fecha_factura,
+                'codigo'                  => $item->codigo,
+                'nombre'                  => $item->nombre,
+                'agrupador'               => $item->agrupador,
+                'cantord'                 => $item->cantord,
+                'cantdpx'                 => $item->cantdpx,
+                'cantidad'                => $item->cantidad,
+                'estado'                  => $item->estado,
+                'fecha_entrega'           => $item->fecha_entrega,
+                'fecha_impresion'         => $item->fecha_impresion,
+                'fecha_anulado'           => $item->fecha_anulado,
+                'factura_entrega'         => $item->factura_entrega,
+                'doc_entrega'             => $item->doc_entrega,
+                'observaciones'           => $item->observaciones,
+                'numero_formula'          => $item->numero_formula,
+                'fecha_ordenamiento'      => $item->fecha_ordenamiento,
+                'frecuencia_administracion' => $item->frecuencia_administracion,
+                'duracion_tratamiento'    => $item->duracion_tratamiento,
+                'centroproduccion'        => $item->centroproduccion,
+            ];
+        });
+
+        return response()->json([
+            'success'      => true,
+            'paciente'     => $paciente,
+            'medicamentos' => $medicamentos,
+            'total'        => $items->count(),
+        ]);
+    }
+
+    /**
+     * Guarda los campos editados de los items seleccionados en la búsqueda por documento/factura.
+     * Cada item puede tener información distinta (fórmula médica diferente).
+     */
+    public function guardarPendientesBusqueda(Request $request)
+    {
+        $request->validate([
+            'items'                              => 'required|array|min:1',
+            'items.*.id'                         => 'required|integer|exists:pendiente_api_medcol6,id',
+            'items.*.cantdpx'                    => 'nullable|numeric|min:0',
+            'items.*.estado'                     => 'required|in:PENDIENTE,ENTREGADO,TRAMITADO,DESABASTECIDO,ANULADO,VENCIDO,SIN CONTACTO',
+            'items.*.fecha_correspondiente'      => 'nullable|date',
+            'items.*.factura_entrega'            => 'nullable|string|max:100',
+            'items.*.observaciones'              => 'nullable|string|max:1000',
+            'items.*.numero_formula'             => 'nullable|string|max:100',
+            'items.*.fecha_ordenamiento'         => 'nullable|date',
+            'items.*.frecuencia_administracion'  => 'nullable|string|max:150',
+            'items.*.duracion_tratamiento'       => 'nullable|string|max:100',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $actualizados = 0;
+            $errores = [];
+
+            foreach ($request->items as $itemData) {
+                try {
+                    $pendiente = PendienteApiMedcol6::findOrFail($itemData['id']);
+
+                    $updateData = [
+                        'estado'                  => $itemData['estado'],
+                        'usuario'                 => Auth::user()->email,
+                        'updated_at'              => now(),
+                        'numero_formula'          => $itemData['numero_formula'] ?? $pendiente->numero_formula,
+                        'fecha_ordenamiento'      => !empty($itemData['fecha_ordenamiento']) ? $itemData['fecha_ordenamiento'] : $pendiente->fecha_ordenamiento,
+                        'frecuencia_administracion' => $itemData['frecuencia_administracion'] ?? $pendiente->frecuencia_administracion,
+                        'duracion_tratamiento'    => $itemData['duracion_tratamiento'] ?? $pendiente->duracion_tratamiento,
+                        'observaciones'           => $itemData['observaciones'] ?? $pendiente->observaciones,
+                    ];
+
+                    if (isset($itemData['cantdpx'])) {
+                        $updateData['cantdpx'] = $itemData['cantdpx'];
+                    }
+
+                    if (!empty($itemData['factura_entrega'])) {
+                        $updateData['factura_entrega'] = $itemData['factura_entrega'];
+                    }
+
+                    // Asignar fecha según el estado
+                    $fecha = !empty($itemData['fecha_correspondiente']) ? Carbon::parse($itemData['fecha_correspondiente']) : now();
+
+                    switch ($itemData['estado']) {
+                        case 'ENTREGADO':
+                            $updateData['fecha_entrega'] = $fecha;
+                            break;
+                        case 'TRAMITADO':
+                        case 'DESABASTECIDO':
+                            $updateData['fecha_impresion'] = $fecha;
+                            break;
+                        case 'ANULADO':
+                            $updateData['fecha_anulado'] = $fecha;
+                            break;
+                        case 'SIN CONTACTO':
+                            $updateData['updated_at'] = $fecha;
+                            break;
+                    }
+
+                    $pendiente->update($updateData);
+                    $actualizados++;
+                } catch (\Exception $e) {
+                    $errores[] = "ID {$itemData['id']}: " . $e->getMessage();
+                }
+            }
+
+            DB::commit();
+
+            $mensaje = "Se actualizaron {$actualizados} item(s) correctamente.";
+            if (!empty($errores)) {
+                $mensaje .= ' Errores: ' . implode('; ', $errores);
+            }
+
+            return response()->json([
+                'success'     => true,
+                'message'     => $mensaje,
+                'actualizados' => $actualizados,
+                'errores'     => $errores,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error en guardarPendientesBusqueda: ' . $e->getMessage(), [
+                'user'  => Auth::user()->email ?? 'unknown',
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }

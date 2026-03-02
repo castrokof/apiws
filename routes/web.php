@@ -348,6 +348,10 @@ Route::post('medcol6/update-multiples-pendientes', 'Medcol6\PendienteApiMedcol6C
 Route::post('medcol6/buscar-validacion', 'Medcol6\PendienteApiMedcol6Controller@buscarValidacion')->name('medcol6.buscar_validacion')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/procesar-entregas', 'Medcol6\PendienteApiMedcol6Controller@procesarEntregas')->name('medcol6.procesar_entregas')->middleware('verified')->middleware('verifyuser');
 
+// Buscar pendiente por documento o factura (ej. MPE131270) para edición masiva
+Route::post('medcol6/buscar-pendiente-doc-factura', 'Medcol6\PendienteApiMedcol6Controller@buscarPendientePorDocumentoFactura')->name('medcol6.buscar_pendiente_doc_factura')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/guardar-pendientes-busqueda', 'Medcol6\PendienteApiMedcol6Controller@guardarPendientesBusqueda')->name('medcol6.guardar_pendientes_busqueda')->middleware('verified')->middleware('verifyuser');
+
 
 //Rutas de tablas de Dispensado MEDCOL 6 SOS y JAMUNDI
 
@@ -698,6 +702,14 @@ Route::put('/analisis-nt/{id}', 'AnalisisNtController@update')->name('analisis-n
 Route::delete('/analisis-nt/{id}', 'AnalisisNtController@destroy')->name('analisis-nt.destroy')->middleware('verified')->middleware('verifyuser');
 Route::post('/analisis-nt/import', 'AnalisisNtController@importExcel')->name('analisis-nt.import')->middleware('verified')->middleware('verifyuser');
 Route::get('/analisis-nt/datatable/data', 'AnalisisNtController@getDataTable')->name('analisis-nt.datatable')->middleware('verified')->middleware('verifyuser');
+
+// Rutas Catálogo
+    Route::get('medcol6/catalogo', 'Medcol6\catalogoMedcol6Controller@index')->name('medcol6.catalogo')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcol6/catalogo/data', 'Medcol6\catalogoMedcol6Controller@data')->name('medcol6.catalogo.data')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcol6/catalogo/filtros', 'Medcol6\catalogoMedcol6Controller@filtros')->name('medcol6.catalogo.filtros')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcol6/catalogo/estadisticas', 'Medcol6\catalogoMedcol6Controller@estadisticas')->name('medcol6.catalogo.estadisticas')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcol6/catalogo/sincronizar', 'Medcol6\catalogoMedcol6Controller@sincronizar')->name('medcol6.catalogo.sincronizar')->middleware('verified')->middleware('verifyuser');
+    Route::get('medcol6/catalogo/duplicadosPorCodigo', 'Medcol6\catalogoMedcol6Controller@duplicadosPorCodigo')->name('medcol6.catalogo.duplicados')->middleware('verified')->middleware('verifyuser');
 
 // Rutas de Gestión de Pacientes
 Route::get('/pacientes', 'PacienteController@index')->name('pacientes.index')->middleware('verified')->middleware('verifyuser');

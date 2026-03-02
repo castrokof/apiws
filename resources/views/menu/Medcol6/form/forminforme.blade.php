@@ -70,6 +70,9 @@
                         <button type="button" class="btn btn-purple" data-toggle="modal" data-target="#modalGestionPendientes">
                             <i class="fas fa-sync-alt mr-1"></i> Gestión de Pendientes
                         </button>
+                        <button type="button" class="btn btn-dark ml-2" data-toggle="modal" data-target="#modal-buscar-pendiente">
+                            <i class="fas fa-search mr-1"></i> Buscar Pendiente
+                        </button>
                     </div>
                 </div>
 

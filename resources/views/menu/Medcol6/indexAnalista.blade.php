@@ -65,6 +65,7 @@
         @include('menu.Medcol6.modal.modalIndicadoresPendientes')
         @include('menu.Medcol6.modal.modalGestionPacientes')
         @include('menu.Medcol6.modal.modalReglasGestion')
+        @include('menu.Medcol6.modal.modalBuscarPendiente')
     </div>
 </section>
 
@@ -4039,6 +4040,333 @@
         // FIN FUNCIONES PARA GESTIÓN DE PENDIENTES
         // =================================================================
     });
+</script>
+
+{{-- ============================================================
+     JavaScript del modal "Buscar Pendiente por Documento/Factura"
+     Debe ir aquí (después de jQuery) y NO dentro del @include del modal,
+     porque jQuery se carga después de @yield('content') en el layout.
+     ============================================================ --}}
+<script>
+$(document).ready(function () {
+
+    // ---- helpers ----
+    function bpFormatFecha(val) {
+        if (!val) return '';
+        return String(val).substring(0, 10);
+    }
+
+    function bpEtiquetaFecha(estado) {
+        switch (estado) {
+            case 'ENTREGADO':     return 'Fecha Entrega';
+            case 'TRAMITADO':
+            case 'DESABASTECIDO': return 'Fecha Impresión';
+            case 'ANULADO':       return 'Fecha Anulado';
+            case 'SIN CONTACTO':  return 'Fecha Sin Contacto';
+            default:              return 'Fecha';
+        }
+    }
+
+    function bpColorFila(estado) {
+        return 'estado-' + (estado || 'PENDIENTE').replace(' ', '_');
+    }
+
+    // ---- construir fila ----
+    function bpConstruirFila(item, idx) {
+        const estado     = item.estado || 'PENDIENTE';
+        const fechaLabel = bpEtiquetaFecha(estado);
+
+        let fechaVal = '';
+        switch (estado) {
+            case 'ENTREGADO':     fechaVal = bpFormatFecha(item.fecha_entrega);   break;
+            case 'TRAMITADO':
+            case 'DESABASTECIDO': fechaVal = bpFormatFecha(item.fecha_impresion); break;
+            case 'ANULADO':       fechaVal = bpFormatFecha(item.fecha_anulado);   break;
+        }
+
+        const estadoOpts = ['PENDIENTE','ENTREGADO','TRAMITADO','DESABASTECIDO','ANULADO','VENCIDO','SIN CONTACTO']
+            .map(function(e) {
+                return '<option value="' + e + '" ' + (e === estado ? 'selected' : '') + '>' + e + '</option>';
+            }).join('');
+
+        return '<tr class="bp-fila ' + bpColorFila(estado) + '" data-idx="' + idx + '" data-id="' + item.id + '">' +
+            '<td style="text-align:center;">' +
+                '<input type="checkbox" class="bp-check-item" data-idx="' + idx + '">' +
+            '</td>' +
+            '<td><small>' + (item.codigo || '') + '</small></td>' +
+            '<td>' +
+                '<small><strong>' + (item.nombre || '') + '</strong></small>' +
+                (item.agrupador ? '<br><small class="text-muted">' + item.agrupador + '</small>' : '') +
+                '<br><small class="text-muted">Factura: ' + (item.factura || '') + ' | F.Fac: ' + bpFormatFecha(item.fecha_factura) + '</small>' +
+            '</td>' +
+            '<td style="text-align:center;"><strong>' + (item.cantord || 0) + '</strong></td>' +
+            '<td>' +
+                '<input type="number" class="form-control bp-row-input bp-cantdpx"' +
+                '       value="' + (item.cantdpx || 0) + '" min="0"' +
+                '       max="' + (item.cantord || 9999) + '" step="0.01"' +
+                '       data-idx="' + idx + '" style="width:80px;">' +
+            '</td>' +
+            '<td>' +
+                '<select class="form-control bp-row-input bp-estado-select" data-idx="' + idx + '">' +
+                    estadoOpts +
+                '</select>' +
+            '</td>' +
+            '<td>' +
+                '<small class="bp-fecha-label text-muted d-block" data-idx="' + idx + '">' + fechaLabel + '</small>' +
+                '<input type="date" class="form-control bp-row-input bp-fecha-correspondiente"' +
+                '       value="' + fechaVal + '" data-idx="' + idx + '">' +
+            '</td>' +
+            '<td>' +
+                '<input type="text" class="form-control bp-row-input bp-factura-entrega"' +
+                '       value="' + (item.factura_entrega || '') + '" maxlength="100"' +
+                '       placeholder="Nro. factura" data-idx="' + idx + '">' +
+            '</td>' +
+            '<td>' +
+                '<textarea class="form-control bp-row-input bp-observaciones"' +
+                '          rows="2" maxlength="1000" placeholder="Observaciones..."' +
+                '          data-idx="' + idx + '">' + (item.observaciones || '') + '</textarea>' +
+            '</td>' +
+            '<td>' +
+                '<input type="text" class="form-control bp-row-input bp-numero-formula"' +
+                '       value="' + (item.numero_formula || '') + '" maxlength="100"' +
+                '       placeholder="Nro. fórmula" data-idx="' + idx + '">' +
+            '</td>' +
+            '<td>' +
+                '<input type="date" class="form-control bp-row-input bp-fecha-ordenamiento"' +
+                '       value="' + bpFormatFecha(item.fecha_ordenamiento) + '" data-idx="' + idx + '">' +
+            '</td>' +
+            '<td>' +
+                '<input type="text" class="form-control bp-row-input bp-frecuencia"' +
+                '       value="' + (item.frecuencia_administracion || '') + '" maxlength="150"' +
+                '       placeholder="Ej: cada 8 horas" data-idx="' + idx + '">' +
+            '</td>' +
+            '<td>' +
+                '<input type="text" class="form-control bp-row-input bp-duracion"' +
+                '       value="' + (item.duracion_tratamiento || '') + '" maxlength="100"' +
+                '       placeholder="Ej: 30 días" data-idx="' + idx + '">' +
+            '</td>' +
+        '</tr>';
+    }
+
+    // ---- estado del módulo ----
+    var bpItems = [];
+
+    // ---- limpiar al abrir ----
+    $('#modal-buscar-pendiente').on('show.bs.modal', function () {
+        $('#buscar-doc-factura-input').val('');
+        $('#bp-resultados').hide();
+        $('#bp-sin-resultados').hide();
+        $('#bp-loading').hide();
+        $('#bp-total-badge').hide();
+        bpItems = [];
+    });
+
+    $('#modal-buscar-pendiente').on('shown.bs.modal', function () {
+        $('#buscar-doc-factura-input').focus();
+    });
+
+    // ---- Enter en el input ----
+    $('#buscar-doc-factura-input').on('keypress', function (e) {
+        if (e.which === 13) $('#btn-ejecutar-busqueda-pendiente').trigger('click');
+    });
+
+    // ---- ejecutar búsqueda ----
+    $('#btn-ejecutar-busqueda-pendiente').on('click', function () {
+        var termino = $('#buscar-doc-factura-input').val().trim();
+        if (termino.length < 3) {
+            Swal.fire('Atención', 'Ingrese al menos 3 caracteres para buscar.', 'warning');
+            return;
+        }
+
+        $('#bp-resultados').hide();
+        $('#bp-sin-resultados').hide();
+        $('#bp-loading').show();
+        $('#bp-total-badge').hide();
+
+        $.ajax({
+            url: '{{ route("medcol6.buscar_pendiente_doc_factura") }}',
+            method: 'POST',
+            data: {
+                termino: termino,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function (resp) {
+                $('#bp-loading').hide();
+                if (!resp.success) {
+                    $('#bp-sin-resultados-msg').text(resp.message);
+                    $('#bp-sin-resultados').show();
+                    return;
+                }
+
+                bpItems = resp.medicamentos;
+                var pac = resp.paciente;
+
+                $('#bp-pac-historia').text(pac.historia || '-');
+                $('#bp-pac-documento').text(pac.orden_externa || '-');
+                $('#bp-pac-nombre').text(pac.nombre || '-');
+                $('#bp-pac-telefono').text(pac.telefres || '-');
+                $('#bp-pac-direccion').text(pac.direcres || '-');
+                $('#bp-pac-municipio').text(pac.municipio || '-');
+
+                var tbody = $('#bp-tabla-body').empty();
+                $.each(bpItems, function (idx, item) {
+                    tbody.append(bpConstruirFila(item, idx));
+                });
+
+                $('#bp-total-badge').text(bpItems.length + ' item(s) encontrado(s)').show();
+                bpActualizarContador();
+                $('#bp-resultados').show();
+            },
+            error: function (xhr) {
+                $('#bp-loading').hide();
+                var msg = xhr.responseJSON ? xhr.responseJSON.message : 'Error al consultar el servidor.';
+                Swal.fire('Error', msg, 'error');
+            }
+        });
+    });
+
+    // ---- cambio de estado → label de fecha ----
+    $(document).on('change', '.bp-estado-select', function () {
+        var idx    = $(this).data('idx');
+        var estado = $(this).val();
+        var $fila  = $(this).closest('tr');
+        $fila.removeClass(function (i, cls) {
+            return (cls.match(/(^|\s)estado-\S+/g) || []).join(' ');
+        }).addClass('estado-' + estado.replace(' ', '_'));
+        $('small.bp-fecha-label[data-idx="' + idx + '"]').text(bpEtiquetaFecha(estado));
+    });
+
+    // ---- checkbox individual ----
+    $(document).on('change', '.bp-check-item', function () {
+        var $fila = $(this).closest('tr');
+        $fila.toggleClass('bp-row-disabled', !this.checked);
+        $fila.find('input:not(.bp-check-item), select, textarea').prop('disabled', !this.checked);
+        bpActualizarContador();
+        bpSyncCheckAll();
+    });
+
+    // ---- check-all ----
+    $(document).on('change', '#bp-check-all', function () {
+        var checked = this.checked;
+        $('.bp-check-item').prop('checked', checked).trigger('change');
+    });
+
+    $('#bp-seleccionar-todos').on('click', function () {
+        $('#bp-check-all').prop('checked', true).trigger('change');
+    });
+    $('#bp-deseleccionar-todos').on('click', function () {
+        $('#bp-check-all').prop('checked', false).trigger('change');
+    });
+
+    function bpSyncCheckAll() {
+        var total   = $('.bp-check-item').length;
+        var checked = $('.bp-check-item:checked').length;
+        $('#bp-check-all').prop('indeterminate', checked > 0 && checked < total);
+        $('#bp-check-all').prop('checked', total > 0 && checked === total);
+    }
+
+    function bpActualizarContador() {
+        var n = $('.bp-check-item:checked').length;
+        $('#bp-contador-sel').text(n + ' seleccionados');
+        $('#bp-btn-guardar, #bp-btn-guardar-bottom').prop('disabled', n === 0);
+    }
+
+    // ---- guardar seleccionados ----
+    function bpEjecutarGuardado() {
+        var seleccionados = [];
+
+        $('.bp-check-item:checked').each(function () {
+            var idx   = $(this).data('idx');
+            var $fila = $('tr.bp-fila[data-idx="' + idx + '"]');
+            seleccionados.push({
+                id:                        $fila.data('id'),
+                cantdpx:                   $fila.find('.bp-cantdpx').val(),
+                estado:                    $fila.find('.bp-estado-select').val(),
+                fecha_correspondiente:     $fila.find('.bp-fecha-correspondiente').val(),
+                factura_entrega:           $fila.find('.bp-factura-entrega').val(),
+                observaciones:             $fila.find('.bp-observaciones').val(),
+                numero_formula:            $fila.find('.bp-numero-formula').val(),
+                fecha_ordenamiento:        $fila.find('.bp-fecha-ordenamiento').val(),
+                frecuencia_administracion: $fila.find('.bp-frecuencia').val(),
+                duracion_tratamiento:      $fila.find('.bp-duracion').val()
+            });
+        });
+
+        if (seleccionados.length === 0) {
+            Swal.fire('Atención', 'Seleccione al menos un item para guardar.', 'warning');
+            return;
+        }
+
+        Swal.fire({
+            title: '¿Guardar cambios?',
+            text: 'Se actualizarán ' + seleccionados.length + ' item(s) seleccionados.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, guardar',
+            cancelButtonText: 'Cancelar'
+        }).then(function (result) {
+            if (!result.value) return;
+
+            $('#bp-btn-guardar, #bp-btn-guardar-bottom')
+                .prop('disabled', true)
+                .html('<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...');
+
+            $.ajax({
+                url: '{{ route("medcol6.guardar_pendientes_busqueda") }}',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    _token: '{{ csrf_token() }}',
+                    items: seleccionados
+                }),
+                success: function (resp) {
+                    if (resp.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Guardado',
+                            text: resp.message,
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                        if ($.fn.DataTable && $.fn.DataTable.isDataTable('#pendientesAnalista')) {
+                            $('#pendientesAnalista').DataTable().ajax.reload(null, false);
+                        }
+                    } else {
+                        Swal.fire('Error', resp.message, 'error');
+                    }
+                },
+                error: function (xhr) {
+                    var msg = xhr.responseJSON ? xhr.responseJSON.message : 'Error al guardar.';
+                    Swal.fire('Error', msg, 'error');
+                },
+                complete: function () {
+                    bpActualizarContador();
+                }
+            });
+        });
+    }
+
+    $('#bp-btn-guardar, #bp-btn-guardar-bottom').on('click', bpEjecutarGuardado);
+
+    // ---- maximizar ----
+    $('#btn-maximizar-buscar').on('click', function () {
+        var $dialog = $('#modal-buscar-pendiente .modal-dialog');
+        var isMax   = $dialog.hasClass('bp-maximized');
+        if (isMax) {
+            $dialog.removeClass('bp-maximized').css({ width: '', 'max-width': '' });
+            $(this).find('i').removeClass('fa-compress').addClass('fa-expand');
+        } else {
+            $dialog.addClass('bp-maximized').css({ width: '98vw', 'max-width': '98vw' });
+            $(this).find('i').removeClass('fa-expand').addClass('fa-compress');
+        }
+    });
+
+    $('#modal-buscar-pendiente').on('hidden.bs.modal', function () {
+        $('#modal-buscar-pendiente .modal-dialog').removeClass('bp-maximized').css({ width: '', 'max-width': '' });
+        $('#btn-maximizar-buscar i').removeClass('fa-compress').addClass('fa-expand');
+    });
+
+});
 </script>
 
 @endsection

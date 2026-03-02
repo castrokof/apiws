@@ -373,7 +373,7 @@ $(document).ready(function () {
     // ── Inicializar DataTable ──────────────────────────────────────────────
     var tabla = $('#tablaPacientes').DataTable({
         processing: true,
-        serverSide: false,
+        serverSide: true,
         ajax: {
             url: '{{ route("pacientes.index") }}',
             type: 'GET',

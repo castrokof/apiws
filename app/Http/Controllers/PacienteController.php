@@ -14,13 +14,13 @@ class PacienteController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Paciente::select([
+            $query = Paciente::select([
                 'id', 'tipdocum', 'historia', 'paciente', 'direccion',
                 'telefono', 'regimen', 'nivel', 'edad', 'sexo',
                 'pqrs', 'estado', 'programa', 'alto_costo',
-            ])->get();
+            ]);
 
-            return DataTables()->of($data)
+            return DataTables()->of($query)
                 ->addColumn('pqrs_badge', function ($row) {
                     $color = $row->pqrs === 'SI' ? 'danger' : 'secondary';
                     return '<span class="badge badge-' . $color . '">' . $row->pqrs . '</span>';
@@ -117,7 +117,7 @@ class PacienteController extends Controller
     }
 
     /**
-     * Sincroniza la tabla pacientes consumiendo el endpoint api/pacientesapi del servidor.
+     * Sincroniza la tabla pacientes consumiendo el endpoint api/pacientes del servidor.
      * Solo inserta pacientes nuevos (no sobreescribe valores gestionados manualmente:
      * pqrs, estado, programa, alto_costo).
      */
@@ -128,26 +128,15 @@ class PacienteController extends Controller
         $usuario  = Auth::user()->email;
 
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1G');
 
         try {
             // ── Servidor principal ────────────────────────────────────────
-            $response = Http::post(
-                'http://hed08pf9dxt.sn.mynetname.net:8004/api/acceso',
-                ['email' => $email, 'password' => $password]
+            $resultado = $this->sincronizarDesde(
+                'http://hed08pf9dxt.sn.mynetname.net:8004',
+                $email,
+                $password
             );
-
-            $token = $response->json()['token'];
-
-            $responsePacientes = Http::withToken($token)
-                ->get('http://hed08pf9dxt.sn.mynetname.net:8004/api/pacientesapi');
-
-            $pacientesApi = $responsePacientes->json()['data'];
-
-            $resultado = $this->procesarPacientes($pacientesApi);
-
-            Http::withToken($token)
-                ->get('http://hed08pf9dxt.sn.mynetname.net:8004/api/closeallacceso');
 
             Log::info(
                 "✅ Sync pacientes (principal) — {$resultado['insertados']} nuevos, " .
@@ -163,24 +152,15 @@ class PacienteController extends Controller
 
         } catch (\Exception $e) {
 
+            Log::warning("⚠️ Servidor principal falló ({$e->getMessage()}). Intentando servidor local…");
+
             try {
                 // ── Fallback servidor local ───────────────────────────────
-                $response = Http::post(
-                    'http://192.168.66.95:8004/api/acceso',
-                    ['email' => $email, 'password' => $password]
+                $resultado = $this->sincronizarDesde(
+                    'http://192.168.66.95:8004',
+                    $email,
+                    $password
                 );
-
-                $token = $response->json()['token'];
-
-                $responsePacientes = Http::withToken($token)
-                    ->get('http://192.168.66.95:8004/api/pacientesapi');
-
-                $pacientesApi = $responsePacientes->json()['data'];
-
-                $resultado = $this->procesarPacientes($pacientesApi);
-
-                Http::withToken($token)
-                    ->get('http://192.168.66.95:8004/api/closeallacceso');
 
                 Log::info(
                     "⚠️ Sync pacientes (local) — {$resultado['insertados']} nuevos, " .
@@ -202,13 +182,75 @@ class PacienteController extends Controller
                 );
 
                 return response()->json([[
-                    'respuesta' => 'Error de conexión: ' . $e->getMessage(),
+                    'respuesta' => 'Sin conexión a los servidores API. Principal: ' . $e->getMessage()
+                                 . ' | Local: ' . $localException->getMessage(),
                     'titulo'    => 'Error de Sincronización',
                     'icon'      => 'error',
                     'position'  => 'bottom-left',
                 ]]);
             }
         }
+    }
+
+    /**
+     * Conecta a un servidor API, obtiene el token, descarga los pacientes,
+     * los procesa y cierra la sesión. Lanza excepciones con mensajes descriptivos
+     * si la respuesta no es válida o si faltan claves esperadas.
+     */
+    private function sincronizarDesde(string $baseUrl, string $email, string $password): array
+    {
+        // ── Autenticación ────────────────────────────────────────────────
+        $authResponse = Http::timeout(30)->post("{$baseUrl}/api/acceso", [
+            'email'    => $email,
+            'password' => $password,
+        ]);
+
+        $authJson = $authResponse->json();
+
+        if (!$authJson || !isset($authJson['token'])) {
+            throw new \Exception(
+                "No se recibió token desde {$baseUrl}. " .
+                "HTTP {$authResponse->status()}. Respuesta: " .
+                substr($authResponse->body(), 0, 200)
+            );
+        }
+
+        $token = $authJson['token'];
+
+        // ── Obtener pacientes ─────────────────────────────────────────────
+        $pacientesResponse = Http::timeout(300)->withToken($token)
+            ->get("{$baseUrl}/api/pacientes");
+
+        $pacientesJson = $pacientesResponse->json();
+
+        if (!$pacientesJson || !isset($pacientesJson['data'])) {
+            throw new \Exception(
+                "Respuesta de pacientes inválida desde {$baseUrl}. " .
+                "HTTP {$pacientesResponse->status()}. Respuesta: " .
+                substr($pacientesResponse->body(), 0, 200)
+            );
+        }
+
+        $pacientesApi = $pacientesJson['data'];
+
+        // Liberar la respuesta completa para no mantener dos copias en memoria
+        unset($pacientesJson, $pacientesResponse);
+
+        if (!is_array($pacientesApi)) {
+            throw new \Exception(
+                "El campo 'data' de la API no es un array (tipo: " . gettype($pacientesApi) . ")."
+            );
+        }
+
+        $resultado = $this->procesarPacientes($pacientesApi);
+
+        unset($pacientesApi);
+
+        // ── Cerrar sesión en el servidor ──────────────────────────────────
+        Http::timeout(10)->withToken($token)
+            ->get("{$baseUrl}/api/closeallacceso");
+
+        return $resultado;
     }
 
     /**
@@ -233,6 +275,7 @@ class PacienteController extends Controller
         $insertados = 0;
         $omitidos   = 0;
         $nuevos     = [];
+        $now        = now()->toDateTimeString();
 
         // Un solo query para traer todas las historias existentes
         $existentes = Paciente::pluck('historia')
@@ -248,13 +291,13 @@ class PacienteController extends Controller
                 continue;
             }
 
-            // Nombre completo: solo partes no vacías
-            $nombreCompleto = collect([
+            // Nombre completo: solo partes no vacías (sin crear objetos Collection)
+            $nombreCompleto = implode(' ', array_filter([
                 trim($p['NOMBRE1']   ?? ''),
                 trim($p['NOMBRE2']   ?? ''),
                 trim($p['APELLIDO1'] ?? ''),
                 trim($p['APELLIDO2'] ?? ''),
-            ])->filter()->implode(' ');
+            ]));
 
             // Primer teléfono disponible
             $telefono = trim($p['TELEFRES']   ?? '')
@@ -276,21 +319,27 @@ class PacienteController extends Controller
                 'estado'     => 'VIVO',
                 'programa'   => null,
                 'alto_costo' => 'NO',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ];
 
             // Registrar en el set local para evitar duplicados dentro del mismo lote
             $existentes[$historia] = true;
             $insertados++;
+
+            // Insertar y vaciar cada 500 registros para no acumular todo en memoria
+            if (count($nuevos) >= 500) {
+                Paciente::insertOrIgnore($nuevos);
+                $nuevos = [];
+            }
         }
 
-        // Inserción en chunks de 500 para no saturar la memoria
-        foreach (array_chunk($nuevos, 500) as $chunk) {
-            Paciente::insertOrIgnore($chunk);
+        // Insertar el remanente
+        if (!empty($nuevos)) {
+            Paciente::insertOrIgnore($nuevos);
         }
 
-        unset($existentes, $nuevos);
+        unset($existentes, $nuevos, $pacientesApi);
 
         return ['insertados' => $insertados, 'omitidos' => $omitidos];
     }

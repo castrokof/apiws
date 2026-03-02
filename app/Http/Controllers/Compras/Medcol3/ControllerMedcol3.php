@@ -619,7 +619,7 @@ class ControllerMedcol3 extends Controller
                          $medicamentos3[] = [
                         'tipo_MI'  => trim($medicamento['tipo_MI']),
                         'codigo'  => trim($medicamento['codigo']),
-                        'nombre'  => trim($medicamento['nombre']),
+                        'nombre'  => str_replace('*', '', trim($medicamento['nombre'])),
                         'marca'  => trim($medicamento['marca']),
                         'atc'  => trim($medicamento['atc']),
                         'forma'  => trim($medicamento['forma']),
