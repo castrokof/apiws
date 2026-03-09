@@ -1597,7 +1597,25 @@
                         url: "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
                     },
                     order: [[3, 'desc']],
-                    pageLength: 25
+                    pageLength: 25,
+                    dom: 'Bfrtip',
+                    buttons: [
+                        {
+                            extend: 'excelHtml5',
+                            text: '<i class="fas fa-file-excel me-2"></i>Descargar Excel',
+                            className: 'btn btn-success btn-sm',
+                            title: 'Gestión de Pacientes',
+                            exportOptions: {
+                                columns: ':visible',
+                                format: {
+                                    body: function(data, row, column, node) {
+                                        // Limpiar formato de moneda para Excel
+                                        return data.replace(/[$,]/g, '');
+                                    }
+                                }
+                            }
+                        }
+                    ]
                 });
             }
 

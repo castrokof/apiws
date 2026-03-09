@@ -13,6 +13,84 @@ Sistema web desarrollado en Laravel 7.x para la gestión de dispensación de med
 
 ## 📋 Changelog
 
+### v3.1 (Marzo 2026) - Mejoras al Módulo de Búsqueda y Gestión de Pendientes
+
+**🚀 Nuevas Funcionalidades:**
+Mejoras en la función `guardarPendientesBusqueda` del módulo Medcol6, incorporando validaciones de campos requeridos en frontend, restricción numérica en factura de entrega, generación automática del documento de entrega según servicio, y registro automático de observaciones en base de datos.
+
+---
+
+#### ✅ Validación de Campos Requeridos antes de Guardar
+
+Se implementó validación en el frontend que impide guardar un ítem si los siguientes campos están vacíos:
+
+| Campo | Descripción |
+|-------|-------------|
+| `numero_formula` | Número de la fórmula médica |
+| `fecha_ordenamiento` | Fecha de ordenamiento de la prescripción |
+| `frecuencia_administracion` | Frecuencia de administración del medicamento |
+| `duracion_tratamiento` | Duración del tratamiento |
+
+- Si alguno de estos campos está vacío, se muestra una alerta `Swal.fire` con el detalle de qué ítem y qué campos deben completarse.
+- Los campos incompletos se marcan visualmente con borde rojo (`is-invalid`) para guiar al usuario.
+- El borde rojo desaparece automáticamente cuando el usuario completa el campo.
+- Si los campos ya tienen datos (precargados desde la base de datos), el guardado procede sin restricciones.
+
+---
+
+#### 🔢 Campo `factura_entrega` — Solo Valores Numéricos
+
+- El input de factura de entrega cambió de `type="text"` a `type="number"` con `min="0"` y `step="1"`.
+- El backend también actualiza su regla de validación de `nullable|string|max:100` a `nullable|numeric`.
+
+---
+
+#### 📄 Campo `doc_entrega` — Generación Automática por Servicio
+
+Se agrega un campo oculto `doc_entrega` que se auto-completa al construir cada fila de resultados, usando el campo `centroproduccion` del ítem y el siguiente mapa de servicios:
+
+| Servicio (`centroproduccion`) | Doc. Entrega (`doc_entrega`) |
+|-------------------------------|------------------------------|
+| BIO1 | CDBI |
+| PAC  | CDPC |
+| DLR1 | CDDO |
+| DPA1 | CDDO |
+| EM01 | CDEM |
+| FRIO | CDIO |
+| EHU1 | CDHU |
+| FRJA | CDJA |
+| FRIP | CDIP |
+| BDNT | EVIO |
+| SM01 | CDSM |
+
+- El usuario no edita este campo; se calcula automáticamente al cargar los resultados de búsqueda.
+- El valor se incluye en el payload enviado al servidor y se guarda en la columna `doc_entrega` de `pendiente_api_medcol6`.
+
+---
+
+#### 📝 Registro Automático de Observaciones
+
+Se crea la función privada `createObservacionBusqueda` en `PendienteApiMedcol6Controller`. Tras cada actualización exitosa de un ítem, si el campo `observaciones` tiene contenido, se guarda un registro en la tabla `observaciones_api_medcol6` con:
+
+| Campo | Valor |
+|-------|-------|
+| `pendiente_id` | ID del pendiente actualizado |
+| `observacion` | Texto del campo `observaciones` del formulario |
+| `estado` | Estado seleccionado en la fila |
+| `usuario` | `Auth::user()->name` |
+| `created_at` / `updated_at` | Timestamp actual |
+
+- Si el campo `observaciones` viene vacío, **no se crea** el registro.
+
+---
+
+#### 📁 Archivos Modificados
+
+- `app/Http/Controllers/Medcol6/PendienteApiMedcol6Controller.php`: validación `factura_entrega` como numérico, soporte `doc_entrega`, llamada a `createObservacionBusqueda`, nueva función privada `createObservacionBusqueda`.
+- `resources/views/menu/Medcol6/indexAnalista.blade.php`: definición de `bpServicioDocMap`, campo `bp-doc-entrega` oculto, input `factura_entrega` numérico, validación de campos requeridos en `bpEjecutarGuardado`, listener para limpiar errores visuales.
+
+---
+
 ### v3.0 (Febrero 2026) - Módulo DDMRP: Demand Driven MRP con Gestión de Buffers
 
 **🚀 Nuevas Funcionalidades Mayores:**

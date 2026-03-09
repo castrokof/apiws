@@ -14,6 +14,14 @@ class PacienteController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
+            ini_set('memory_limit', '1G');
+
+            // Evitar consultas sin LIMIT: DataTables envía -1 cuando el usuario
+            // elige "Mostrar Todo". Capamos a 10 000 para proteger la memoria.
+            if ((int) $request->input('length', 25) === -1) {
+                $request->merge(['length' => 10000]);
+            }
+
             $query = Paciente::select([
                 'id', 'tipdocum', 'historia', 'paciente', 'direccion',
                 'telefono', 'regimen', 'nivel', 'edad', 'sexo',
@@ -59,6 +67,82 @@ class PacienteController extends Controller
         }
 
         return view('pacientes.index');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $search   = $request->input('search');
+        $filename = 'gestion_pacientes_' . now()->format('Ymd_His') . '.csv';
+
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'X-Accel-Buffering'   => 'no',
+            'Cache-Control'       => 'no-cache, no-store, must-revalidate',
+            'Pragma'              => 'no-cache',
+        ];
+
+        return response()->stream(function () use ($search) {
+            // Desactivar cualquier buffer de salida activo para que el streaming funcione
+            while (ob_get_level() > 0) {
+                ob_end_flush();
+            }
+
+            $handle = fopen('php://output', 'w');
+
+            // BOM UTF-8 para que Excel abra correctamente tildes y caracteres especiales
+            fputs($handle, "\xEF\xBB\xBF");
+
+            // Cabeceras de columna
+            fputcsv($handle, [
+                'Tip. Doc.', 'Historia', 'Paciente', 'Dirección',
+                'Teléfono', 'Régimen', 'Nivel', 'Edad', 'Sexo',
+                'PQRS', 'Estado', 'Programa', 'Alto Costo',
+            ], ';');
+
+            $query = Paciente::select([
+                'tipdocum', 'historia', 'paciente', 'direccion',
+                'telefono', 'regimen', 'nivel', 'edad', 'sexo',
+                'pqrs', 'estado', 'programa', 'alto_costo',
+            ]);
+
+            if ($search) {
+                $s = $search;
+                $query->where(function ($q) use ($s) {
+                    $q->where('historia',  'like', "%{$s}%")
+                      ->orWhere('paciente', 'like', "%{$s}%")
+                      ->orWhere('tipdocum', 'like', "%{$s}%")
+                      ->orWhere('regimen',  'like', "%{$s}%")
+                      ->orWhere('programa', 'like', "%{$s}%");
+                });
+            }
+
+            $query->orderBy('paciente')->chunk(1000, function ($rows) use ($handle) {
+                foreach ($rows as $row) {
+                    fputcsv($handle, [
+                        $row->tipdocum,
+                        $row->historia,
+                        $row->paciente,
+                        $row->direccion,
+                        $row->telefono,
+                        $row->regimen,
+                        $row->nivel,
+                        $row->edad,
+                        $row->sexo,
+                        $row->pqrs,
+                        $row->estado,
+                        $row->programa ?? '',
+                        $row->alto_costo,
+                    ], ';');
+                }
+                flush();
+            });
+
+            fclose($handle);
+        }, 200, $headers);
     }
 
     public function store(Request $request)

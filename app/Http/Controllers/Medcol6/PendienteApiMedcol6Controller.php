@@ -3097,7 +3097,8 @@ class PendienteApiMedcol6Controller extends Controller
             'items.*.cantdpx'                    => 'nullable|numeric|min:0',
             'items.*.estado'                     => 'required|in:PENDIENTE,ENTREGADO,TRAMITADO,DESABASTECIDO,ANULADO,VENCIDO,SIN CONTACTO',
             'items.*.fecha_correspondiente'      => 'nullable|date',
-            'items.*.factura_entrega'            => 'nullable|string|max:100',
+            'items.*.factura_entrega'            => 'nullable|numeric',
+            'items.*.doc_entrega'               => 'nullable|string|max:10',
             'items.*.observaciones'              => 'nullable|string|max:1000',
             'items.*.numero_formula'             => 'nullable|string|max:100',
             'items.*.fecha_ordenamiento'         => 'nullable|date',
@@ -3134,6 +3135,10 @@ class PendienteApiMedcol6Controller extends Controller
                         $updateData['factura_entrega'] = $itemData['factura_entrega'];
                     }
 
+                    if (!empty($itemData['doc_entrega'])) {
+                        $updateData['doc_entrega'] = $itemData['doc_entrega'];
+                    }
+
                     // Asignar fecha según el estado
                     $fecha = !empty($itemData['fecha_correspondiente']) ? Carbon::parse($itemData['fecha_correspondiente']) : now();
 
@@ -3154,6 +3159,11 @@ class PendienteApiMedcol6Controller extends Controller
                     }
 
                     $pendiente->update($updateData);
+
+                    if (!empty($itemData['observaciones'])) {
+                        $this->createObservacionBusqueda($pendiente, $itemData['observaciones'], $itemData['estado']);
+                    }
+
                     $actualizados++;
                 } catch (\Exception $e) {
                     $errores[] = "ID {$itemData['id']}: " . $e->getMessage();
@@ -3185,5 +3195,17 @@ class PendienteApiMedcol6Controller extends Controller
                 'message' => 'Error al guardar: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    private function createObservacionBusqueda(PendienteApiMedcol6 $pendiente, string $observacion, string $estado): void
+    {
+        ObservacionesApiMedcol6::create([
+            'pendiente_id' => $pendiente->id,
+            'observacion'  => $observacion,
+            'estado'       => $estado,
+            'usuario'      => Auth::user()->name,
+            'created_at'   => now(),
+            'updated_at'   => now(),
+        ]);
     }
 }

@@ -833,107 +833,182 @@ class DashboardController extends Controller
      * Endpoint para análisis de distribución
      */
     public function getAnalisisDistribucion(Request $request)
-    {
-        $fechaInicio = $request->get('fecha_inicio');
-        $fechaFin = $request->get('fecha_fin');
-        $contrato = $request->get('contrato', 'all');
+{
+    $fechaInicio = $request->get('fecha_inicio');
+    $fechaFin = $request->get('fecha_fin');
+    $contrato = $request->get('contrato', 'all');
 
-        $cacheKey = "analisis_distribucion_{$fechaInicio}_{$fechaFin}_{$contrato}";
+    // Validar que las fechas no estén vacías
+    if (!$fechaInicio || !$fechaFin) {
+        return response()->json(['error' => 'Fechas de inicio y fin son requeridas'], 400);
+    }
 
-        $data = Cache::remember($cacheKey, 1800, function () use ($fechaInicio, $fechaFin, $contrato) {
-            // Función que crea una nueva query cada vez que se llama
-            $baseQuery = function() use ($fechaInicio, $fechaFin, $contrato) {
-                $query = DispensadoApiMedcol6::whereBetween('fecha_suministro', [$fechaInicio, $fechaFin])
-                    ->whereIn('estado', ['DISPENSADO', 'REVISADO']);
+    $cacheKey = "analisis_distribucion_{$fechaInicio}_{$fechaFin}_{$contrato}";
 
-                if ($contrato !== 'all') {
-                    $query->where('centroprod', $contrato);
-                }
+    $data = Cache::remember($cacheKey, 1800, function () use ($fechaInicio, $fechaFin, $contrato) {
+        // Función que crea una nueva query cada vez que se llama
+        $baseQuery = function() use ($fechaInicio, $fechaFin, $contrato) {
+            $query = DispensadoApiMedcol6::whereBetween('fecha_suministro', [$fechaInicio, $fechaFin])
+                ->whereIn('estado', ['DISPENSADO', 'REVISADO'])
+                ->whereNotNull('fecha_suministro'); // Evitar fechas nulas
 
-                return $query;
-            };
-
-            // Facturación por mes
-            $facturasPorMes = $baseQuery()
-                ->select(
-                    DB::raw('MONTH(fecha_suministro) as mes'),
-                    DB::raw('YEAR(fecha_suministro) as año'),
-                    DB::raw('SUM(CAST(REPLACE(valor_total, ",", "") as DECIMAL(15,2))) as total_mes')
-                )
-                ->groupBy(DB::raw('YEAR(fecha_suministro)'), DB::raw('MONTH(fecha_suministro)'))
-                ->orderBy(DB::raw('YEAR(fecha_suministro)'))
-                ->orderBy(DB::raw('MONTH(fecha_suministro)'))
-                ->get();
-
-            // Pacientes por contrato
-            $pacientesPorContrato = $baseQuery()
-                ->select('centroprod', DB::raw('COUNT(DISTINCT historia) as total_pacientes'))
-                ->groupBy('centroprod')
-                ->get();
-
-            // Calcular mes con mayor y menor facturación
-            $mesMayorFacturacion = null;
-            $mesMenorFacturacion = null;
-
-            if ($facturasPorMes->isNotEmpty()) {
-                $mesMayorFacturacion = $facturasPorMes->sortByDesc('total_mes')->first();
-                $mesMenorFacturacion = $facturasPorMes->sortBy('total_mes')->first();
+            if ($contrato !== 'all') {
+                $query->where('centroprod', $contrato);
             }
 
-            // Facturación por día
-            // IMPORTANTE: Usamos fecha_suministro que representa cuando se dispensó el medicamento
-            // No confundir con fecha_ordenamiento (cuando se ordenó)
-            $facturasPorDia = $baseQuery()
-                ->select(
-                    DB::raw('fecha_suministro as fecha'),
-                    DB::raw('SUM(CAST(REPLACE(valor_total, ",", "") as DECIMAL(15,2))) as total_dia'),
-                    DB::raw('COUNT(DISTINCT historia) as pacientes_dia'),
-                    DB::raw('COUNT(*) as total_registros'),
-                    DB::raw('DAYOFWEEK(fecha_suministro) as dia_semana')
-                )
-                ->groupBy('fecha_suministro')
-                ->orderBy('fecha_suministro')
-                ->get();
+            return $query;
+        };
 
-            // Log para depuración: verificar días con alta facturación
-            \Log::info('Facturación por día - Top 5:', [
-                'top_5' => $facturasPorDia->sortByDesc('total_dia')->take(7)->map(function($item) {
-                    $diasSemana = ['', 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-                    return [
-                        'fecha' => $item->fecha,
-                        'dia_semana' => $diasSemana[$item->dia_semana] ?? 'Desconocido',
-                        'total_dia' => number_format($item->total_dia, 2),
-                        'pacientes' => $item->pacientes_dia,
-                        'registros' => $item->total_registros
-                    ];
-                })->values()
-            ]);
+        // Facturación por mes
+        $facturasPorMes = $baseQuery()
+            ->select(
+                DB::raw('YEAR(fecha_suministro) as año'),
+                DB::raw('MONTH(fecha_suministro) as mes'),
+                DB::raw('SUM(CAST(REPLACE(valor_total, ",", "") as DECIMAL(15,2))) as total_mes'),
+                DB::raw('COUNT(DISTINCT historia) as total_pacientes_mes'),
+                DB::raw('COUNT(*) as total_registros_mes')
+            )
+            ->groupBy(DB::raw('YEAR(fecha_suministro)'), DB::raw('MONTH(fecha_suministro)'))
+            ->orderBy(DB::raw('YEAR(fecha_suministro)'))
+            ->orderBy(DB::raw('MONTH(fecha_suministro)'))
+            ->get();
 
-            // Calcular día con mayor y menor facturación
-            $diaMayorFacturacion = null;
-            $diaMenorFacturacion = null;
-            $diaMayorPacientes = null;
+        // Pacientes por contrato
+        $pacientesPorContrato = $baseQuery()
+            ->select('centroprod', DB::raw('COUNT(DISTINCT historia) as total_pacientes'))
+            ->groupBy('centroprod')
+            ->get();
 
-            if ($facturasPorDia->isNotEmpty()) {
-                $diaMayorFacturacion = $facturasPorDia->sortByDesc('total_dia')->first();
-                $diaMenorFacturacion = $facturasPorDia->sortBy('total_dia')->first();
-                $diaMayorPacientes = $facturasPorDia->sortByDesc('pacientes_dia')->first();
-            }
+        // Calcular mes con mayor y menor facturación
+        $mesMayorFacturacion = null;
+        $mesMenorFacturacion = null;
 
-            return [
-                'facturas_por_mes' => $facturasPorMes,
-                'pacientes_por_contrato' => $pacientesPorContrato,
-                'mes_mayor_facturacion' => $mesMayorFacturacion,
-                'mes_menor_facturacion' => $mesMenorFacturacion,
-                'facturas_por_dia' => $facturasPorDia,
-                'dia_mayor_facturacion' => $diaMayorFacturacion,
-                'dia_menor_facturacion' => $diaMenorFacturacion,
-                'dia_mayor_pacientes' => $diaMayorPacientes
+        if ($facturasPorMes->isNotEmpty()) {
+            $mesMayorFacturacion = $facturasPorMes->sortByDesc('total_mes')->first();
+            $mesMenorFacturacion = $facturasPorMes->sortBy('total_mes')->first();
+        }
+
+        // Facturación por día - VERSIÓN CORREGIDA
+        // Primero, obtenemos los datos agrupados por fecha
+        $facturasPorDia = $baseQuery()
+            ->select(
+                DB::raw('DATE(fecha_suministro) as fecha'),
+                DB::raw('SUM(CAST(REPLACE(valor_total, ",", "") as DECIMAL(15,2))) as total_dia'),
+                DB::raw('COUNT(DISTINCT historia) as pacientes_dia'),
+                DB::raw('COUNT(*) as total_registros')
+            )
+            ->groupBy(DB::raw('DATE(fecha_suministro)'))
+            ->orderBy(DB::raw('DATE(fecha_suministro)'))
+            ->get();
+
+        // Ahora, para cada fecha, calculamos el día de la semana en PHP
+        // Esto evita problemas con DAYOFWEEK de MySQL
+        $facturasPorDia = $facturasPorDia->map(function($item) {
+            // Convertir la fecha a objeto Carbon si no lo es
+            $fecha = \Carbon\Carbon::parse($item->fecha);
+            
+            // Array de días de la semana en español
+            $diasSemana = [
+                0 => 'Domingo',
+                1 => 'Lunes', 
+                2 => 'Martes',
+                3 => 'Miércoles',
+                4 => 'Jueves',
+                5 => 'Viernes',
+                6 => 'Sábado'
+            ];
+            
+            // Carbon usa 0 para domingo, 1 para lunes, etc.
+            $diaSemanaNumero = $fecha->dayOfWeek;
+            
+            return (object)[
+                'fecha' => $item->fecha,
+                'total_dia' => $item->total_dia,
+                'pacientes_dia' => $item->pacientes_dia,
+                'total_registros' => $item->total_registros,
+                'dia_semana' => $diasSemana[$diaSemanaNumero],
+                'dia_semana_numero' => $diaSemanaNumero,
+                'fecha_formateada' => $fecha->format('d/m/Y')
             ];
         });
 
-        return response()->json($data);
-    }
+        // Verificar si hay fechas duplicadas (debug)
+        $fechasUnicas = $facturasPorDia->pluck('fecha')->unique();
+        if ($fechasUnicas->count() !== $facturasPorDia->count()) {
+            \Log::warning('Se detectaron fechas duplicadas en facturasPorDia', [
+                'total_registros' => $facturasPorDia->count(),
+                'fechas_unicas' => $fechasUnicas->count()
+            ]);
+            
+            // Forzar la unicidad de fechas combinando registros con misma fecha
+            $facturasPorDia = $facturasPorDia->groupBy('fecha')->map(function($grupo) {
+                $primero = $grupo->first();
+                
+                // Si hay múltiples registros para la misma fecha, combinarlos
+                if ($grupo->count() > 1) {
+                    $primero->total_dia = $grupo->sum('total_dia');
+                    $primero->pacientes_dia = $grupo->sum('pacientes_dia'); // Nota: esto podría sobreestimar pacientes
+                    $primero->total_registros = $grupo->sum('total_registros');
+                }
+                
+                return $primero;
+            })->values();
+        }
+
+        // CORRECCIÓN: Obtener primer y último elemento de forma segura sin usar ?->
+        $primerDia = $facturasPorDia->isNotEmpty() ? $facturasPorDia->first() : null;
+        $ultimoDia = $facturasPorDia->isNotEmpty() ? $facturasPorDia->last() : null;
+
+        // Log para depuración mejorado (sin usar ?->)
+        \Log::info('Facturación por día - Resumen:', [
+            'total_dias' => $facturasPorDia->count(),
+            'rango_fechas' => [
+                'inicio' => $primerDia ? $primerDia->fecha : null,
+                'fin' => $ultimoDia ? $ultimoDia->fecha : null
+            ],
+            'top_5' => $facturasPorDia->sortByDesc('total_dia')->take(5)->map(function($item) {
+                return [
+                    'fecha' => $item->fecha,
+                    'fecha_formateada' => $item->fecha_formateada ?? $item->fecha,
+                    'dia_semana' => $item->dia_semana,
+                    'total_dia' => number_format($item->total_dia, 2),
+                    'pacientes' => $item->pacientes_dia,
+                    'registros' => $item->total_registros
+                ];
+            })->values()
+        ]);
+
+        // Calcular día con mayor y menor facturación
+        $diaMayorFacturacion = null;
+        $diaMenorFacturacion = null;
+        $diaMayorPacientes = null;
+
+        if ($facturasPorDia->isNotEmpty()) {
+            $diaMayorFacturacion = $facturasPorDia->sortByDesc('total_dia')->first();
+            $diaMenorFacturacion = $facturasPorDia->sortBy('total_dia')->first();
+            $diaMayorPacientes = $facturasPorDia->sortByDesc('pacientes_dia')->first();
+        }
+
+        return [
+            'facturas_por_mes' => $facturasPorMes,
+            'pacientes_por_contrato' => $pacientesPorContrato,
+            'mes_mayor_facturacion' => $mesMayorFacturacion,
+            'mes_menor_facturacion' => $mesMenorFacturacion,
+            'facturas_por_dia' => $facturasPorDia,
+            'dia_mayor_facturacion' => $diaMayorFacturacion,
+            'dia_menor_facturacion' => $diaMenorFacturacion,
+            'dia_mayor_pacientes' => $diaMayorPacientes,
+            'metadata' => [
+                'total_dias' => $facturasPorDia->count(),
+                'fecha_inicio' => $fechaInicio,
+                'fecha_fin' => $fechaFin,
+                'contrato' => $contrato
+            ]
+        ];
+    });
+
+    return response()->json($data);
+}
 
     /**
      * Endpoint para análisis de tendencias de pendientes

@@ -716,3 +716,4 @@ Route::get('/pacientes', 'PacienteController@index')->name('pacientes.index')->m
 Route::post('/pacientes', 'PacienteController@store')->name('pacientes.store')->middleware('verified')->middleware('verifyuser');
 Route::put('/pacientes/{id}', 'PacienteController@update')->name('pacientes.update')->middleware('verified')->middleware('verifyuser');
 Route::get('/pacientes/syncapi', 'PacienteController@syncPacientesApi')->name('pacientes.syncapi')->middleware('verified')->middleware('verifyuser');
+Route::get('/pacientes/export', 'PacienteController@exportExcel')->name('pacientes.export')->middleware('verified')->middleware('verifyuser');

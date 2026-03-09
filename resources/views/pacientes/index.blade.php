@@ -5,6 +5,7 @@
 @section('styles')
 <link rel="stylesheet" href="{{ asset('assets/lte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/lte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap4.min.css">
 <style>
     .badge { font-size: .82em; }
     .dt-buttons .btn { margin-right: 3px; }
@@ -341,6 +342,10 @@
 <script src="{{ asset('assets/lte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
 <script src="{{ asset('assets/lte/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
 <script src="{{ asset('assets/lte/plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
 <script>
 $(document).ready(function () {
 
@@ -373,6 +378,10 @@ $(document).ready(function () {
     // ── Inicializar DataTable ──────────────────────────────────────────────
     var tabla = $('#tablaPacientes').DataTable({
         processing: true,
+        lengthMenu: [
+            [25, 50, 100, 500, 5000, 10000],
+            [25, 50, 100, 500, 5000, 10000]
+        ],
         serverSide: true,
         ajax: {
             url: '{{ route("pacientes.index") }}',
@@ -400,6 +409,21 @@ $(document).ready(function () {
         responsive: true,
         pageLength: 25,
         order: [[2, 'asc']],
+        dom: '<"row mb-2"<"col-sm-6"l><"col-sm-6 text-right"B>><"row mb-2"<"col-12"f>>rt<"row"<"col-sm-5"i><"col-sm-7"p>>',
+        buttons: [
+            {
+                text: '<i class="fas fa-file-csv mr-1"></i> Descargar CSV',
+                className: 'btn btn-success btn-sm',
+                action: function (e, dt) {
+                    var search = dt.search();
+                    var url    = '{{ route("pacientes.export") }}';
+                    if (search) {
+                        url += '?search=' + encodeURIComponent(search);
+                    }
+                    window.location.href = url;
+                }
+            }
+        ],
     });
 
     // ── Crear paciente ─────────────────────────────────────────────────────

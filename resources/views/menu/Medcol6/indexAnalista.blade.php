@@ -1715,7 +1715,14 @@
                         "FRJA": "CDJA",
                         "FRIP": "CDIP",
                         "BDNT": "EVIO",
-                        "SM01": "CDSM"
+                        "SM01": "CDSM",
+                        "INY": "INYE",
+                        "FRRC": "CDRC",
+                        "F24H": "CDEV",
+                        "FRPD": "CDDO",
+                        "FRPE": "CDIO",
+                        "FRPJ": "CDJA",
+                        "FRPP": "CDPC"
                     };
 
                     // Obtener el valor del centro de producción (servicio)
@@ -3307,7 +3314,7 @@
             // Mapeo de servicios a documentos de entrega
             var servicioDocMap = {
                 "BIO1": "CDBI",
-                "PAC": "CDPC", 
+                "PAC": "CDPC",
                 "DLR1": "CDDO",
                 "DPA1": "CDDO",
                 "EM01": "CDEM",
@@ -3315,7 +3322,15 @@
                 "EHU1": "CDHU",
                 "FRJA": "CDJA",
                 "FRIP": "CDIP",
-                "BDNT": "EVIO"
+                "BDNT": "EVIO",
+                "SM01": "CDSM",
+                "INY": "INYE",
+                "FRRC": "CDRC",
+                "F24H": "CDEV",
+                "FRPD": "CDDO",
+                "FRPE": "CDIO",
+                "FRPJ": "CDJA",
+                "FRPP": "CDPC"
             };
 
             const data = pendientes.map(pendiente => [
@@ -4071,6 +4086,28 @@ $(document).ready(function () {
         return 'estado-' + (estado || 'PENDIENTE').replace(' ', '_');
     }
 
+    // ---- mapa servicio → documento de entrega ----
+    var bpServicioDocMap = {
+        "BIO1": "CDBI",
+        "PAC": "CDPC",
+        "DLR1": "CDDO",
+        "DPA1": "CDDO",
+        "EM01": "CDEM",
+        "FRIO": "CDIO",
+        "EHU1": "CDHU",
+        "FRJA": "CDJA",
+        "FRIP": "CDIP",
+        "BDNT": "EVIO",
+        "SM01": "CDSM",
+        "INY": "INYE",
+        "FRRC": "CDRC",
+        "F24H": "CDEV",
+        "FRPD": "CDDO",
+        "FRPE": "CDIO",
+        "FRPJ": "CDJA",
+        "FRPP": "CDPC"
+    };
+
     // ---- construir fila ----
     function bpConstruirFila(item, idx) {
         const estado     = item.estado || 'PENDIENTE';
@@ -4117,9 +4154,11 @@ $(document).ready(function () {
                 '       value="' + fechaVal + '" data-idx="' + idx + '">' +
             '</td>' +
             '<td>' +
-                '<input type="text" class="form-control bp-row-input bp-factura-entrega"' +
-                '       value="' + (item.factura_entrega || '') + '" maxlength="100"' +
-                '       placeholder="Nro. factura" data-idx="' + idx + '">' +
+                '<input type="number" class="form-control bp-row-input bp-factura-entrega"' +
+                '       value="' + (item.factura_entrega || '') + '"' +
+                '       placeholder="Nro. factura" data-idx="' + idx + '" min="0" step="1">' +
+                '<input type="hidden" class="bp-doc-entrega" data-idx="' + idx + '"' +
+                '       value="' + (bpServicioDocMap[item.centroproduccion] || '') + '">' +
             '</td>' +
             '<td>' +
                 '<textarea class="form-control bp-row-input bp-observaciones"' +
@@ -4274,23 +4313,63 @@ $(document).ready(function () {
     // ---- guardar seleccionados ----
     function bpEjecutarGuardado() {
         var seleccionados = [];
+        var erroresValidacion = [];
 
         $('.bp-check-item:checked').each(function () {
             var idx   = $(this).data('idx');
             var $fila = $('tr.bp-fila[data-idx="' + idx + '"]');
+
+            var numeroFormula    = $.trim($fila.find('.bp-numero-formula').val());
+            var fechaOrden       = $.trim($fila.find('.bp-fecha-ordenamiento').val());
+            var frecuencia       = $.trim($fila.find('.bp-frecuencia').val());
+            var duracion         = $.trim($fila.find('.bp-duracion').val());
+            var nombre           = $.trim($fila.find('td:nth-child(3) small strong').text()) || ('Ítem ' + (idx + 1));
+
+            var camposVacios = [];
+            if (!numeroFormula)  camposVacios.push('Nro. Fórmula');
+            if (!fechaOrden)     camposVacios.push('Fecha Ordenamiento');
+            if (!frecuencia)     camposVacios.push('Frecuencia Administración');
+            if (!duracion)       camposVacios.push('Duración Tratamiento');
+
+            if (camposVacios.length > 0) {
+                erroresValidacion.push('<b>' + nombre + ':</b> ' + camposVacios.join(', '));
+                $fila.find('.bp-numero-formula, .bp-fecha-ordenamiento, .bp-frecuencia, .bp-duracion').each(function () {
+                    var $input = $(this);
+                    if (!$.trim($input.val())) {
+                        $input.addClass('is-invalid');
+                    }
+                });
+                return; // skip this item
+            }
+
+            // Limpiar marcas de error previas
+            $fila.find('.bp-numero-formula, .bp-fecha-ordenamiento, .bp-frecuencia, .bp-duracion').removeClass('is-invalid');
+
             seleccionados.push({
                 id:                        $fila.data('id'),
                 cantdpx:                   $fila.find('.bp-cantdpx').val(),
                 estado:                    $fila.find('.bp-estado-select').val(),
                 fecha_correspondiente:     $fila.find('.bp-fecha-correspondiente').val(),
                 factura_entrega:           $fila.find('.bp-factura-entrega').val(),
+                doc_entrega:               $fila.find('.bp-doc-entrega').val(),
                 observaciones:             $fila.find('.bp-observaciones').val(),
-                numero_formula:            $fila.find('.bp-numero-formula').val(),
-                fecha_ordenamiento:        $fila.find('.bp-fecha-ordenamiento').val(),
-                frecuencia_administracion: $fila.find('.bp-frecuencia').val(),
-                duracion_tratamiento:      $fila.find('.bp-duracion').val()
+                numero_formula:            numeroFormula,
+                fecha_ordenamiento:        fechaOrden,
+                frecuencia_administracion: frecuencia,
+                duracion_tratamiento:      duracion
             });
         });
+
+        if (erroresValidacion.length > 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos requeridos incompletos',
+                html: 'Los siguientes ítems tienen campos obligatorios vacíos:<br><br>' +
+                      erroresValidacion.join('<br>') +
+                      '<br><br><small>Por favor complete: <b>Nro. Fórmula, Fecha Ordenamiento, Frecuencia Administración y Duración Tratamiento</b>.</small>',
+            });
+            return;
+        }
 
         if (seleccionados.length === 0) {
             Swal.fire('Atención', 'Seleccione al menos un item para guardar.', 'warning');
@@ -4347,6 +4426,13 @@ $(document).ready(function () {
     }
 
     $('#bp-btn-guardar, #bp-btn-guardar-bottom').on('click', bpEjecutarGuardado);
+
+    // ---- limpiar error al corregir campo requerido ----
+    $(document).on('input change', '.bp-numero-formula, .bp-fecha-ordenamiento, .bp-frecuencia, .bp-duracion', function () {
+        if ($.trim($(this).val())) {
+            $(this).removeClass('is-invalid');
+        }
+    });
 
     // ---- maximizar ----
     $('#btn-maximizar-buscar').on('click', function () {
