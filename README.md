@@ -13,6 +13,88 @@ Sistema web desarrollado en Laravel 7.x para la gestión de dispensación de med
 
 ## 📋 Changelog
 
+### v3.2 (Marzo 2026) - Carga Masiva de Entregas desde Archivo
+
+**🚀 Nuevas Funcionalidades:**
+Se implementa una funcionalidad de carga masiva de entregas en el módulo **Medcol6/pendientes**, que permite actualizar registros en dos fases secuenciales a partir de un archivo Excel o CSV, eliminando la necesidad de actualización manual registro por registro.
+
+---
+
+#### 📁 Carga Masiva — Fase 1: Actualización de Entregas
+
+El usuario accede mediante el botón **"Carga Masiva"** en el panel de control de pendientes, el cual abre un modal dedicado.
+
+**Formato del archivo requerido (Excel `.xlsx`/`.xls` o CSV `.csv`):**
+
+| Columna | Descripción |
+|---------|-------------|
+| `documento` | Documento del paciente (ej. `MPE`) |
+| `factura` | Número de factura |
+| `codigo` | Código del medicamento (ej. `M001548-01`) |
+| `fecha_entrega` | Fecha de entrega (serial Excel o cadena de texto) |
+| `dispensacion` | Código de dispensación (ej. `CDIO59516`) |
+
+**Proceso de la Fase 1:**
+1. Se lee el archivo completo en memoria (sin queries a BD).
+2. Se construye un mapa de claves compuestas `documento||factura||codigo`.
+3. Se realiza el lookup en BD con una sola query `whereIn(documento) + whereIn(factura)`, con match exacto del código en PHP — evita N+1 queries.
+4. Los registros encontrados se actualizan masivamente con `UPDATE ... CASE WHEN` en chunks de 500:
+   - `estado` → `'ENTREGADO'`
+   - `usuario` → `'SYSTEM'`
+   - `fecha_entrega` → tomada del archivo (soporta serial Excel y texto)
+   - `doc_entrega` → parte alfabética del campo `dispensacion`
+   - `factura_entrega` → parte numérica del campo `dispensacion`
+   - `updated_at` → timestamp del sistema
+5. Los IDs procesados se guardan en sesión para habilitar la Fase 2.
+
+**Resultado visible en el modal:**
+- Contador verde: registros actualizados.
+- Contador amarillo: registros no encontrados en BD (con detalle de hasta 20 filas).
+- Contador rojo: filas con datos vacíos o errores de formato.
+
+---
+
+#### 📝 Carga Masiva — Fase 2: Registro de Observaciones
+
+Habilitada automáticamente tras una Fase 1 exitosa. Al hacer clic en **"Registrar Observaciones"**:
+
+- Para cada registro procesado en Fase 1 se crea una fila en `observaciones_api_medcol6`:
+
+| Campo | Valor |
+|-------|-------|
+| `pendiente_id` | ID del pendiente actualizado |
+| `observacion` | `'Entregado sujeto a validación en caso de presentarse alguna novedad'` |
+| `usuario` | `'SYSTEM'` |
+| `estado` | `'ENTREGADO'` |
+
+---
+
+#### ⚡ Optimización de Rendimiento
+
+| Métrica | Antes | Después |
+|---------|-------|---------|
+| Queries lookup | ~2293 (1 por fila) | **5** (`whereIn` en chunks) |
+| Queries update | ~957 (1 por registro) | **2** (`CASE WHEN` masivo) |
+| Total queries | ~3250 | **7** |
+| Tiempo total (2293 filas) | >60s (timeout) | **~8s** |
+
+**Técnica de CASE WHEN masivo:** Los bindings se acumulan por columna (no intercalados) y se concatenan en el orden correcto que MySQL espera: `[fecha×N, doc×N, fac×N, updated_at]`.
+
+---
+
+#### 📁 Archivos Creados/Modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `app/Imports/EntregasMasivasMedcol6Import.php` | Nueva clase Import con `WithHeadingRow` |
+| `app/Http/Controllers/Medcol6/PendienteApiMedcol6Controller.php` | Métodos `cargarEntregasMasivas()` y `registrarObservacionesMasivas()` |
+| `resources/views/menu/Medcol6/modal/modalCargaMasiva.blade.php` | Nuevo modal con UI de dos fases |
+| `resources/views/menu/Medcol6/indexAnalista.blade.php` | Include del modal + JS en `$(document).ready()` principal |
+| `resources/views/menu/Medcol6/form/forminforme.blade.php` | Botón "Carga Masiva" |
+| `routes/web.php` | Rutas `POST medcol6/cargar-entregas-masivas` y `POST medcol6/registrar-observaciones-masivas` |
+
+---
+
 ### v3.1 (Marzo 2026) - Mejoras al Módulo de Búsqueda y Gestión de Pendientes
 
 **🚀 Nuevas Funcionalidades:**

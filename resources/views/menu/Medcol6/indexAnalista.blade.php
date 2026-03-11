@@ -66,6 +66,7 @@
         @include('menu.Medcol6.modal.modalGestionPacientes')
         @include('menu.Medcol6.modal.modalReglasGestion')
         @include('menu.Medcol6.modal.modalBuscarPendiente')
+        @include('menu.Medcol6.modal.modalCargaMasiva')
     </div>
 </section>
 
@@ -4310,6 +4311,25 @@ $(document).ready(function () {
         $('#bp-btn-guardar, #bp-btn-guardar-bottom').prop('disabled', n === 0);
     }
 
+    // ---- limpiar modal para nueva búsqueda ----
+    function bpLimpiarModal() {
+        bpItems = [];
+        $('#buscar-doc-factura-input').val('');
+        $('#bp-tabla-body').empty();
+        $('#bp-resultados').hide();
+        $('#bp-sin-resultados').hide();
+        $('#bp-loading').hide();
+        $('#bp-total-badge').hide().text('');
+        $('#bp-btn-guardar, #bp-btn-guardar-bottom')
+            .prop('disabled', true)
+            .html('<i class="fas fa-save mr-1"></i> Guardar Seleccionados');
+        $('#bp-contador-sel').text('0 seleccionados');
+        $('#bp-check-all').prop('checked', false).prop('indeterminate', false);
+        // Limpiar datos del paciente
+        $('#bp-pac-historia, #bp-pac-documento, #bp-pac-nombre').text('');
+        $('#bp-pac-telefono, #bp-pac-direccion, #bp-pac-municipio').text('');
+    }
+
     // ---- guardar seleccionados ----
     function bpEjecutarGuardado() {
         var seleccionados = [];
@@ -4400,6 +4420,10 @@ $(document).ready(function () {
                 }),
                 success: function (resp) {
                     if (resp.success) {
+                        // Cerrar modal y limpiar para que el usuario pueda buscar el siguiente
+                        $('#modal-buscar-pendiente').modal('hide');
+                        bpLimpiarModal();
+
                         Swal.fire({
                             icon: 'success',
                             title: 'Guardado',
@@ -4412,14 +4436,24 @@ $(document).ready(function () {
                         }
                     } else {
                         Swal.fire('Error', resp.message, 'error');
+                        // Restaurar botones en caso de error de negocio
+                        $('#bp-btn-guardar, #bp-btn-guardar-bottom')
+                            .prop('disabled', false)
+                            .html('<i class="fas fa-save mr-1"></i> Guardar Seleccionados');
+                        bpActualizarContador();
                     }
                 },
                 error: function (xhr) {
                     var msg = xhr.responseJSON ? xhr.responseJSON.message : 'Error al guardar.';
                     Swal.fire('Error', msg, 'error');
+                    // Restaurar botones para que el usuario pueda reintentar
+                    $('#bp-btn-guardar, #bp-btn-guardar-bottom')
+                        .prop('disabled', false)
+                        .html('<i class="fas fa-save mr-1"></i> Guardar Seleccionados');
+                    bpActualizarContador();
                 },
                 complete: function () {
-                    bpActualizarContador();
+                    // No se necesita lógica adicional aquí; el restore se hace en success/error
                 }
             });
         });
@@ -4450,6 +4484,128 @@ $(document).ready(function () {
     $('#modal-buscar-pendiente').on('hidden.bs.modal', function () {
         $('#modal-buscar-pendiente .modal-dialog').removeClass('bp-maximized').css({ width: '', 'max-width': '' });
         $('#btn-maximizar-buscar i').removeClass('fa-compress').addClass('fa-expand');
+    });
+
+    // =============================================
+    // CARGA MASIVA DE ENTREGAS - Fase 1 y Fase 2
+    // =============================================
+
+    // Mostrar nombre del archivo seleccionado
+    $(document).on('change', '#archivoCargaMasiva', function () {
+        var fileName = $(this).val().split('\\').pop();
+        $(this).siblings('.custom-file-label').text(fileName || 'Elegir archivo...');
+    });
+
+    // Resetear modal al cerrar
+    $('#modalCargaMasiva').on('hidden.bs.modal', function () {
+        $('#formCargaMasiva')[0].reset();
+        $('#archivoCargaMasiva').siblings('.custom-file-label').text('Elegir archivo...');
+        $('#resultadosFase1').hide();
+        $('#panelFase2').hide();
+        $('#resultadosFase2').hide();
+        $('#loadingFase1').hide();
+        $('#btnProcesarFase1').prop('disabled', false);
+    });
+
+    // Fase 1: click en botón Procesar
+    $(document).on('click', '#btnProcesarFase1', function () {
+        var archivo = $('#archivoCargaMasiva')[0].files[0];
+        if (!archivo) {
+            Swal.fire('Atención', 'Debe seleccionar un archivo antes de continuar.', 'warning');
+            return;
+        }
+
+        var formData = new FormData($('#formCargaMasiva')[0]);
+
+        $('#btnProcesarFase1').prop('disabled', true);
+        $('#loadingFase1').show();
+        $('#resultadosFase1').hide();
+        $('#panelFase2').hide();
+        $('#resultadosFase2').hide();
+
+        $.ajax({
+            url: '{{ route("medcol6.cargar_entregas_masivas") }}',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            timeout: 300000, // 5 minutos
+            success: function (res) {
+                $('#loadingFase1').hide();
+                $('#btnProcesarFase1').prop('disabled', false);
+
+                $('#cnt-procesados').text(res.procesados);
+                $('#cnt-no-encontrados').text(res.no_encontrados);
+                $('#cnt-errores').text(res.errores);
+                $('#cnt-para-fase2').text(res.procesados);
+                $('#resultadosFase1').show();
+
+                // Detalle no encontrados
+                if (res.detalle_no_encontrados && res.detalle_no_encontrados.length > 0) {
+                    var lista = '';
+                    if (res.msg_no_encontrados) {
+                        lista += '<li class="text-warning font-weight-bold">' + res.msg_no_encontrados + '</li>';
+                    }
+                    $.each(res.detalle_no_encontrados, function (i, item) {
+                        lista += '<li>' + item + '</li>';
+                    });
+                    $('#lista-no-encontrados').html(lista);
+                    $('#detalle-no-encontrados').show();
+                } else {
+                    $('#detalle-no-encontrados').hide();
+                }
+
+                // Detalle errores
+                if (res.detalle_errores && res.detalle_errores.length > 0) {
+                    var listaErr = '';
+                    $.each(res.detalle_errores, function (i, item) {
+                        listaErr += '<li>' + item + '</li>';
+                    });
+                    $('#lista-errores-fase1').html(listaErr);
+                    $('#detalle-errores-fase1').show();
+                } else {
+                    $('#detalle-errores-fase1').hide();
+                }
+
+                if (res.puede_fase2) {
+                    $('#panelFase2').show();
+                }
+            },
+            error: function (xhr) {
+                $('#loadingFase1').hide();
+                $('#btnProcesarFase1').prop('disabled', false);
+                var msg = (xhr.responseJSON && xhr.responseJSON.message)
+                    ? xhr.responseJSON.message
+                    : 'Error al procesar el archivo.';
+                Swal.fire('Error', msg, 'error');
+            }
+        });
+    });
+
+    // Fase 2: Registrar observaciones
+    $(document).on('click', '#btnProcesarFase2', function () {
+        $('#btnProcesarFase2').prop('disabled', true);
+        $('#loadingFase2').show();
+
+        $.ajax({
+            url: '{{ route("medcol6.registrar_observaciones_masivas") }}',
+            method: 'POST',
+            data: { _token: $('meta[name="csrf-token"]').attr('content') },
+            success: function (res) {
+                $('#loadingFase2').hide();
+                $('#msgFase2').text(res.message);
+                $('#resultadosFase2').show();
+                $('#panelFase2').hide();
+            },
+            error: function (xhr) {
+                $('#loadingFase2').hide();
+                $('#btnProcesarFase2').prop('disabled', false);
+                var msg = (xhr.responseJSON && xhr.responseJSON.message)
+                    ? xhr.responseJSON.message
+                    : 'Error al registrar observaciones.';
+                Swal.fire('Error', msg, 'error');
+            }
+        });
     });
 
 });

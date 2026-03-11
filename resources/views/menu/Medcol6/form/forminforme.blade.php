@@ -73,6 +73,9 @@
                         <button type="button" class="btn btn-dark ml-2" data-toggle="modal" data-target="#modal-buscar-pendiente">
                             <i class="fas fa-search mr-1"></i> Buscar Pendiente
                         </button>
+                        <button type="button" class="btn btn-success ml-2" data-toggle="modal" data-target="#modalCargaMasiva">
+                            <i class="fas fa-file-upload mr-1"></i> Carga Masiva
+                        </button>
                     </div>
                 </div>
 
@@ -118,12 +121,15 @@
                                         <option value="INY">INY-FARMACIA INYECTABLES</option>
                                         <option value="PAC">PAC-FARMACIA PAC</option>
                                         <option value="SM01">SM01-FARMACIA SALUD MENTAL</option>
+                                        <option value="FRPE">FRPE-FARMACIA PENDIENTES</option>
+                                        <option value="FRRC">FRRC-FARMACIA RIO CAUCA</option>
                                     </optgroup>
                                     <optgroup label="Farmacias Especializadas">
                                         <option value="BPDT">BPDT-BOLSA</option>
                                         <option value="EVIO">EVIO-EVENTO IDEO</option>
                                         <option value="EVEN">EVEN-FARMACIA EVENTO</option>
                                         <option value="EVSM">EVSM-EVENTO SALUD MENTAL</option>
+                                        <option value="F24H">F24H-FARMACIA 24H URGENCIAS</option>
                                     </optgroup>
                                 </select>
                             </div>
@@ -195,12 +201,15 @@
                                                     <option value="INY">INY-FARMACIA INYECTABLES</option>
                                                     <option value="PAC">PAC-FARMACIA PAC</option>
                                                     <option value="SM01">SM01-FARMACIA SALUD MENTAL</option>
+                                                    <option value="FRPE">FRPE-FARMACIA PENDIENTES IDEO</option>
+                                                    <option value="FRRC">FRRC-FARMACIA RIO CAUCA</option>
                                                 </optgroup>
                                                 <optgroup label="Farmacias Especializadas">
                                                     <option value="BPDT">BPDT-BOLSA</option>
                                                     <option value="EVIO">EVIO-EVENTO IDEO</option>
                                                     <option value="EVEN">EVEN-FARMACIA EVENTO</option>
                                                     <option value="EVSM">EVSM-EVENTO SALUD MENTAL</option>
+                                                    <option value="F24H">F24H-FARMACIA 24H URGENCIAS</option>
                                                 </optgroup>
                                             </select>
                                         </div>

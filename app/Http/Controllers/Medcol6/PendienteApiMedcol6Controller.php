@@ -3208,4 +3208,266 @@ class PendienteApiMedcol6Controller extends Controller
             'updated_at'   => now(),
         ]);
     }
+
+    /**
+     * Fase 1: Carga masiva de entregas desde archivo Excel/CSV.
+     * Estrategia de optimización:
+     *  - Lookup: 1 sola query con whereIn(documento) + whereIn(factura), match final en PHP.
+     *  - Update: CASE WHEN masivo en chunks (bindings separados por columna).
+     */
+    public function cargarEntregasMasivas(Request $request)
+    {
+        $request->validate([
+            'archivo' => 'required|file|mimes:xlsx,xls,csv,txt',
+        ]);
+
+        set_time_limit(300);
+        ini_set('memory_limit', '512M');
+
+        try {
+            // PASO 1: Leer el archivo Excel completo en memoria (sin DB)
+            $rows = \Maatwebsite\Excel\Facades\Excel::toCollection(
+                new \App\Imports\EntregasMasivasMedcol6Import(),
+                $request->file('archivo')
+            )->first();
+
+            if (!$rows || $rows->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El archivo no contiene datos o el formato no es válido.',
+                ], 422);
+            }
+
+            $MAX_MUESTRA = 20;
+            $CHUNK_SIZE  = 500;
+            $errores     = [];
+            $mapaFilas   = []; // clave compuesta => datos de fila
+
+            // PASO 2: Parsear todas las filas en memoria (PHP puro, sin DB)
+            foreach ($rows as $index => $row) {
+                $fila         = $index + 2;
+                $documento    = trim((string)($row['documento'] ?? ''));
+                $factura      = trim((string)($row['factura'] ?? ''));
+                $codigo       = trim((string)($row['codigo'] ?? ''));
+                $fechaEntrega = $row['fecha_entrega'] ?? null;
+                $dispensacion = trim((string)($row['dispensacion'] ?? ''));
+
+                if (empty($documento) || empty($factura) || empty($codigo)) {
+                    $errores[] = "Fila {$fila}: documento, factura o código vacíos.";
+                    continue;
+                }
+
+                $docEntrega = $facturaEntrega = '';
+                if (preg_match('/^([A-Za-z]*)(\d*)$/', $dispensacion, $m)) {
+                    $docEntrega     = $m[1] ?? '';
+                    $facturaEntrega = $m[2] ?? '';
+                } else {
+                    $docEntrega = $dispensacion;
+                }
+
+                $fechaParsed = null;
+                if (!empty($fechaEntrega)) {
+                    try {
+                        $fechaParsed = is_numeric($fechaEntrega)
+                            ? \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float)$fechaEntrega)->format('Y-m-d')
+                            : Carbon::parse($fechaEntrega)->format('Y-m-d');
+                    } catch (\Exception $e) {}
+                }
+
+                $clave = $documento . '||' . $factura . '||' . $codigo;
+                $mapaFilas[$clave] = [
+                    'fila'            => $fila,
+                    'documento'       => $documento,
+                    'factura'         => $factura,
+                    'codigo'          => $codigo,
+                    'fecha_entrega'   => $fechaParsed,
+                    'doc_entrega'     => $docEntrega,
+                    'factura_entrega' => $facturaEntrega,
+                ];
+            }
+
+            // PASO 3: Lookup en BD con UNA sola query whereIn(documento)+whereIn(factura)
+            // Luego el match exacto del código se hace en PHP (muy rápido en memoria).
+            $documentosUnicos = array_unique(array_column($mapaFilas, 'documento'));
+            $facturasUnicas   = array_unique(array_column($mapaFilas, 'factura'));
+
+            $encontrados = []; // clave => id
+
+            // Si hay muchas facturas, hacemos chunks del whereIn para no sobrepasar límites de MySQL
+            foreach (array_chunk($facturasUnicas, $CHUNK_SIZE) as $facturasChunk) {
+                DB::table('pendiente_api_medcol6')
+                    ->select('id', 'documento', 'factura', 'codigo')
+                    ->where('estado', '!=', 'ENTREGADO')
+                    ->whereIn('documento', $documentosUnicos)
+                    ->whereIn('factura', $facturasChunk)
+                    ->get()
+                    ->each(function ($r) use (&$encontrados, $mapaFilas) {
+                        $clave = $r->documento . '||' . $r->factura . '||' . $r->codigo;
+                        if (isset($mapaFilas[$clave])) {
+                            $encontrados[$clave] = (int)$r->id;
+                        }
+                    });
+            }
+
+            // PASO 4: Clasificar encontrados vs no encontrados
+            $toUpdate      = [];
+            $noEncontrados = 0;
+            $muestraNoEnc  = [];
+
+            foreach ($mapaFilas as $clave => $datos) {
+                if (isset($encontrados[$clave])) {
+                    $toUpdate[$encontrados[$clave]] = $datos;
+                } else {
+                    $noEncontrados++;
+                    if (count($muestraNoEnc) < $MAX_MUESTRA) {
+                        $muestraNoEnc[] = "Fila {$datos['fila']}: doc={$datos['documento']}, fac={$datos['factura']}, cod={$datos['codigo']}";
+                    }
+                }
+            }
+
+            // PASO 5: Actualización masiva con CASE WHEN.
+            // Los bindings se acumulan POR COLUMNA (no intercalados) para respetar
+            // el orden en que MySQL los consume del SQL generado.
+            $procesadosIds = array_keys($toUpdate);
+            $now           = now()->format('Y-m-d H:i:s');
+
+            DB::beginTransaction();
+
+            foreach (array_chunk($procesadosIds, $CHUNK_SIZE) as $idChunk) {
+                $fechaCases    = '';
+                $docCases      = '';
+                $facCases      = '';
+                $fechaBindings = [];
+                $docBindings   = [];
+                $facBindings   = [];
+
+                foreach ($idChunk as $id) {
+                    $d              = $toUpdate[$id];
+                    $fechaCases    .= "WHEN {$id} THEN ? ";
+                    $docCases      .= "WHEN {$id} THEN ? ";
+                    $facCases      .= "WHEN {$id} THEN ? ";
+                    $fechaBindings[] = $d['fecha_entrega'];
+                    $docBindings[]   = $d['doc_entrega'];
+                    $facBindings[]   = $d['factura_entrega'];
+                }
+
+                // Orden de bindings: todos los de fecha → todos los de doc → todos los de fac → updated_at
+                $bindings = array_merge($fechaBindings, $docBindings, $facBindings, [$now]);
+                $inList   = implode(',', $idChunk);
+
+                DB::statement("
+                    UPDATE pendiente_api_medcol6
+                    SET estado          = 'ENTREGADO',
+                        usuario         = 'SYSTEM',
+                        fecha_entrega   = CASE id {$fechaCases} END,
+                        doc_entrega     = CASE id {$docCases} END,
+                        factura_entrega = CASE id {$facCases} END,
+                        updated_at      = ?
+                    WHERE id IN ({$inList})
+                ", $bindings);
+            }
+
+            DB::commit();
+
+            session(['carga_masiva_ids' => $procesadosIds]);
+
+            $totalProcesados  = count($procesadosIds);
+            $queriesLookup    = count(array_chunk($facturasUnicas, $CHUNK_SIZE));
+            $queriesUpdate    = count(array_chunk($procesadosIds, $CHUNK_SIZE));
+
+            Log::info('Carga masiva de entregas completada', [
+                'user'            => Auth::user()->email ?? 'unknown',
+                'procesados'      => $totalProcesados,
+                'no_encontrados'  => $noEncontrados,
+                'errores'         => count($errores),
+                'queries_lookup'  => $queriesLookup,
+                'queries_update'  => $queriesUpdate,
+            ]);
+
+            $msgNoEnc = $noEncontrados > $MAX_MUESTRA
+                ? "Mostrando {$MAX_MUESTRA} de {$noEncontrados} no encontrados:"
+                : null;
+
+            return response()->json([
+                'success'                => true,
+                'procesados'             => $totalProcesados,
+                'no_encontrados'         => $noEncontrados,
+                'errores'                => count($errores),
+                'detalle_no_encontrados' => $muestraNoEnc,
+                'msg_no_encontrados'     => $msgNoEnc,
+                'detalle_errores'        => array_slice($errores, 0, $MAX_MUESTRA),
+                'message'                => 'Fase 1 completada. Se actualizaron ' . $totalProcesados . ' registro(s).',
+                'puede_fase2'            => $totalProcesados > 0,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error en cargarEntregasMasivas: ' . $e->getMessage(), [
+                'user'  => Auth::user()->email ?? 'unknown',
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar el archivo: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Fase 2: Registra observaciones masivas para los pendientes procesados en la Fase 1.
+     */
+    public function registrarObservacionesMasivas(Request $request)
+    {
+        $ids = session('carga_masiva_ids', []);
+
+        if (empty($ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No hay registros pendientes de la Fase 1. Cargue primero el archivo.',
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $registrados = 0;
+            foreach ($ids as $id) {
+                ObservacionesApiMedcol6::create([
+                    'pendiente_id' => $id,
+                    'observacion'  => 'Entregado sujeto a validación en caso de presentarse alguna novedad',
+                    'usuario'      => 'SYSTEM',
+                    'estado'       => 'ENTREGADO',
+                    'created_at'   => now(),
+                    'updated_at'   => now(),
+                ]);
+                $registrados++;
+            }
+
+            DB::commit();
+
+            session()->forget('carga_masiva_ids');
+
+            Log::info('Observaciones masivas registradas', [
+                'user'       => Auth::user()->email ?? 'unknown',
+                'registrados' => $registrados,
+            ]);
+
+            return response()->json([
+                'success'     => true,
+                'registrados' => $registrados,
+                'message'     => 'Fase 2 completada. Se crearon ' . $registrados . ' observación(es).',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error en registrarObservacionesMasivas: ' . $e->getMessage(), [
+                'user'  => Auth::user()->email ?? 'unknown',
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al registrar observaciones: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }

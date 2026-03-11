@@ -352,6 +352,10 @@ Route::post('medcol6/procesar-entregas', 'Medcol6\PendienteApiMedcol6Controller@
 Route::post('medcol6/buscar-pendiente-doc-factura', 'Medcol6\PendienteApiMedcol6Controller@buscarPendientePorDocumentoFactura')->name('medcol6.buscar_pendiente_doc_factura')->middleware('verified')->middleware('verifyuser');
 Route::post('medcol6/guardar-pendientes-busqueda', 'Medcol6\PendienteApiMedcol6Controller@guardarPendientesBusqueda')->name('medcol6.guardar_pendientes_busqueda')->middleware('verified')->middleware('verifyuser');
 
+// Carga masiva de entregas desde archivo Excel/CSV
+Route::post('medcol6/cargar-entregas-masivas', 'Medcol6\PendienteApiMedcol6Controller@cargarEntregasMasivas')->name('medcol6.cargar_entregas_masivas')->middleware('verified')->middleware('verifyuser');
+Route::post('medcol6/registrar-observaciones-masivas', 'Medcol6\PendienteApiMedcol6Controller@registrarObservacionesMasivas')->name('medcol6.registrar_observaciones_masivas')->middleware('verified')->middleware('verifyuser');
+
 
 //Rutas de tablas de Dispensado MEDCOL 6 SOS y JAMUNDI
 
