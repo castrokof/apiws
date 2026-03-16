@@ -183,9 +183,13 @@ class DispensadoApiMedcol6Controller extends Controller
             'FSAU' => 'FSAU-FARMACIA SAU',
             'EVSO' => 'EVSO-EVENTO SOS',
             'FRIO' => 'FRIO-FARMACIA FRIO',
-            'FRIP' => 'FRIP-FARMACIA FRIP',
+            'FRRC' => 'FRRC-FARMACIA RIO CAUCA',
+            'FRIP' => 'FRIP-FARMACIA IDEO PASOANCHO',
             'F24H' => 'F24H-FARMACIA 24 HORAS',
-            'FRPE' => 'FRPE-FARMACIA PREVENTIVA'
+            'FRPE' => 'FRPE-FARMACIA PENDIENTES IDEO',
+            'FRPP' => 'FRPP-FARMACIA PENDIENTES PAC',
+            'FRPD' => 'FRPD-FARMACIA PENDIENTES DOLOR',
+            'FRPJ' => 'FRPJ-FARMACIA PENDIENTES JAMUNDI'
         ];
 
         // Calcular totales
@@ -361,11 +365,8 @@ class DispensadoApiMedcol6Controller extends Controller
     public function createdispensadoapi(Request $request)
     {
 
-
         // Obtener la fecha límite de los últimos 7 días
         $fechaLimite = Carbon::now()->startOfWeek()->subDays(8)->startOfDay();
-
-
 
         $email = 'castrokofdev@gmail.com'; // Auth::user()->email
         $password = 'colMed2023**';
@@ -374,9 +375,7 @@ class DispensadoApiMedcol6Controller extends Controller
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-
         try {
-
 
             $response = Http::post("http://hed08pf9dxt.sn.mynetname.net:8004/api/acceso", [
                 'email' =>  $email,
@@ -385,25 +384,16 @@ class DispensadoApiMedcol6Controller extends Controller
 
             $token = $response->json()["token"];
 
-
-
             if ($token) {
-
 
                 try {
 
-
-
-
                     $responsefacturas = Http::withToken($token)->get("http://hed08pf9dxt.sn.mynetname.net:8004/api/dispensadoapi");
-
-
 
                     $facturassapi = $responsefacturas->json()['data'];
 
                     $contadorei = 0;
                     $contador = 0;
-
 
                     // Obtener las facturas existentes en un solo query
 
@@ -454,9 +444,7 @@ class DispensadoApiMedcol6Controller extends Controller
 
                         // Registrar en el log como "SI" (porque se va a insertar)
                         Log::info("{$clave} => SI (se inserta)");
-
-
-
+                        
                         $dispensados[] = [
                             'idusuario'  => trim($factura['idusuario']),
                             'tipo'  => trim($factura['tipo']),
@@ -470,6 +458,7 @@ class DispensadoApiMedcol6Controller extends Controller
                             'consecutivo'  => trim($factura['consecutivo']),
                             'cums_rips'  => trim($factura['cums_rips']),
                             'codigo'  => trim($factura['codigo']),
+                            'codigo2'  => trim($factura['codigo2']),
                             'tipo_medicamento'  => trim($factura['tipo_medicamento']),
                             'nombre_generico'  => trim($factura['nombre_generico']),
                             'atc'  => trim($factura['atc']),
@@ -479,6 +468,8 @@ class DispensadoApiMedcol6Controller extends Controller
                             'cantidad_ordenada'  => trim($factura['cantidad_ordenada']),
                             'numero_unidades'  => trim($factura['numero_unidades']),
                             'regimen'  => trim($factura['regimen']),
+                            'regimenafil'  => trim($factura['regimenafil']),
+                            'nivelafil'  => trim($factura['nivelafil']),
                             'paciente'  => trim($factura['paciente']),
                             'primer_apellido'  => trim($factura['primer_apellido']),
                             'segundo_apellido'  => trim($factura['segundo_apellido']),
@@ -600,6 +591,7 @@ class DispensadoApiMedcol6Controller extends Controller
                                     'consecutivo'  => trim($factura['consecutivo']),
                                     'cums_rips'  => trim($factura['cums_rips']),
                                     'codigo'  => trim($factura['codigo']),
+                                    'codigo2'  => trim($factura['codigo2']),
                                     'tipo_medicamento'  => trim($factura['tipo_medicamento']),
                                     'nombre_generico'  => trim($factura['nombre_generico']),
                                     'atc'  => trim($factura['atc']),
@@ -609,6 +601,8 @@ class DispensadoApiMedcol6Controller extends Controller
                                     'cantidad_ordenada'  => trim($factura['cantidad_ordenada']),
                                     'numero_unidades'  => trim($factura['numero_unidades']),
                                     'regimen'  => trim($factura['regimen']),
+                                    'regimenafil'  => trim($factura['regimenafil']),
+                                    'nivelafil'  => trim($factura['nivelafil']),
                                     'paciente'  => trim($factura['paciente']),
                                     'primer_apellido'  => trim($factura['primer_apellido']),
                                     'segundo_apellido'  => trim($factura['segundo_apellido']),
@@ -1766,6 +1760,7 @@ class DispensadoApiMedcol6Controller extends Controller
                                 'consecutivo'  => trim($factura['consecutivo']),
                                 'cums_rips'  => trim($factura['cums_rips']),
                                 'codigo'  => trim($factura['codigo']),
+                                'codigo2'  => trim($factura['codigo2']),
                                 'tipo_medicamento'  => trim($factura['tipo_medicamento']),
                                 'nombre_generico'  => trim($factura['nombre_generico']),
                                 'atc'  => trim($factura['atc']),
@@ -1775,6 +1770,8 @@ class DispensadoApiMedcol6Controller extends Controller
                                 'cantidad_ordenada'  => trim($factura['cantidad_ordenada']),
                                 'numero_unidades'  => trim($factura['numero_unidades']),
                                 'regimen'  => trim($factura['regimen']),
+                                'regimenafil'  => trim($factura['regimenafil']),
+                                'nivelafil'  => trim($factura['nivelafil']),
                                 'paciente'  => trim($factura['paciente']),
                                 'primer_apellido'  => trim($factura['primer_apellido']),
                                 'segundo_apellido'  => trim($factura['segundo_apellido']),
@@ -1987,5 +1984,121 @@ class DispensadoApiMedcol6Controller extends Controller
                 ]);
             }
         }
+    }
+
+    public function validarIntegridadDatos(Request $request)
+    {
+        $request->validate([
+            'fechaini' => 'required|date',
+            'fechafin' => 'required|date|after_or_equal:fechaini',
+        ]);
+
+        $fechaini = $request->fechaini;
+        $fechafin = $request->fechafin;
+
+        // Obtener registros del período agrupando los campos relevantes por historia y factura
+        $registros = DB::table('dispensado_medcol6')
+            ->select('historia', 'factura', 'tipodocument', 'regimen', 'nivelafil', 'paciente', 'primer_nombre', 'primer_apellido')
+            ->whereIn('estado', ['REVISADO', 'DISPENSADO'])
+            ->whereBetween('fecha_suministro', [$fechaini, $fechafin])
+            ->orderBy('historia')
+            ->get();
+
+        if ($registros->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'total_pacientes_analizados' => 0,
+                'total_con_inconsistencias' => 0,
+                'inconsistencias' => [],
+                'periodo' => ['inicio' => $fechaini, 'fin' => $fechafin],
+                'mensaje' => 'No se encontraron registros en el período seleccionado.',
+            ]);
+        }
+
+        // Agrupar por historia (identificador único del paciente)
+        $porHistoria = $registros->groupBy('historia');
+
+        $inconsistencias = [];
+
+        foreach ($porHistoria as $historia => $registrosHistoria) {
+            $tiposDoc   = $registrosHistoria->pluck('tipodocument')->map(fn($v) => strtoupper(trim($v)))->filter()->unique()->values();
+            $regimenes  = $registrosHistoria->pluck('regimen')->map(fn($v) => strtoupper(trim($v)))->filter()->unique()->values();
+            $nivelafil = $registrosHistoria->pluck('nivelafil')->map(fn($v) => strtoupper(trim($v)))->filter()->unique()->values();
+
+            $tieneInconsistencia = false;
+            $detallesInconsistencia = [];
+
+            // Verificar inconsistencia en tipo de documento
+            if ($tiposDoc->count() > 1) {
+                $tieneInconsistencia = true;
+                $detallesInconsistencia[] = 'Tipo Documento: ' . $tiposDoc->implode(' vs ');
+            }
+
+            // Verificar inconsistencia en régimen de afiliación
+            if ($regimenes->count() > 1) {
+                $tieneInconsistencia = true;
+                $etiquetasRegimen = $regimenes->map(function ($r) {
+                    $labels = ['RS' => 'RS (Subsidiado)', 'RC' => 'RC (Contributivo)', 'PR' => 'PR (Particular)', 'OT' => 'OT (Otro)'];
+                    return $labels[$r] ?? $r;
+                });
+                $detallesInconsistencia[] = 'Régimen: ' . $etiquetasRegimen->implode(' vs ');
+            }
+
+            // Verificar inconsistencia en nivel/cobertura de afiliación
+            if ($nivelafil->count() > 1) {
+                $tieneInconsistencia = true;
+                $etiquetaslnivelafil = $nivelafil->map(function ($c) {
+                    $labels = [
+                        'A'  => 'Nivel A', 'B'  => 'Nivel B', 'C'  => 'Nivel C',
+                        '01' => 'Nivel 01', '02' => 'Nivel 02', '03' => 'Nivel 03',
+                        '1'  => 'PBS/POS', '2'  => 'NOPBS/NOPOS',
+                    ];
+                    return $labels[$c] ?? 'Nivel ' . $c;
+                });
+                $detallesInconsistencia[] = 'Nivel/Cobertura: ' . $etiquetaslnivelafil->implode(' vs ');
+            }
+
+            if (!$tieneInconsistencia) {
+                continue;
+            }
+
+            // Determinar valor predominante (moda) para cada campo
+            $modoTipoDoc   = $registrosHistoria->groupBy(fn($r) => strtoupper(trim($r->tipodocument)))->map->count()->sortDesc()->keys()->first();
+            $modoRegimen   = $registrosHistoria->groupBy(fn($r) => strtoupper(trim($r->regimen)))->map->count()->sortDesc()->keys()->first();
+            $modoNivelafil = $registrosHistoria->groupBy(fn($r) => strtoupper(trim($r->nivelafil)))->map->count()->sortDesc()->keys()->first();
+
+            // Contar registros inconsistentes respecto a los valores predominantes
+            $cantidadInconsistentes = $registrosHistoria->filter(function ($r) use ($modoTipoDoc, $modoRegimen, $modoNivelafil) {
+                return strtoupper(trim($r->tipodocument)) !== $modoTipoDoc
+                    || strtoupper(trim($r->regimen))      !== $modoRegimen
+                    || strtoupper(trim($r->nivelafil))    !== $modoNivelafil;
+            })->count();
+
+            $primerRegistro = $registrosHistoria->first();
+            $nombrePaciente = trim($primerRegistro->primer_nombre . ' ' . $primerRegistro->primer_apellido);
+
+            $inconsistencias[] = [
+                'historia'              => $historia,
+                'paciente'              => $nombrePaciente ?: ($primerRegistro->paciente ?? ''),
+                'total_facturas'        => $registrosHistoria->pluck('factura')->unique()->count(),
+                'total_registros'       => $registrosHistoria->count(),
+                'inconsistencias_count' => $cantidadInconsistentes,
+                'tipo_inconsistencia'   => implode('; ', $detallesInconsistencia),
+                'valores_tipodoc'       => $tiposDoc->implode(', '),
+                'valores_regimen'       => $regimenes->implode(', '),
+                'valores_nivelafil'     => $nivelafil->implode(', '),
+            ];
+        }
+
+        // Ordenar por cantidad de inconsistencias descendente
+        usort($inconsistencias, fn($a, $b) => $b['inconsistencias_count'] <=> $a['inconsistencias_count']);
+
+        return response()->json([
+            'success'                    => true,
+            'total_pacientes_analizados' => $porHistoria->count(),
+            'total_con_inconsistencias'  => count($inconsistencias),
+            'inconsistencias'            => $inconsistencias,
+            'periodo'                    => ['inicio' => $fechaini, 'fin' => $fechafin],
+        ]);
     }
 }

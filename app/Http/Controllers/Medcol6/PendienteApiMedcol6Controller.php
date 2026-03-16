@@ -3049,6 +3049,8 @@ class PendienteApiMedcol6Controller extends Controller
             'direcres'      => $primero->direcres,
             'telefres'      => $primero->telefres,
             'municipio'     => $primero->municipio,
+            'fecha_factura' => $primero->fecha_factura,
+            'centroproduccion' => $primero->centroproduccion,
         ];
 
         $medicamentos = $items->map(function ($item) {
@@ -3094,8 +3096,9 @@ class PendienteApiMedcol6Controller extends Controller
         $request->validate([
             'items'                              => 'required|array|min:1',
             'items.*.id'                         => 'required|integer|exists:pendiente_api_medcol6,id',
+            'items.*.solo_res1604'               => 'nullable|boolean',
             'items.*.cantdpx'                    => 'nullable|numeric|min:0',
-            'items.*.estado'                     => 'required|in:PENDIENTE,ENTREGADO,TRAMITADO,DESABASTECIDO,ANULADO,VENCIDO,SIN CONTACTO',
+            'items.*.estado'                     => 'nullable|in:PENDIENTE,ENTREGADO,TRAMITADO,DESABASTECIDO,ANULADO,VENCIDO,SIN CONTACTO',
             'items.*.fecha_correspondiente'      => 'nullable|date',
             'items.*.factura_entrega'            => 'nullable|numeric',
             'items.*.doc_entrega'               => 'nullable|string|max:10',
@@ -3109,62 +3112,80 @@ class PendienteApiMedcol6Controller extends Controller
         try {
             DB::beginTransaction();
 
-            $actualizados = 0;
-            $errores = [];
+            $actualizados    = 0;
+            $actualizadosRes = 0;
+            $errores         = [];
 
             foreach ($request->items as $itemData) {
                 try {
-                    $pendiente = PendienteApiMedcol6::findOrFail($itemData['id']);
+                    $pendiente   = PendienteApiMedcol6::findOrFail($itemData['id']);
+                    $soloRes1604 = !empty($itemData['solo_res1604']);
 
-                    $updateData = [
-                        'estado'                  => $itemData['estado'],
-                        'usuario'                 => Auth::user()->email,
-                        'updated_at'              => now(),
-                        'numero_formula'          => $itemData['numero_formula'] ?? $pendiente->numero_formula,
-                        'fecha_ordenamiento'      => !empty($itemData['fecha_ordenamiento']) ? $itemData['fecha_ordenamiento'] : $pendiente->fecha_ordenamiento,
-                        'frecuencia_administracion' => $itemData['frecuencia_administracion'] ?? $pendiente->frecuencia_administracion,
-                        'duracion_tratamiento'    => $itemData['duracion_tratamiento'] ?? $pendiente->duracion_tratamiento,
-                        'observaciones'           => $itemData['observaciones'] ?? $pendiente->observaciones,
-                    ];
+                    if ($soloRes1604) {
+                        // Solo actualizar los 4 campos de Resolución 1604
+                        $updateData = [
+                            'numero_formula'           => $itemData['numero_formula'] ?? $pendiente->numero_formula,
+                            'fecha_ordenamiento'       => !empty($itemData['fecha_ordenamiento']) ? $itemData['fecha_ordenamiento'] : $pendiente->fecha_ordenamiento,
+                            'frecuencia_administracion' => $itemData['frecuencia_administracion'] ?? $pendiente->frecuencia_administracion,
+                            'duracion_tratamiento'     => $itemData['duracion_tratamiento'] ?? $pendiente->duracion_tratamiento,
+                            'usuario'                  => Auth::user()->email,
+                            'updated_at'               => now(),
+                        ];
 
-                    if (isset($itemData['cantdpx'])) {
-                        $updateData['cantdpx'] = $itemData['cantdpx'];
+                        $pendiente->update($updateData);
+                        $actualizadosRes++;
+                    } else {
+                        // Actualización completa del ítem seleccionado
+                        $updateData = [
+                            'estado'                   => $itemData['estado'],
+                            'usuario'                  => Auth::user()->email,
+                            'updated_at'               => now(),
+                            'numero_formula'           => $itemData['numero_formula'] ?? $pendiente->numero_formula,
+                            'fecha_ordenamiento'       => !empty($itemData['fecha_ordenamiento']) ? $itemData['fecha_ordenamiento'] : $pendiente->fecha_ordenamiento,
+                            'frecuencia_administracion' => $itemData['frecuencia_administracion'] ?? $pendiente->frecuencia_administracion,
+                            'duracion_tratamiento'     => $itemData['duracion_tratamiento'] ?? $pendiente->duracion_tratamiento,
+                            'observaciones'            => $itemData['observaciones'] ?? $pendiente->observaciones,
+                        ];
+
+                        if (isset($itemData['cantdpx'])) {
+                            $updateData['cantdpx'] = $itemData['cantdpx'];
+                        }
+
+                        if (!empty($itemData['factura_entrega'])) {
+                            $updateData['factura_entrega'] = $itemData['factura_entrega'];
+                        }
+
+                        if (!empty($itemData['doc_entrega'])) {
+                            $updateData['doc_entrega'] = $itemData['doc_entrega'];
+                        }
+
+                        // Asignar fecha según el estado
+                        $fecha = !empty($itemData['fecha_correspondiente']) ? Carbon::parse($itemData['fecha_correspondiente']) : now();
+
+                        switch ($itemData['estado']) {
+                            case 'ENTREGADO':
+                                $updateData['fecha_entrega'] = $fecha;
+                                break;
+                            case 'TRAMITADO':
+                            case 'DESABASTECIDO':
+                                $updateData['fecha_impresion'] = $fecha;
+                                break;
+                            case 'ANULADO':
+                                $updateData['fecha_anulado'] = $fecha;
+                                break;
+                            case 'SIN CONTACTO':
+                                $updateData['updated_at'] = $fecha;
+                                break;
+                        }
+
+                        $pendiente->update($updateData);
+
+                        if (!empty($itemData['observaciones'])) {
+                            $this->createObservacionBusqueda($pendiente, $itemData['observaciones'], $itemData['estado']);
+                        }
+
+                        $actualizados++;
                     }
-
-                    if (!empty($itemData['factura_entrega'])) {
-                        $updateData['factura_entrega'] = $itemData['factura_entrega'];
-                    }
-
-                    if (!empty($itemData['doc_entrega'])) {
-                        $updateData['doc_entrega'] = $itemData['doc_entrega'];
-                    }
-
-                    // Asignar fecha según el estado
-                    $fecha = !empty($itemData['fecha_correspondiente']) ? Carbon::parse($itemData['fecha_correspondiente']) : now();
-
-                    switch ($itemData['estado']) {
-                        case 'ENTREGADO':
-                            $updateData['fecha_entrega'] = $fecha;
-                            break;
-                        case 'TRAMITADO':
-                        case 'DESABASTECIDO':
-                            $updateData['fecha_impresion'] = $fecha;
-                            break;
-                        case 'ANULADO':
-                            $updateData['fecha_anulado'] = $fecha;
-                            break;
-                        case 'SIN CONTACTO':
-                            $updateData['updated_at'] = $fecha;
-                            break;
-                    }
-
-                    $pendiente->update($updateData);
-
-                    if (!empty($itemData['observaciones'])) {
-                        $this->createObservacionBusqueda($pendiente, $itemData['observaciones'], $itemData['estado']);
-                    }
-
-                    $actualizados++;
                 } catch (\Exception $e) {
                     $errores[] = "ID {$itemData['id']}: " . $e->getMessage();
                 }
@@ -3172,16 +3193,20 @@ class PendienteApiMedcol6Controller extends Controller
 
             DB::commit();
 
-            $mensaje = "Se actualizaron {$actualizados} item(s) correctamente.";
+            $mensaje = "Se actualizaron {$actualizados} ítem(s) seleccionado(s) correctamente.";
+            if ($actualizadosRes > 0) {
+                $mensaje .= " Campos Res. 1604 guardados en {$actualizadosRes} ítem(s) adicional(es).";
+            }
             if (!empty($errores)) {
                 $mensaje .= ' Errores: ' . implode('; ', $errores);
             }
 
             return response()->json([
-                'success'     => true,
-                'message'     => $mensaje,
-                'actualizados' => $actualizados,
-                'errores'     => $errores,
+                'success'          => true,
+                'message'          => $mensaje,
+                'actualizados'     => $actualizados,
+                'actualizados_res' => $actualizadosRes,
+                'errores'          => $errores,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();

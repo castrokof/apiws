@@ -388,6 +388,8 @@ Route::post('medcol6/disanulado', 'Medcol6\DispensadoApiMedcol6Controller@disanu
 
 Route::get('buscar-medcol6/{factura}', 'Medcol6\DispensadoApiMedcol6Controller@buscar')->name('dispensado.medcol6')->middleware('verified')->middleware('verifyuser');
 
+Route::post('medcol6/validar-integridad', 'Medcol6\DispensadoApiMedcol6Controller@validarIntegridadDatos')->name('medcol6.validar.integridad')->middleware('verified')->middleware('verifyuser');
+
 Route::post('medcol6/exportar-excel', [ExportController::class, 'exportExcel'])->name('exportar.excel');
 
 //Rutas para gestión de saldos MEDCOL 6

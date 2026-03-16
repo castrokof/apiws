@@ -13,6 +13,93 @@ Sistema web desarrollado en Laravel 7.x para la gestión de dispensación de med
 
 ## 📋 Changelog
 
+### v3.3 (Marzo 2026) - Validaciones y Guardado Completo de Campos Res. 1604 en Búsqueda de Pendientes
+
+**🚀 Nuevas Funcionalidades:**
+Se refuerza el cumplimiento de la **Resolución 1604** en el módulo `Medcol6/pendientes` (modal `Buscar Pendiente por Documento / Factura`), garantizando que los cuatro campos normativos sean obligatorios, coherentes entre todos los ítems, y que su información se persista en base de datos independientemente de la selección del usuario.
+
+---
+
+#### 🔒 Obligatoriedad de Campos Res. 1604 por Estado
+
+Los campos de la Resolución 1604 pasan a ser **obligatorios** para todos los ítems cuyo estado sea alguno de los siguientes:
+
+| Estado |
+|--------|
+| `PENDIENTE` |
+| `SIN CONTACTO` |
+| `ENTREGADO` |
+| `DESABASTECIDO` |
+
+**Campos obligatorios bajo esa condición:**
+
+| Campo | Descripción |
+|-------|-------------|
+| `numero_formula` | Número de la fórmula médica |
+| `fecha_ordenamiento` | Fecha de ordenamiento de la prescripción |
+| `frecuencia_administracion` | Frecuencia de administración |
+| `duracion_tratamiento` | Duración del tratamiento |
+
+- La validación aplica a **todos** los ítems listados, estén o no seleccionados con el checkbox.
+- Si algún ítem con estado aplicable tiene campos vacíos, el guardado se bloquea completamente mostrando un `Swal.fire` de tipo `error` con el detalle de cada ítem y sus campos faltantes.
+- Los campos vacíos se marcan visualmente con `is-invalid` (borde rojo).
+- Para ítems en estados distintos a los mencionados (`ANULADO`, `TRAMITADO`, `VENCIDO`), la obligatoriedad **no aplica**.
+
+---
+
+#### 🔁 Guardado de Campos Res. 1604 para Todos los Ítems (No Solo Seleccionados)
+
+**Problema anterior:** Al guardar, solo se actualizaban los ítems marcados con checkbox. Los ítems no seleccionados (aunque tuvieran Res. 1604 diligenciada) nunca se persistían en BD.
+
+**Solución implementada:** El payload enviado al backend ahora incluye dos grupos:
+
+| Grupo | Flag | Qué se actualiza |
+|-------|------|------------------|
+| Ítems seleccionados | `solo_res1604: false` | Actualización completa: estado, cantidades, fechas, observaciones y campos Res. 1604 |
+| Ítems NO seleccionados con estado aplicable | `solo_res1604: true` | Solo los 4 campos Res. 1604 |
+
+**Frontend (`bpEjecutarGuardado`):**
+- Se construye `idsSeleccionadosIdx` con los índices de ítems seleccionados.
+- Se itera sobre todos los `tr.bp-fila` con estado aplicable; los que no están en `idsSeleccionadosIdx` se agregan con `solo_res1604: true`.
+- El mensaje de confirmación (`Swal`) indica cuántos ítems se actualizan completamente y cuántos solo guardan Res. 1604.
+
+**Backend (`guardarPendientesBusqueda`):**
+- Campo `estado` pasa de `required` a `nullable` (los ítems `solo_res1604` no modifican el estado).
+- Se agrega validación `nullable|boolean` para `items.*.solo_res1604`.
+- En el loop de procesamiento se bifurca la lógica:
+  - `solo_res1604 = true` → actualiza solo `numero_formula`, `fecha_ordenamiento`, `frecuencia_administracion`, `duracion_tratamiento`, `usuario`, `updated_at`.
+  - `solo_res1604 = false` → actualización completa (comportamiento previo).
+- La respuesta JSON incluye los contadores `actualizados` (completos) y `actualizados_res` (solo Res. 1604).
+
+---
+
+#### ✅ Validaciones Cruzadas entre Ítems (Res. 1604)
+
+Se agregan tres reglas de consistencia que se evalúan **después** de verificar la completitud de campos y **antes** de construir el payload:
+
+**Regla 1 — `numero_formula` idéntico para todos los ítems**
+- Se extraen los valores únicos de `numero_formula` de todos los ítems con estado aplicable.
+- Si hay más de un valor distinto → bloquea el guardado y marca con `is-invalid` los campos que difieran.
+
+**Regla 2 — `fecha_ordenamiento` idéntica para todos los ítems**
+- Misma lógica que la Regla 1 aplicada al campo `fecha_ordenamiento`.
+
+**Regla 3 — `fecha_ordenamiento` no puede superar `fecha_factura` ni `fecha_entrega`**
+- **vs `fecha_factura`**: se compara contra `bpItems[idx].fecha_factura` (dato original del servidor) para cada ítem con estado aplicable.
+- **vs `fecha_entrega`**: aplica exclusivamente a ítems con estado `ENTREGADO`; se toma el valor del campo editable `bp-fecha-correspondiente` (lo que el usuario ingresa como fecha de entrega).
+- En caso de incumplimiento: se bloquea el guardado, se marca el campo `bp-fecha-ordenamiento` del ítem infractor con `is-invalid`, y el mensaje `Swal` muestra el nombre del medicamento con las fechas en conflicto.
+
+---
+
+#### 📁 Archivos Modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `resources/views/menu/Medcol6/indexAnalista.blade.php` | Función `bpEjecutarGuardado`: validación de obligatoriedad por estado, construcción de payload dual (`solo_res1604`), validaciones cruzadas (unicidad de fórmula/fecha, rango de fecha ordenamiento) |
+| `app/Http/Controllers/Medcol6/PendienteApiMedcol6Controller.php` | `guardarPendientesBusqueda`: nuevo campo `solo_res1604`, estado `nullable`, bifurcación de lógica de actualización, contadores separados en respuesta |
+
+---
+
 ### v3.2 (Marzo 2026) - Carga Masiva de Entregas desde Archivo
 
 **🚀 Nuevas Funcionalidades:**

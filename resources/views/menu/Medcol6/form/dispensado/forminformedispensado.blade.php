@@ -80,6 +80,11 @@
                                         <option value="INY">INY-FARMACIA INYECTABLES</option>
                                         <option value="PAC">PAC-FARMACIA PAC</option>
                                         <option value="SM01">SM01-FARMACIA SALUD MENTAL</option>
+                                        <option value="FRPE">FRPE-FARMACIA PENDIENTES IDEO</option>
+                                        <option value="FRRC">FRRC-FARMACIA RIO CAUCA</option>
+                                        <option value="FRPP">FRPP-FARMACIA PENDIENTES PAC</option>
+                                        <option value="FRPD">FRPD-FARMACIA PENDIENTES DOLOR</option>
+                                        <option value="FRPJ">FRPJ-FARMACIA PENDIENTES JAMUNDI</option>
                                     </optgroup>
                                     <optgroup label="Farmacias Especializadas">
                                         <option value="BPDT">BPDT-BOLSA</option>
@@ -140,6 +145,10 @@
                                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#gestion_multiple">
                                             <i class="fas fa-layer-group mr-1"></i>
                                             Gestión Múltiple
+                                        </button>
+                                        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#modal_validar_integridad" title="Detectar inconsistencias en tipo de documento, régimen y nivel de afiliación">
+                                            <i class="fas fa-shield-alt mr-1"></i>
+                                            Validar Integridad
                                         </button>
                                     </div>
                                 </div>

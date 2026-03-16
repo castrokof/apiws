@@ -1795,6 +1795,9 @@
      * Load patient history with all events and metrics
      */
     function loadPatientHistory(historia) {
+        // Navigate to historico tab (in case called from another tab)
+        $('#historico-tab').tab('show');
+
         // Show loading state
         const detailContainer = $('#patient-history-detail');
         detailContainer.html(`
@@ -1806,10 +1809,12 @@
             </div>
         `).show();
 
-        // Scroll to detail section
-        $('html, body').animate({
-            scrollTop: detailContainer.offset().top - 100
-        }, 500);
+        // Scroll to detail section after tab animation
+        setTimeout(function() {
+            $('html, body').animate({
+                scrollTop: detailContainer.offset().top - 100
+            }, 500);
+        }, 300);
 
         // Load both history and metrics in parallel
         Promise.all([
@@ -2894,16 +2899,7 @@
         $('#modalRegistrarGestion').modal('show');
     }
 
-    // Navega al tab de histórico y carga el paciente
-    function loadPatientHistory(historia) {
-        $('#historico-tab').tab('show');
-        setTimeout(function () {
-            var $input = $('#patient-search-input');
-            if ($input.length) {
-                $input.val(historia).trigger('input');
-            }
-        }, 300);
-    }
+
 </script>
 @endsection
 

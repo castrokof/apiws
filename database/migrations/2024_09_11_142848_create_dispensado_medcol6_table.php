@@ -26,7 +26,7 @@ class CreateDispensadoMedcol6Table extends Migration
             $table->string('expediente');
             $table->string('consecutivo');
             $table->string('cums_rips');
-            $table->string('codigoSOS')->nullable();
+            $table->string('codigo2')->nullable();
             $table->string('codigo');
             $table->string('tipo_medicamento');
             $table->string('nombre_comercial')->nullable();
@@ -38,6 +38,8 @@ class CreateDispensadoMedcol6Table extends Migration
             $table->string('cantidad_ordenada')->nullable();
             $table->string('numero_unidades');
             $table->string('regimen');
+            $table->string('regimenafil');
+            $table->string('nivelafil');
             $table->string('paciente');
             $table->string('primer_apellido');
             $table->string('segundo_apellido');

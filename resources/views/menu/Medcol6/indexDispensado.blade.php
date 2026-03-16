@@ -78,6 +78,7 @@
         @include('menu.Medcol6.modal.modalGenerarInforme')
 
         @include('menu.Medcol6.modal.modalEditDispensados')
+        @include('menu.Medcol6.modal.modalValidarIntegridad')
     </div>
 </section>
 
@@ -2512,5 +2513,166 @@ function ejecutarBusquedaFactura(numeroFactura) {
             "colvis": "Visibilidad"
         }
     }
+</script>
+
+{{-- ============================================================
+     VALIDACIÓN DE INTEGRIDAD DE DATOS
+     ============================================================ --}}
+<script>
+$(document).ready(function () {
+
+    // Maximizar/colapsar el modal de integridad
+    $('#modal_validar_integridad [data-card-widget="maximize"]').off('click').on('click', function (e) {
+        e.preventDefault();
+        var card = $(this).closest('.card');
+        var isMax = card.hasClass('maximized-card');
+        card.toggleClass('maximized-card', !isMax);
+        $(this).find('i').toggleClass('fa-expand', isMax).toggleClass('fa-compress', !isMax);
+    });
+
+    $('#modal_validar_integridad [data-card-widget="collapse"]').off('click').on('click', function (e) {
+        e.preventDefault();
+        var body = $(this).closest('.card').find('.card-body');
+        var isHidden = body.is(':hidden');
+        body.toggle();
+        $(this).find('i').toggleClass('fa-plus', !isHidden).toggleClass('fa-minus', isHidden);
+    });
+
+    $('#modal_validar_integridad').on('hidden.bs.modal', function () {
+        var card = $(this).find('.card');
+        card.removeClass('maximized-card');
+        card.find('.card-body').show();
+        card.find('[data-card-widget="maximize"] i').removeClass('fa-compress').addClass('fa-expand');
+        card.find('[data-card-widget="collapse"] i').removeClass('fa-plus').addClass('fa-minus');
+    });
+
+    // Ejecutar validación de integridad
+    $(document).on('click', '#btn_ejecutar_validacion', function () {
+        var fechaini = $('#vi_fechaini').val();
+        var fechafin = $('#vi_fechafin').val();
+
+        if (!fechaini || !fechafin) {
+            Swal.fire({ icon: 'warning', title: 'Fechas requeridas', text: 'Debe seleccionar fecha inicial y fecha final.' });
+            return;
+        }
+        if (fechafin < fechaini) {
+            Swal.fire({ icon: 'warning', title: 'Fechas inválidas', text: 'La fecha final no puede ser anterior a la fecha inicial.' });
+            return;
+        }
+
+        $('#vi_loading').show();
+        $('#vi_resumen').hide();
+        $('#btn_exportar_validacion').hide();
+
+        $.ajax({
+            url: "{{ route('medcol6.validar.integridad') }}",
+            method: 'POST',
+            data: {
+                fechaini: fechaini,
+                fechafin: fechafin,
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function (response) {
+                $('#vi_loading').hide();
+                $('#vi_resumen').show();
+
+                var total  = response.total_pacientes_analizados;
+                var conInc = response.total_con_inconsistencias;
+                var sinInc = total - conInc;
+
+                $('#vi_total_analizados').text(total.toLocaleString('es-ES'));
+                $('#vi_total_inconsistencias').text(conInc.toLocaleString('es-ES'));
+                $('#vi_total_correctos').text(sinInc.toLocaleString('es-ES'));
+
+                var tbody = $('#vi_tbody');
+                tbody.empty();
+
+                if (conInc === 0) {
+                    $('#vi_sin_resultados').show();
+                    $('#tabla_validacion_integridad').hide();
+                    return;
+                }
+
+                $('#vi_sin_resultados').hide();
+                $('#tabla_validacion_integridad').show();
+
+                $.each(response.inconsistencias, function (index, item) {
+                    var badgeClass = item.inconsistencias_count > 5 ? 'badge-danger' : 'badge-warning';
+                    var tiposBadges = item.tipo_inconsistencia.split(';').map(function (t) {
+                        return '<span class="badge badge-secondary badge-inconsistencia mr-1">' + t.trim() + '</span>';
+                    }).join('');
+
+                    tbody.append(
+                        '<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td><strong>' + item.historia + '</strong></td>' +
+                        '<td>' + item.paciente + '</td>' +
+                        '<td class="text-center">' + item.total_facturas + '</td>' +
+                        '<td class="text-center"><span class="badge ' + badgeClass + ' px-2 py-1">' + item.inconsistencias_count + '</span></td>' +
+                        '<td>' + tiposBadges + '</td>' +
+                        '<td><code>' + item.valores_tipodoc + '</code></td>' +
+                        '<td><code>' + item.valores_regimen + '</code></td>' +
+                        '<td><code>' + item.valores_nivelafil + '</code></td>' +
+                        '</tr>'
+                    );
+                });
+
+                if ($.fn.DataTable.isDataTable('#tabla_validacion_integridad')) {
+                    $('#tabla_validacion_integridad').DataTable().destroy();
+                }
+                $('#tabla_validacion_integridad').DataTable({
+                    language: idioma_espanol,
+                    pageLength: 25,
+                    order: [[4, 'desc']],
+                    responsive: true,
+                });
+
+                $('#btn_exportar_validacion').show();
+            },
+            error: function (xhr) {
+                $('#vi_loading').hide();
+                var msg = 'Error al procesar la solicitud.';
+                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                    msg = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    msg = xhr.responseJSON.message;
+                }
+                Swal.fire({ icon: 'error', title: 'Error', html: msg });
+            }
+        });
+    });
+
+    // Exportar resultados a CSV
+    $(document).on('click', '#btn_exportar_validacion', function () {
+        var rows = [['#', 'Historia', 'Paciente', 'Total Facturas', 'Inconsistentes', 'Tipo Inconsistencia', 'Tipo Doc.', 'Regímenes', 'Niveles']];
+        $('#vi_tbody tr').each(function (i) {
+            var cells = $(this).find('td');
+            rows.push([
+                i + 1,
+                cells.eq(1).text().trim(),
+                cells.eq(2).text().trim(),
+                cells.eq(3).text().trim(),
+                cells.eq(4).text().trim(),
+                cells.eq(5).text().trim(),
+                cells.eq(6).text().trim(),
+                cells.eq(7).text().trim(),
+                cells.eq(8).text().trim(),
+            ]);
+        });
+
+        var csvContent = rows.map(function (r) {
+            return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(',');
+        }).join('\n');
+
+        var blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        var url  = URL.createObjectURL(blob);
+        var link = document.createElement('a');
+        link.href = url;
+        link.download = 'validacion_integridad_' + $('#vi_fechaini').val() + '_' + $('#vi_fechafin').val() + '.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+    });
+
+});
 </script>
 @endsection

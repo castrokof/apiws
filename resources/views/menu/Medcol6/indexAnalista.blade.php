@@ -4135,7 +4135,7 @@ $(document).ready(function () {
             '<td>' +
                 '<small><strong>' + (item.nombre || '') + '</strong></small>' +
                 (item.agrupador ? '<br><small class="text-muted">' + item.agrupador + '</small>' : '') +
-                '<br><small class="text-muted">Factura: ' + (item.factura || '') + ' | F.Fac: ' + bpFormatFecha(item.fecha_factura) + '</small>' +
+                '<br><small class="text-muted">Factura: ' + (item.factura || '') + ' | F.Pend: ' + bpFormatFecha(item.fecha_factura) + '</small>' +
             '</td>' +
             '<td style="text-align:center;"><strong>' + (item.cantord || 0) + '</strong></td>' +
             '<td>' +
@@ -4244,9 +4244,11 @@ $(document).ready(function () {
                 $('#bp-pac-historia').text(pac.historia || '-');
                 $('#bp-pac-documento').text(pac.orden_externa || '-');
                 $('#bp-pac-nombre').text(pac.nombre || '-');
+                $('#bp-pac-fecha-factura').text(pac.fecha_factura || '-');
                 $('#bp-pac-telefono').text(pac.telefres || '-');
                 $('#bp-pac-direccion').text(pac.direcres || '-');
                 $('#bp-pac-municipio').text(pac.municipio || '-');
+                $('#bp-pac-farmacia').text(pac.centroproduccion || '-');
 
                 var tbody = $('#bp-tabla-body').empty();
                 $.each(bpItems, function (idx, item) {
@@ -4326,41 +4328,168 @@ $(document).ready(function () {
         $('#bp-contador-sel').text('0 seleccionados');
         $('#bp-check-all').prop('checked', false).prop('indeterminate', false);
         // Limpiar datos del paciente
-        $('#bp-pac-historia, #bp-pac-documento, #bp-pac-nombre').text('');
+        $('#bp-pac-historia, #bp-pac-documento, #bp-pac-nombre, #bp-pac-fecha-factura, #bp-pac-farmacia').text('');
         $('#bp-pac-telefono, #bp-pac-direccion, #bp-pac-municipio').text('');
     }
 
     // ---- guardar seleccionados ----
     function bpEjecutarGuardado() {
+        // VALIDACIÓN DE INTEGRIDAD RES. 1604
+        // Aplica a TODOS los ítems (seleccionados o no) cuyo estado sea
+        // PENDIENTE, SIN CONTACTO, ENTREGADO o DESABASTECIDO.
+        var estadosRes1604 = ['PENDIENTE', 'SIN CONTACTO', 'ENTREGADO', 'DESABASTECIDO'];
+        var erroresIntegridad = [];
+
+        $('tr.bp-fila').each(function () {
+            var $fila  = $(this);
+            var estado = $.trim($fila.find('.bp-estado-select').val());
+
+            if (estadosRes1604.indexOf(estado) === -1) return; // otros estados no aplican
+
+            var numeroFormula = $.trim($fila.find('.bp-numero-formula').val());
+            var fechaOrden    = $.trim($fila.find('.bp-fecha-ordenamiento').val());
+            var frecuencia    = $.trim($fila.find('.bp-frecuencia').val());
+            var duracion      = $.trim($fila.find('.bp-duracion').val());
+            var nombre        = $.trim($fila.find('td:nth-child(3) small strong').text()) || ('Ítem #' + (parseInt($fila.data('idx')) + 1));
+
+            var camposVacios = [];
+            if (!numeroFormula) camposVacios.push('Nro. Fórmula');
+            if (!fechaOrden)    camposVacios.push('Fecha Ordenamiento');
+            if (!frecuencia)    camposVacios.push('Frec. Administración');
+            if (!duracion)      camposVacios.push('Duración Tratamiento');
+
+            if (camposVacios.length > 0) {
+                erroresIntegridad.push('<b>' + nombre + '</b> [' + estado + ']: ' + camposVacios.join(', '));
+                $fila.find('.bp-numero-formula, .bp-fecha-ordenamiento, .bp-frecuencia, .bp-duracion').each(function () {
+                    if (!$.trim($(this).val())) {
+                        $(this).addClass('is-invalid');
+                    }
+                });
+            }
+        });
+
+        if (erroresIntegridad.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Campos Res. 1604 incompletos',
+                html: 'Los siguientes ítems deben tener completos los campos de la <b>Resolución 1604</b>:<br><br>' +
+                      erroresIntegridad.join('<br>') +
+                      '<br><br><small>Campos obligatorios para estados <b>PENDIENTE, SIN CONTACTO, ENTREGADO y DESABASTECIDO</b>:<br>' +
+                      '<b>Nro. Fórmula · Fecha Ordenamiento · Frec. Administración · Duración Tratamiento</b></small>',
+            });
+            return;
+        }
+
+        // VALIDACIÓN CRUZADA Res. 1604
+        // 1. numero_formula debe ser igual en todos los ítems con estado aplicable.
+        // 2. fecha_ordenamiento debe ser igual en todos los ítems con estado aplicable.
+        // 3. fecha_ordenamiento no puede ser mayor a fecha_factura ni a fecha_entrega (ENTREGADO).
+        var valoresFormula    = [];
+        var valoresFechaOrden = [];
+        var erroresCruzados   = [];
+
+        $('tr.bp-fila').each(function () {
+            var $fila  = $(this);
+            var estado = $.trim($fila.find('.bp-estado-select').val());
+            if (estadosRes1604.indexOf(estado) === -1) return;
+
+            var formula    = $.trim($fila.find('.bp-numero-formula').val());
+            var fechaOrden = $.trim($fila.find('.bp-fecha-ordenamiento').val());
+            var idx        = parseInt($fila.data('idx'));
+
+            if (formula)    valoresFormula.push(formula);
+            if (fechaOrden) valoresFechaOrden.push({ fecha: fechaOrden, idx: idx, estado: estado, $fila: $fila });
+        });
+
+        // Regla 1: todos deben tener el mismo numero_formula
+        var formulasUnicas = valoresFormula.filter(function (v, i, a) { return a.indexOf(v) === i; });
+        if (formulasUnicas.length > 1) {
+            erroresCruzados.push(
+                'El campo <b>Nro. Fórmula</b> debe ser idéntico para todos los ítems.<br>' +
+                'Valores distintos encontrados: <i>' + formulasUnicas.join(' / ') + '</i>'
+            );
+            $('tr.bp-fila').each(function () {
+                var $fila  = $(this);
+                var estado = $.trim($fila.find('.bp-estado-select').val());
+                if (estadosRes1604.indexOf(estado) === -1) return;
+                if ($.trim($fila.find('.bp-numero-formula').val()) !== formulasUnicas[0]) {
+                    $fila.find('.bp-numero-formula').addClass('is-invalid');
+                }
+            });
+        }
+
+        // Regla 2: todos deben tener la misma fecha_ordenamiento
+        var fechasOrdenUnicas = valoresFechaOrden
+            .map(function (v) { return v.fecha; })
+            .filter(function (v, i, a) { return a.indexOf(v) === i; });
+        if (fechasOrdenUnicas.length > 1) {
+            erroresCruzados.push(
+                'El campo <b>Fecha Ordenamiento</b> debe ser idéntica para todos los ítems.<br>' +
+                'Valores distintos encontrados: <i>' + fechasOrdenUnicas.join(' / ') + '</i>'
+            );
+            $('tr.bp-fila').each(function () {
+                var $fila  = $(this);
+                var estado = $.trim($fila.find('.bp-estado-select').val());
+                if (estadosRes1604.indexOf(estado) === -1) return;
+                if ($.trim($fila.find('.bp-fecha-ordenamiento').val()) !== fechasOrdenUnicas[0]) {
+                    $fila.find('.bp-fecha-ordenamiento').addClass('is-invalid');
+                }
+            });
+        }
+
+        // Regla 3: fecha_ordenamiento no puede ser mayor a fecha_factura ni fecha_entrega
+        valoresFechaOrden.forEach(function (v) {
+            var item       = bpItems[v.idx];
+            var fechaOrden = new Date(v.fecha + 'T00:00:00');
+            var nombre     = (item && item.nombre) ? item.nombre : ('Ítem #' + (v.idx + 1));
+
+            // vs fecha_factura del ítem
+            if (item && item.fecha_factura) {
+                var strFactura   = bpFormatFecha(item.fecha_factura);
+                var fechaFactura = new Date(strFactura + 'T00:00:00');
+                if (fechaOrden > fechaFactura) {
+                    erroresCruzados.push(
+                        '<b>' + nombre + '</b>: Fecha Ordenamiento <i>(' + v.fecha + ')</i> ' +
+                        'no puede ser mayor a Fecha Pendiente <i>(' + strFactura + ')</i>'
+                    );
+                    v.$fila.find('.bp-fecha-ordenamiento').addClass('is-invalid');
+                }
+            }
+
+            // vs fecha_entrega cuando el estado es ENTREGADO (campo bp-fecha-correspondiente)
+            if (v.estado === 'ENTREGADO') {
+                var strEntrega = $.trim(v.$fila.find('.bp-fecha-correspondiente').val());
+                if (strEntrega) {
+                    var fechaEntrega = new Date(strEntrega + 'T00:00:00');
+                    if (fechaOrden > fechaEntrega) {
+                        erroresCruzados.push(
+                            '<b>' + nombre + '</b>: Fecha Ordenamiento <i>(' + v.fecha + ')</i> ' +
+                            'no puede ser mayor a Fecha Entrega <i>(' + strEntrega + ')</i>'
+                        );
+                        v.$fila.find('.bp-fecha-ordenamiento').addClass('is-invalid');
+                    }
+                }
+            }
+        });
+
+        if (erroresCruzados.length > 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Validación cruzada Res. 1604',
+                html: erroresCruzados.join('<br><br>'),
+            });
+            return;
+        }
+
+        // Recopilar ítems seleccionados → actualización completa
         var seleccionados = [];
-        var erroresValidacion = [];
+        var idsSeleccionadosIdx = [];
 
         $('.bp-check-item:checked').each(function () {
             var idx   = $(this).data('idx');
             var $fila = $('tr.bp-fila[data-idx="' + idx + '"]');
 
-            var numeroFormula    = $.trim($fila.find('.bp-numero-formula').val());
-            var fechaOrden       = $.trim($fila.find('.bp-fecha-ordenamiento').val());
-            var frecuencia       = $.trim($fila.find('.bp-frecuencia').val());
-            var duracion         = $.trim($fila.find('.bp-duracion').val());
-            var nombre           = $.trim($fila.find('td:nth-child(3) small strong').text()) || ('Ítem ' + (idx + 1));
-
-            var camposVacios = [];
-            if (!numeroFormula)  camposVacios.push('Nro. Fórmula');
-            if (!fechaOrden)     camposVacios.push('Fecha Ordenamiento');
-            if (!frecuencia)     camposVacios.push('Frecuencia Administración');
-            if (!duracion)       camposVacios.push('Duración Tratamiento');
-
-            if (camposVacios.length > 0) {
-                erroresValidacion.push('<b>' + nombre + ':</b> ' + camposVacios.join(', '));
-                $fila.find('.bp-numero-formula, .bp-fecha-ordenamiento, .bp-frecuencia, .bp-duracion').each(function () {
-                    var $input = $(this);
-                    if (!$.trim($input.val())) {
-                        $input.addClass('is-invalid');
-                    }
-                });
-                return; // skip this item
-            }
+            idsSeleccionadosIdx.push(parseInt(idx));
 
             // Limpiar marcas de error previas
             $fila.find('.bp-numero-formula, .bp-fecha-ordenamiento, .bp-frecuencia, .bp-duracion').removeClass('is-invalid');
@@ -4373,32 +4502,53 @@ $(document).ready(function () {
                 factura_entrega:           $fila.find('.bp-factura-entrega').val(),
                 doc_entrega:               $fila.find('.bp-doc-entrega').val(),
                 observaciones:             $fila.find('.bp-observaciones').val(),
-                numero_formula:            numeroFormula,
-                fecha_ordenamiento:        fechaOrden,
-                frecuencia_administracion: frecuencia,
-                duracion_tratamiento:      duracion
+                numero_formula:            $.trim($fila.find('.bp-numero-formula').val()),
+                fecha_ordenamiento:        $.trim($fila.find('.bp-fecha-ordenamiento').val()),
+                frecuencia_administracion: $.trim($fila.find('.bp-frecuencia').val()),
+                duracion_tratamiento:      $.trim($fila.find('.bp-duracion').val()),
+                solo_res1604:              false
             });
         });
 
-        if (erroresValidacion.length > 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Campos requeridos incompletos',
-                html: 'Los siguientes ítems tienen campos obligatorios vacíos:<br><br>' +
-                      erroresValidacion.join('<br>') +
-                      '<br><br><small>Por favor complete: <b>Nro. Fórmula, Fecha Ordenamiento, Frecuencia Administración y Duración Tratamiento</b>.</small>',
-            });
-            return;
-        }
+        // Ítems NO seleccionados con estado aplicable → solo guardar campos Res. 1604
+        $('tr.bp-fila').each(function () {
+            var $fila = $(this);
+            var idx   = parseInt($fila.data('idx'));
 
-        if (seleccionados.length === 0) {
+            if (idsSeleccionadosIdx.indexOf(idx) !== -1) return; // ya incluido arriba
+
+            var estado = $.trim($fila.find('.bp-estado-select').val());
+            if (estadosRes1604.indexOf(estado) === -1) return; // otros estados no aplican
+
+            $fila.find('.bp-numero-formula, .bp-fecha-ordenamiento, .bp-frecuencia, .bp-duracion').removeClass('is-invalid');
+
+            seleccionados.push({
+                id:                        $fila.data('id'),
+                estado:                    estado,
+                numero_formula:            $.trim($fila.find('.bp-numero-formula').val()),
+                fecha_ordenamiento:        $.trim($fila.find('.bp-fecha-ordenamiento').val()),
+                frecuencia_administracion: $.trim($fila.find('.bp-frecuencia').val()),
+                duracion_tratamiento:      $.trim($fila.find('.bp-duracion').val()),
+                solo_res1604:              true
+            });
+        });
+
+        var cntCompletos  = seleccionados.filter(function(i) { return !i.solo_res1604; }).length;
+        var cntSoloRes    = seleccionados.filter(function(i) { return  i.solo_res1604; }).length;
+
+        if (cntCompletos === 0) {
             Swal.fire('Atención', 'Seleccione al menos un item para guardar.', 'warning');
             return;
         }
 
+        var textoConfirmacion = 'Se actualizarán ' + cntCompletos + ' ítem(s) seleccionado(s) completamente.';
+        if (cntSoloRes > 0) {
+            textoConfirmacion += ' Además, se guardarán los campos Res. 1604 de ' + cntSoloRes + ' ítem(s) adicional(es).';
+        }
+
         Swal.fire({
             title: '¿Guardar cambios?',
-            text: 'Se actualizarán ' + seleccionados.length + ' item(s) seleccionados.',
+            text: textoConfirmacion,
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Sí, guardar',

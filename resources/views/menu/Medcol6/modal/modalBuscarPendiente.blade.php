@@ -78,17 +78,27 @@
                         </div>
                         <div class="card-body py-2">
                             <div class="row">
-                                <div class="col-md-3 col-sm-6">
-                                    <small class="text-muted d-block">Historia</small>
-                                    <strong id="bp-pac-historia"></strong>
+                                <div class="col-md-2 col-sm-6 d-flex flex-column">
+                                    <small class="text-muted">Historia</small>
+                                    <strong id="bp-pac-historia" class="text-truncate" title="Número de historia clínica"></strong>
                                 </div>
-                                <div class="col-md-3 col-sm-6">
-                                    <small class="text-muted d-block">Documento</small>
-                                    <strong id="bp-pac-documento"></strong>
+                                <div class="col-md-2 col-sm-6 d-flex flex-column">
+                                    <small class="text-muted">Documento</small>
+                                    <strong id="bp-pac-documento" class="text-truncate" title="Número de identificación"></strong>
                                 </div>
-                                <div class="col-md-6 col-sm-12">
-                                    <small class="text-muted d-block">Nombre Completo</small>
-                                    <strong id="bp-pac-nombre"></strong>
+                                <div class="col-md-3 col-sm-12 d-flex flex-column">
+                                    <small class="text-muted">Nombre Completo</small>
+                                    <strong id="bp-pac-nombre" class="text-truncate" title="Nombre del paciente"></strong>
+                                </div>
+                                <div class="col-md-2 col-sm-6 d-flex flex-column">
+                                    <small class="text-muted">
+                                        <i class="fas fa-file-invoice mr-1 text-primary"></i>Fecha Pendiente
+                                    </small>
+                                    <strong id="bp-pac-fecha-factura" class="text-truncate" title="Fecha de la factura pendiente"></strong>
+                                </div>
+                                <div class="col-md-3 col-sm-6 d-flex flex-column">
+                                    <small class="text-muted">Farmacia</small>
+                                    <strong id="bp-pac-farmacia" class="text-truncate" title="Farmacia asignada"></strong>
                                 </div>
                             </div>
                         </div>
