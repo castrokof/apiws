@@ -160,7 +160,7 @@
                                     <th style="width:140px;">Estado</th>
                                     <th style="width:130px;">Fecha</th>
                                     <th style="width:120px;">Factura Entrega</th>
-                                    <th style="width:160px;">Observaciones</th>
+                                    <th style="width:160px;">Observación</th>
                                     <th style="width:120px;">Nro. Fórmula <small class="d-block text-warning" style="font-weight:normal;">(Res. 1604)</small></th>
                                     <th style="width:120px;">Fecha Ordenamiento <small class="d-block text-warning" style="font-weight:normal;">(Res. 1604)</small></th>
                                     <th style="width:140px;">Frec. Administ. <small class="d-block text-warning" style="font-weight:normal;">(Res. 1604)</small></th>

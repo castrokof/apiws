@@ -934,7 +934,7 @@
                             </h3>
                         </div>
                         <div class="chart-body">
-                            <canvas id="chartTopMedicamentos"></canvas>
+                            <canvas id="chartTopMedicamentosCompras"></canvas>
                         </div>
                     </div>
                 </div>
@@ -1213,6 +1213,9 @@
                     data: {...filters, limit: 5},
                     success: function(data) {
                         updateChartTopMedicamentos(data);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error al cargar Top 5 Medicamentos:', error);
                     }
                 });
             }
@@ -1232,8 +1235,22 @@
             }
 
             // Cargar resumen de pendientes
+            // Formatea un valor como moneda COP (sin decimales, separador de miles con punto)
+            function formatCOP(value) {
+                return parseFloat(value || 0).toLocaleString('es-CO', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                });
+            }
+
+            // Formatea un entero con separador de miles
+            function formatNum(value) {
+                return parseInt(value || 0).toLocaleString('es-CO');
+            }
+
             function loadResumenPendientes(filters) {
                 showLoading('pendientes-stats');
+                showLoading('pendientes-detalle');
 
                 $.ajax({
                     url: "{{ route('dashboard.resumen-pendientes') }}",
@@ -1245,19 +1262,22 @@
                     },
                     error: function() {
                         showError('pendientes-stats', 'Error al cargar las estadísticas de pendientes');
+                        showError('pendientes-detalle', 'Error al cargar el detalle por estado');
                     }
                 });
             }
 
             function renderPendientesStats(data) {
                 const container = $('#pendientes-stats');
+                const pendiente = parseFloat(data.valor_total_pendiente || 0);
+                const entregado = parseFloat(data.valor_total_entregado || 0);
 
                 container.html(`
                     <div class="stat-card warning">
                         <div class="stat-icon">
                             <i class="fas fa-clock"></i>
                         </div>
-                        <h2 class="stat-value">$${data.valor_total_pendiente.toLocaleString()}</h2>
+                        <h2 class="stat-value">$${formatCOP(pendiente)}</h2>
                         <p class="stat-label">Valor Pendiente por Facturar</p>
                     </div>
 
@@ -1265,7 +1285,7 @@
                         <div class="stat-icon">
                             <i class="fas fa-check-circle"></i>
                         </div>
-                        <h2 class="stat-value">$${data.valor_total_entregado.toLocaleString()}</h2>
+                        <h2 class="stat-value">$${formatCOP(entregado)}</h2>
                         <p class="stat-label">Valor Total Entregado</p>
                     </div>
                 `);
@@ -1275,28 +1295,35 @@
                 const container = $('#pendientes-detalle');
                 container.empty();
 
+                if (!estadisticas || estadisticas.length === 0) {
+                    container.html('<div class="alert alert-info"><i class="fas fa-info-circle mr-2"></i>No hay datos de pendientes para el período seleccionado.</div>');
+                    return;
+                }
+
                 const estadosConfig = {
-                    'PENDIENTE': { icon: 'fas fa-clock', class: 'warning', label: 'Pendientes' },
-                    'ENTREGADO': { icon: 'fas fa-check-circle', class: 'success', label: 'Entregados' },
-                    'ANULADO': { icon: 'fas fa-times-circle', class: 'danger', label: 'Anulados' },
-                    'DESABASTECIDO': { icon: 'fas fa-exclamation-triangle', class: 'info', label: 'Desabastecidos' },
-                    'SIN CONTACTO': { icon: 'fas fa-phone-slash', class: 'secondary', label: 'Sin Contacto' },
-                    'TRAMITADO': { icon: 'fas fa-hourglass-half', class: 'primary', label: 'Tramitados' },
-                    'VENCIDO': { icon: 'fas fa-calendar-times', class: 'danger', label: 'Vencidos' }
+                    'PENDIENTE':    { icon: 'fas fa-clock',              class: 'warning',   label: 'Pendientes' },
+                    'ENTREGADO':    { icon: 'fas fa-check-circle',        class: 'success',   label: 'Entregados' },
+                    'ANULADO':      { icon: 'fas fa-times-circle',        class: 'danger',    label: 'Anulados' },
+                    'DESABASTECIDO':{ icon: 'fas fa-exclamation-triangle',class: 'info',      label: 'Desabastecidos' },
+                    'SIN CONTACTO': { icon: 'fas fa-phone-slash',         class: 'secondary', label: 'Sin Contacto' },
+                    'TRAMITADO':    { icon: 'fas fa-hourglass-half',      class: 'primary',   label: 'Tramitados' },
+                    'VENCIDO':      { icon: 'fas fa-calendar-times',      class: 'danger',    label: 'Vencidos' },
                 };
 
                 estadisticas.forEach((stat, index) => {
-                    const config = estadosConfig[stat.estado] || { icon: 'fas fa-circle', class: 'secondary', label: stat.estado };
+                    const config   = estadosConfig[stat.estado] || { icon: 'fas fa-circle', class: 'secondary', label: stat.estado };
+                    const cantidad = formatNum(stat.total_pendientes);
+                    const valor    = formatCOP(stat.valor_total);
 
                     const card = $(`
                         <div class="stat-card ${config.class} animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.1}s;">
                             <div class="stat-icon">
                                 <i class="${config.icon}"></i>
                             </div>
-                            <h2 class="stat-value">${stat.total_pendientes.toLocaleString()}</h2>
+                            <h2 class="stat-value">${cantidad}</h2>
                             <p class="stat-label">${config.label}</p>
                             <div class="mt-2">
-                                <small class="text-muted">Valor Total: <strong>$${stat.valor_total.toLocaleString()}</strong></small>
+                                <small class="text-muted">Valor Total: <strong>$${valor}</strong></small>
                             </div>
                         </div>
                     `);
@@ -1628,11 +1655,17 @@
                     charts.topMedicamentos.destroy();
                 }
 
-                const labels = data.slice(0, 5).map(item => {
-                    const nombre = item.nombre_generico;
+                if (!data || data.length === 0) {
+                    console.warn('Top 5 Medicamentos: sin datos para mostrar');
+                    return;
+                }
+
+                const top5 = data.slice(0, 5);
+                const labels = top5.map(item => {
+                    const nombre = item.nombre_generico || 'Sin nombre';
                     return nombre.length > 25 ? nombre.substring(0, 25) + '...' : nombre;
                 });
-                const valores = data.slice(0, 5).map(item => item.total_medicamento);
+                const valores = top5.map(item => parseFloat(item.total_medicamento) || 0);
 
                 // Colores diferentes para cada barra (misma paleta que Valor por Contrato)
                 const colors = [
@@ -2441,7 +2474,6 @@
                     charts.valoresPendientes.destroy();
                 }
 
-                // Validar que hay datos
                 if (!estadisticas || estadisticas.length === 0) {
                     $(ctx).closest('.chart-container').html(`
                         <div class="alert alert-info text-center">
@@ -2453,7 +2485,7 @@
                 }
 
                 const labels = estadisticas.map(stat => stat.estado);
-                const datos = estadisticas.map(stat => stat.valor_total);
+                const datos  = estadisticas.map(stat => parseFloat(stat.valor_total) || 0);
 
                 charts.valoresPendientes = new Chart(ctx, {
                     type: 'bar',
@@ -2472,14 +2504,27 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { display: false }
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Valor: $' + context.parsed.y.toLocaleString('es-CO', {
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 0
+                                        });
+                                    }
+                                }
+                            }
                         },
                         scales: {
                             y: {
                                 beginAtZero: true,
                                 ticks: {
                                     callback: function(value) {
-                                        return '$' + value.toLocaleString();
+                                        return '$' + value.toLocaleString('es-CO', {
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 0
+                                        });
                                     }
                                 }
                             }
@@ -2562,11 +2607,34 @@
                         plugins: {
                             legend: {
                                 position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' +
+                                            parseInt(context.parsed.y || 0).toLocaleString('es-CO') + ' pendientes';
+                                    }
+                                }
                             }
                         },
                         scales: {
                             y: {
-                                beginAtZero: true
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Cantidad de Pendientes'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return parseInt(value).toLocaleString('es-CO');
+                                    }
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Período'
+                                }
                             }
                         }
                     }
@@ -2621,14 +2689,35 @@
                         maintainAspectRatio: false,
                         indexAxis: 'y',
                         plugins: {
-                            legend: { display: false }
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const med = medicamentos[context.dataIndex];
+                                        return [
+                                            'Valor: $' + context.parsed.x.toLocaleString('es-CO', {
+                                                minimumFractionDigits: 0,
+                                                maximumFractionDigits: 0
+                                            }),
+                                            'Cantidad: ' + parseFloat(med.total_cantidad || 0).toLocaleString('es-CO', {
+                                                minimumFractionDigits: 0,
+                                                maximumFractionDigits: 0
+                                            }) + ' uds',
+                                            'Registros: ' + parseInt(med.total_pendientes || 0).toLocaleString('es-CO')
+                                        ];
+                                    }
+                                }
+                            }
                         },
                         scales: {
                             x: {
                                 beginAtZero: true,
                                 ticks: {
                                     callback: function(value) {
-                                        return '$' + value.toLocaleString();
+                                        return '$' + value.toLocaleString('es-CO', {
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 0
+                                        });
                                     }
                                 }
                             }
@@ -2677,7 +2766,7 @@
                             type: 'num',
                             render: function(data, type) {
                                 if (type === 'display' || type === 'filter') {
-                                    return parseFloat(data).toLocaleString('es-ES', {minimumFractionDigits: 0, maximumFractionDigits: 2});
+                                    return parseFloat(data || 0).toLocaleString('es-CO', {minimumFractionDigits: 0, maximumFractionDigits: 2});
                                 }
                                 return parseFloat(data) || 0;
                             }
@@ -2685,7 +2774,13 @@
                         {
                             data: 'total_pendientes',
                             name: 'total_pendientes',
-                            type: 'num'
+                            type: 'num',
+                            render: function(data, type) {
+                                if (type === 'display' || type === 'filter') {
+                                    return parseInt(data || 0).toLocaleString('es-CO');
+                                }
+                                return parseInt(data) || 0;
+                            }
                         },
                         {
                             data: 'valor_total',
@@ -2693,7 +2788,7 @@
                             type: 'num',
                             render: function(data, type) {
                                 if (type === 'display' || type === 'filter') {
-                                    return '$' + parseFloat(data).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                    return '$' + parseFloat(data || 0).toLocaleString('es-CO', {minimumFractionDigits: 0, maximumFractionDigits: 0});
                                 }
                                 return parseFloat(data) || 0;
                             }
@@ -2757,7 +2852,7 @@
                         console.log('Datos de órdenes de compra recibidos:', data);
                         renderOrdenesCompraStats(data);
                         updateChartTopProveedores(data.top_proveedores);
-                        updateChartTopMedicamentos(data.top_medicamentos);
+                        updateChartTopMedicamentosCompras(data.top_medicamentos);
                         updateChartOrdenesPorMes(data.ordenes_por_mes);
                     },
                     error: function(xhr, status, error) {
@@ -2876,8 +2971,8 @@
             }
 
             // Gráfica de Top 5 Medicamentos Más Comprados
-            function updateChartTopMedicamentos(data) {
-                const ctx = document.getElementById('chartTopMedicamentos');
+            function updateChartTopMedicamentosCompras(data) {
+                const ctx = document.getElementById('chartTopMedicamentosCompras');
                 if (!ctx) return;
 
                 // Destruir gráfico anterior si existe

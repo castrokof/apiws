@@ -57,6 +57,7 @@
                                         <th>Teléfono</th>
                                         <th>Régimen</th>
                                         <th>Nivel</th>
+                                        <th>Fecha Nacimiento</th>
                                         <th>Edad</th>
                                         <th>Sexo</th>
                                         <th>PQRS</th>
@@ -349,7 +350,36 @@
 <script>
 $(document).ready(function () {
 
-    // ── Sincronizar desde API ──────────────────────────────────────────────
+    // ── Sincronizar desde API (con polling asíncrono) ─────────────────────
+    var syncPollTimer = null;
+
+    function mostrarResultadoSync(r) {
+        var fn = r.icon === 'success' ? toastr.success :
+                 r.icon === 'warning'  ? toastr.warning  : toastr.error;
+        fn(r.respuesta, r.titulo);
+        if (r.icon !== 'error') { tabla.ajax.reload(); }
+        $('#btnSyncApi').prop('disabled', false)
+                        .html('<i class="fas fa-sync-alt"></i> Sincronizar API');
+    }
+
+    function iniciarPolling() {
+        if (syncPollTimer) clearInterval(syncPollTimer);
+        syncPollTimer = setInterval(function () {
+            $.ajax({
+                url: '{{ route("pacientes.sync-status") }}',
+                type: 'GET',
+                success: function (data) {
+                    if (data.status === 'done') {
+                        clearInterval(syncPollTimer);
+                        syncPollTimer = null;
+                        mostrarResultadoSync(data);
+                    }
+                    // Si sigue 'processing', continuar polling
+                }
+            });
+        }, 4000); // revisar cada 4 segundos
+    }
+
     $('#btnSyncApi').on('click', function () {
         var btn = $(this);
         btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Sincronizando...');
@@ -360,16 +390,17 @@ $(document).ready(function () {
             success: function (resp) {
                 if (resp && resp.length > 0) {
                     var r = resp[0];
-                    var fn = r.icon === 'success' ? toastr.success :
-                             r.icon === 'warning'  ? toastr.warning  : toastr.error;
-                    fn(r.respuesta, r.titulo);
-                    tabla.ajax.reload();
+                    if (r.polling) {
+                        // Job despachado — esperar resultado vía polling
+                        toastr.info(r.respuesta, r.titulo);
+                        iniciarPolling();
+                    } else {
+                        mostrarResultadoSync(r);
+                    }
                 }
             },
             error: function () {
                 toastr.error('No se pudo conectar con el servidor de sincronización.');
-            },
-            complete: function () {
                 btn.prop('disabled', false).html('<i class="fas fa-sync-alt"></i> Sincronizar API');
             }
         });
@@ -395,6 +426,7 @@ $(document).ready(function () {
             { data: 'telefono',       name: 'telefono' },
             { data: 'regimen',        name: 'regimen' },
             { data: 'nivel',          name: 'nivel' },
+            { data: 'fechanac',       name: 'fechanac' },
             { data: 'edad',           name: 'edad' },
             { data: 'sexo',           name: 'sexo' },
             { data: 'pqrs_badge',     name: 'pqrs',       orderable: false },

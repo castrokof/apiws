@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Paciente;
-use Illuminate\Support\Facades\Http;
+use App\Jobs\SyncPacientesJob;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class PacienteController extends Controller
 {
@@ -24,7 +26,7 @@ class PacienteController extends Controller
 
             $query = Paciente::select([
                 'id', 'tipdocum', 'historia', 'paciente', 'direccion',
-                'telefono', 'regimen', 'nivel', 'edad', 'sexo',
+                'telefono', 'regimen', 'nivel', 'edad', 'fechanac', 'sexo',
                 'pqrs', 'estado', 'programa', 'alto_costo',
             ]);
 
@@ -99,13 +101,13 @@ class PacienteController extends Controller
             // Cabeceras de columna
             fputcsv($handle, [
                 'Tip. Doc.', 'Historia', 'Paciente', 'Dirección',
-                'Teléfono', 'Régimen', 'Nivel', 'Edad', 'Sexo',
+                'Teléfono', 'Régimen', 'Nivel', 'Edad', 'Fechanac', 'Sexo',
                 'PQRS', 'Estado', 'Programa', 'Alto Costo',
             ], ';');
 
             $query = Paciente::select([
                 'tipdocum', 'historia', 'paciente', 'direccion',
-                'telefono', 'regimen', 'nivel', 'edad', 'sexo',
+                'telefono', 'regimen', 'nivel', 'edad', 'fechanac', 'sexo',
                 'pqrs', 'estado', 'programa', 'alto_costo',
             ]);
 
@@ -131,6 +133,7 @@ class PacienteController extends Controller
                         $row->regimen,
                         $row->nivel,
                         $row->edad,
+                        $row->fechanac,
                         $row->sexo,
                         $row->pqrs,
                         $row->estado,
@@ -201,230 +204,48 @@ class PacienteController extends Controller
     }
 
     /**
-     * Sincroniza la tabla pacientes consumiendo el endpoint api/pacientes del servidor.
-     * Solo inserta pacientes nuevos (no sobreescribe valores gestionados manualmente:
-     * pqrs, estado, programa, alto_costo).
+     * Despacha el job de sincronización y retorna inmediatamente (202 Accepted).
+     * El job corre en background y guarda el resultado en Cache.
+     * El frontend hace polling a /pacientes/sync-status para obtener el resultado.
      */
     public function syncPacientesApi(Request $request)
     {
-        $email    = 'castrokofdev@gmail.com';
-        $password = 'colMed2023**';
-        $usuario  = Auth::user()->email;
+        $cacheKey = 'sync_pacientes_' . Auth::id();
 
-        set_time_limit(0);
-        ini_set('memory_limit', '1G');
-
-        try {
-            // ── Servidor principal ────────────────────────────────────────
-            $resultado = $this->sincronizarDesde(
-                'http://hed08pf9dxt.sn.mynetname.net:8004',
-                $email,
-                $password
-            );
-
-            Log::info(
-                "✅ Sync pacientes (principal) — {$resultado['insertados']} nuevos, " .
-                "{$resultado['omitidos']} existentes — Usuario: {$usuario}"
-            );
-
+        // Si ya hay un proceso corriendo, no lanzar otro
+        $estadoActual = Cache::get($cacheKey);
+        if ($estadoActual && ($estadoActual['status'] ?? '') === 'processing') {
             return response()->json([[
-                'respuesta' => "{$resultado['insertados']} pacientes sincronizados | {$resultado['omitidos']} ya existían",
-                'titulo'    => 'Sincronización Exitosa',
-                'icon'      => 'success',
+                'respuesta' => 'Ya hay una sincronización en progreso. Por favor espere.',
+                'titulo'    => 'En proceso...',
+                'icon'      => 'info',
                 'position'  => 'bottom-left',
+                'polling'   => true,
             ]]);
-
-        } catch (\Exception $e) {
-
-            Log::warning("⚠️ Servidor principal falló ({$e->getMessage()}). Intentando servidor local…");
-
-            try {
-                // ── Fallback servidor local ───────────────────────────────
-                $resultado = $this->sincronizarDesde(
-                    'http://192.168.66.95:8004',
-                    $email,
-                    $password
-                );
-
-                Log::info(
-                    "⚠️ Sync pacientes (local) — {$resultado['insertados']} nuevos, " .
-                    "{$resultado['omitidos']} existentes — Usuario: {$usuario}"
-                );
-
-                return response()->json([[
-                    'respuesta' => "{$resultado['insertados']} pacientes sincronizados | {$resultado['omitidos']} ya existían",
-                    'titulo'    => 'Usando API Local',
-                    'icon'      => 'warning',
-                    'position'  => 'bottom-left',
-                ]]);
-
-            } catch (\Exception $localException) {
-
-                Log::error(
-                    "❌ Error ambos servidores. Principal: {$e->getMessage()} | " .
-                    "Local: {$localException->getMessage()} — Usuario: {$usuario}"
-                );
-
-                return response()->json([[
-                    'respuesta' => 'Sin conexión a los servidores API. Principal: ' . $e->getMessage()
-                                 . ' | Local: ' . $localException->getMessage(),
-                    'titulo'    => 'Error de Sincronización',
-                    'icon'      => 'error',
-                    'position'  => 'bottom-left',
-                ]]);
-            }
         }
+
+        Cache::put($cacheKey, ['status' => 'processing'], 600);
+
+        SyncPacientesJob::dispatch($cacheKey, Auth::user()->email);
+
+        return response()->json([[
+            'respuesta' => 'Sincronización iniciada. Espere el resultado...',
+            'titulo'    => 'Procesando',
+            'icon'      => 'info',
+            'position'  => 'bottom-left',
+            'polling'   => true,
+        ]], 202);
     }
 
     /**
-     * Conecta a un servidor API, obtiene el token, descarga los pacientes,
-     * los procesa y cierra la sesión. Lanza excepciones con mensajes descriptivos
-     * si la respuesta no es válida o si faltan claves esperadas.
+     * Endpoint de polling: retorna el estado del job de sincronización.
+     * status: 'processing' | 'done' | 'idle'
      */
-    private function sincronizarDesde(string $baseUrl, string $email, string $password): array
+    public function syncStatus(Request $request)
     {
-        // ── Autenticación ────────────────────────────────────────────────
-        $authResponse = Http::timeout(30)->post("{$baseUrl}/api/acceso", [
-            'email'    => $email,
-            'password' => $password,
-        ]);
+        $cacheKey = 'sync_pacientes_' . Auth::id();
+        $result   = Cache::get($cacheKey, ['status' => 'idle']);
 
-        $authJson = $authResponse->json();
-
-        if (!$authJson || !isset($authJson['token'])) {
-            throw new \Exception(
-                "No se recibió token desde {$baseUrl}. " .
-                "HTTP {$authResponse->status()}. Respuesta: " .
-                substr($authResponse->body(), 0, 200)
-            );
-        }
-
-        $token = $authJson['token'];
-
-        // ── Obtener pacientes ─────────────────────────────────────────────
-        $pacientesResponse = Http::timeout(300)->withToken($token)
-            ->get("{$baseUrl}/api/pacientes");
-
-        $pacientesJson = $pacientesResponse->json();
-
-        if (!$pacientesJson || !isset($pacientesJson['data'])) {
-            throw new \Exception(
-                "Respuesta de pacientes inválida desde {$baseUrl}. " .
-                "HTTP {$pacientesResponse->status()}. Respuesta: " .
-                substr($pacientesResponse->body(), 0, 200)
-            );
-        }
-
-        $pacientesApi = $pacientesJson['data'];
-
-        // Liberar la respuesta completa para no mantener dos copias en memoria
-        unset($pacientesJson, $pacientesResponse);
-
-        if (!is_array($pacientesApi)) {
-            throw new \Exception(
-                "El campo 'data' de la API no es un array (tipo: " . gettype($pacientesApi) . ")."
-            );
-        }
-
-        $resultado = $this->procesarPacientes($pacientesApi);
-
-        unset($pacientesApi);
-
-        // ── Cerrar sesión en el servidor ──────────────────────────────────
-        Http::timeout(10)->withToken($token)
-            ->get("{$baseUrl}/api/closeallacceso");
-
-        return $resultado;
-    }
-
-    /**
-     * Procesa el array de pacientes recibido del API:
-     * - Solo inserta registros cuyo 'historia' (NUMDOCUM) no exista aún en la BD.
-     * - Los campos pqrs, estado, programa y alto_costo se inicializan con valores
-     *   por defecto para que el usuario los gestione manualmente.
-     *
-     * Mapeo de campos API → columnas tabla pacientes:
-     *   Tipodocum  → tipdocum
-     *   NUMDOCUM   → historia
-     *   NOMBRE1 + NOMBRE2 + APELLIDO1 + APELLIDO2 → paciente
-     *   DIRECRES   → direccion
-     *   TELEFRES / TELEFTRA / AVISAR_TEL → telefono (primer valor no vacío)
-     *   REGIMEN_1  → regimen
-     *   nivel      → nivel
-     *   EDAD       → edad
-     *   SEXO       → sexo
-     */
-    private function procesarPacientes(array $pacientesApi): array
-    {
-        $insertados = 0;
-        $omitidos   = 0;
-        $nuevos     = [];
-        $now        = now()->toDateTimeString();
-
-        // Un solo query para traer todas las historias existentes
-        $existentes = Paciente::pluck('historia')
-            ->map(fn($h) => trim((string) $h))
-            ->flip()
-            ->toArray();
-
-        foreach ($pacientesApi as $p) {
-            $historia = trim($p['NUMDOCUM'] ?? '');
-
-            if ($historia === '' || isset($existentes[$historia])) {
-                $omitidos++;
-                continue;
-            }
-
-            // Nombre completo: solo partes no vacías (sin crear objetos Collection)
-            $nombreCompleto = implode(' ', array_filter([
-                trim($p['NOMBRE1']   ?? ''),
-                trim($p['NOMBRE2']   ?? ''),
-                trim($p['APELLIDO1'] ?? ''),
-                trim($p['APELLIDO2'] ?? ''),
-            ]));
-
-            // Primer teléfono disponible
-            $telefono = trim($p['TELEFRES']   ?? '')
-                     ?: trim($p['TELEFTRA']   ?? '')
-                     ?: trim($p['AVISAR_TEL'] ?? '');
-
-            $nuevos[] = [
-                'tipdocum'   => trim($p['Tipodocum'] ?? ''),
-                'historia'   => $historia,
-                'paciente'   => $nombreCompleto,
-                'direccion'  => trim($p['DIRECRES']  ?? ''),
-                'telefono'   => $telefono,
-                'regimen'    => trim($p['REGIMEN_1'] ?? ''),
-                'nivel'      => trim($p['nivel']     ?? ''),
-                'edad'       => trim($p['EDAD']      ?? ''),
-                'sexo'       => trim($p['SEXO']      ?? ''),
-                // Valores por defecto — el usuario los gestiona manualmente
-                'pqrs'       => 'NO',
-                'estado'     => 'VIVO',
-                'programa'   => null,
-                'alto_costo' => 'NO',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-
-            // Registrar en el set local para evitar duplicados dentro del mismo lote
-            $existentes[$historia] = true;
-            $insertados++;
-
-            // Insertar y vaciar cada 500 registros para no acumular todo en memoria
-            if (count($nuevos) >= 500) {
-                Paciente::insertOrIgnore($nuevos);
-                $nuevos = [];
-            }
-        }
-
-        // Insertar el remanente
-        if (!empty($nuevos)) {
-            Paciente::insertOrIgnore($nuevos);
-        }
-
-        unset($existentes, $nuevos, $pacientesApi);
-
-        return ['insertados' => $insertados, 'omitidos' => $omitidos];
+        return response()->json($result);
     }
 }

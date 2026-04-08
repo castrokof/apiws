@@ -9,10 +9,10 @@ class AddResolucion1604FieldsToPendienteApiMedcol6 extends Migration
     public function up()
     {
         Schema::table('pendiente_api_medcol6', function (Blueprint $table) {
-            $table->string('numero_formula', 100)->nullable()->after('secuencia_pendiente');
-            $table->date('fecha_ordenamiento')->nullable()->after('numero_formula');
-            $table->string('frecuencia_administracion', 150)->nullable()->after('fecha_ordenamiento');
-            $table->string('duracion_tratamiento', 100)->nullable()->after('frecuencia_administracion');
+            $table->string('numero_orden', 100)->nullable()->after('secuencia_pendiente');
+            $table->date('fecha_ordenamiento')->nullable()->after('numero_orden');
+            $table->string('frecuencia', 150)->nullable()->after('fecha_ordenamiento');
+            $table->string('duracion_tratamiento', 100)->nullable()->after('frecuencia');
         });
     }
 
@@ -20,9 +20,9 @@ class AddResolucion1604FieldsToPendienteApiMedcol6 extends Migration
     {
         Schema::table('pendiente_api_medcol6', function (Blueprint $table) {
             $table->dropColumn([
-                'numero_formula',
+                'numero_orden',
                 'fecha_ordenamiento',
-                'frecuencia_administracion',
+                'frecuencia',
                 'duracion_tratamiento',
             ]);
         });

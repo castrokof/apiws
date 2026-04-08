@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-           Commands\CronApiPendientes::class, 
+           Commands\CronApiPendientes::class,
            //Commands\CronApiDispensados::class,
            //Commands\CronApiDispensadosDolor::class,
            //Commands\CronApiPendientesDolor::class,
@@ -21,7 +21,8 @@ class Kernel extends ConsoleKernel
            //Commands\CronApiPendientesSaludMental::class,
            //Commands\CronApiDispensadosEmcali::class,
            Commands\CronApiDispensadosSos::class,
-           
+           Commands\SyncMedicamentosCommand::class,
+           Commands\CronSyncPacientes::class,
     ];
 
     /**
@@ -40,6 +41,12 @@ class Kernel extends ConsoleKernel
     //$schedule->command('cron:api_pendientessaludmental')->cron('0 */4 * * *');
     //$schedule->command('cron:api_dispensadosemcali')->cron('*/30 * * * *');
     $schedule->command('cron:api_dispensadossos')->cron('*/5 * * * *');
+    $schedule->command('medicamentos:sync')->dailyAt('22:00')->withoutOverlapping();
+
+    // Sincronización de pacientes: 07:00, 12:00 y 22:00
+    $schedule->command('cron:sync_pacientes')->cron('0 7 * * *');
+    $schedule->command('cron:sync_pacientes')->cron('0 12 * * *');
+    $schedule->command('cron:sync_pacientes')->cron('0 22 * * *');
     
     
     

@@ -3124,9 +3124,9 @@ class PendienteApiMedcol6Controller extends Controller
                     if ($soloRes1604) {
                         // Solo actualizar los 4 campos de Resolución 1604
                         $updateData = [
-                            'numero_formula'           => $itemData['numero_formula'] ?? $pendiente->numero_formula,
+                            'numero_orden'           => $itemData['numero_formula'] ?? $pendiente->numero_formula,
                             'fecha_ordenamiento'       => !empty($itemData['fecha_ordenamiento']) ? $itemData['fecha_ordenamiento'] : $pendiente->fecha_ordenamiento,
-                            'frecuencia_administracion' => $itemData['frecuencia_administracion'] ?? $pendiente->frecuencia_administracion,
+                            'frecuencia' => $itemData['frecuencia_administracion'] ?? $pendiente->frecuencia_administracion,
                             'duracion_tratamiento'     => $itemData['duracion_tratamiento'] ?? $pendiente->duracion_tratamiento,
                             'usuario'                  => Auth::user()->email,
                             'updated_at'               => now(),
@@ -3140,9 +3140,9 @@ class PendienteApiMedcol6Controller extends Controller
                             'estado'                   => $itemData['estado'],
                             'usuario'                  => Auth::user()->email,
                             'updated_at'               => now(),
-                            'numero_formula'           => $itemData['numero_formula'] ?? $pendiente->numero_formula,
+                            'numero_orden'           => $itemData['numero_formula'] ?? $pendiente->numero_formula,
                             'fecha_ordenamiento'       => !empty($itemData['fecha_ordenamiento']) ? $itemData['fecha_ordenamiento'] : $pendiente->fecha_ordenamiento,
-                            'frecuencia_administracion' => $itemData['frecuencia_administracion'] ?? $pendiente->frecuencia_administracion,
+                            'frecuencia' => $itemData['frecuencia_administracion'] ?? $pendiente->frecuencia_administracion,
                             'duracion_tratamiento'     => $itemData['duracion_tratamiento'] ?? $pendiente->duracion_tratamiento,
                             'observaciones'            => $itemData['observaciones'] ?? $pendiente->observaciones,
                         ];

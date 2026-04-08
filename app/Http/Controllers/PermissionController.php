@@ -12,8 +12,9 @@ class PermissionController extends Controller
      */
     public function index()
     {
-        $permissions = Permission::withCount('roles')->orderBy('slug')->get();
-        return view('admin.permissions.index', compact('permissions'));
+        $permissions = Permission::withCount('roles')->orderBy('module')->orderBy('slug')->get();
+        $modules     = Permission::whereNotNull('module')->distinct()->orderBy('module')->pluck('module');
+        return view('admin.permissions.index', compact('permissions', 'modules'));
     }
 
     /**
@@ -54,7 +55,8 @@ class PermissionController extends Controller
      */
     public function edit(Permission $permission)
     {
-        $modules = Permission::distinct('module')->pluck('module');
+        $permission->load('roles', 'users');
+        $modules = Permission::whereNotNull('module')->distinct()->orderBy('module')->pluck('module');
         return view('admin.permissions.edit', compact('permission', 'modules'));
     }
 

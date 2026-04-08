@@ -18,6 +18,7 @@ class Paciente extends Model
         'regimen',
         'nivel',
         'edad',
+        'fechanac',
         'sexo',
         'pqrs',
         'estado',

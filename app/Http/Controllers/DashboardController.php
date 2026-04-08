@@ -123,13 +123,12 @@ class DashboardController extends Controller
         });
     }
 
-    public function getEstadisticasMedcol6($fechaInicio, $fechaFin)
+    public function getEstadisticasMedcol6($fechaInicio, $fechaFin, $contrato = 'all')
     {
-        // Crear clave única para caché basada en fechas
-        $cacheKey = "medcol6_estadisticas_{$fechaInicio}_{$fechaFin}";
+        // Clave única incluye contrato para evitar colisiones entre filtros distintos
+        $cacheKey = "medcol6_estadisticas_{$fechaInicio}_{$fechaFin}_{$contrato}";
 
-        // Aumentar tiempo de caché a 1 hora (3600 segundos) para reducir carga
-        return Cache::remember($cacheKey, 3600, function () use ($fechaInicio, $fechaFin) {
+        return Cache::remember($cacheKey, 3600, function () use ($fechaInicio, $fechaFin, $contrato) {
             // Crear tabla temporal con el precio más reciente por código (UN SOLO registro por código)
             DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_ultimo');
             DB::statement('
@@ -153,7 +152,7 @@ class DashboardController extends Controller
             DB::statement('CREATE INDEX idx_temp_codigo ON temp_precios_ultimo(codigo)');
 
             // Calcular estadísticas por estado UNA SOLA VEZ y reutilizar
-            $estadisticasPorEstado = $this->getEstadisticasPorEstadoOptimizado($fechaInicio, $fechaFin);
+            $estadisticasPorEstado = $this->getEstadisticasPorEstadoOptimizado($fechaInicio, $fechaFin, $contrato);
 
             // Extraer valor entregado de las estadísticas ya calculadas (evitar query duplicado)
             $valorTotalEntregado = 0;
@@ -166,10 +165,10 @@ class DashboardController extends Controller
             }
 
             // Valor total pendiente por facturar
-            $valorTotalPendiente = $this->getValorPendientePorFacturarOptimizado($fechaInicio, $fechaFin);
+            $valorTotalPendiente = $this->getValorPendientePorFacturarOptimizado($fechaInicio, $fechaFin, $contrato);
 
             // Top medicamentos pendientes por valor
-            $topMedicamentosPendientes = $this->getTopMedicamentosPendientesOptimizado($fechaInicio, $fechaFin, 10);
+            $topMedicamentosPendientes = $this->getTopMedicamentosPendientesOptimizado($fechaInicio, $fechaFin, 10, $contrato);
 
             // Tendencias por mes (simplificado, sin calcular valores monetarios)
             $tendenciasPorMes = $this->getTendenciasPorMesSimplificado($fechaInicio, $fechaFin);
@@ -178,19 +177,18 @@ class DashboardController extends Controller
             DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_ultimo');
 
             return [
-                'estadisticas_por_estado' => $estadisticasPorEstado,
-                'valor_total_pendiente' => $valorTotalPendiente,
-                'valor_total_entregado' => $valorTotalEntregado,
+                'estadisticas_por_estado'  => $estadisticasPorEstado,
+                'valor_total_pendiente'    => $valorTotalPendiente,
+                'valor_total_entregado'    => $valorTotalEntregado,
                 'top_medicamentos_pendientes' => $topMedicamentosPendientes,
-                'tendencias_por_mes' => $tendenciasPorMes
+                'tendencias_por_mes'       => $tendenciasPorMes,
             ];
         });
     }
 
-    private function getEstadisticasPorEstadoOptimizado($fechaInicio, $fechaFin)
+    private function getEstadisticasPorEstadoOptimizado($fechaInicio, $fechaFin, $contrato = 'all')
     {
-        // Optimización: Usar tabla temporal con el último precio
-        $estadisticas = DB::table('pendiente_api_medcol6 as p')
+        $query = DB::table('pendiente_api_medcol6 as p')
             ->leftJoin('temp_precios_ultimo as d', 'p.codigo', '=', 'd.codigo')
             ->whereBetween('p.fecha', [$fechaInicio, $fechaFin])
             ->select(
@@ -199,16 +197,20 @@ class DashboardController extends Controller
                 DB::raw('SUM(CAST(p.cantord as DECIMAL(10,2))) as total_cantidad'),
                 DB::raw('SUM(CAST(p.cantord as DECIMAL(10,2)) * CAST(COALESCE(d.precio_ultimo, 0) as DECIMAL(10,2))) as valor_total')
             )
-            ->groupBy('p.estado')
-            ->get()
-            ->toArray();
+            ->groupBy('p.estado');
+
+        if ($contrato !== 'all') {
+            $query->where('p.centroproduccion', $contrato);
+        }
+
+        $estadisticas = $query->get()->toArray();
 
         return array_map(function($stat) {
             return [
-                'estado' => $stat->estado,
-                'total_pendientes' => $stat->total_pendientes,
-                'total_cantidad' => $stat->total_cantidad,
-                'valor_total' => $stat->valor_total ?? 0
+                'estado'           => $stat->estado,
+                'total_pendientes' => (int) $stat->total_pendientes,
+                'total_cantidad'   => (float) ($stat->total_cantidad ?? 0),
+                'valor_total'      => (float) ($stat->valor_total ?? 0),
             ];
         }, $estadisticas);
     }
@@ -248,17 +250,19 @@ class DashboardController extends Controller
     }
 
 
-    private function getValorPendientePorFacturarOptimizado($fechaInicio, $fechaFin)
+    private function getValorPendientePorFacturarOptimizado($fechaInicio, $fechaFin, $contrato = 'all')
     {
-        // Optimización: Usar tabla temporal con el último precio
-        $resultado = DB::table('pendiente_api_medcol6 as p')
+        $query = DB::table('pendiente_api_medcol6 as p')
             ->leftJoin('temp_precios_ultimo as d', 'p.codigo', '=', 'd.codigo')
             ->whereIn('p.estado', ['PENDIENTE', 'DESABASTECIDO', 'SIN CONTACTO', 'TRAMITADO', 'VENCIDO'])
             ->whereBetween('p.fecha', [$fechaInicio, $fechaFin])
-            ->select(DB::raw('SUM(CAST(p.cantord as DECIMAL(10,2)) * CAST(COALESCE(d.precio_ultimo, 0) as DECIMAL(10,2))) as valor_total'))
-            ->value('valor_total');
+            ->select(DB::raw('SUM(CAST(p.cantord as DECIMAL(10,2)) * CAST(COALESCE(d.precio_ultimo, 0) as DECIMAL(10,2))) as valor_total'));
 
-        return $resultado ?? 0;
+        if ($contrato !== 'all') {
+            $query->where('p.centroproduccion', $contrato);
+        }
+
+        return (float) ($query->value('valor_total') ?? 0);
     }
 
     private function getValorPendientePorFacturar($fechaInicio, $fechaFin)
@@ -324,9 +328,8 @@ class DashboardController extends Controller
         return $resultado ?? 0;
     }
 
-    private function getTopMedicamentosPendientesOptimizado($fechaInicio, $fechaFin, $limit = 10)
+    private function getTopMedicamentosPendientesOptimizado($fechaInicio, $fechaFin, $limit = 10, $contrato = 'all')
     {
-        // Optimización: Usar tabla temporal con el último precio
         $query = DB::table('pendiente_api_medcol6 as p')
             ->leftJoin('temp_precios_ultimo as d', 'p.codigo', '=', 'd.codigo')
             ->whereBetween('p.fecha', [$fechaInicio, $fechaFin])
@@ -340,7 +343,10 @@ class DashboardController extends Controller
             ->groupBy('p.codigo', 'p.nombre')
             ->orderBy('valor_total', 'desc');
 
-        // Solo aplicar límite si se especifica
+        if ($contrato !== 'all') {
+            $query->where('p.centroproduccion', $contrato);
+        }
+
         if ($limit !== null) {
             $query->limit($limit);
         }
@@ -349,11 +355,11 @@ class DashboardController extends Controller
 
         return array_map(function($med) {
             return [
-                'codigo' => $med->codigo,
-                'nombre' => $med->nombre,
-                'total_cantidad' => $med->total_cantidad,
-                'total_pendientes' => $med->total_pendientes,
-                'valor_total' => $med->valor_total ?? 0
+                'codigo'           => $med->codigo,
+                'nombre'           => $med->nombre,
+                'total_cantidad'   => (float) ($med->total_cantidad ?? 0),
+                'total_pendientes' => (int) $med->total_pendientes,
+                'valor_total'      => (float) ($med->valor_total ?? 0),
             ];
         }, $medicamentos);
     }
@@ -395,10 +401,9 @@ class DashboardController extends Controller
         }, $medicamentos);
     }
 
-    private function getTendenciasPorMes($fechaInicio, $fechaFin)
+    private function getTendenciasPorMes($fechaInicio, $fechaFin, $contrato = 'all')
     {
-        // Optimización: Usar índice compuesto (fecha, estado) si existe
-        $tendencias = PendienteApiMedcol6::whereBetween('fecha', [$fechaInicio, $fechaFin])
+        $query = PendienteApiMedcol6::whereBetween('fecha', [$fechaInicio, $fechaFin])
             ->select(
                 DB::raw('YEAR(fecha) as año'),
                 DB::raw('MONTH(fecha) as mes'),
@@ -407,10 +412,14 @@ class DashboardController extends Controller
             )
             ->groupBy(DB::raw('YEAR(fecha)'), DB::raw('MONTH(fecha)'), 'estado')
             ->orderBy(DB::raw('YEAR(fecha)'))
-            ->orderBy(DB::raw('MONTH(fecha)'))
-            ->get();
+            ->orderBy(DB::raw('MONTH(fecha)'));
 
-        // Si no hay datos, retornar array vacío
+        if ($contrato !== 'all') {
+            $query->where('centroproduccion', $contrato);
+        }
+
+        $tendencias = $query->get();
+
         if ($tendencias->isEmpty()) {
             return [];
         }
@@ -422,13 +431,13 @@ class DashboardController extends Controller
 
             if (!isset($tendenciasAgrupadas[$key])) {
                 $tendenciasAgrupadas[$key] = [
-                    'año' => (int)$tendencia->año,
-                    'mes' => (int)$tendencia->mes,
-                    'estados' => []
+                    'año'     => (int) $tendencia->año,
+                    'mes'     => (int) $tendencia->mes,
+                    'estados' => [],
                 ];
             }
 
-            $tendenciasAgrupadas[$key]['estados'][$tendencia->estado] = (int)$tendencia->total_pendientes;
+            $tendenciasAgrupadas[$key]['estados'][$tendencia->estado] = (int) $tendencia->total_pendientes;
         }
 
         return array_values($tendenciasAgrupadas);
@@ -784,14 +793,15 @@ class DashboardController extends Controller
     public function getResumenPendientes(Request $request)
     {
         $fechaInicio = $request->get('fecha_inicio');
-        $fechaFin = $request->get('fecha_fin');
+        $fechaFin    = $request->get('fecha_fin');
+        $contrato    = $request->get('contrato', 'all');
 
-        $data = $this->getEstadisticasMedcol6($fechaInicio, $fechaFin);
+        $data = $this->getEstadisticasMedcol6($fechaInicio, $fechaFin, $contrato);
 
         $resumen = [
-            'valor_total_pendiente' => $data['valor_total_pendiente'],
-            'valor_total_entregado' => $data['valor_total_entregado'],
-            'estadisticas_por_estado' => $data['estadisticas_por_estado']
+            'valor_total_pendiente'   => (float) $data['valor_total_pendiente'],
+            'valor_total_entregado'   => (float) $data['valor_total_entregado'],
+            'estadisticas_por_estado' => $data['estadisticas_por_estado'],
         ];
 
         return response()->json($resumen);
@@ -1016,46 +1026,48 @@ class DashboardController extends Controller
     public function getAnalisisTendenciasPendientes(Request $request)
     {
         $fechaInicio = $request->get('fecha_inicio');
-        $fechaFin = $request->get('fecha_fin');
+        $fechaFin    = $request->get('fecha_fin');
+        $contrato    = $request->get('contrato', 'all');
 
-        $cacheKey = "tendencias_pendientes_{$fechaInicio}_{$fechaFin}";
+        // Incluye contrato en la clave para evitar colisiones entre filtros distintos
+        $cacheKey = "tendencias_pendientes_{$fechaInicio}_{$fechaFin}_{$contrato}";
 
-        $data = Cache::remember($cacheKey, 1800, function () use ($fechaInicio, $fechaFin) {
-            // Crear tabla temporal con el precio (costo_unitario) desde saldos_medcol6
-            // Esta tabla contendrá UN registro por código con el costo unitario más reciente
+        $data = Cache::remember($cacheKey, 1800, function () use ($fechaInicio, $fechaFin, $contrato) {
+            // Tabla temporal: garantiza UN único registro por código (el más reciente).
+            // Usa INNER JOIN con MAX(updated_at) para evitar filas duplicadas por código
+            // que inflarían los SUM en los JOINs posteriores.
             DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_ultimo');
             DB::statement('
                 CREATE TEMPORARY TABLE temp_precios_ultimo AS
                 SELECT
-                    codigo,
-                    CAST(REPLACE(REPLACE(costo_unitario, ",", ""), "$", "") as DECIMAL(15,2)) as precio_ultimo,
-                    updated_at
-                FROM saldos_medcol6
-                WHERE costo_unitario IS NOT NULL
-                AND costo_unitario != ""
-                AND costo_unitario != "0"
-                AND costo_unitario != "$0"
-                GROUP BY codigo, costo_unitario, updated_at
+                    t1.codigo,
+                    CAST(REPLACE(REPLACE(t1.costo_unitario, ",", ""), "$", "") as DECIMAL(15,2)) as precio_ultimo
+                FROM saldos_medcol6 t1
+                INNER JOIN (
+                    SELECT codigo, MAX(updated_at) as max_updated
+                    FROM saldos_medcol6
+                    WHERE costo_unitario IS NOT NULL
+                    AND costo_unitario != ""
+                    AND costo_unitario != "0"
+                    AND costo_unitario != "$0"
+                    GROUP BY codigo
+                ) t2 ON t1.codigo = t2.codigo AND t1.updated_at = t2.max_updated
             ');
 
-            // Usar métodos optimizados que aprovechan la tabla temporal
-            $estadisticasPorEstado = $this->getEstadisticasPorEstadoOptimizado($fechaInicio, $fechaFin);
-            $tendenciasPorMes = $this->getTendenciasPorMes($fechaInicio, $fechaFin);
+            DB::statement('CREATE INDEX idx_temp_codigo ON temp_precios_ultimo(codigo)');
 
-            // Top 10 para el gráfico
-            $topMedicamentosPendientes = $this->getTopMedicamentosPendientesOptimizado($fechaInicio, $fechaFin, 10);
+            $estadisticasPorEstado   = $this->getEstadisticasPorEstadoOptimizado($fechaInicio, $fechaFin, $contrato);
+            $tendenciasPorMes        = $this->getTendenciasPorMes($fechaInicio, $fechaFin, $contrato);
+            $topMedicamentosPendientes  = $this->getTopMedicamentosPendientesOptimizado($fechaInicio, $fechaFin, 10, $contrato);
+            $todosMedicamentosPendientes = $this->getTopMedicamentosPendientesOptimizado($fechaInicio, $fechaFin, null, $contrato);
 
-            // TODOS los medicamentos para el DataTable
-            $todosMedicamentosPendientes = $this->getTopMedicamentosPendientesOptimizado($fechaInicio, $fechaFin, null);
-
-            // Limpiar tabla temporal
             DB::statement('DROP TEMPORARY TABLE IF EXISTS temp_precios_ultimo');
 
             return [
-                'estadisticas_por_estado' => $estadisticasPorEstado,
-                'tendencias_por_mes' => $tendenciasPorMes,
-                'top_medicamentos_pendientes' => $topMedicamentosPendientes,
-                'todos_medicamentos_pendientes' => $todosMedicamentosPendientes
+                'estadisticas_por_estado'      => $estadisticasPorEstado,
+                'tendencias_por_mes'            => $tendenciasPorMes,
+                'top_medicamentos_pendientes'   => $topMedicamentosPendientes,
+                'todos_medicamentos_pendientes' => $todosMedicamentosPendientes,
             ];
         });
 

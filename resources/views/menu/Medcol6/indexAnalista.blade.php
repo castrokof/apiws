@@ -4162,9 +4162,9 @@ $(document).ready(function () {
                 '       value="' + (bpServicioDocMap[item.centroproduccion] || '') + '">' +
             '</td>' +
             '<td>' +
-                '<textarea class="form-control bp-row-input bp-observaciones"' +
-                '          rows="2" maxlength="1000" placeholder="Observaciones..."' +
-                '          data-idx="' + idx + '">' + (item.observaciones || '') + '</textarea>' +
+                '<input type="text" class="form-control bp-row-input bp-observaciones"' +
+                '       maxlength="1000" placeholder="Observación..."' +
+                '       data-idx="' + idx + '" value="">' +
             '</td>' +
             '<td>' +
                 '<input type="text" class="form-control bp-row-input bp-numero-formula"' +
