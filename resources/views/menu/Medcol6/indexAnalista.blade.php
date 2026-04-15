@@ -1388,7 +1388,7 @@
 
                             });
 
-                    }else if (tabId === "custom-tabs-one-datos-sincontacto-tab") {
+                    } else if (tabId === "custom-tabs-one-datos-sincontacto-tab") {
                         // Llamar a la función correspondiente al tab "Sin Contacto"
 
                         // Destruir la tabla existente
@@ -3296,11 +3296,11 @@
                         return false;
                     }
                 });
-                
+
                 // Mostrar/ocultar columnas Doc Entrega (13) y Factura Entrega (14)
                 tablaPendientesPaciente.column(13).visible(hayEntregados);
                 tablaPendientesPaciente.column(14).visible(hayEntregados);
-                
+
                 // Ajustar el layout de la tabla
                 tablaPendientesPaciente.columns.adjust();
             }
@@ -3399,12 +3399,12 @@
                         placeholder: 'Seleccione estado',
                         allowClear: false
                     });
-                    
+
                     // Manejar cambio de estado para mostrar/ocultar campos de entrega
                     $('.estado-select').on('change', function() {
                         verificarYMostrarColumnasEntrega();
                     });
-                    
+
                     // Verificar estado inicial para mostrar/ocultar campos
                     verificarYMostrarColumnasEntrega();
                 }
@@ -3682,9 +3682,9 @@
         // =================================================================
         // FUNCIONES PARA GESTIÓN DE PENDIENTES - VALIDACIÓN Y ENTREGA
         // =================================================================
-        
+
         let tablaPendientesGestion = null;
-        
+
         // Event listener para abrir modal de gestión pendientes
         $('#modalGestionPendientes').on('shown.bs.modal', function() {
             console.log('Modal de gestión pendientes abierto');
@@ -3703,7 +3703,11 @@
             const fechaFinal = $('#fechaFinalGestion').val();
             const farmacia = $('#farmaciaGestion').val();
 
-            console.log('Valores:', {fechaInicial, fechaFinal, farmacia});
+            console.log('Valores:', {
+                fechaInicial,
+                fechaFinal,
+                farmacia
+            });
 
             if (!fechaInicial || !fechaFinal) {
                 Swal.fire('Error', 'Debe seleccionar fechas de inicio y fin', 'error');
@@ -3733,7 +3737,7 @@
 
             const token = $('meta[name="csrf-token"]').attr('content');
             console.log('CSRF Token:', token);
-            
+
             // URL de la ruta
             const routeUrl = '{{ route("medcol6.buscar_validacion") }}';
             console.log('URL de la ruta:', routeUrl);
@@ -3765,10 +3769,11 @@
                         data: response.data,
                         destroy: true,
                         pageLength: 25,
-                        order: [[1, 'desc']],
+                        order: [
+                            [1, 'desc']
+                        ],
                         language: idioma_espanol,
-                        columns: [
-                            {
+                        columns: [{
                                 data: null,
                                 orderable: false,
                                 className: 'text-center',
@@ -3778,18 +3783,28 @@
                                     </div>`;
                                 }
                             },
-                            { data: 'fecha_pendiente' },
-                            { data: 'historia' },
-                            { 
+                            {
+                                data: 'fecha_pendiente'
+                            },
+                            {
+                                data: 'historia'
+                            },
+                            {
                                 data: null,
                                 render: function(data, type, row) {
                                     return `${row.nombre1} ${row.nombre2 || ''} ${row.apellido1} ${row.apellido2 || ''}`.trim();
                                 }
                             },
-                            { data: 'codigo' },
-                            { data: 'nombre_medicamento' },
-                            { data: 'cantord' },
-                            { 
+                            {
+                                data: 'codigo'
+                            },
+                            {
+                                data: 'nombre_medicamento'
+                            },
+                            {
+                                data: 'cantord'
+                            },
+                            {
                                 data: 'estado_actual',
                                 render: function(data, type, row) {
                                     const badgeClass = {
@@ -3797,20 +3812,28 @@
                                         'VENCIDO': 'badge-danger',
                                         'SIN CONTACTO': 'badge-secondary',
                                         'DESABASTECIDO': 'badge-info'
-                                    }[data] || 'badge-light';
+                                    } [data] || 'badge-light';
                                     return `<span class="badge ${badgeClass}">${data}</span>`;
                                 }
                             },
-                            { data: 'fecha_suministro' },
-                            { data: 'numero_unidades' },
-                            { 
+                            {
+                                data: 'fecha_suministro'
+                            },
+                            {
+                                data: 'numero_unidades'
+                            },
+                            {
                                 data: 'estado_dispensado',
                                 render: function(data, type, row) {
                                     return `<span class="badge badge-success">${data}</span>`;
                                 }
                             },
-                            { data: 'factura_dispensado' },
-                            { data: 'orden_externa' },
+                            {
+                                data: 'factura_dispensado'
+                            },
+                            {
+                                data: 'orden_externa'
+                            },
                             {
                                 data: null,
                                 orderable: false,
@@ -3846,11 +3869,15 @@
                     // Solo se guardan después de procesar entregas exitosamente
                 },
                 error: function(xhr, status, error) {
-                    console.error('Error AJAX:', {xhr, status, error});
+                    console.error('Error AJAX:', {
+                        xhr,
+                        status,
+                        error
+                    });
                     console.error('Response Text:', xhr.responseText);
                     console.error('Status:', xhr.status);
                     $('#loadingGestion').hide();
-                    
+
                     let errorMessage = 'Error desconocido';
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage = xhr.responseJSON.message;
@@ -3859,7 +3886,7 @@
                     } else {
                         errorMessage = error || 'Error en la conexión';
                     }
-                    
+
                     Swal.fire('Error', 'Error al buscar pendientes: ' + errorMessage, 'error');
                 }
             });
@@ -3876,7 +3903,7 @@
         $(document).on('change', '.pendiente-checkbox', function() {
             const totalCheckboxes = $('.pendiente-checkbox').length;
             const checkedCheckboxes = $('.pendiente-checkbox:checked').length;
-            
+
             $('#checkboxAll').prop('checked', totalCheckboxes === checkedCheckboxes);
             actualizarContadorSeleccionados();
         });
@@ -3940,17 +3967,17 @@
                 },
                 success: function(response) {
                     Swal.fire('Éxito', `${response.procesados} pendientes procesados correctamente`, 'success');
-                    
+
                     // Guardar observaciones de los pendientes procesados exitosamente
                     ids.forEach(function(pendienteId) {
                         const input = $(`.observaciones-input[data-id="${pendienteId}"]`);
                         const observacion = input.val().trim();
-                        
+
                         if (observacion) {
                             guardarObservacionDespuesProceso(pendienteId, observacion);
                         }
                     });
-                    
+
                     // Recargar la tabla
                     const fechaInicial = $('#fechaInicialGestion').val();
                     const fechaFinal = $('#fechaFinalGestion').val();
@@ -3981,7 +4008,7 @@
             const checkbox = $(`.pendiente-checkbox[value="${id}"]`);
             checkbox.prop('checked', false);
             actualizarContadorSeleccionados();
-            
+
             Swal.fire({
                 title: 'Pendiente rechazado',
                 text: 'Este pendiente ha sido desmarcado para no ser procesado',
@@ -4064,701 +4091,775 @@
      porque jQuery se carga después de @yield('content') en el layout.
      ============================================================ --}}
 <script>
-$(document).ready(function () {
+    $(document).ready(function() {
 
-    // ---- helpers ----
-    function bpFormatFecha(val) {
-        if (!val) return '';
-        return String(val).substring(0, 10);
-    }
-
-    function bpEtiquetaFecha(estado) {
-        switch (estado) {
-            case 'ENTREGADO':     return 'Fecha Entrega';
-            case 'TRAMITADO':
-            case 'DESABASTECIDO': return 'Fecha Impresión';
-            case 'ANULADO':       return 'Fecha Anulado';
-            case 'SIN CONTACTO':  return 'Fecha Sin Contacto';
-            default:              return 'Fecha';
-        }
-    }
-
-    function bpColorFila(estado) {
-        return 'estado-' + (estado || 'PENDIENTE').replace(' ', '_');
-    }
-
-    // ---- mapa servicio → documento de entrega ----
-    var bpServicioDocMap = {
-        "BIO1": "CDBI",
-        "PAC": "CDPC",
-        "DLR1": "CDDO",
-        "DPA1": "CDDO",
-        "EM01": "CDEM",
-        "FRIO": "CDIO",
-        "EHU1": "CDHU",
-        "FRJA": "CDJA",
-        "FRIP": "CDIP",
-        "BDNT": "EVIO",
-        "SM01": "CDSM",
-        "INY": "INYE",
-        "FRRC": "CDRC",
-        "F24H": "CDEV",
-        "FRPD": "CDDO",
-        "FRPE": "CDIO",
-        "FRPJ": "CDJA",
-        "FRPP": "CDPC"
-    };
-
-    // ---- construir fila ----
-    function bpConstruirFila(item, idx) {
-        const estado     = item.estado || 'PENDIENTE';
-        const fechaLabel = bpEtiquetaFecha(estado);
-
-        let fechaVal = '';
-        switch (estado) {
-            case 'ENTREGADO':     fechaVal = bpFormatFecha(item.fecha_entrega);   break;
-            case 'TRAMITADO':
-            case 'DESABASTECIDO': fechaVal = bpFormatFecha(item.fecha_impresion); break;
-            case 'ANULADO':       fechaVal = bpFormatFecha(item.fecha_anulado);   break;
+        // ---- helpers ----
+        function bpFormatFecha(val) {
+            if (!val) return '';
+            return String(val).substring(0, 10);
         }
 
-        const estadoOpts = ['PENDIENTE','ENTREGADO','TRAMITADO','DESABASTECIDO','ANULADO','VENCIDO','SIN CONTACTO']
-            .map(function(e) {
-                return '<option value="' + e + '" ' + (e === estado ? 'selected' : '') + '>' + e + '</option>';
-            }).join('');
+        function bpEtiquetaFecha(estado) {
+            switch (estado) {
+                case 'ENTREGADO':
+                    return 'Fecha Entrega';
+                case 'TRAMITADO':
+                case 'DESABASTECIDO':
+                    return 'Fecha Impresión';
+                case 'ANULADO':
+                    return 'Fecha Anulado';
+                case 'SIN CONTACTO':
+                    return 'Fecha Sin Contacto';
+                default:
+                    return 'Fecha';
+            }
+        }
 
-        return '<tr class="bp-fila ' + bpColorFila(estado) + '" data-idx="' + idx + '" data-id="' + item.id + '">' +
-            '<td style="text-align:center;">' +
+        function bpColorFila(estado) {
+            return 'estado-' + (estado || 'PENDIENTE').replace(' ', '_');
+        }
+
+        // ---- mapa servicio → documento de entrega ----
+        var bpServicioDocMap = {
+            "BIO1": "CDBI",
+            "PAC": "CDPC",
+            "DLR1": "CDDO",
+            "DPA1": "CDDO",
+            "EM01": "CDEM",
+            "FRIO": "CDIO",
+            "EHU1": "CDHU",
+            "FRJA": "CDJA",
+            "FRIP": "CDIP",
+            "BDNT": "EVIO",
+            "SM01": "CDSM",
+            "INY": "INYE",
+            "FRRC": "CDRC",
+            "F24H": "CDEV",
+            "FRPD": "CDDO",
+            "FRPE": "CDIO",
+            "FRPJ": "CDJA",
+            "FRPP": "CDPC"
+        };
+
+        // ---- construir fila ----
+        function bpConstruirFila(item, idx) {
+            const estado = item.estado || 'PENDIENTE';
+            const fechaLabel = bpEtiquetaFecha(estado);
+
+            let fechaVal = '';
+            switch (estado) {
+                case 'ENTREGADO':
+                    fechaVal = bpFormatFecha(item.fecha_entrega);
+                    break;
+                case 'TRAMITADO':
+                case 'DESABASTECIDO':
+                    fechaVal = bpFormatFecha(item.fecha_impresion);
+                    break;
+                case 'ANULADO':
+                    fechaVal = bpFormatFecha(item.fecha_anulado);
+                    break;
+            }
+
+            const estadoOpts = ['PENDIENTE', 'ENTREGADO', 'TRAMITADO', 'DESABASTECIDO', 'ANULADO', 'VENCIDO', 'SIN CONTACTO']
+                .map(function(e) {
+                    return '<option value="' + e + '" ' + (e === estado ? 'selected' : '') + '>' + e + '</option>';
+                }).join('');
+
+            return '<tr class="bp-fila ' + bpColorFila(estado) + '" data-idx="' + idx + '" data-id="' + item.id + '">' +
+                '<td style="text-align:center;">' +
                 '<input type="checkbox" class="bp-check-item" data-idx="' + idx + '">' +
-            '</td>' +
-            '<td><small>' + (item.codigo || '') + '</small></td>' +
-            '<td>' +
+                '</td>' +
+                '<td><small>' + (item.codigo || '') + '</small></td>' +
+                '<td>' +
                 '<small><strong>' + (item.nombre || '') + '</strong></small>' +
                 (item.agrupador ? '<br><small class="text-muted">' + item.agrupador + '</small>' : '') +
                 '<br><small class="text-muted">Factura: ' + (item.factura || '') + ' | F.Pend: ' + bpFormatFecha(item.fecha_factura) + '</small>' +
-            '</td>' +
-            '<td style="text-align:center;"><strong>' + (item.cantord || 0) + '</strong></td>' +
-            '<td>' +
+                '</td>' +
+                '<td style="text-align:center;"><strong>' + (item.cantord || 0) + '</strong></td>' +
+                '<td>' +
                 '<input type="number" class="form-control bp-row-input bp-cantdpx"' +
                 '       value="' + (item.cantdpx || 0) + '" min="0"' +
                 '       max="' + (item.cantord || 9999) + '" step="0.01"' +
                 '       data-idx="' + idx + '" style="width:80px;">' +
-            '</td>' +
-            '<td>' +
+                '</td>' +
+                '<td>' +
                 '<select class="form-control bp-row-input bp-estado-select" data-idx="' + idx + '">' +
-                    estadoOpts +
+                estadoOpts +
                 '</select>' +
-            '</td>' +
-            '<td>' +
+                '</td>' +
+                '<td>' +
                 '<small class="bp-fecha-label text-muted d-block" data-idx="' + idx + '">' + fechaLabel + '</small>' +
                 '<input type="date" class="form-control bp-row-input bp-fecha-correspondiente"' +
                 '       value="' + fechaVal + '" data-idx="' + idx + '">' +
-            '</td>' +
-            '<td>' +
+                '</td>' +
+                '<td>' +
                 '<input type="number" class="form-control bp-row-input bp-factura-entrega"' +
                 '       value="' + (item.factura_entrega || '') + '"' +
                 '       placeholder="Nro. factura" data-idx="' + idx + '" min="0" step="1">' +
                 '<input type="hidden" class="bp-doc-entrega" data-idx="' + idx + '"' +
                 '       value="' + (bpServicioDocMap[item.centroproduccion] || '') + '">' +
-            '</td>' +
-            '<td>' +
+                '</td>' +
+                '<td>' +
                 '<input type="text" class="form-control bp-row-input bp-observaciones"' +
                 '       maxlength="1000" placeholder="Observación..."' +
                 '       data-idx="' + idx + '" value="">' +
-            '</td>' +
-            '<td>' +
+                '</td>' +
+                '<td>' +
                 '<input type="text" class="form-control bp-row-input bp-numero-formula"' +
                 '       value="' + (item.numero_formula || '') + '" maxlength="100"' +
                 '       placeholder="Nro. fórmula" data-idx="' + idx + '">' +
-            '</td>' +
-            '<td>' +
+                '</td>' +
+                '<td>' +
                 '<input type="date" class="form-control bp-row-input bp-fecha-ordenamiento"' +
                 '       value="' + bpFormatFecha(item.fecha_ordenamiento) + '" data-idx="' + idx + '">' +
-            '</td>' +
-            '<td>' +
+                '</td>' +
+                '<td>' +
                 '<input type="text" class="form-control bp-row-input bp-frecuencia"' +
                 '       value="' + (item.frecuencia_administracion || '') + '" maxlength="150"' +
                 '       placeholder="Ej: cada 8 horas" data-idx="' + idx + '">' +
-            '</td>' +
-            '<td>' +
+                '</td>' +
+                '<td>' +
                 '<input type="text" class="form-control bp-row-input bp-duracion"' +
                 '       value="' + (item.duracion_tratamiento || '') + '" maxlength="100"' +
                 '       placeholder="Ej: 30 días" data-idx="' + idx + '">' +
-            '</td>' +
-        '</tr>';
-    }
-
-    // ---- estado del módulo ----
-    var bpItems = [];
-
-    // ---- limpiar al abrir ----
-    $('#modal-buscar-pendiente').on('show.bs.modal', function () {
-        $('#buscar-doc-factura-input').val('');
-        $('#bp-resultados').hide();
-        $('#bp-sin-resultados').hide();
-        $('#bp-loading').hide();
-        $('#bp-total-badge').hide();
-        bpItems = [];
-    });
-
-    $('#modal-buscar-pendiente').on('shown.bs.modal', function () {
-        $('#buscar-doc-factura-input').focus();
-    });
-
-    // ---- Enter en el input ----
-    $('#buscar-doc-factura-input').on('keypress', function (e) {
-        if (e.which === 13) $('#btn-ejecutar-busqueda-pendiente').trigger('click');
-    });
-
-    // ---- ejecutar búsqueda ----
-    $('#btn-ejecutar-busqueda-pendiente').on('click', function () {
-        var termino = $('#buscar-doc-factura-input').val().trim();
-        if (termino.length < 3) {
-            Swal.fire('Atención', 'Ingrese al menos 3 caracteres para buscar.', 'warning');
-            return;
+                '</td>' +
+                '</tr>';
         }
 
-        $('#bp-resultados').hide();
-        $('#bp-sin-resultados').hide();
-        $('#bp-loading').show();
-        $('#bp-total-badge').hide();
+        // ---- estado del módulo ----
+        var bpItems = [];
 
-        $.ajax({
-            url: '{{ route("medcol6.buscar_pendiente_doc_factura") }}',
-            method: 'POST',
-            data: {
-                termino: termino,
-                _token: '{{ csrf_token() }}'
-            },
-            success: function (resp) {
-                $('#bp-loading').hide();
-                if (!resp.success) {
-                    $('#bp-sin-resultados-msg').text(resp.message);
-                    $('#bp-sin-resultados').show();
-                    return;
-                }
-
-                bpItems = resp.medicamentos;
-                var pac = resp.paciente;
-
-                $('#bp-pac-historia').text(pac.historia || '-');
-                $('#bp-pac-documento').text(pac.orden_externa || '-');
-                $('#bp-pac-nombre').text(pac.nombre || '-');
-                $('#bp-pac-fecha-factura').text(pac.fecha_factura || '-');
-                $('#bp-pac-telefono').text(pac.telefres || '-');
-                $('#bp-pac-direccion').text(pac.direcres || '-');
-                $('#bp-pac-municipio').text(pac.municipio || '-');
-                $('#bp-pac-farmacia').text(pac.centroproduccion || '-');
-
-                var tbody = $('#bp-tabla-body').empty();
-                $.each(bpItems, function (idx, item) {
-                    tbody.append(bpConstruirFila(item, idx));
-                });
-
-                $('#bp-total-badge').text(bpItems.length + ' item(s) encontrado(s)').show();
-                bpActualizarContador();
-                $('#bp-resultados').show();
-            },
-            error: function (xhr) {
-                $('#bp-loading').hide();
-                var msg = xhr.responseJSON ? xhr.responseJSON.message : 'Error al consultar el servidor.';
-                Swal.fire('Error', msg, 'error');
-            }
+        // ---- limpiar al abrir ----
+        $('#modal-buscar-pendiente').on('show.bs.modal', function() {
+            $('#buscar-doc-factura-input').val('');
+            $('#bp-resultados').hide();
+            $('#bp-sin-resultados').hide();
+            $('#bp-loading').hide();
+            $('#bp-total-badge').hide();
+            bpItems = [];
         });
-    });
 
-    // ---- cambio de estado → label de fecha ----
-    $(document).on('change', '.bp-estado-select', function () {
-        var idx    = $(this).data('idx');
-        var estado = $(this).val();
-        var $fila  = $(this).closest('tr');
-        $fila.removeClass(function (i, cls) {
-            return (cls.match(/(^|\s)estado-\S+/g) || []).join(' ');
-        }).addClass('estado-' + estado.replace(' ', '_'));
-        $('small.bp-fecha-label[data-idx="' + idx + '"]').text(bpEtiquetaFecha(estado));
-    });
+        $('#modal-buscar-pendiente').on('shown.bs.modal', function() {
+            $('#buscar-doc-factura-input').focus();
+        });
 
-    // ---- checkbox individual ----
-    $(document).on('change', '.bp-check-item', function () {
-        var $fila = $(this).closest('tr');
-        $fila.toggleClass('bp-row-disabled', !this.checked);
-        $fila.find('input:not(.bp-check-item), select, textarea').prop('disabled', !this.checked);
-        bpActualizarContador();
-        bpSyncCheckAll();
-    });
+        // ---- Enter en el input ----
+        $('#buscar-doc-factura-input').on('keypress', function(e) {
+            if (e.which === 13) $('#btn-ejecutar-busqueda-pendiente').trigger('click');
+        });
 
-    // ---- check-all ----
-    $(document).on('change', '#bp-check-all', function () {
-        var checked = this.checked;
-        $('.bp-check-item').prop('checked', checked).trigger('change');
-    });
+        // ---- ejecutar búsqueda ----
+        $('#btn-ejecutar-busqueda-pendiente').on('click', function() {
+            var termino = $('#buscar-doc-factura-input').val().trim();
+            if (termino.length < 3) {
+                Swal.fire('Atención', 'Ingrese al menos 3 caracteres para buscar.', 'warning');
+                return;
+            }
 
-    $('#bp-seleccionar-todos').on('click', function () {
-        $('#bp-check-all').prop('checked', true).trigger('change');
-    });
-    $('#bp-deseleccionar-todos').on('click', function () {
-        $('#bp-check-all').prop('checked', false).trigger('change');
-    });
+            $('#bp-resultados').hide();
+            $('#bp-sin-resultados').hide();
+            $('#bp-loading').show();
+            $('#bp-total-badge').hide();
 
-    function bpSyncCheckAll() {
-        var total   = $('.bp-check-item').length;
-        var checked = $('.bp-check-item:checked').length;
-        $('#bp-check-all').prop('indeterminate', checked > 0 && checked < total);
-        $('#bp-check-all').prop('checked', total > 0 && checked === total);
-    }
+            $.ajax({
+                url: '{{ route("medcol6.buscar_pendiente_doc_factura") }}',
+                method: 'POST',
+                data: {
+                    termino: termino,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(resp) {
+                    $('#bp-loading').hide();
+                    if (!resp.success) {
+                        $('#bp-sin-resultados-msg').text(resp.message);
+                        $('#bp-sin-resultados').show();
+                        return;
+                    }
 
-    function bpActualizarContador() {
-        var n = $('.bp-check-item:checked').length;
-        $('#bp-contador-sel').text(n + ' seleccionados');
-        $('#bp-btn-guardar, #bp-btn-guardar-bottom').prop('disabled', n === 0);
-    }
+                    bpItems = resp.medicamentos;
+                    var pac = resp.paciente;
 
-    // ---- limpiar modal para nueva búsqueda ----
-    function bpLimpiarModal() {
-        bpItems = [];
-        $('#buscar-doc-factura-input').val('');
-        $('#bp-tabla-body').empty();
-        $('#bp-resultados').hide();
-        $('#bp-sin-resultados').hide();
-        $('#bp-loading').hide();
-        $('#bp-total-badge').hide().text('');
-        $('#bp-btn-guardar, #bp-btn-guardar-bottom')
-            .prop('disabled', true)
-            .html('<i class="fas fa-save mr-1"></i> Guardar Seleccionados');
-        $('#bp-contador-sel').text('0 seleccionados');
-        $('#bp-check-all').prop('checked', false).prop('indeterminate', false);
-        // Limpiar datos del paciente
-        $('#bp-pac-historia, #bp-pac-documento, #bp-pac-nombre, #bp-pac-fecha-factura, #bp-pac-farmacia').text('');
-        $('#bp-pac-telefono, #bp-pac-direccion, #bp-pac-municipio').text('');
-    }
+                    $('#bp-pac-historia').text(pac.historia || '-');
+                    $('#bp-pac-documento').text(pac.orden_externa || '-');
+                    $('#bp-pac-nombre').text(pac.nombre || '-');
+                    $('#bp-pac-fecha-factura').text(pac.fecha_factura || '-');
+                    $('#bp-pac-telefono').text(pac.telefres || '-');
+                    $('#bp-pac-direccion').text(pac.direcres || '-');
+                    $('#bp-pac-municipio').text(pac.municipio || '-');
+                    $('#bp-pac-farmacia').text(pac.centroproduccion || '-');
 
-    // ---- guardar seleccionados ----
-    function bpEjecutarGuardado() {
-        // VALIDACIÓN DE INTEGRIDAD RES. 1604
-        // Aplica a TODOS los ítems (seleccionados o no) cuyo estado sea
-        // PENDIENTE, SIN CONTACTO, ENTREGADO o DESABASTECIDO.
-        var estadosRes1604 = ['PENDIENTE', 'SIN CONTACTO', 'ENTREGADO', 'DESABASTECIDO'];
-        var erroresIntegridad = [];
+                    var tbody = $('#bp-tabla-body').empty();
+                    $.each(bpItems, function(idx, item) {
+                        tbody.append(bpConstruirFila(item, idx));
+                    });
 
-        $('tr.bp-fila').each(function () {
-            var $fila  = $(this);
-            var estado = $.trim($fila.find('.bp-estado-select').val());
+                    $('#bp-total-badge').text(bpItems.length + ' item(s) encontrado(s)').show();
+                    bpActualizarContador();
+                    $('#bp-resultados').show();
+                },
+                error: function(xhr) {
+                    $('#bp-loading').hide();
+                    var msg = xhr.responseJSON ? xhr.responseJSON.message : 'Error al consultar el servidor.';
+                    Swal.fire('Error', msg, 'error');
+                }
+            });
+        });
 
-            if (estadosRes1604.indexOf(estado) === -1) return; // otros estados no aplican
+        // ---- cambio de estado → label de fecha ----
+        $(document).on('change', '.bp-estado-select', function() {
+            var idx = $(this).data('idx');
+            var estado = $(this).val();
+            var $fila = $(this).closest('tr');
+            $fila.removeClass(function(i, cls) {
+                return (cls.match(/(^|\s)estado-\S+/g) || []).join(' ');
+            }).addClass('estado-' + estado.replace(' ', '_'));
+            $('small.bp-fecha-label[data-idx="' + idx + '"]').text(bpEtiquetaFecha(estado));
+        });
 
-            var numeroFormula = $.trim($fila.find('.bp-numero-formula').val());
-            var fechaOrden    = $.trim($fila.find('.bp-fecha-ordenamiento').val());
-            var frecuencia    = $.trim($fila.find('.bp-frecuencia').val());
-            var duracion      = $.trim($fila.find('.bp-duracion').val());
-            var nombre        = $.trim($fila.find('td:nth-child(3) small strong').text()) || ('Ítem #' + (parseInt($fila.data('idx')) + 1));
+        // ---- checkbox individual ----
+        $(document).on('change', '.bp-check-item', function() {
+            var $fila = $(this).closest('tr');
+            $fila.toggleClass('bp-row-disabled', !this.checked);
+            $fila.find('input:not(.bp-check-item), select, textarea').prop('disabled', !this.checked);
+            bpActualizarContador();
+            bpSyncCheckAll();
+        });
 
-            var camposVacios = [];
-            if (!numeroFormula) camposVacios.push('Nro. Fórmula');
-            if (!fechaOrden)    camposVacios.push('Fecha Ordenamiento');
-            if (!frecuencia)    camposVacios.push('Frec. Administración');
-            if (!duracion)      camposVacios.push('Duración Tratamiento');
+        // ---- check-all ----
+        $(document).on('change', '#bp-check-all', function() {
+            var checked = this.checked;
+            $('.bp-check-item').prop('checked', checked).trigger('change');
+        });
 
-            if (camposVacios.length > 0) {
-                erroresIntegridad.push('<b>' + nombre + '</b> [' + estado + ']: ' + camposVacios.join(', '));
-                $fila.find('.bp-numero-formula, .bp-fecha-ordenamiento, .bp-frecuencia, .bp-duracion').each(function () {
-                    if (!$.trim($(this).val())) {
-                        $(this).addClass('is-invalid');
+        $('#bp-seleccionar-todos').on('click', function() {
+            $('#bp-check-all').prop('checked', true).trigger('change');
+        });
+        $('#bp-deseleccionar-todos').on('click', function() {
+            $('#bp-check-all').prop('checked', false).trigger('change');
+        });
+
+        function bpSyncCheckAll() {
+            var total = $('.bp-check-item').length;
+            var checked = $('.bp-check-item:checked').length;
+            $('#bp-check-all').prop('indeterminate', checked > 0 && checked < total);
+            $('#bp-check-all').prop('checked', total > 0 && checked === total);
+        }
+
+        function bpActualizarContador() {
+            var n = $('.bp-check-item:checked').length;
+            $('#bp-contador-sel').text(n + ' seleccionados');
+            $('#bp-btn-guardar, #bp-btn-guardar-bottom').prop('disabled', n === 0);
+        }
+
+        // ---- limpiar modal para nueva búsqueda ----
+        function bpLimpiarModal() {
+            bpItems = [];
+            $('#buscar-doc-factura-input').val('');
+            $('#bp-tabla-body').empty();
+            $('#bp-resultados').hide();
+            $('#bp-sin-resultados').hide();
+            $('#bp-loading').hide();
+            $('#bp-total-badge').hide().text('');
+            $('#bp-btn-guardar, #bp-btn-guardar-bottom')
+                .prop('disabled', true)
+                .html('<i class="fas fa-save mr-1"></i> Guardar Seleccionados');
+            $('#bp-contador-sel').text('0 seleccionados');
+            $('#bp-check-all').prop('checked', false).prop('indeterminate', false);
+            // Limpiar datos del paciente
+            $('#bp-pac-historia, #bp-pac-documento, #bp-pac-nombre, #bp-pac-fecha-factura, #bp-pac-farmacia').text('');
+            $('#bp-pac-telefono, #bp-pac-direccion, #bp-pac-municipio').text('');
+        }
+
+        // ---- guardar seleccionados ----
+        function bpEjecutarGuardado() {
+            // VALIDACIÓN DE INTEGRIDAD RES. 1604
+            // Aplica a TODOS los ítems (seleccionados o no) cuyo estado sea
+            // PENDIENTE, SIN CONTACTO, ENTREGADO o DESABASTECIDO.
+            var estadosRes1604 = ['PENDIENTE', 'SIN CONTACTO', 'ENTREGADO', 'DESABASTECIDO'];
+            var erroresIntegridad = [];
+
+            $('tr.bp-fila').each(function() {
+                var $fila = $(this);
+                var estado = $.trim($fila.find('.bp-estado-select').val());
+
+                if (estadosRes1604.indexOf(estado) === -1) return; // otros estados no aplican
+
+                var numeroFormula = $.trim($fila.find('.bp-numero-formula').val());
+                var fechaOrden = $.trim($fila.find('.bp-fecha-ordenamiento').val());
+                var frecuencia = $.trim($fila.find('.bp-frecuencia').val());
+                var duracion = $.trim($fila.find('.bp-duracion').val());
+                var nombre = $.trim($fila.find('td:nth-child(3) small strong').text()) || ('Ítem #' + (parseInt($fila.data('idx')) + 1));
+
+                var camposVacios = [];
+                if (!numeroFormula) camposVacios.push('Nro. Fórmula');
+                if (!fechaOrden) camposVacios.push('Fecha Ordenamiento');
+                if (!frecuencia) camposVacios.push('Frec. Administración');
+                if (!duracion) camposVacios.push('Duración Tratamiento');
+
+                if (camposVacios.length > 0) {
+                    erroresIntegridad.push('<b>' + nombre + '</b> [' + estado + ']: ' + camposVacios.join(', '));
+                    $fila.find('.bp-numero-formula, .bp-fecha-ordenamiento, .bp-frecuencia, .bp-duracion').each(function() {
+                        if (!$.trim($(this).val())) {
+                            $(this).addClass('is-invalid');
+                        }
+                    });
+                }
+            });
+
+            if (erroresIntegridad.length > 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Campos Res. 1604 incompletos',
+                    html: 'Los siguientes ítems deben tener completos los campos de la <b>Resolución 1604</b>:<br><br>' +
+                        erroresIntegridad.join('<br>') +
+                        '<br><br><small>Campos obligatorios para estados <b>PENDIENTE, SIN CONTACTO, ENTREGADO y DESABASTECIDO</b>:<br>' +
+                        '<b>Nro. Fórmula · Fecha Ordenamiento · Frec. Administración · Duración Tratamiento</b></small>',
+                });
+                return;
+            }
+
+            // VALIDACIÓN CRUZADA Res. 1604
+            // 1. numero_formula debe ser igual en todos los ítems con estado aplicable.
+            // 2. fecha_ordenamiento debe ser igual en todos los ítems con estado aplicable.
+            // 3. fecha_ordenamiento no puede ser mayor a fecha_factura ni a fecha_entrega (ENTREGADO).
+            var valoresFormula = [];
+            var valoresFechaOrden = [];
+            var erroresCruzados = [];
+
+            $('tr.bp-fila').each(function() {
+                var $fila = $(this);
+                var estado = $.trim($fila.find('.bp-estado-select').val());
+                if (estadosRes1604.indexOf(estado) === -1) return;
+
+                var formula = $.trim($fila.find('.bp-numero-formula').val());
+                var fechaOrden = $.trim($fila.find('.bp-fecha-ordenamiento').val());
+                var idx = parseInt($fila.data('idx'));
+
+                if (formula) valoresFormula.push(formula);
+                if (fechaOrden) valoresFechaOrden.push({
+                    fecha: fechaOrden,
+                    idx: idx,
+                    estado: estado,
+                    $fila: $fila
+                });
+            });
+
+            // Regla 1: todos deben tener el mismo numero_formula
+            var formulasUnicas = valoresFormula.filter(function(v, i, a) {
+                return a.indexOf(v) === i;
+            });
+            if (formulasUnicas.length > 1) {
+                erroresCruzados.push(
+                    'El campo <b>Nro. Fórmula</b> debe ser idéntico para todos los ítems.<br>' +
+                    'Valores distintos encontrados: <i>' + formulasUnicas.join(' / ') + '</i>'
+                );
+                $('tr.bp-fila').each(function() {
+                    var $fila = $(this);
+                    var estado = $.trim($fila.find('.bp-estado-select').val());
+                    if (estadosRes1604.indexOf(estado) === -1) return;
+                    if ($.trim($fila.find('.bp-numero-formula').val()) !== formulasUnicas[0]) {
+                        $fila.find('.bp-numero-formula').addClass('is-invalid');
                     }
                 });
             }
-        });
 
-        if (erroresIntegridad.length > 0) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Campos Res. 1604 incompletos',
-                html: 'Los siguientes ítems deben tener completos los campos de la <b>Resolución 1604</b>:<br><br>' +
-                      erroresIntegridad.join('<br>') +
-                      '<br><br><small>Campos obligatorios para estados <b>PENDIENTE, SIN CONTACTO, ENTREGADO y DESABASTECIDO</b>:<br>' +
-                      '<b>Nro. Fórmula · Fecha Ordenamiento · Frec. Administración · Duración Tratamiento</b></small>',
-            });
-            return;
-        }
-
-        // VALIDACIÓN CRUZADA Res. 1604
-        // 1. numero_formula debe ser igual en todos los ítems con estado aplicable.
-        // 2. fecha_ordenamiento debe ser igual en todos los ítems con estado aplicable.
-        // 3. fecha_ordenamiento no puede ser mayor a fecha_factura ni a fecha_entrega (ENTREGADO).
-        var valoresFormula    = [];
-        var valoresFechaOrden = [];
-        var erroresCruzados   = [];
-
-        $('tr.bp-fila').each(function () {
-            var $fila  = $(this);
-            var estado = $.trim($fila.find('.bp-estado-select').val());
-            if (estadosRes1604.indexOf(estado) === -1) return;
-
-            var formula    = $.trim($fila.find('.bp-numero-formula').val());
-            var fechaOrden = $.trim($fila.find('.bp-fecha-ordenamiento').val());
-            var idx        = parseInt($fila.data('idx'));
-
-            if (formula)    valoresFormula.push(formula);
-            if (fechaOrden) valoresFechaOrden.push({ fecha: fechaOrden, idx: idx, estado: estado, $fila: $fila });
-        });
-
-        // Regla 1: todos deben tener el mismo numero_formula
-        var formulasUnicas = valoresFormula.filter(function (v, i, a) { return a.indexOf(v) === i; });
-        if (formulasUnicas.length > 1) {
-            erroresCruzados.push(
-                'El campo <b>Nro. Fórmula</b> debe ser idéntico para todos los ítems.<br>' +
-                'Valores distintos encontrados: <i>' + formulasUnicas.join(' / ') + '</i>'
-            );
-            $('tr.bp-fila').each(function () {
-                var $fila  = $(this);
-                var estado = $.trim($fila.find('.bp-estado-select').val());
-                if (estadosRes1604.indexOf(estado) === -1) return;
-                if ($.trim($fila.find('.bp-numero-formula').val()) !== formulasUnicas[0]) {
-                    $fila.find('.bp-numero-formula').addClass('is-invalid');
-                }
-            });
-        }
-
-        // Regla 2: todos deben tener la misma fecha_ordenamiento
-        var fechasOrdenUnicas = valoresFechaOrden
-            .map(function (v) { return v.fecha; })
-            .filter(function (v, i, a) { return a.indexOf(v) === i; });
-        if (fechasOrdenUnicas.length > 1) {
-            erroresCruzados.push(
-                'El campo <b>Fecha Ordenamiento</b> debe ser idéntica para todos los ítems.<br>' +
-                'Valores distintos encontrados: <i>' + fechasOrdenUnicas.join(' / ') + '</i>'
-            );
-            $('tr.bp-fila').each(function () {
-                var $fila  = $(this);
-                var estado = $.trim($fila.find('.bp-estado-select').val());
-                if (estadosRes1604.indexOf(estado) === -1) return;
-                if ($.trim($fila.find('.bp-fecha-ordenamiento').val()) !== fechasOrdenUnicas[0]) {
-                    $fila.find('.bp-fecha-ordenamiento').addClass('is-invalid');
-                }
-            });
-        }
-
-        // Regla 3: fecha_ordenamiento no puede ser mayor a fecha_factura ni fecha_entrega
-        valoresFechaOrden.forEach(function (v) {
-            var item       = bpItems[v.idx];
-            var fechaOrden = new Date(v.fecha + 'T00:00:00');
-            var nombre     = (item && item.nombre) ? item.nombre : ('Ítem #' + (v.idx + 1));
-
-            // vs fecha_factura del ítem
-            if (item && item.fecha_factura) {
-                var strFactura   = bpFormatFecha(item.fecha_factura);
-                var fechaFactura = new Date(strFactura + 'T00:00:00');
-                if (fechaOrden > fechaFactura) {
-                    erroresCruzados.push(
-                        '<b>' + nombre + '</b>: Fecha Ordenamiento <i>(' + v.fecha + ')</i> ' +
-                        'no puede ser mayor a Fecha Pendiente <i>(' + strFactura + ')</i>'
-                    );
-                    v.$fila.find('.bp-fecha-ordenamiento').addClass('is-invalid');
-                }
+            // Regla 2: todos deben tener la misma fecha_ordenamiento
+            var fechasOrdenUnicas = valoresFechaOrden
+                .map(function(v) {
+                    return v.fecha;
+                })
+                .filter(function(v, i, a) {
+                    return a.indexOf(v) === i;
+                });
+            if (fechasOrdenUnicas.length > 1) {
+                erroresCruzados.push(
+                    'El campo <b>Fecha Ordenamiento</b> debe ser idéntica para todos los ítems.<br>' +
+                    'Valores distintos encontrados: <i>' + fechasOrdenUnicas.join(' / ') + '</i>'
+                );
+                $('tr.bp-fila').each(function() {
+                    var $fila = $(this);
+                    var estado = $.trim($fila.find('.bp-estado-select').val());
+                    if (estadosRes1604.indexOf(estado) === -1) return;
+                    if ($.trim($fila.find('.bp-fecha-ordenamiento').val()) !== fechasOrdenUnicas[0]) {
+                        $fila.find('.bp-fecha-ordenamiento').addClass('is-invalid');
+                    }
+                });
             }
 
-            // vs fecha_entrega cuando el estado es ENTREGADO (campo bp-fecha-correspondiente)
-            if (v.estado === 'ENTREGADO') {
-                var strEntrega = $.trim(v.$fila.find('.bp-fecha-correspondiente').val());
-                if (strEntrega) {
-                    var fechaEntrega = new Date(strEntrega + 'T00:00:00');
-                    if (fechaOrden > fechaEntrega) {
+            // Regla 3: fecha_ordenamiento no puede ser mayor a fecha_factura ni fecha_entrega
+            valoresFechaOrden.forEach(function(v) {
+                var item = bpItems[v.idx];
+                var fechaOrden = new Date(v.fecha + 'T00:00:00');
+                var nombre = (item && item.nombre) ? item.nombre : ('Ítem #' + (v.idx + 1));
+
+                // vs fecha_factura del ítem
+                if (item && item.fecha_factura) {
+                    var strFactura = bpFormatFecha(item.fecha_factura);
+                    var fechaFactura = new Date(strFactura + 'T00:00:00');
+                    if (fechaOrden > fechaFactura) {
                         erroresCruzados.push(
                             '<b>' + nombre + '</b>: Fecha Ordenamiento <i>(' + v.fecha + ')</i> ' +
-                            'no puede ser mayor a Fecha Entrega <i>(' + strEntrega + ')</i>'
+                            'no puede ser mayor a Fecha Pendiente <i>(' + strFactura + ')</i>'
                         );
                         v.$fila.find('.bp-fecha-ordenamiento').addClass('is-invalid');
                     }
                 }
-            }
-        });
 
-        if (erroresCruzados.length > 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Validación cruzada Res. 1604',
-                html: erroresCruzados.join('<br><br>'),
-            });
-            return;
-        }
-
-        // Recopilar ítems seleccionados → actualización completa
-        var seleccionados = [];
-        var idsSeleccionadosIdx = [];
-
-        $('.bp-check-item:checked').each(function () {
-            var idx   = $(this).data('idx');
-            var $fila = $('tr.bp-fila[data-idx="' + idx + '"]');
-
-            idsSeleccionadosIdx.push(parseInt(idx));
-
-            // Limpiar marcas de error previas
-            $fila.find('.bp-numero-formula, .bp-fecha-ordenamiento, .bp-frecuencia, .bp-duracion').removeClass('is-invalid');
-
-            seleccionados.push({
-                id:                        $fila.data('id'),
-                cantdpx:                   $fila.find('.bp-cantdpx').val(),
-                estado:                    $fila.find('.bp-estado-select').val(),
-                fecha_correspondiente:     $fila.find('.bp-fecha-correspondiente').val(),
-                factura_entrega:           $fila.find('.bp-factura-entrega').val(),
-                doc_entrega:               $fila.find('.bp-doc-entrega').val(),
-                observaciones:             $fila.find('.bp-observaciones').val(),
-                numero_formula:            $.trim($fila.find('.bp-numero-formula').val()),
-                fecha_ordenamiento:        $.trim($fila.find('.bp-fecha-ordenamiento').val()),
-                frecuencia_administracion: $.trim($fila.find('.bp-frecuencia').val()),
-                duracion_tratamiento:      $.trim($fila.find('.bp-duracion').val()),
-                solo_res1604:              false
-            });
-        });
-
-        // Ítems NO seleccionados con estado aplicable → solo guardar campos Res. 1604
-        $('tr.bp-fila').each(function () {
-            var $fila = $(this);
-            var idx   = parseInt($fila.data('idx'));
-
-            if (idsSeleccionadosIdx.indexOf(idx) !== -1) return; // ya incluido arriba
-
-            var estado = $.trim($fila.find('.bp-estado-select').val());
-            if (estadosRes1604.indexOf(estado) === -1) return; // otros estados no aplican
-
-            $fila.find('.bp-numero-formula, .bp-fecha-ordenamiento, .bp-frecuencia, .bp-duracion').removeClass('is-invalid');
-
-            seleccionados.push({
-                id:                        $fila.data('id'),
-                estado:                    estado,
-                numero_formula:            $.trim($fila.find('.bp-numero-formula').val()),
-                fecha_ordenamiento:        $.trim($fila.find('.bp-fecha-ordenamiento').val()),
-                frecuencia_administracion: $.trim($fila.find('.bp-frecuencia').val()),
-                duracion_tratamiento:      $.trim($fila.find('.bp-duracion').val()),
-                solo_res1604:              true
-            });
-        });
-
-        var cntCompletos  = seleccionados.filter(function(i) { return !i.solo_res1604; }).length;
-        var cntSoloRes    = seleccionados.filter(function(i) { return  i.solo_res1604; }).length;
-
-        if (cntCompletos === 0) {
-            Swal.fire('Atención', 'Seleccione al menos un item para guardar.', 'warning');
-            return;
-        }
-
-        var textoConfirmacion = 'Se actualizarán ' + cntCompletos + ' ítem(s) seleccionado(s) completamente.';
-        if (cntSoloRes > 0) {
-            textoConfirmacion += ' Además, se guardarán los campos Res. 1604 de ' + cntSoloRes + ' ítem(s) adicional(es).';
-        }
-
-        Swal.fire({
-            title: '¿Guardar cambios?',
-            text: textoConfirmacion,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, guardar',
-            cancelButtonText: 'Cancelar'
-        }).then(function (result) {
-            if (!result.value) return;
-
-            $('#bp-btn-guardar, #bp-btn-guardar-bottom')
-                .prop('disabled', true)
-                .html('<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...');
-
-            $.ajax({
-                url: '{{ route("medcol6.guardar_pendientes_busqueda") }}',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    _token: '{{ csrf_token() }}',
-                    items: seleccionados
-                }),
-                success: function (resp) {
-                    if (resp.success) {
-                        // Cerrar modal y limpiar para que el usuario pueda buscar el siguiente
-                        $('#modal-buscar-pendiente').modal('hide');
-                        bpLimpiarModal();
-
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Guardado',
-                            text: resp.message,
-                            timer: 3000,
-                            showConfirmButton: false
-                        });
-                        if ($.fn.DataTable && $.fn.DataTable.isDataTable('#pendientesAnalista')) {
-                            $('#pendientesAnalista').DataTable().ajax.reload(null, false);
+                // vs fecha_entrega cuando el estado es ENTREGADO (campo bp-fecha-correspondiente)
+                if (v.estado === 'ENTREGADO') {
+                    var strEntrega = $.trim(v.$fila.find('.bp-fecha-correspondiente').val());
+                    if (strEntrega) {
+                        var fechaEntrega = new Date(strEntrega + 'T00:00:00');
+                        if (fechaOrden > fechaEntrega) {
+                            erroresCruzados.push(
+                                '<b>' + nombre + '</b>: Fecha Ordenamiento <i>(' + v.fecha + ')</i> ' +
+                                'no puede ser mayor a Fecha Entrega <i>(' + strEntrega + ')</i>'
+                            );
+                            v.$fila.find('.bp-fecha-ordenamiento').addClass('is-invalid');
                         }
-                    } else {
-                        Swal.fire('Error', resp.message, 'error');
-                        // Restaurar botones en caso de error de negocio
+                    }
+                }
+            });
+
+            if (erroresCruzados.length > 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Validación cruzada Res. 1604',
+                    html: erroresCruzados.join('<br><br>'),
+                });
+                return;
+            }
+
+            // Recopilar ítems seleccionados → actualización completa
+            var seleccionados = [];
+            var idsSeleccionadosIdx = [];
+
+            $('.bp-check-item:checked').each(function() {
+                var idx = $(this).data('idx');
+                var $fila = $('tr.bp-fila[data-idx="' + idx + '"]');
+
+                idsSeleccionadosIdx.push(parseInt(idx));
+
+                // Limpiar marcas de error previas
+                $fila.find('.bp-numero-formula, .bp-fecha-ordenamiento, .bp-frecuencia, .bp-duracion').removeClass('is-invalid');
+
+                seleccionados.push({
+                    id: $fila.data('id'),
+                    cantdpx: $fila.find('.bp-cantdpx').val(),
+                    estado: $fila.find('.bp-estado-select').val(),
+                    fecha_correspondiente: $fila.find('.bp-fecha-correspondiente').val(),
+                    factura_entrega: $fila.find('.bp-factura-entrega').val(),
+                    doc_entrega: $fila.find('.bp-doc-entrega').val(),
+                    observaciones: $fila.find('.bp-observaciones').val(),
+                    numero_formula: $.trim($fila.find('.bp-numero-formula').val()),
+                    fecha_ordenamiento: $.trim($fila.find('.bp-fecha-ordenamiento').val()),
+                    frecuencia_administracion: $.trim($fila.find('.bp-frecuencia').val()),
+                    duracion_tratamiento: $.trim($fila.find('.bp-duracion').val()),
+                    solo_res1604: false
+                });
+            });
+
+            // Ítems NO seleccionados con estado aplicable → solo guardar campos Res. 1604
+            $('tr.bp-fila').each(function() {
+                var $fila = $(this);
+                var idx = parseInt($fila.data('idx'));
+
+                if (idsSeleccionadosIdx.indexOf(idx) !== -1) return; // ya incluido arriba
+
+                var estado = $.trim($fila.find('.bp-estado-select').val());
+                if (estadosRes1604.indexOf(estado) === -1) return; // otros estados no aplican
+
+                $fila.find('.bp-numero-formula, .bp-fecha-ordenamiento, .bp-frecuencia, .bp-duracion').removeClass('is-invalid');
+
+                seleccionados.push({
+                    id: $fila.data('id'),
+                    estado: estado,
+                    numero_formula: $.trim($fila.find('.bp-numero-formula').val()),
+                    fecha_ordenamiento: $.trim($fila.find('.bp-fecha-ordenamiento').val()),
+                    frecuencia_administracion: $.trim($fila.find('.bp-frecuencia').val()),
+                    duracion_tratamiento: $.trim($fila.find('.bp-duracion').val()),
+                    solo_res1604: true
+                });
+            });
+
+            var cntCompletos = seleccionados.filter(function(i) {
+                return !i.solo_res1604;
+            }).length;
+            var cntSoloRes = seleccionados.filter(function(i) {
+                return i.solo_res1604;
+            }).length;
+
+            if (cntCompletos === 0) {
+                Swal.fire('Atención', 'Seleccione al menos un item para guardar.', 'warning');
+                return;
+            }
+
+            var textoConfirmacion = 'Se actualizarán ' + cntCompletos + ' ítem(s) seleccionado(s) completamente.';
+            if (cntSoloRes > 0) {
+                textoConfirmacion += ' Además, se guardarán los campos Res. 1604 de ' + cntSoloRes + ' ítem(s) adicional(es).';
+            }
+
+            Swal.fire({
+                title: '¿Guardar cambios?',
+                text: textoConfirmacion,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, guardar',
+                cancelButtonText: 'Cancelar'
+            }).then(function(result) {
+                if (!result.value) return;
+
+                $('#bp-btn-guardar, #bp-btn-guardar-bottom')
+                    .prop('disabled', true)
+                    .html('<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...');
+
+                $.ajax({
+                    url: '{{ route("medcol6.guardar_pendientes_busqueda") }}',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        _token: '{{ csrf_token() }}',
+                        items: seleccionados
+                    }),
+                    success: function(resp) {
+                        if (resp.success) {
+                            // Cerrar modal y limpiar para que el usuario pueda buscar el siguiente
+                            $('#modal-buscar-pendiente').modal('hide');
+                            bpLimpiarModal();
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Guardado',
+                                text: resp.message,
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+                            if ($.fn.DataTable && $.fn.DataTable.isDataTable('#pendientesAnalista')) {
+                                $('#pendientesAnalista').DataTable().ajax.reload(null, false);
+                            }
+                        } else {
+                            Swal.fire('Error', resp.message, 'error');
+                            // Restaurar botones en caso de error de negocio
+                            $('#bp-btn-guardar, #bp-btn-guardar-bottom')
+                                .prop('disabled', false)
+                                .html('<i class="fas fa-save mr-1"></i> Guardar Seleccionados');
+                            bpActualizarContador();
+                        }
+                    },
+                    error: function(xhr) {
+                        var msg = xhr.responseJSON ? xhr.responseJSON.message : 'Error al guardar.';
+                        Swal.fire('Error', msg, 'error');
+                        // Restaurar botones para que el usuario pueda reintentar
                         $('#bp-btn-guardar, #bp-btn-guardar-bottom')
                             .prop('disabled', false)
                             .html('<i class="fas fa-save mr-1"></i> Guardar Seleccionados');
                         bpActualizarContador();
+                    },
+                    complete: function() {
+                        // No se necesita lógica adicional aquí; el restore se hace en success/error
+                    }
+                });
+            });
+        }
+
+        $('#bp-btn-guardar, #bp-btn-guardar-bottom').on('click', bpEjecutarGuardado);
+
+        // ---- limpiar error al corregir campo requerido ----
+        $(document).on('input change', '.bp-numero-formula, .bp-fecha-ordenamiento, .bp-frecuencia, .bp-duracion', function() {
+            if ($.trim($(this).val())) {
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        // ---- maximizar ----
+        $('#btn-maximizar-buscar').on('click', function() {
+            var $dialog = $('#modal-buscar-pendiente .modal-dialog');
+            var isMax = $dialog.hasClass('bp-maximized');
+            if (isMax) {
+                $dialog.removeClass('bp-maximized').css({
+                    width: '',
+                    'max-width': ''
+                });
+                $(this).find('i').removeClass('fa-compress').addClass('fa-expand');
+            } else {
+                $dialog.addClass('bp-maximized').css({
+                    width: '98vw',
+                    'max-width': '98vw'
+                });
+                $(this).find('i').removeClass('fa-expand').addClass('fa-compress');
+            }
+        });
+
+        $('#modal-buscar-pendiente').on('hidden.bs.modal', function() {
+            $('#modal-buscar-pendiente .modal-dialog').removeClass('bp-maximized').css({
+                width: '',
+                'max-width': ''
+            });
+            $('#btn-maximizar-buscar i').removeClass('fa-compress').addClass('fa-expand');
+        });
+
+        // ---- ampliar / restaurar modal Gestión de Pendientes ----
+        $('#btn-maximizar-gestion').on('click', function() {
+            var $dialog = $('#modalGestionPendientes .modal-dialog');
+            var isMax = $dialog.hasClass('gp-maximized');
+            if (isMax) {
+                $dialog.removeClass('gp-maximized').css({
+                    width: '',
+                    'max-width': ''
+                });
+                $(this).find('i').removeClass('fa-compress').addClass('fa-expand');
+            } else {
+                $dialog.addClass('gp-maximized').css({
+                    width: '98vw',
+                    'max-width': '98vw'
+                });
+                $(this).find('i').removeClass('fa-expand').addClass('fa-compress');
+            }
+
+            // Redibujar DataTable para ajustar columnas al nuevo ancho
+            if ($.fn.DataTable && $.fn.DataTable.isDataTable('#tablaPendientesGestion')) {
+                setTimeout(function() {
+                    $('#tablaPendientesGestion').DataTable().columns.adjust();
+                }, 300);
+            }
+        });
+
+        // Restaurar tamaño normal al cerrar el modal
+        $('#modalGestionPendientes').on('hidden.bs.modal', function() {
+            $('#modalGestionPendientes .modal-dialog')
+                .removeClass('gp-maximized')
+                .css({
+                    width: '',
+                    'max-width': ''
+                });
+            $('#btn-maximizar-gestion i').removeClass('fa-compress').addClass('fa-expand');
+        });
+
+        // =============================================
+        // CARGA MASIVA DE ENTREGAS - Fase 1 y Fase 2
+        // =============================================
+
+        // Mostrar nombre del archivo seleccionado
+        $(document).on('change', '#archivoCargaMasiva', function() {
+            var fileName = $(this).val().split('\\').pop();
+            $(this).siblings('.custom-file-label').text(fileName || 'Elegir archivo...');
+        });
+
+        // Resetear modal al cerrar
+        $('#modalCargaMasiva').on('hidden.bs.modal', function() {
+            $('#formCargaMasiva')[0].reset();
+            $('#archivoCargaMasiva').siblings('.custom-file-label').text('Elegir archivo...');
+            $('#resultadosFase1').hide();
+            $('#panelFase2').hide();
+            $('#resultadosFase2').hide();
+            $('#loadingFase1').hide();
+            $('#btnProcesarFase1').prop('disabled', false);
+        });
+
+        // Fase 1: click en botón Procesar
+        $(document).on('click', '#btnProcesarFase1', function() {
+            var archivo = $('#archivoCargaMasiva')[0].files[0];
+            if (!archivo) {
+                Swal.fire('Atención', 'Debe seleccionar un archivo antes de continuar.', 'warning');
+                return;
+            }
+
+            var formData = new FormData($('#formCargaMasiva')[0]);
+
+            $('#btnProcesarFase1').prop('disabled', true);
+            $('#loadingFase1').show();
+            $('#resultadosFase1').hide();
+            $('#panelFase2').hide();
+            $('#resultadosFase2').hide();
+
+            $.ajax({
+                url: '{{ route("medcol6.cargar_entregas_masivas") }}',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                timeout: 300000, // 5 minutos
+                success: function(res) {
+                    $('#loadingFase1').hide();
+                    $('#btnProcesarFase1').prop('disabled', false);
+
+                    $('#cnt-procesados').text(res.procesados);
+                    $('#cnt-no-encontrados').text(res.no_encontrados);
+                    $('#cnt-errores').text(res.errores);
+                    $('#cnt-para-fase2').text(res.procesados);
+                    $('#resultadosFase1').show();
+
+                    // Detalle no encontrados
+                    if (res.detalle_no_encontrados && res.detalle_no_encontrados.length > 0) {
+                        var lista = '';
+                        if (res.msg_no_encontrados) {
+                            lista += '<li class="text-warning font-weight-bold">' + res.msg_no_encontrados + '</li>';
+                        }
+                        $.each(res.detalle_no_encontrados, function(i, item) {
+                            lista += '<li>' + item + '</li>';
+                        });
+                        $('#lista-no-encontrados').html(lista);
+                        $('#detalle-no-encontrados').show();
+                    } else {
+                        $('#detalle-no-encontrados').hide();
+                    }
+
+                    // Detalle errores
+                    if (res.detalle_errores && res.detalle_errores.length > 0) {
+                        var listaErr = '';
+                        $.each(res.detalle_errores, function(i, item) {
+                            listaErr += '<li>' + item + '</li>';
+                        });
+                        $('#lista-errores-fase1').html(listaErr);
+                        $('#detalle-errores-fase1').show();
+                    } else {
+                        $('#detalle-errores-fase1').hide();
+                    }
+
+                    if (res.puede_fase2) {
+                        $('#panelFase2').show();
                     }
                 },
-                error: function (xhr) {
-                    var msg = xhr.responseJSON ? xhr.responseJSON.message : 'Error al guardar.';
+                error: function(xhr) {
+                    $('#loadingFase1').hide();
+                    $('#btnProcesarFase1').prop('disabled', false);
+                    var msg = (xhr.responseJSON && xhr.responseJSON.message) ?
+                        xhr.responseJSON.message :
+                        'Error al procesar el archivo.';
                     Swal.fire('Error', msg, 'error');
-                    // Restaurar botones para que el usuario pueda reintentar
-                    $('#bp-btn-guardar, #bp-btn-guardar-bottom')
-                        .prop('disabled', false)
-                        .html('<i class="fas fa-save mr-1"></i> Guardar Seleccionados');
-                    bpActualizarContador();
-                },
-                complete: function () {
-                    // No se necesita lógica adicional aquí; el restore se hace en success/error
                 }
             });
         });
-    }
 
-    $('#bp-btn-guardar, #bp-btn-guardar-bottom').on('click', bpEjecutarGuardado);
+        // Fase 2: Registrar observaciones
+        $(document).on('click', '#btnProcesarFase2', function() {
+            $('#btnProcesarFase2').prop('disabled', true);
+            $('#loadingFase2').show();
 
-    // ---- limpiar error al corregir campo requerido ----
-    $(document).on('input change', '.bp-numero-formula, .bp-fecha-ordenamiento, .bp-frecuencia, .bp-duracion', function () {
-        if ($.trim($(this).val())) {
-            $(this).removeClass('is-invalid');
-        }
-    });
-
-    // ---- maximizar ----
-    $('#btn-maximizar-buscar').on('click', function () {
-        var $dialog = $('#modal-buscar-pendiente .modal-dialog');
-        var isMax   = $dialog.hasClass('bp-maximized');
-        if (isMax) {
-            $dialog.removeClass('bp-maximized').css({ width: '', 'max-width': '' });
-            $(this).find('i').removeClass('fa-compress').addClass('fa-expand');
-        } else {
-            $dialog.addClass('bp-maximized').css({ width: '98vw', 'max-width': '98vw' });
-            $(this).find('i').removeClass('fa-expand').addClass('fa-compress');
-        }
-    });
-
-    $('#modal-buscar-pendiente').on('hidden.bs.modal', function () {
-        $('#modal-buscar-pendiente .modal-dialog').removeClass('bp-maximized').css({ width: '', 'max-width': '' });
-        $('#btn-maximizar-buscar i').removeClass('fa-compress').addClass('fa-expand');
-    });
-
-    // =============================================
-    // CARGA MASIVA DE ENTREGAS - Fase 1 y Fase 2
-    // =============================================
-
-    // Mostrar nombre del archivo seleccionado
-    $(document).on('change', '#archivoCargaMasiva', function () {
-        var fileName = $(this).val().split('\\').pop();
-        $(this).siblings('.custom-file-label').text(fileName || 'Elegir archivo...');
-    });
-
-    // Resetear modal al cerrar
-    $('#modalCargaMasiva').on('hidden.bs.modal', function () {
-        $('#formCargaMasiva')[0].reset();
-        $('#archivoCargaMasiva').siblings('.custom-file-label').text('Elegir archivo...');
-        $('#resultadosFase1').hide();
-        $('#panelFase2').hide();
-        $('#resultadosFase2').hide();
-        $('#loadingFase1').hide();
-        $('#btnProcesarFase1').prop('disabled', false);
-    });
-
-    // Fase 1: click en botón Procesar
-    $(document).on('click', '#btnProcesarFase1', function () {
-        var archivo = $('#archivoCargaMasiva')[0].files[0];
-        if (!archivo) {
-            Swal.fire('Atención', 'Debe seleccionar un archivo antes de continuar.', 'warning');
-            return;
-        }
-
-        var formData = new FormData($('#formCargaMasiva')[0]);
-
-        $('#btnProcesarFase1').prop('disabled', true);
-        $('#loadingFase1').show();
-        $('#resultadosFase1').hide();
-        $('#panelFase2').hide();
-        $('#resultadosFase2').hide();
-
-        $.ajax({
-            url: '{{ route("medcol6.cargar_entregas_masivas") }}',
-            method: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            timeout: 300000, // 5 minutos
-            success: function (res) {
-                $('#loadingFase1').hide();
-                $('#btnProcesarFase1').prop('disabled', false);
-
-                $('#cnt-procesados').text(res.procesados);
-                $('#cnt-no-encontrados').text(res.no_encontrados);
-                $('#cnt-errores').text(res.errores);
-                $('#cnt-para-fase2').text(res.procesados);
-                $('#resultadosFase1').show();
-
-                // Detalle no encontrados
-                if (res.detalle_no_encontrados && res.detalle_no_encontrados.length > 0) {
-                    var lista = '';
-                    if (res.msg_no_encontrados) {
-                        lista += '<li class="text-warning font-weight-bold">' + res.msg_no_encontrados + '</li>';
-                    }
-                    $.each(res.detalle_no_encontrados, function (i, item) {
-                        lista += '<li>' + item + '</li>';
-                    });
-                    $('#lista-no-encontrados').html(lista);
-                    $('#detalle-no-encontrados').show();
-                } else {
-                    $('#detalle-no-encontrados').hide();
+            $.ajax({
+                url: '{{ route("medcol6.registrar_observaciones_masivas") }}',
+                method: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(res) {
+                    $('#loadingFase2').hide();
+                    $('#msgFase2').text(res.message);
+                    $('#resultadosFase2').show();
+                    $('#panelFase2').hide();
+                },
+                error: function(xhr) {
+                    $('#loadingFase2').hide();
+                    $('#btnProcesarFase2').prop('disabled', false);
+                    var msg = (xhr.responseJSON && xhr.responseJSON.message) ?
+                        xhr.responseJSON.message :
+                        'Error al registrar observaciones.';
+                    Swal.fire('Error', msg, 'error');
                 }
-
-                // Detalle errores
-                if (res.detalle_errores && res.detalle_errores.length > 0) {
-                    var listaErr = '';
-                    $.each(res.detalle_errores, function (i, item) {
-                        listaErr += '<li>' + item + '</li>';
-                    });
-                    $('#lista-errores-fase1').html(listaErr);
-                    $('#detalle-errores-fase1').show();
-                } else {
-                    $('#detalle-errores-fase1').hide();
-                }
-
-                if (res.puede_fase2) {
-                    $('#panelFase2').show();
-                }
-            },
-            error: function (xhr) {
-                $('#loadingFase1').hide();
-                $('#btnProcesarFase1').prop('disabled', false);
-                var msg = (xhr.responseJSON && xhr.responseJSON.message)
-                    ? xhr.responseJSON.message
-                    : 'Error al procesar el archivo.';
-                Swal.fire('Error', msg, 'error');
-            }
+            });
         });
+
     });
-
-    // Fase 2: Registrar observaciones
-    $(document).on('click', '#btnProcesarFase2', function () {
-        $('#btnProcesarFase2').prop('disabled', true);
-        $('#loadingFase2').show();
-
-        $.ajax({
-            url: '{{ route("medcol6.registrar_observaciones_masivas") }}',
-            method: 'POST',
-            data: { _token: $('meta[name="csrf-token"]').attr('content') },
-            success: function (res) {
-                $('#loadingFase2').hide();
-                $('#msgFase2').text(res.message);
-                $('#resultadosFase2').show();
-                $('#panelFase2').hide();
-            },
-            error: function (xhr) {
-                $('#loadingFase2').hide();
-                $('#btnProcesarFase2').prop('disabled', false);
-                var msg = (xhr.responseJSON && xhr.responseJSON.message)
-                    ? xhr.responseJSON.message
-                    : 'Error al registrar observaciones.';
-                Swal.fire('Error', msg, 'error');
-            }
-        });
-    });
-
-});
 </script>
 
 @endsection

@@ -153,16 +153,21 @@
     <!-- Modal Gestión de Pendientes -->
     <div class="modal fade" id="modalGestionPendientes" tabindex="-1" role="dialog" aria-labelledby="modalGestionPendientesLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-purple text-white">
+            <div class="modal-content card">
+                <div class="modal-header card-header bg-purple text-white">
                     <h5 class="modal-title" id="modalGestionPendientesLabel">
                         <i class="fas fa-sync-alt mr-2"></i>Gestión de Pendientes - Validación y Entrega
                     </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <div class="card-tools ml-auto">
+                        <button type="button" class="btn btn-tool text-white" id="btn-maximizar-gestion" title="Ampliar / Restaurar">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool text-white" data-dismiss="modal" aria-label="Cerrar">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="modal-body">
+                <div class="card-body modal-body" style="max-height:85vh; overflow-y:auto;">
                     <!-- Filtros -->
                     <div class="card mb-3">
                         <div class="card-header bg-light">
@@ -309,5 +314,14 @@
 
         .bg-purple {
             background-color: #6f42c1 !important;
+        }
+
+        /* Cabecera fija al hacer scroll en la tabla */
+        #tablaPendientesGestion thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background-color: #343a40;
+            color: #fff;
         }
     </style>
